@@ -522,7 +522,13 @@ button {
   -webkit-app-region: drag;
 }
 
-.titlebar > * {
+/* Only interactive elements inside the titlebar opt out of window dragging.
+   Never apply this to non-interactive elements (e.g. .title-center with
+   pointer-events:none) — those still block drag even with pointer-events:none. */
+.titlebar button,
+.titlebar a,
+.titlebar input,
+.titlebar select {
   -webkit-app-region: no-drag;
 }
 
