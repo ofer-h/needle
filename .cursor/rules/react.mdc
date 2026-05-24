@@ -1,0 +1,31 @@
+---
+description: React renderer conventions
+globs: src/renderer/**/*.tsx, src/renderer/**/*.ts
+---
+
+# React renderer
+
+## Components
+- Function components only. No class components.
+- One component per file when it's non-trivial; co-locate small sub-components.
+- Props typed with a `type Props = { ... }` above the component. Don't inline.
+- No `React.FC`. Type props directly: `export function Foo(props: Props) { ... }`.
+
+## State and data
+- Local state with `useState` / `useReducer`. App-wide state: pick ONE library and stick to it. Default to Zustand or React Context — do not introduce Redux without discussion.
+- Server / IPC data: wrap in a hook like `useSettings()`. The hook owns loading/error state. Components consume `{ data, isLoading, error }`.
+- Side effects in `useEffect` only when they truly need the lifecycle. Prefer event handlers and derived state.
+
+## Rendering hygiene
+- No work in render bodies that could be `useMemo`-ed or derived from props. But also: don't `useMemo` trivial expressions — premature memo adds noise.
+- Keys must be stable IDs, never array indices for lists that can reorder.
+- Don't reach into the DOM. If you need a ref, use `useRef`. Use `useLayoutEffect` only for measurements.
+
+## Styling
+- Pick ONE styling approach for the project (CSS modules, Tailwind, or vanilla-extract). Don't mix.
+- macOS-feeling defaults: respect system color scheme (`prefers-color-scheme`), use system font stack by default (`-apple-system, BlinkMacSystemFont, ...`), and respect reduced-motion.
+
+## What renderer code MUST NOT do
+- Import from `electron`, `node:*`, `fs`, `path`, `child_process`, or any main-process module.
+- Touch `window.process`, `window.require`, `__dirname`, `__filename` — these should not exist in renderer with proper config; if they do, the config is wrong.
+- Make network calls to untrusted origins. Route sensitive network through main.

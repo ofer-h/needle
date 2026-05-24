@@ -1,0 +1,30 @@
+---
+description: How to make changes, commit, and avoid scope creep
+alwaysApply: true
+---
+
+# Working in the repo
+
+## Scope discipline
+- Do exactly what's asked. If you spot something else worth fixing, mention it — don't silently expand the diff.
+- One concern per change. A bug fix and a refactor go in separate commits/PRs.
+- Don't reformat files you didn't otherwise touch. Don't rename things "while you're in there."
+
+## Files to never touch without explicit ask
+- `package-lock.json` / `yarn.lock` / `pnpm-lock.yaml` — only changes when dependencies change.
+- `forge.config.ts`, signing/notarization config, entitlements — confirm first.
+- Anything under `build/` related to signing or icons — confirm first.
+- CI configuration — confirm first.
+
+## Commits
+- Imperative subject, under ~70 chars. Body explains *why* when it isn't obvious.
+- One logical change per commit. Don't squash unrelated work together.
+- Never `git push --force` to a shared branch. Never `--no-verify` to skip hooks.
+
+## Secrets and credentials
+- Nothing secret in source, ever. No API keys, no signing certs, no `.env` contents.
+- `.env*` files belong in `.gitignore`. If you find one tracked, stop and flag it.
+
+## When something is broken
+- Don't paper over errors with try/catch that swallows them. Either handle the error meaningfully or let it bubble.
+- If a test starts failing after your change, fix the cause — don't `.skip` it without saying so loudly.

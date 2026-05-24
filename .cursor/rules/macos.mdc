@@ -1,0 +1,37 @@
+---
+description: macOS-specific behavior, packaging, signing, and platform conventions
+alwaysApply: true
+---
+
+# macOS conventions
+
+The app targets macOS first. Behave like a native Mac app.
+
+## Lifecycle
+- On `window-all-closed`, do NOT quit on macOS (`if (process.platform !== 'darwin') app.quit()`).
+- On `activate`, recreate the main window if none are open (standard dock-click behavior).
+- Restore window size/position across launches — persist to `userData`. Don't restore off-screen positions if displays changed.
+
+## Menu
+- Provide a full application menu via `Menu.setApplicationMenu`. Include the standard macOS items: app menu (About, Preferences, Hide, Quit), Edit (Undo/Redo/Cut/Copy/Paste/Select All), Window, Help.
+- Use `role:` values where they exist instead of hand-rolling shortcuts — they match Apple HIG and localize correctly.
+- "Preferences" shortcut is ⌘, on macOS.
+
+## Window chrome
+- Consider `titleBarStyle: 'hiddenInset'` or `'hidden'` with `trafficLightPosition` for a modern Mac look — but only when the design calls for it.
+- Use `vibrancy` / `visualEffectState` sparingly and only on macOS.
+
+## Packaging and signing
+- Build artifacts: `.app` bundle inside a `.dmg` (or `.zip` for auto-update).
+- App must be code-signed with a Developer ID Application certificate and notarized for distribution outside the App Store.
+- Hardened runtime is required for notarization. Entitlements live in `build/entitlements.mac.plist`. Only add the entitlements you actually need — each one is reviewed.
+- Universal binary (arm64 + x64) for distribution unless explicitly told otherwise.
+- Don't commit signing identities, API keys, App Store Connect credentials, or `.p12` files. They come from env vars / keychain in CI.
+
+## Auto-update
+- Use Electron's `autoUpdater` (Squirrel.Mac) or `electron-updater`. Decide once; don't mix.
+- Updates require code signing to work. Never ship an unsigned auto-updating build.
+
+## Files and paths
+- User data: `app.getPath('userData')`. Logs: `app.getPath('logs')`. Don't write to `~/Library` directly — use the path helpers.
+- Respect sandbox restrictions if/when you ship to the Mac App Store. (Outside MAS, hardened runtime is still required.)

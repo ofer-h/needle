@@ -1,0 +1,26 @@
+---
+description: Project overview, conventions, and how to collaborate on this Electron macOS app
+alwaysApply: true
+---
+
+# Needle — Electron macOS app
+
+A native-feeling macOS desktop app built with Electron, TypeScript, React, and Electron Forge + Vite.
+
+## Targets and assumptions
+- **Primary platform:** macOS (Apple Silicon + Intel). Cross-platform is a non-goal unless explicitly stated.
+- **Runtime:** Latest stable Electron. Pin in `package.json`; do not silently bump.
+- **Node:** Use the Node version Electron ships with — do not depend on host Node features in main/renderer code.
+- **Package manager:** Use whatever the repo is set up with (`npm` by default). Don't switch managers without being asked.
+
+## How to collaborate
+- This project is in early scaffolding. Prefer asking a clarifying question over inventing structure when something is genuinely ambiguous.
+- Don't add features, abstractions, or files the current task doesn't require. No speculative interfaces, no "future-proofing."
+- Don't create README/docs files unless asked. Code + this rules directory are the source of truth.
+- Don't write code comments that just restate what the code does. Comments are only for non-obvious *why*.
+- When you finish a change, state in one or two sentences what changed and what (if anything) is still pending. No trailing summaries of obvious diffs.
+
+## Decision policy
+- If a task touches Electron security posture (preload, IPC, CSP, fuses, entitlements, code signing), pause and confirm before changing it.
+- If you find yourself reaching for `nodeIntegration: true`, `contextIsolation: false`, `@electron/remote`, or disabling sandbox — stop. That's almost certainly the wrong tool. See `security.mdc`.
+- Prefer Electron's first-party APIs over third-party wrappers when they cover the use case.

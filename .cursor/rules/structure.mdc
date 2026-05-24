@@ -1,0 +1,40 @@
+---
+description: Directory layout and what lives where
+alwaysApply: true
+---
+
+# Project structure
+
+Three distinct execution contexts. Keep them separate — code that runs in one MUST NOT be imported into another except through the documented boundaries.
+
+```
+src/
+  main/           # Electron main process (Node). App lifecycle, windows, native APIs, IPC handlers.
+    index.ts      # App entry — app.whenReady(), createWindow(), event wiring.
+    windows/      # BrowserWindow factories, one per window type.
+    ipc/          # ipcMain.handle() registrations. One file per logical channel group.
+    services/     # Main-process side effects (fs, child_process, native modules, network when sensitive).
+    menu.ts       # Application menu (macOS-style).
+  preload/        # Preload scripts. The ONLY bridge between main and renderer.
+    index.ts      # contextBridge.exposeInMainWorld('api', ...)
+  renderer/       # React app. Treat as a sandboxed web app.
+    main.tsx      # React root.
+    App.tsx
+    components/
+    hooks/
+    state/
+    styles/
+  shared/         # Pure TypeScript shared between contexts.
+    ipc-contracts.ts  # Channel names + request/response types. Source of truth for IPC.
+    types.ts
+build/            # Icons (icns), entitlements.plist, notarization config.
+forge.config.ts   # Electron Forge config.
+vite.*.config.ts  # Vite configs (one per context if needed).
+```
+
+## Rules
+- `renderer/` MUST NOT `import` from `main/` or `preload/`. Renderer talks to main only via `window.api` exposed in preload.
+- `main/` MUST NOT `import` from `renderer/`. Shared types live in `shared/`.
+- `preload/` MUST NOT import heavy main-process modules. Preload is small and fast — it only wires the bridge.
+- `shared/` is pure TS: no Node APIs, no DOM APIs, no React. Types + pure helpers only.
+- Never put secrets, file paths, or environment-dependent constants in `renderer/`. Surface them from main via IPC.

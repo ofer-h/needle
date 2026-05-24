@@ -1,0 +1,52 @@
+---
+description: Non-negotiable Electron security rules. Apply to anything touching BrowserWindow, preload, IPC, or web contents.
+alwaysApply: true
+---
+
+# Electron security — non-negotiable
+
+These match Electron's own security checklist. Do not weaken them without a written exception.
+
+## BrowserWindow defaults
+Every `BrowserWindow` MUST be created with:
+
+```ts
+new BrowserWindow({
+  webPreferences: {
+    contextIsolation: true,
+    nodeIntegration: false,
+    sandbox: true,
+    webSecurity: true,
+    allowRunningInsecureContent: false,
+    experimentalFeatures: false,
+    preload: path.join(__dirname, 'preload.js'),
+  },
+});
+```
+
+- **Never** set `nodeIntegration: true`.
+- **Never** set `contextIsolation: false`.
+- **Never** disable `sandbox` unless a specific window genuinely needs Node in preload AND the user has approved it.
+- **Never** use `@electron/remote`. It's deprecated and a security hole.
+- **Never** disable `webSecurity` — not even in dev.
+
+## Navigation and new windows
+- Handle `will-navigate` and `setWindowOpenHandler` on every `webContents`. Deny anything that isn't an allow-listed origin.
+- External links open in the user's browser via `shell.openExternal(url)` — and only after validating the URL scheme is `https:` (or `mailto:` etc.) against an allow-list.
+- Never pass user-controlled strings to `shell.openExternal` without validation.
+
+## Content Security Policy
+- Renderer HTML MUST ship a strict CSP via `<meta http-equiv="Content-Security-Policy">` AND a response header in dev.
+- Baseline: `default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https:;`
+- Loosen only with justification. No `unsafe-eval`. No remote script sources.
+
+## Loading content
+- Production renderer loads from `file://` bundled assets. Never load arbitrary remote URLs into the main app window.
+- Dev server (Vite) is the only exception, and only over `http://localhost`.
+
+## Permissions
+- Register a `session.defaultSession.setPermissionRequestHandler` that denies by default. Allow per-permission, per-origin only as needed.
+
+## Native code and child processes
+- Validate every argument passed to `child_process.spawn` / `exec`. Never interpolate user input into a shell string — use the array form of `spawn` and never `shell: true` unless absolutely required (and documented why).
+- File-system writes from main MUST stay inside known app directories (`app.getPath('userData')`, etc.) unless the user explicitly picked a path via `dialog.showOpenDialog` / `showSaveDialog`.

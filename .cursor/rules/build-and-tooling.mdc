@@ -1,0 +1,34 @@
+---
+description: Build tooling, scripts, and dev workflow
+alwaysApply: true
+---
+
+# Build & tooling
+
+## Stack
+- **Electron Forge** with the **Vite** plugin. One Vite config per context (main, preload, renderer) registered through Forge.
+- TypeScript everywhere. No ts-node at runtime in production — everything is compiled by Vite.
+
+## Scripts (package.json)
+Expected scripts — adjust names if Forge defaults differ, but keep the semantics:
+- `start` — `electron-forge start` (dev with HMR for renderer).
+- `package` — produce an unsigned `.app` for local smoke-tests.
+- `make` — produce the distributable (`.dmg` / `.zip`).
+- `publish` — produce + upload (CI only).
+- `lint` — ESLint over `src/`.
+- `typecheck` — `tsc --noEmit` for each tsconfig.
+- `test` — unit tests (Vitest preferred).
+
+## Dependencies
+- Native modules (anything with a `binding.gyp` or postinstall that builds): justify each one. They complicate signing and universal builds.
+- Prefer pure-JS alternatives when they exist.
+- Do not add a dependency without it being used. Do not add wrapper libraries for things Electron already does well.
+
+## Dev workflow
+- HMR is for renderer only. Changes to `main/` or `preload/` require a restart — Forge handles this.
+- When changing IPC contracts, restart the dev server; HMR will not pick up preload changes reliably.
+
+## Linting & formatting
+- ESLint with `@typescript-eslint`, `eslint-plugin-react`, `eslint-plugin-react-hooks`, and an Electron-security plugin (`eslint-plugin-electron-security` or equivalent).
+- Prettier with project defaults. Don't argue style in code review — let the formatter decide.
+- Do not silence lint rules inline without a one-line reason. Don't disable rules project-wide to make a single file pass.

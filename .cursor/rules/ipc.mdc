@@ -1,0 +1,46 @@
+---
+description: How to design and implement IPC between main, preload, and renderer
+globs: src/main/ipc/**, src/preload/**, src/shared/ipc-*.ts, src/renderer/**/use*Ipc*.ts
+---
+
+# IPC: typed, narrow, validated
+
+The renderer is untrusted from main's perspective. Treat every IPC payload like network input.
+
+## Contract first
+- Every IPC channel has a typed contract in `src/shared/ipc-contracts.ts`:
+  ```ts
+  export type IpcContracts = {
+    'settings:get': { req: void; res: Settings };
+    'settings:set': { req: Partial<Settings>; res: void };
+  };
+  ```
+- Channel names use `domain:action` (lowercase, colon-separated). No free-form strings.
+
+## Main side
+- Register handlers with `ipcMain.handle(channel, async (event, payload) => ...)`. Never use `ipcMain.on` for request/response — use it only for fire-and-forget events from renderer.
+- Validate `payload` at the boundary. If you use Zod (or similar), parse and throw on invalid input. Do NOT trust the type system alone — the renderer can send anything.
+- Validate `event.senderFrame` / `event.sender` is one of the allow-listed windows when handlers do anything sensitive.
+- Handlers MUST NOT return objects containing functions, class instances, or non-cloneable values. Return plain data.
+
+## Preload side
+- Expose a single typed `api` object via `contextBridge.exposeInMainWorld('api', { ... })`.
+- The bridge only forwards calls — no business logic in preload.
+- Each method is a thin typed wrapper:
+  ```ts
+  settings: {
+    get: () => ipcRenderer.invoke('settings:get'),
+    set: (patch: Partial<Settings>) => ipcRenderer.invoke('settings:set', patch),
+  }
+  ```
+- Augment `Window` in a `.d.ts` file shared with the renderer so `window.api` is fully typed.
+
+## Renderer side
+- Renderer NEVER touches `ipcRenderer`, `electron`, `node:*`, or `process` directly. It only sees `window.api`.
+- Wrap IPC calls in hooks/queries (`useSettings`, etc.) so components don't sprinkle raw `window.api` calls everywhere.
+- Treat IPC calls as async I/O: handle pending and error states. Don't assume success.
+
+## What NOT to do
+- Don't expose `ipcRenderer.invoke` directly through the bridge. Expose specific methods only.
+- Don't expose Node modules (`fs`, `path`, `child_process`, etc.) through the bridge. Wrap the *capability* you need, not the module.
+- Don't add a channel for "anything goes" / generic RPC. Each channel does one thing.

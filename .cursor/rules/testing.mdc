@@ -1,0 +1,21 @@
+---
+description: Testing approach for main, preload, renderer, and end-to-end
+globs: **/*.test.ts, **/*.test.tsx, **/*.spec.ts, tests/**
+---
+
+# Testing
+
+## Layers
+- **Unit (Vitest):** Pure logic in `shared/` and isolated functions in `main/services/`. Fast. No Electron required.
+- **Component (Vitest + @testing-library/react):** Renderer components with a mocked `window.api`. The mock lives in `src/renderer/test/mock-api.ts` and matches the typed bridge surface.
+- **End-to-end (Playwright for Electron):** Boots the packaged or dev app, drives the UI, asserts on real IPC behavior. Use sparingly — these are slow.
+
+## Rules
+- Tests describe behavior, not implementation. Don't assert on internal function calls when an observable output works.
+- Don't mock what you own unless there's a real reason (slow I/O, nondeterminism, external service). Prefer real code paths.
+- When a bug is fixed, add a failing-first test that proves the fix. No exceptions for "trivial" fixes — trivial fixes regress too.
+- IPC contract types and runtime validators must be tested together — a contract change with no test change is suspect.
+
+## What NOT to test
+- Don't test Electron itself, React itself, or third-party libraries.
+- Don't snapshot whole DOM trees — they rot and nobody reads the diffs. Assert on the specific thing you care about.

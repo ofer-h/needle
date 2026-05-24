@@ -1,0 +1,25 @@
+---
+description: TypeScript conventions across all contexts
+globs: **/*.ts, **/*.tsx
+---
+
+# TypeScript conventions
+
+## tsconfig
+- `strict: true`, `noUncheckedIndexedAccess: true`, `noImplicitOverride: true`, `exactOptionalPropertyTypes: true`.
+- Separate `tsconfig` per context (`main`, `preload`, `renderer`) that each extend a base. Different DOM/Node lib sets.
+- `main` and `preload`: lib includes Node, NOT DOM. `renderer`: lib includes DOM, NOT Node.
+
+## Style
+- ES modules everywhere (`import`/`export`). No CommonJS in source.
+- Named exports by default. Default exports only for React components if a file is one component.
+- `type` for unions/aliases/IPC contracts. `interface` for object shapes meant to be extended (rare).
+- No `any`. If you genuinely need an escape hatch, use `unknown` and narrow.
+- No non-null assertions (`!`) outside of clearly justified cases (e.g. just-checked invariants). Prefer narrowing.
+- Don't suppress errors with `@ts-ignore`. Use `@ts-expect-error` with a one-line reason if there's truly no alternative.
+
+## Patterns
+- Discriminated unions for state machines and IPC results. Avoid boolean flags that mean different things together.
+- Errors: throw `Error` subclasses with stable names (`class IpcValidationError extends Error`). Don't throw strings.
+- Async: `async/await` only. No raw `.then()` chains in app code.
+- Don't write barrel `index.ts` files that re-export everything — they hurt tree-shaking and create import cycles.
