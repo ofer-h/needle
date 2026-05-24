@@ -142,6 +142,7 @@ function CaptureTyping({
         <div className="composer">
           <textarea
             ref={textareaRef}
+            className="input-text"
             value={value}
             onChange={(e) => onChange(e.target.value)}
             onKeyDown={(e) => {
@@ -151,20 +152,7 @@ function CaptureTyping({
               }
             }}
             placeholder=""
-            style={{
-              fontSize: 22,
-              fontWeight: 400,
-              lineHeight: 1.4,
-              color: 'var(--ink)',
-              letterSpacing: '-0.01em',
-              background: 'transparent',
-              border: 'none',
-              outline: 'none',
-              resize: 'none',
-              fontFamily: 'var(--sans)',
-              width: '100%',
-              minHeight: 120,
-            }}
+            rows={6}
           />
         </div>
 
@@ -211,7 +199,7 @@ function CaptureClassified({
       <div style={{ maxWidth: 720, width: '100%', margin: '0 auto' }}>
         {/* Compact input recap */}
         <div className="composer" style={{ minHeight: 0, padding: '14px 22px' }}>
-          <div className="input-text" style={{ fontSize: 16, color: 'var(--ink-2)' }}>
+          <div className="input-text recap">
             {rawInput || 'prep for the 1on1 with my manager on thursday'}
           </div>
         </div>
