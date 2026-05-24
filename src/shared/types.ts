@@ -31,7 +31,7 @@ export type CalendarEvent = {
   sublabel?: string;
 };
 
-export type CaptureState = 'empty' | 'typing' | 'classified' | 'voice';
+export type CaptureState = 'typing' | 'classifying' | 'classified' | 'voice';
 
 export type CaptureResult = {
   bucket: Bucket;

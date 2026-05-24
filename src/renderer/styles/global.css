@@ -398,8 +398,10 @@ button {
   overflow-wrap: break-word;
 }
 
-.composer .input-text.empty {
+.composer .input-text.empty,
+.composer textarea::placeholder {
   color: var(--ink-4);
+  opacity: 1;
 }
 
 .composer .input-text.recap {

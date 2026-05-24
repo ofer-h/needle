@@ -1,44 +1,87 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import FxWindow from '../Window/FxWindow';
 import Section from './Section';
 import TaskRow from './TaskRow';
 import EventRow from './EventRow';
 import { IconPlus, IconChevron } from '../Icons';
+import { useTasks } from '../../hooks/useTasks';
+import type { Task } from '../../../shared/types';
 
 type Props = {
   onNavigateCapture: () => void;
+  active: boolean;
 };
 
-const INITIAL_TASKS = [
-  { id: '1', done: false },
-  { id: '2', done: false },
-  { id: '3', done: false },
-  { id: '4', done: true },
-  { id: '5', done: false },
-  { id: '6', done: false },
-  { id: '7', done: false },
-  { id: '8', done: false },
-  { id: '9', done: false },
+const SECTION_ORDER: { slot: 'today' | 'tomorrow' | 'this-week'; title: string; date?: string }[] = [
+  { slot: 'today', title: 'Today', date: formatHeaderDate(new Date()) },
+  { slot: 'tomorrow', title: 'Tomorrow', date: formatHeaderDate(addDays(new Date(), 1)) },
+  { slot: 'this-week', title: 'This week', date: `ends ${formatShortWeekday(addDays(new Date(), 6))}` },
 ];
 
-export default function TodayScreen({ onNavigateCapture }: Props) {
-  const [doneIds, setDoneIds] = useState<Set<string>>(new Set(['4']));
+function addDays(date: Date, days: number): Date {
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
+}
 
-  const toggle = (id: string) =>
-    setDoneIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+function formatHeaderDate(date: Date): string {
+  return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
 
-  const total = INITIAL_TASKS.length;
-  const doneCount = doneIds.size;
-  const progressPct = Math.round((doneCount / total) * 100);
+function formatShortWeekday(date: Date): string {
+  return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+function groupTasks(tasks: Task[]): Record<'today' | 'tomorrow' | 'this-week', Task[]> {
+  const groups: Record<'today' | 'tomorrow' | 'this-week', Task[]> = {
+    today: [],
+    tomorrow: [],
+    'this-week': [],
+  };
+
+  for (const task of tasks) {
+    if (task.timeSlot === 'today') groups.today.push(task);
+    else if (task.timeSlot === 'tomorrow') groups.tomorrow.push(task);
+    else if (task.timeSlot === 'in-a-few-days' || task.timeSlot === 'next-week') {
+      groups['this-week'].push(task);
+    }
+  }
+
+  return groups;
+}
+
+export default function TodayScreen({ onNavigateCapture, active }: Props) {
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const { listToday, setDone, error } = useTasks();
+
+  const loadTasks = useCallback(async () => {
+    const next = await listToday();
+    setTasks(next);
+  }, [listToday]);
+
+  useEffect(() => {
+    if (!active) return;
+    void loadTasks();
+  }, [active, loadTasks]);
+
+  const grouped = useMemo(() => groupTasks(tasks), [tasks]);
+  const total = tasks.length;
+  const doneCount = tasks.filter((t) => t.done).length;
+  const progressPct = total === 0 ? 0 : Math.round((doneCount / total) * 100);
+
+  const toggle = async (id: string, done: boolean) => {
+    await setDone(id, !done);
+    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, done: !done } : t)));
+  };
+
+  const todayLabel = new Date().toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'short',
+    day: 'numeric',
+  });
 
   return (
     <FxWindow title="Focus · Today">
-      {/* Sub-toolbar */}
       <div
         style={{
           display: 'flex',
@@ -49,10 +92,7 @@ export default function TodayScreen({ onNavigateCapture }: Props) {
         }}
       >
         <div>
-          <div
-            className="t-display"
-            style={{ fontSize: 32, lineHeight: 1, color: 'var(--ink)' }}
-          >
+          <div className="t-display" style={{ fontSize: 32, lineHeight: 1, color: 'var(--ink)' }}>
             Today
           </div>
           <div
@@ -63,13 +103,12 @@ export default function TodayScreen({ onNavigateCapture }: Props) {
               letterSpacing: '-0.005em',
             }}
           >
-            Sunday, May 25 · {total} tasks · {doneCount} done
+            {todayLabel} · {total} tasks · {doneCount} done
           </div>
         </div>
 
         <div style={{ flex: 1 }} />
 
-        {/* Progress bar */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingRight: 6 }}>
           <div
             style={{
@@ -100,7 +139,6 @@ export default function TodayScreen({ onNavigateCapture }: Props) {
           </span>
         </div>
 
-        {/* Add task button */}
         <button
           onClick={onNavigateCapture}
           style={{
@@ -137,7 +175,6 @@ export default function TodayScreen({ onNavigateCapture }: Props) {
         </button>
       </div>
 
-      {/* Scrollable list */}
       <div
         style={{
           flex: 1,
@@ -146,92 +183,53 @@ export default function TodayScreen({ onNavigateCapture }: Props) {
           padding: '12px 32px 100px',
         }}
       >
-        {/* Overdue */}
-        <Section title="Overdue" count={1} accent="var(--urgent)">
-          <TaskRow
-            kind="urgent"
-            label="Call back Dana"
-            sublabel="from your captured note"
-            date="yesterday"
-            datePill="urgent"
-            done={doneIds.has('1')}
-            onToggle={() => toggle('1')}
-          />
-        </Section>
+        {total === 0 && (
+          <div
+            style={{
+              padding: '32px 10px',
+              textAlign: 'center',
+              color: 'var(--ink-3)',
+              fontSize: 14,
+              lineHeight: 1.5,
+              fontStyle: 'italic',
+            }}
+            className="t-serif-i"
+          >
+            Nothing here yet. Something on your mind?
+          </div>
+        )}
 
-        {/* Today */}
-        <Section title="Today" date="Sun, May 25" count={4}>
-          <TaskRow
-            kind="urgent"
-            label="Prep for manager 1:1"
-            sublabel="2 hr lead time"
-            date="1 PM"
-            link="Manager 1:1 · 3 PM"
-            done={doneIds.has('2')}
-            onToggle={() => toggle('2')}
-          />
-          <EventRow time="3:00 PM" label="Manager 1:1" sublabel="30 min · with Maya · Zoom" />
-          <TaskRow
-            kind="upcoming"
-            label="Email last week's recap"
-            date="anytime"
-            done={doneIds.has('3')}
-            onToggle={() => toggle('3')}
-          />
-          <TaskRow
-            done={doneIds.has('4')}
-            label="Pick up dry cleaning"
-            date="11 AM"
-            onToggle={() => toggle('4')}
-          />
-        </Section>
+        {SECTION_ORDER.map((section) => {
+          const sectionTasks = grouped[section.slot];
+          if (sectionTasks.length === 0) return null;
 
-        {/* Tomorrow */}
-        <Section title="Tomorrow" date="Mon, May 26" count={2}>
-          <TaskRow
-            kind="upcoming"
-            label="Review PR from Tal"
-            sublabel="auth refactor — 12 files"
-            link="GitHub"
-            date="morning"
-            done={doneIds.has('5')}
-            onToggle={() => toggle('5')}
-          />
-          <TaskRow
-            kind="upcoming"
-            label="Book dentist"
-            date="9 AM"
-            done={doneIds.has('6')}
-            onToggle={() => toggle('6')}
-          />
-        </Section>
+          return (
+            <Section
+              key={section.slot}
+              title={section.title}
+              {...(section.date ? { date: section.date } : {})}
+              count={sectionTasks.length}
+            >
+              {section.slot === 'today' && (
+                <EventRow time="3:00 PM" label="Manager 1:1" sublabel="30 min · with Maya · Zoom" />
+              )}
+              {sectionTasks.map((task) => (
+                <TaskRow
+                  key={task.id}
+                  kind={task.kind}
+                  label={task.title}
+                  date={task.date}
+                  done={task.done}
+                  onToggle={() => void toggle(task.id, task.done)}
+                  {...(task.sublabel ? { sublabel: task.sublabel } : {})}
+                  {...(task.link ? { link: task.link } : {})}
+                  {...(task.datePill ? { datePill: task.datePill } : {})}
+                />
+              ))}
+            </Section>
+          );
+        })}
 
-        {/* This week */}
-        <Section title="This week" date="ends Sat, May 31" count={3}>
-          <TaskRow
-            kind="faded"
-            label="Fix kitchen light"
-            date="Next Sun"
-            done={doneIds.has('7')}
-            onToggle={() => toggle('7')}
-          />
-          <TaskRow
-            kind="faded"
-            label="Renew driver's license"
-            date="Wed"
-            done={doneIds.has('8')}
-            onToggle={() => toggle('8')}
-          />
-          <TaskRow
-            kind="faded"
-            label="Plan dad's birthday gift"
-            date="Sat"
-            done={doneIds.has('9')}
-            onToggle={() => toggle('9')}
-          />
-        </Section>
-
-        {/* Quick-add row */}
         <div className="t-quickadd" onClick={onNavigateCapture} role="button" tabIndex={0}>
           <span className="plus-bubble">
             <IconPlus size={10} />
@@ -248,12 +246,11 @@ export default function TodayScreen({ onNavigateCapture }: Props) {
                 color: 'var(--ink-2)',
               }}
             >
-              ⌘ N
+              ⌘ K
             </span>
           </span>
         </div>
 
-        {/* Someday footer */}
         <div
           style={{
             display: 'flex',
@@ -285,15 +282,20 @@ export default function TodayScreen({ onNavigateCapture }: Props) {
                 color: 'var(--ink-2)',
               }}
             >
-              14
+              0
             </span>
             <IconChevron size={11} />
           </span>
           <span style={{ flex: 1, height: 0.5, background: 'var(--hairline)', display: 'block' }} />
         </div>
+
+        {error && (
+          <div style={{ marginTop: 16, textAlign: 'center', color: 'var(--urgent)', fontSize: 12 }}>
+            {error}
+          </div>
+        )}
       </div>
 
-      {/* FAB */}
       <button className="fab" onClick={onNavigateCapture} aria-label="New capture">
         <span className="ic">
           <IconPlus size={14} />
