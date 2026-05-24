@@ -1,6 +1,9 @@
 import { ipcMain, BrowserWindow } from 'electron';
+import { registerTaskHandlers } from './tasks';
 
 export function registerIpcHandlers(): void {
+  registerTaskHandlers();
+
   // Theme query — return system appearance
   ipcMain.handle('app:getTheme', () => {
     const { nativeTheme } = require('electron');

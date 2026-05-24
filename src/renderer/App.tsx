@@ -44,7 +44,7 @@ export default function App() {
   return (
     <>
       {screen === 'today' && (
-        <TodayScreen onNavigateCapture={() => setScreen('capture')} />
+        <TodayScreen active onNavigateCapture={() => setScreen('capture')} />
       )}
       {screen === 'capture' && (
         <CaptureScreen onBack={() => setScreen('today')} />

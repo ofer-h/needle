@@ -2,10 +2,15 @@ import { app, BrowserWindow, globalShortcut, session } from 'electron';
 import { createMainWindow } from './windows/main';
 import { buildMenu } from './menu';
 import { registerIpcHandlers } from './ipc/index';
+import { initDb } from './services/db';
+import { loadProjectEnv } from './services/env';
+
+loadProjectEnv();
 
 let mainWindow: BrowserWindow | null = null;
 
 function bootstrap(): void {
+  initDb();
   buildMenu();
   registerIpcHandlers();
 

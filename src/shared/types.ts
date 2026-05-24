@@ -31,12 +31,20 @@ export type CalendarEvent = {
   sublabel?: string;
 };
 
-export type CaptureState = 'empty' | 'typing' | 'classified' | 'voice';
+export type CaptureState = 'typing' | 'classifying' | 'classified' | 'voice';
 
-export type CaptureResult = {
+export type ClassifiedItem = {
   bucket: Bucket;
   timeSlot: TimeSlot;
   title: string;
+  sourceText?: string;
+  sublabel?: string;
+  link?: string;
+  datePill?: 'urgent' | 'upcoming';
+};
+
+export type CaptureResult = {
+  items: ClassifiedItem[];
   explanation: string;
   latencyMs: number;
 };
