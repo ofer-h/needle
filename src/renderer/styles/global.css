@@ -508,8 +508,8 @@ button {
 }
 
 .titlebar {
-  height: 52px;
-  flex: 0 0 52px;
+  height: 38px;
+  flex: 0 0 38px;
   position: relative;
   display: flex;
   align-items: center;

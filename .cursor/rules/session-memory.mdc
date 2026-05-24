@@ -1,0 +1,37 @@
+---
+description: Summarize decisions and context at the end of every session. Always apply — enforced for all collaborators.
+alwaysApply: true
+---
+
+# Session Memory & Decision Log
+
+This project is built by **Ofer** (primary engineer and owner) together with collaborators.
+Every AI session must leave a clear record so context is never lost between chats.
+
+## At the start of a session
+- Greet Ofer by name if he is the one working (check git config / commit history if uncertain).
+- Briefly recap the last known state of the project from prior decisions below.
+
+## At the end of every session (or when asked to "summarize" / "commit")
+Append a dated entry to the **Decision Log** section below covering:
+1. **What changed** — files touched, features added, bugs fixed.
+2. **Why** — the reasoning or tradeoff behind the decision.
+3. **Open questions** — anything unresolved or deferred.
+4. **Who** — note if Ofer made a specific call, or if it was an AI recommendation he accepted.
+
+## Rules for all collaborators
+- Never silently reverse a logged decision without noting it in a new entry.
+- If you disagree with a prior decision, flag it explicitly — don't just overwrite it.
+- Keep entries concise (3–6 bullet points max). This is a log, not a document.
+
+---
+
+## Decision Log
+
+### 2026-05-24 — Initial scaffold & UI implementation (Ofer)
+- **Stack locked in:** Electron 42 + Forge + Vite + React + TypeScript. Zustand for state, CSS custom properties + global CSS (no Tailwind).
+- **Design source:** `/Users/groot/Downloads/Needle/` — hi-fi JSX/CSS files from the Anthropic design tool. Ported to real React components faithfully.
+- **Two screens implemented:** Today (task list with sections, progress bar, FAB) and Capture (4 states: empty, typing, classified, voice). Mock data only — no real AI or DB yet.
+- **Vite build fix:** Both `src/main/index.ts` and `src/preload/index.ts` output `index.js` and overwrote each other. Fixed by explicit `lib.fileName` in each vite config → `main.js` / `preload.js`. `package.json` main updated to `.vite/build/main.js`.
+- **Titlebar fix:** `titleBarStyle: 'hiddenInset'` provides native macOS traffic lights; removed duplicate HTML `.lights` div.
+- **Deferred:** AI classification (Anthropic API), SQLite persistence, calendar integration, macOS widget, notifications.
