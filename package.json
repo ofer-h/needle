@@ -2,7 +2,7 @@
   "name": "focus",
   "version": "0.1.0",
   "description": "Intelligent second brain for ADHD — capture anything, AI handles the rest.",
-  "main": ".vite/build/main/index.js",
+  "main": ".vite/build/main.js",
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
