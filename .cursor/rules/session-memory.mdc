@@ -1,38 +1,33 @@
 ---
-description: Summarize decisions and context at the end of every session. Always apply — enforced for all collaborators.
+description: How to read and write project memory. Always apply.
 alwaysApply: true
 ---
 
-# Session Memory & Decision Log
+# Memory Management
 
-This project is built by **Ofer** (primary engineer and owner) together with collaborators.
-Every AI session must leave a clear record so context is never lost between chats.
+All persistent memory lives in the `memory/` folder at the project root.
+Never store memories inside rule files.
 
-## At the start of a session
-- Greet Ofer by name if he is the one working (check git config / commit history if uncertain).
-- Briefly recap the last known state of the project from prior decisions below.
+## Files
+| File | Purpose |
+|------|---------|
+| `memory/context.md` | Who, what, current state, key paths, non-negotiables |
+| `memory/decisions.md` | Chronological log of every significant decision |
 
-## At the end of every session (or when asked to "summarize" / "commit")
-Append a dated entry to the **Decision Log** section below covering:
-1. **What changed** — files touched, features added, bugs fixed.
-2. **Why** — the reasoning or tradeoff behind the decision.
-3. **Open questions** — anything unresolved or deferred.
-4. **Who** — note if Ofer made a specific call, or if it was an AI recommendation he accepted.
+## On session start
+1. Read both memory files.
+2. Identify who is working — **Ofer** (engineer, day-to-day coding) or **Omri** (product, direction).
+   - Check `git config user.name` or ask if unclear: *"Is this Ofer or Omri?"*
+3. Greet them by name and summarize the current project state in 1–2 sentences.
+
+## On session end / when asked to commit or summarize
+1. Append a new entry to `memory/decisions.md`:
+   - Date, topic, **who drove the decision** (Ofer / Omri / both / AI recommendation)
+   - What changed, why, and any open questions
+2. Update `memory/context.md` "Current state" section if anything changed.
+3. Keep entries concise — 3–5 bullets max.
 
 ## Rules for all collaborators
-- Never silently reverse a logged decision without noting it in a new entry.
-- If you disagree with a prior decision, flag it explicitly — don't just overwrite it.
-- Keep entries concise (3–6 bullet points max). This is a log, not a document.
-
----
-
-## Decision Log
-
-### 2026-05-24 — Initial scaffold & UI implementation (Ofer)
-- **Stack locked in:** Electron 42 + Forge + Vite + React + TypeScript. Zustand for state, CSS custom properties + global CSS (no Tailwind).
-- **Design source:** `/Users/groot/Downloads/Needle/` — hi-fi JSX/CSS files from the Anthropic design tool. Ported to real React components faithfully.
-- **Two screens implemented:** Today (task list with sections, progress bar, FAB) and Capture (4 states: empty, typing, classified, voice). Mock data only — no real AI or DB yet.
-- **Vite build fix:** Both `src/main/index.ts` and `src/preload/index.ts` output `index.js` and overwrote each other. Fixed by explicit `lib.fileName` in each vite config → `main.js` / `preload.js`. `package.json` main updated to `.vite/build/main.js`.
-- **Titlebar fix:** `titleBarStyle: 'hiddenInset'` provides native macOS traffic lights; removed duplicate HTML `.lights` div.
-- **Titlebar drag fix:** `.titlebar > *` applied `-webkit-app-region: no-drag` to `.title-center` (inset:0, covers full bar) — killed dragging everywhere. Fixed by scoping `no-drag` only to `button, a, input, select` inside the titlebar.
-- **Deferred:** AI classification (Anthropic API), SQLite persistence, calendar integration, macOS widget, notifications.
+- Always attribute decisions to the right person in the log.
+- Never reverse a logged decision without adding a new entry explaining why and who decided.
+- If Omri changes a product direction Ofer implemented, log both sides.
