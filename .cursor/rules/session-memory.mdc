@@ -34,4 +34,5 @@ Append a dated entry to the **Decision Log** section below covering:
 - **Two screens implemented:** Today (task list with sections, progress bar, FAB) and Capture (4 states: empty, typing, classified, voice). Mock data only — no real AI or DB yet.
 - **Vite build fix:** Both `src/main/index.ts` and `src/preload/index.ts` output `index.js` and overwrote each other. Fixed by explicit `lib.fileName` in each vite config → `main.js` / `preload.js`. `package.json` main updated to `.vite/build/main.js`.
 - **Titlebar fix:** `titleBarStyle: 'hiddenInset'` provides native macOS traffic lights; removed duplicate HTML `.lights` div.
+- **Titlebar drag fix:** `.titlebar > *` applied `-webkit-app-region: no-drag` to `.title-center` (inset:0, covers full bar) — killed dragging everywhere. Fixed by scoping `no-drag` only to `button, a, input, select` inside the titlebar.
 - **Deferred:** AI classification (Anthropic API), SQLite persistence, calendar integration, macOS widget, notifications.
