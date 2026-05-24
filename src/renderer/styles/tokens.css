@@ -1,0 +1,67 @@
+/* Focus design tokens — light & dark, ported from focus-app.css */
+
+:root {
+  --sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  --serif: 'Fraunces', 'New York', Georgia, serif;
+  --mono: 'Geist Mono', ui-monospace, 'SFMono-Regular', monospace;
+}
+
+/* ── Light theme (Warm Light) ─────────────────────────────────── */
+[data-theme='light'] {
+  --bg: #f6f1eb;
+  --bg-elev: #fbf7f0;
+  --surface: #ffffff;
+  --surface-sub: #efe9df;
+  --hairline: rgba(34, 24, 12, 0.08);
+  --hairline-2: rgba(34, 24, 12, 0.14);
+
+  --ink: #1f1a14;
+  --ink-2: #4a3f32;
+  --ink-3: #7a6e5d;
+  --ink-4: #a8997f;
+
+  --urgent: #c4622d;
+  --urgent-soft: rgba(196, 98, 45, 0.1);
+  --upcoming: #6f9272;
+  --upcoming-soft: rgba(111, 146, 114, 0.1);
+  --calendar: #2c2c3a;
+  --remember: #6b7fa3;
+  --accent: #d4a847;
+
+  --shadow-card: 0 1px 1px rgba(40, 28, 12, 0.04), 0 4px 16px rgba(40, 28, 12, 0.06);
+  --shadow-win: 0 0 0 0.5px rgba(0, 0, 0, 0.18), 0 30px 80px rgba(20, 12, 4, 0.22),
+    0 8px 24px rgba(20, 12, 4, 0.1);
+
+  --titlebar-bg: rgba(246, 241, 235, 0.85);
+  --titlebar-stroke: rgba(34, 24, 12, 0.07);
+}
+
+/* ── Dark theme (Deep Dark) ───────────────────────────────────── */
+[data-theme='dark'] {
+  --bg: #16161a;
+  --bg-elev: #1c1c21;
+  --surface: #232328;
+  --surface-sub: #2a2a30;
+  --hairline: rgba(255, 255, 255, 0.07);
+  --hairline-2: rgba(255, 255, 255, 0.12);
+
+  --ink: #f2efe9;
+  --ink-2: #bdb7ad;
+  --ink-3: #807a70;
+  --ink-4: #585249;
+
+  --urgent: #e8674a;
+  --urgent-soft: rgba(232, 103, 74, 0.14);
+  --upcoming: #6fbdb4;
+  --upcoming-soft: rgba(111, 189, 180, 0.14);
+  --calendar: #b9baca;
+  --remember: #b0a4d6;
+  --accent: #f0b429;
+
+  --shadow-card: 0 1px 0 rgba(0, 0, 0, 0.4), 0 6px 24px rgba(0, 0, 0, 0.35);
+  --shadow-win: 0 0 0 0.5px rgba(255, 255, 255, 0.06), 0 30px 80px rgba(0, 0, 0, 0.55),
+    0 8px 24px rgba(0, 0, 0, 0.3);
+
+  --titlebar-bg: rgba(22, 22, 26, 0.85);
+  --titlebar-stroke: rgba(255, 255, 255, 0.06);
+}

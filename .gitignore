@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+
+# Electron Forge / Vite build artifacts
+.vite/
+out/
+dist/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.Spotlight-V8
+.Trashes
+.fseventsd
+
+# Editor
+.idea/
+*.swp
+*.swo
+
+# Environment — never commit secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Signing / notarization — never commit
+*.p12
+*.cer
+*.mobileprovision
+build/entitlements.mac.plist
