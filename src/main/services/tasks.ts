@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
-import type { CaptureResult, Task, TaskKind, TimeSlot } from '../../shared/types';
-import { classifyStubWithLatency } from './classify-stub';
+import type { CaptureResult, ClassifiedItem, Task, TaskKind, TimeSlot } from '../../shared/types';
+import { classifyCapture } from './classify';
 import { getDb } from './db';
 
 type TaskRow = {
@@ -60,19 +60,9 @@ function rowToTask(row: TaskRow): Task {
   return task;
 }
 
-export type CreateTaskResponse = {
-  task: Task;
-  result: CaptureResult;
-};
-
-export function createTask(rawInput: string): CreateTaskResponse {
-  const trimmed = rawInput.trim();
-  if (!trimmed) throw new Error('rawInput must not be empty');
-
-  const result = classifyStubWithLatency(trimmed);
-  const now = new Date().toISOString();
+function insertTask(rawInput: string, item: ClassifiedItem, now: string): Task {
   const id = randomUUID();
-  const kind = kindFromTimeSlot(result.timeSlot);
+  const kind = kindFromTimeSlot(item.timeSlot);
 
   getDb()
     .prepare(
@@ -81,25 +71,51 @@ export function createTask(rawInput: string): CreateTaskResponse {
         sublabel, link, date_pill, ai_reason, created_at, updated_at
       ) VALUES (
         @id, @title, @raw_input, @bucket, @time_slot, @kind, 0,
-        NULL, NULL, NULL, @ai_reason, @created_at, @updated_at
+        @sublabel, @link, @date_pill, NULL, @created_at, @updated_at
       )`,
     )
     .run({
       id,
-      title: result.title,
-      raw_input: trimmed,
-      bucket: result.bucket,
-      time_slot: result.timeSlot,
+      title: item.title,
+      raw_input: rawInput,
+      bucket: item.bucket,
+      time_slot: item.timeSlot,
       kind,
-      ai_reason: result.explanation,
+      sublabel: item.sublabel ?? item.sourceText ?? null,
+      link: item.link ?? null,
+      date_pill: item.datePill ?? null,
       created_at: now,
       updated_at: now,
     });
 
   const row = getDb().prepare('SELECT * FROM tasks WHERE id = ?').get(id) as TaskRow | undefined;
   if (!row) throw new Error('Failed to read created task');
+  return rowToTask(row);
+}
 
-  return { task: rowToTask(row), result };
+export async function classifyOnly(rawInput: string): Promise<CaptureResult> {
+  const trimmed = rawInput.trim();
+  if (!trimmed) throw new Error('rawInput must not be empty');
+  return classifyCapture(trimmed);
+}
+
+export function confirmTasks(rawInput: string, items: ClassifiedItem[]): Task[] {
+  const trimmed = rawInput.trim();
+  if (!trimmed) throw new Error('rawInput must not be empty');
+  if (items.length === 0) throw new Error('items must not be empty');
+
+  const now = new Date().toISOString();
+  const db = getDb();
+
+  db.exec('BEGIN');
+  try {
+    const tasks = items.map((item) => insertTask(trimmed, item, now));
+    db.exec('COMMIT');
+    return tasks;
+  } catch (err) {
+    db.exec('ROLLBACK');
+    throw err;
+  }
 }
 
 export function listTodayTasks(): Task[] {

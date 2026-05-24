@@ -1,12 +1,11 @@
 import { useState, useRef, useEffect, useCallback, type RefObject } from 'react';
 import FxWindow from '../Window/FxWindow';
 import { useTasks } from '../../hooks/useTasks';
-import type { CaptureResult, Task, TimeSlot } from '../../../shared/types';
+import type { CaptureResult, ClassifiedItem, TimeSlot } from '../../../shared/types';
 import {
   IconBack,
   IconMic,
   IconPaperclip,
-  IconCheck,
   IconThumbsUp,
   IconThumbsDown,
   IconPlus,
@@ -26,16 +25,6 @@ type Props = {
   onBack: () => void;
 };
 
-const TIME_CHIPS = ['Today', 'Tomorrow', 'In a few days', 'Next Sun', 'Next week', 'Someday', 'Pick date…'];
-
-const TIME_SLOT_CHIP_INDEX: Record<TimeSlot, number> = {
-  today: 0,
-  tomorrow: 1,
-  'in-a-few-days': 2,
-  'next-week': 4,
-  someday: 5,
-};
-
 const BUCKET_LABELS = {
   act: 'Act',
   remember: 'Remember',
@@ -48,6 +37,164 @@ const TIME_SLOT_LABELS: Record<TimeSlot, string> = {
   'next-week': 'Next week',
   someday: 'Someday',
 };
+
+function ApprovalItemCard({ item, index }: { item: ClassifiedItem; index: number }) {
+  const bucketColor = item.bucket === 'act' ? 'var(--urgent)' : 'var(--remember)';
+
+  return (
+    <div
+      className="result-card"
+      style={{
+        marginTop: index === 0 ? 0 : 12,
+        padding: '18px 22px',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+        <span style={{ color: 'var(--accent)' }}>
+          <IconSpark size={12} />
+        </span>
+        <span className="t-eyebrow" style={{ color: bucketColor }}>
+          {BUCKET_LABELS[item.bucket]} · {TIME_SLOT_LABELS[item.timeSlot]}
+        </span>
+        {item.datePill && (
+          <span
+            className="chip urgent"
+            style={{ height: 22, fontSize: 10, padding: '0 8px', marginLeft: 4 }}
+          >
+            {item.datePill}
+          </span>
+        )}
+      </div>
+
+      <div
+        style={{
+          fontSize: 20,
+          color: 'var(--ink)',
+          fontWeight: 500,
+          marginTop: 10,
+          letterSpacing: '-0.015em',
+        }}
+      >
+        {item.title}
+      </div>
+
+      {item.sublabel && (
+        <div style={{ fontSize: 13, color: 'var(--ink-3)', marginTop: 4 }}>{item.sublabel}</div>
+      )}
+
+      {item.link && (
+        <div style={{ fontSize: 12.5, color: 'var(--upcoming)', marginTop: 6 }}>{item.link}</div>
+      )}
+
+      {item.sourceText && item.sourceText !== item.title && (
+        <div
+          className="t-mono"
+          style={{ fontSize: 10.5, color: 'var(--ink-4)', marginTop: 8, lineHeight: 1.4 }}
+        >
+          from: {item.sourceText}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CaptureClassified({
+  rawInput,
+  result,
+  onConfirm,
+  onAddAnother,
+  onChangeThis,
+  isSaving,
+}: {
+  rawInput: string;
+  result: CaptureResult;
+  onConfirm: () => void;
+  onAddAnother: () => void;
+  onChangeThis: () => void;
+  isSaving: boolean;
+}) {
+  const latencyLabel =
+    result.latencyMs >= 1000
+      ? `${(result.latencyMs / 1000).toFixed(1)} s`
+      : `${result.latencyMs} ms`;
+  const isMulti = result.items.length > 1;
+
+  return (
+    <>
+      <Prompt>{isMulti ? `${result.items.length} tasks ready` : 'Does this look right?'}</Prompt>
+      <div style={{ maxWidth: 720, width: '100%', margin: '0 auto' }}>
+        <div className="composer" style={{ minHeight: 0, padding: '14px 22px' }}>
+          <div className="input-text recap">{rawInput}</div>
+        </div>
+
+        <div style={{ marginTop: 16 }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'baseline',
+              gap: 10,
+              marginBottom: 12,
+              padding: '0 4px',
+            }}
+          >
+            <span className="t-eyebrow" style={{ color: 'var(--ink-3)' }}>
+              {isMulti ? 'Review each task' : 'Review'}
+            </span>
+            <span style={{ flex: 1 }} />
+            <span className="t-mono" style={{ fontSize: 10, color: 'var(--ink-4)' }}>
+              {latencyLabel}
+            </span>
+          </div>
+
+          <div style={{ fontSize: 13.5, color: 'var(--ink-3)', marginBottom: 14, padding: '0 4px' }}>
+            {result.explanation}
+          </div>
+
+          {result.items.map((item, index) => (
+            <ApprovalItemCard key={`${item.title}-${index}`} item={item} index={index} />
+          ))}
+        </div>
+
+        <div
+          style={{
+            display: 'flex',
+            gap: 10,
+            alignItems: 'center',
+            marginTop: 20,
+          }}
+        >
+          <button
+            className="chip"
+            style={{
+              height: 32,
+              background: 'var(--upcoming-soft)',
+              color: 'var(--upcoming)',
+              opacity: isSaving ? 0.6 : 1,
+            }}
+            onClick={onConfirm}
+            disabled={isSaving}
+          >
+            <IconThumbsUp size={13} />
+            <span style={{ fontWeight: 500 }}>
+              {isSaving ? 'Saving…' : isMulti ? `Save all ${result.items.length}` : 'Looks right'}
+            </span>
+          </button>
+          <button className="chip outline" style={{ height: 32 }} onClick={onChangeThis} disabled={isSaving}>
+            <IconThumbsDown size={13} />
+            <span>Change this</span>
+          </button>
+          <span style={{ flex: 1 }} />
+          <button className="chip outline" style={{ height: 32 }} onClick={onAddAnother} disabled={isSaving}>
+            <span style={{ display: 'inline-flex' }}>
+              <IconPlus size={11} />
+            </span>
+            <span>Add another</span>
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}
 
 function BackNav({ onBack }: { onBack: () => void }) {
   return (
@@ -172,104 +319,6 @@ function CaptureClassifying() {
   );
 }
 
-function CaptureClassified({
-  rawInput,
-  result,
-  onAddAnother,
-  onBack,
-  onChangeThis,
-}: {
-  rawInput: string;
-  result: CaptureResult;
-  onAddAnother: () => void;
-  onBack: () => void;
-  onChangeThis: () => void;
-}) {
-  const [selectedChip, setSelectedChip] = useState(TIME_SLOT_CHIP_INDEX[result.timeSlot] ?? 0);
-  const bucketLabel = BUCKET_LABELS[result.bucket];
-  const timeLabel = TIME_SLOT_LABELS[result.timeSlot];
-  const latencyLabel =
-    result.latencyMs >= 1000
-      ? `${(result.latencyMs / 1000).toFixed(1)} s`
-      : `${result.latencyMs} ms`;
-
-  return (
-    <>
-      <Prompt />
-      <div style={{ maxWidth: 720, width: '100%', margin: '0 auto' }}>
-        <div className="composer" style={{ minHeight: 0, padding: '14px 22px' }}>
-          <div className="input-text recap">{rawInput}</div>
-        </div>
-
-        <div className="result-card" style={{ marginTop: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-            <span style={{ color: 'var(--accent)' }}>
-              <IconSpark size={12} />
-            </span>
-            <span className="t-eyebrow" style={{ color: 'var(--urgent)' }}>
-              {bucketLabel} · {timeLabel}
-            </span>
-            <span style={{ flex: 1 }} />
-            <span className="t-mono" style={{ fontSize: 10, color: 'var(--ink-4)' }}>
-              {latencyLabel}
-            </span>
-          </div>
-
-          <div
-            style={{
-              fontSize: 22,
-              color: 'var(--ink)',
-              fontWeight: 500,
-              marginTop: 8,
-              letterSpacing: '-0.015em',
-            }}
-          >
-            {result.title}
-          </div>
-          <div style={{ fontSize: 13.5, color: 'var(--ink-3)', marginTop: 4 }}>{result.explanation}</div>
-
-          <div style={{ display: 'flex', gap: 8, marginTop: 18, flexWrap: 'wrap' }}>
-            {TIME_CHIPS.map((chip, i) => (
-              <button
-                key={chip}
-                className={`chip${i === selectedChip ? ' urgent' : ' outline'}`}
-                onClick={() => setSelectedChip(i)}
-              >
-                {i === selectedChip && <IconCheck size={11} />}
-                <span style={i === selectedChip ? { marginLeft: 2 } : undefined}>{chip}</span>
-              </button>
-            ))}
-          </div>
-
-          <div className="divider" style={{ margin: '18px 0 14px' }} />
-
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-            <button
-              className="chip"
-              style={{ height: 32, background: 'var(--upcoming-soft)', color: 'var(--upcoming)' }}
-              onClick={onBack}
-            >
-              <IconThumbsUp size={13} />
-              <span style={{ fontWeight: 500 }}>Looks right</span>
-            </button>
-            <button className="chip outline" style={{ height: 32 }} onClick={onChangeThis}>
-              <IconThumbsDown size={13} />
-              <span>Change this</span>
-            </button>
-            <span style={{ flex: 1 }} />
-            <button className="chip outline" style={{ height: 32 }} onClick={onAddAnother}>
-              <span style={{ display: 'inline-flex' }}>
-                <IconPlus size={11} />
-              </span>
-              <span>Add another</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </>
-  );
-}
-
 const WAVE_HEIGHTS = [30, 45, 70, 55, 40, 65, 80, 60, 35, 50, 75, 90, 70, 50, 30, 45, 60, 85, 70, 50,
   40, 65, 95, 75, 55, 35, 50, 80, 65, 45, 30, 55, 70, 60, 40, 50, 75, 55, 35, 25];
 
@@ -362,16 +411,15 @@ function CaptureVoice({
 export default function CaptureScreen({ onBack }: Props) {
   const [state, setState] = useState<CaptureState>('typing');
   const [inputValue, setInputValue] = useState('');
-  const [classification, setClassification] = useState<{ task: Task; result: CaptureResult } | null>(
-    null,
-  );
+  const [classification, setClassification] = useState<CaptureResult | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { create, error } = useTasks();
+  const { classify, confirm, error } = useTasks();
 
   const footer: Record<CaptureState, string> = {
-    typing: '⌘⏎ to confirm · ⎋ to dismiss',
-    classifying: 'Saving your capture…',
-    classified: 'thumbs up to save · ↩ or wait 3s to return',
+    typing: '⌘⏎ to classify · ⎋ to dismiss',
+    classifying: 'Classifying…',
+    classified: 'review below · thumbs up to save',
     voice: 'tap to stop · auto-stops on silence',
   };
 
@@ -383,15 +431,26 @@ export default function CaptureScreen({ onBack }: Props) {
       setInputValue(trimmed);
       setState('classifying');
       try {
-        const response = await create(trimmed);
-        setClassification(response);
+        const result = await classify(trimmed);
+        setClassification(result);
         setState('classified');
       } catch {
         setState('typing');
       }
     },
-    [create],
+    [classify],
   );
+
+  const handleConfirm = useCallback(async () => {
+    if (!classification) return;
+    setIsSaving(true);
+    try {
+      await confirm(inputValue, classification.items);
+      onBack();
+    } catch {
+      setIsSaving(false);
+    }
+  }, [classification, confirm, inputValue, onBack]);
 
   const handleSubmit = useCallback(() => {
     void submitCapture(inputValue);
@@ -490,10 +549,11 @@ export default function CaptureScreen({ onBack }: Props) {
         {state === 'classified' && classification && (
           <CaptureClassified
             rawInput={inputValue}
-            result={classification.result}
+            result={classification}
+            onConfirm={() => void handleConfirm()}
             onAddAnother={handleAddAnother}
-            onBack={onBack}
             onChangeThis={handleChangeThis}
+            isSaving={isSaving}
           />
         )}
         {state === 'voice' && (

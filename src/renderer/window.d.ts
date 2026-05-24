@@ -1,4 +1,4 @@
-import type { Theme, Screen, Task, CaptureResult } from '../shared/types';
+import type { Theme, Screen, Task, CaptureResult, ClassifiedItem } from '../shared/types';
 
 declare global {
   interface Window {
@@ -8,7 +8,8 @@ declare global {
         onNavigate(cb: (screen: Screen) => void): () => void;
       };
       tasks: {
-        create(req: { rawInput: string }): Promise<{ task: Task; result: CaptureResult }>;
+        classify(req: { rawInput: string }): Promise<CaptureResult>;
+        confirm(req: { rawInput: string; items: ClassifiedItem[] }): Promise<Task[]>;
         list(req: { scope: 'today' }): Promise<Task[]>;
         setDone(req: { id: string; done: boolean }): Promise<void>;
       };

@@ -1,11 +1,5 @@
-import type { Bucket, CaptureResult, TimeSlot } from '../../shared/types';
-
-type StubClassification = {
-  bucket: Bucket;
-  timeSlot: TimeSlot;
-  title: string;
-  explanation: string;
-};
+import type { Bucket, CaptureResult, ClassifiedItem, TimeSlot } from '../../shared/types';
+import { trimTitle } from './classify-parse';
 
 const TIME_SLOT_LABELS: Record<TimeSlot, string> = {
   today: 'today',
@@ -15,8 +9,8 @@ const TIME_SLOT_LABELS: Record<TimeSlot, string> = {
   someday: 'someday',
 };
 
-function inferTimeSlot(rawInput: string): TimeSlot {
-  const lower = rawInput.toLowerCase();
+function inferTimeSlot(text: string): TimeSlot {
+  const lower = text.toLowerCase();
   if (lower.includes('someday')) return 'someday';
   if (lower.includes('next week')) return 'next-week';
   if (lower.includes('in a few days')) return 'in-a-few-days';
@@ -24,37 +18,69 @@ function inferTimeSlot(rawInput: string): TimeSlot {
   return 'today';
 }
 
-function titleFromRawInput(rawInput: string): string {
-  const trimmed = rawInput.trim();
-  const firstLine = trimmed.split('\n').find((line) => line.trim())?.trim() ?? trimmed;
-  const words = firstLine.split(/\s+/).filter(Boolean);
-  if (words.length === 0) return 'Untitled';
-  return words.slice(0, 8).join(' ');
+function stripListMarker(line: string): string {
+  return line.replace(/^[\s•\-*–—]+/, '').replace(/^\d+[.)]\s*/, '').trim();
 }
 
-export function classifyStub(rawInput: string): StubClassification {
-  const timeSlot = inferTimeSlot(rawInput);
-  const title = titleFromRawInput(rawInput);
-  const bucket: Bucket = 'act';
+function splitIntoSegments(rawInput: string): string[] {
+  const trimmed = rawInput.trim();
+  const lines = trimmed
+    .split('\n')
+    .map(stripListMarker)
+    .filter(Boolean);
 
+  if (lines.length > 1) return lines;
+
+  const bulletParts = trimmed
+    .split(/\s*[•\-–—]\s+/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+  if (bulletParts.length > 1) return bulletParts;
+
+  const numberedParts = trimmed
+    .split(/\s*(?:\d+[.)]\s+)/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+  if (numberedParts.length > 1) return numberedParts;
+
+  const andParts = trimmed
+    .split(/\s*,\s*|\s+and also\s+|\s+also\s+|\s+and then\s+/i)
+    .map((part) => part.trim())
+    .filter(Boolean);
+  if (andParts.length > 1 && andParts.every((part) => part.split(/\s+/).length >= 2)) {
+    return andParts;
+  }
+
+  return [trimmed];
+}
+
+function titleFromSegment(segment: string): string {
+  const words = segment.split(/\s+/).filter(Boolean);
+  if (words.length === 0) return 'Untitled';
+  const cleaned = words.join(' ');
+  return trimTitle(cleaned.charAt(0).toUpperCase() + cleaned.slice(1));
+}
+
+function classifySegment(segment: string): ClassifiedItem {
+  const timeSlot = inferTimeSlot(segment);
   return {
-    bucket,
+    bucket: 'act' as Bucket,
     timeSlot,
-    title,
-    explanation: `Saved as an Act item for ${TIME_SLOT_LABELS[timeSlot]}.`,
+    title: titleFromSegment(segment),
+    sourceText: segment,
   };
 }
 
 export function classifyStubWithLatency(rawInput: string): CaptureResult {
   const start = performance.now();
-  const classified = classifyStub(rawInput);
+  const segments = splitIntoSegments(rawInput);
+  const items = segments.map(classifySegment);
   const latencyMs = Math.round(performance.now() - start);
 
-  return {
-    bucket: classified.bucket,
-    timeSlot: classified.timeSlot,
-    title: classified.title,
-    explanation: classified.explanation,
-    latencyMs,
-  };
+  const explanation =
+    items.length > 1
+      ? `Split into ${items.length} tasks and cleaned up phrasing (offline mode).`
+      : `Saved as an Act item for ${TIME_SLOT_LABELS[items[0]?.timeSlot ?? 'today']}.`;
+
+  return { items, explanation, latencyMs };
 }
