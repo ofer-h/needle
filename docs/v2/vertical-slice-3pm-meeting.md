@@ -59,9 +59,28 @@ Build the first end-to-end product moment using the v2 contract: an unmissable 3
 
 ## Status pointer
 
-▸ **Step 11 done; Step 8 still open.** Timing bug fixed (dev clock now defaults to 14:54 so interventions don't fire on app load). Multi-display torch + system notification + hero banner all wired. User to verify with a fresh `npm start`.
+▸ **Step 12 done; Step 8 still open.** Torch is more transparent (underlying apps visible) and the spotlight no longer "sticks" when the cursor leaves a display — cursor is now polled in main and broadcast to every torch window, each decides whether the cursor is on its own display.
 
 (When resuming: update this line first, before doing any other work.)
+
+### Step 12 — Transparency + cursor-off-display fix (added 2026-05-26, done)
+
+User feedback after Step 11:
+1. The torch overlay was too opaque — wanted to clearly see underlying apps through the dim.
+2. When the cursor moved off a display, that display's spotlight froze at the last position ("stuck"). Looked broken.
+
+Fixed:
+
+- **Transparency tune** (`src/renderer/components/Intervention/Torchlight.css`): dim scrim lowered from `rgba(22,22,26,0.7)` to `rgba(22,22,26,0.42)`. Backdrop filter softened from `blur(8px)` to `blur(2px) saturate(0.85)`. Underlying apps are clearly visible; the dim cues attention without obscuring content.
+- **Main-process cursor polling** (`src/main/windows/torch.ts`): `startCursorPolling()` runs `screen.getCursorScreenPoint()` every 33ms (~30fps) while torch windows are open, sending the absolute screen position to all torch windows via `torch:cursor`. Stopped on `hideTorch()`.
+- **Preload + window typing**: `window.api.torch.onCursor(cb)` exposes the IPC stream to renderer.
+- **TorchWindow.tsx**: replaced the per-window `mousemove` listener with the IPC cursor stream. Converts absolute → local via `window.screenX / screenY` and checks against `window.innerWidth / innerHeight`. If cursor is on this display → `setCursor({x, y})`. If off → `setCursor(null)`.
+- **Torchlight.tsx**: when `cursor === null && targetRect === null`, render the backdrop without a mask (uniform dim, no spotlight). When `cursor` is a point, render the spotlight there. The contract is now: `cursor` is `{x,y,radius?}` (show spotlight here), `null` (off this display, no spotlight), or `undefined` (fall back to targetRect / viewport center).
+
+Architectural notes:
+
+- Cursor polling at 30fps is cheap; the alternative (per-window mousemove) doesn't work for multi-display because only the focused window receives mouse events.
+- Multi-display handoff is smooth: as the cursor crosses display boundaries, the leaving display's spotlight disappears and the entering display's spotlight appears at the new position, all driven by the same IPC stream.
 
 ### Step 11 — Multi-surface attention + timing fix (added 2026-05-26, done)
 

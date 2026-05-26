@@ -104,6 +104,10 @@ export default function Torchlight({
 
   if (!active) return null;
 
+  // Explicit `cursor === null` with no targetRect means "off this display" —
+  // render uniform dim without a spotlight hole. (Distinct from `cursor === undefined`
+  // which falls through to targetRect / viewport-center defaults.)
+  const noSpotlight = cursor === null && targetRect === null;
   const { cx, cy, radius } = computeSpotlight(targetRect, cursor);
 
   // The mask cuts a soft circular hole over the target. The inner stop
@@ -115,10 +119,12 @@ export default function Torchlight({
     `transparent ${radius * 0.7}px, ` +
     `#000 ${radius}px)`;
 
-  const backdropStyle: CSSProperties = {
-    maskImage: maskValue,
-    WebkitMaskImage: maskValue,
-  };
+  const backdropStyle: CSSProperties = noSpotlight
+    ? {}
+    : {
+        maskImage: maskValue,
+        WebkitMaskImage: maskValue,
+      };
 
   function handleCtaKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
     // Native <button> already triggers click on Enter / Space, but we keep

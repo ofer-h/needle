@@ -12,6 +12,9 @@ let heroBannerWindow: BrowserWindow | null = null;
 let activeNotification: Notification | null = null;
 let currentPayload: TorchShowPayload | null = null;
 let dismissHandler: ((correlationId: string) => void) | null = null;
+let cursorPollHandle: ReturnType<typeof setInterval> | null = null;
+
+const CURSOR_POLL_INTERVAL_MS = 33; // ~30fps
 
 export function setTorchDismissHandler(fn: ((correlationId: string) => void) | null): void {
   dismissHandler = fn;
@@ -153,6 +156,26 @@ function createHeroBannerForDisplay(display: Electron.Display): BrowserWindow {
   return win;
 }
 
+function startCursorPolling(): void {
+  if (cursorPollHandle !== null) return;
+  cursorPollHandle = setInterval(() => {
+    if (torchWindows.length === 0) return;
+    const point = screen.getCursorScreenPoint();
+    torchWindows.forEach((w) => {
+      if (!w.isDestroyed()) {
+        w.webContents.send('torch:cursor', point);
+      }
+    });
+  }, CURSOR_POLL_INTERVAL_MS);
+}
+
+function stopCursorPolling(): void {
+  if (cursorPollHandle !== null) {
+    clearInterval(cursorPollHandle);
+    cursorPollHandle = null;
+  }
+}
+
 function fireSystemNotification(payload: TorchShowPayload): void {
   if (!Notification.isSupported()) return;
   if (activeNotification !== null) {
@@ -198,9 +221,16 @@ export function showTorch(payload: TorchShowPayload): void {
 
   // 3) Native macOS notification.
   fireSystemNotification(payload);
+
+  // 4) Start broadcasting absolute cursor position to torch windows so each
+  //    one can decide whether the cursor is on its display (show spotlight)
+  //    or not (uniform dim — no stuck spotlight).
+  startCursorPolling();
 }
 
 export function hideTorch(): void {
+  stopCursorPolling();
+
   torchWindows.forEach((w) => {
     if (!w.isDestroyed()) w.close();
   });

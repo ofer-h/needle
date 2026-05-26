@@ -12,10 +12,8 @@ const FALLBACK: TorchShowPayload = {
 
 export default function TorchWindow() {
   const [payload, setPayload] = useState<TorchShowPayload | null>(null);
-  const [cursor, setCursor] = useState<{ x: number; y: number }>(() => ({
-    x: window.innerWidth / 2,
-    y: window.innerHeight / 2,
-  }));
+  // null = cursor is NOT on this window's display → render uniform dim, no spotlight.
+  const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     if (window.api === undefined) return;
@@ -23,12 +21,22 @@ export default function TorchWindow() {
     return unsub;
   }, []);
 
+  // Receive absolute screen cursor position from main. Decide if it's on
+  // this window's display by checking against window.screenX/Y + window size.
   useEffect(() => {
-    function handleMove(event: MouseEvent) {
-      setCursor({ x: event.clientX, y: event.clientY });
-    }
-    window.addEventListener('mousemove', handleMove);
-    return () => window.removeEventListener('mousemove', handleMove);
+    if (window.api === undefined) return;
+    const unsub = window.api.torch.onCursor(({ x, y }) => {
+      const left = window.screenX;
+      const top = window.screenY;
+      const right = left + window.innerWidth;
+      const bottom = top + window.innerHeight;
+      if (x < left || x >= right || y < top || y >= bottom) {
+        setCursor(null);
+      } else {
+        setCursor({ x: x - left, y: y - top });
+      }
+    });
+    return unsub;
   }, []);
 
   const effective = payload ?? FALLBACK;
@@ -44,7 +52,7 @@ export default function TorchWindow() {
         title={effective.title}
         subtitle={effective.subtitle}
         targetRect={null}
-        cursor={{ x: cursor.x, y: cursor.y, radius: 180 }}
+        cursor={cursor === null ? null : { x: cursor.x, y: cursor.y, radius: 180 }}
         timeoutMs={effective.durationMs}
         onAcknowledge={() => dismiss('acknowledged')}
         onTimeout={() => dismiss('timeout')}

@@ -38,6 +38,11 @@ const api = {
       ipcRenderer.on('torch:closed', handler);
       return () => ipcRenderer.removeListener('torch:closed', handler);
     },
+    onCursor: (cb: (point: { x: number; y: number }) => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, point: { x: number; y: number }) => cb(point);
+      ipcRenderer.on('torch:cursor', handler);
+      return () => ipcRenderer.removeListener('torch:cursor', handler);
+    },
   },
   capture: {
     show: (payload: CaptureShowPayload): void => {

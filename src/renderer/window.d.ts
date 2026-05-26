@@ -21,6 +21,7 @@ declare global {
         dismiss(payload: TorchClosePayload): void;
         onPayload(cb: (payload: TorchShowPayload) => void): () => void;
         onClosed(cb: (payload: TorchClosePayload) => void): () => void;
+        onCursor(cb: (point: { x: number; y: number }) => void): () => void;
       };
       capture: {
         show(payload: CaptureShowPayload): void;
