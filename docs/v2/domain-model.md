@@ -75,6 +75,8 @@ Status:
 
 Events do not need checkboxes. Their visible state is derived from occurrence time: upcoming, in progress, or past.
 
+Commitment level (`soft` | `firm` | `unmissable`) signals how aggressively the system should intervene to keep the user on this item. It is set by the user (manually or through accepted suggestions) and read by the planning service when materializing interventions. Most items default to `firm`. `unmissable` is reserved for things the user truly does not want to miss (a critical meeting, a deadline) and unlocks higher-intensity intervention strategies.
+
 ### Item Relation
 
 Relations connect items.
@@ -125,6 +127,7 @@ Plan fields include:
 - `startTime` / `endTime` for anchored tasks
 - `slotIndex` / `slotOrder` for floats
 - `timezone`
+- `relativeTo`: optional `{ occurrenceId, offsetMinutes }` for plans that anchor relative to another occurrence (for example, "5 minutes before this meeting"). When set, effective wall-clock time is derived from the linked occurrence; if the occurrence moves or cancels, the planner cascades the change rather than freezing stale absolute times.
 
 ### Occurrence
 
@@ -221,6 +224,59 @@ Examples:
 - You have not had recovery time today.
 
 Insights should be gentle and useful. They should never become shame mechanics.
+
+### Ritual
+
+A ritual is a standing rule that produces prep items and/or interventions in response to a trigger. Rituals turn personal patterns ("always brain-dump 5 minutes before a 1:1") into reusable structure.
+
+Triggers:
+
+- `before_occurrence` / `after_occurrence` - relative to a matching occurrence (filterable by item kind, title contains, source, minimum commitment level).
+- `before_focus_start` - when an actor begins a focus session.
+- `on_transition` - when a flow session moves between states.
+- `time_of_day` - at a local clock time.
+
+Actions are an ordered list. Each action is either:
+
+- `generate_prep_item` - create a child task linked by `prep_for` relation.
+- `fire_intervention` - schedule an intervention with a chosen strategy/surface/intensity.
+- `open_capture` - surface the brain-dump UI for the user to capture thoughts.
+
+Rituals can be authored by the user directly or proposed by AI through a `Suggestion(kind = 'intervention_strategy')` that the user accepts. Either way, every materialized ritual carries `createdByActorId`.
+
+### Intervention
+
+An intervention is a single attention moment - the unit that drives every product nudge, from an ambient pill to a full screen-takeover effect to a phone push.
+
+Strategies:
+
+- `ambient_pill` - quiet visual hint inside Today.
+- `banner` - in-app banner.
+- `modal_capture` - opens the brain-dump capture surface.
+- `attention_takeover_torch` - full-screen blur/dim with a torch-style focus area drawing attention to the next item.
+- `breathing_reset` - short timed reset prompt.
+- `escalated_alert` - high-priority system or push notification.
+- `silent_log` - record-only, no surfaced UI.
+
+Surfaces describe *where* the intervention renders: `in_app`, `system_notification`, `screen_overlay`, `sound`, `push`, `wearable`. Strategy and surface are independent so the same strategy can render across devices.
+
+Intensity (1-5) lets the planning service tune the same strategy gently or sharply.
+
+Interventions have a lifecycle: `scheduled` → `active` → `acknowledged | dismissed | completed_ritual | escalated | missed | cancelled`. Outcomes feed `BehavioralInsight`s ("torch worked 4/5 times this week") so the system learns when to escalate and when to back off.
+
+Chaining via `escalatesToInterventionId` expresses fallback paths - desktop torch → phone push → wearable buzz - without a separate policy table. The chain is materialized at scheduling time.
+
+### Capture Entry
+
+A capture entry is a single raw thought captured during a brain-dump moment. Each entry is promotable to a real `Item` so a 30-second dump becomes structured work without forcing the user to commit upfront.
+
+Status:
+
+- `raw` - just captured, not yet processed.
+- `promoted` - converted to an `Item` (the new item's id is stored on the entry).
+- `dismissed` - kept for context but not promoted.
+
+Capture entries can be linked to a `TransitionEvent` (captured between two tasks) or to a `FlowSession` (freeform capture during the day). AI agents can suggest promotions; promoting always creates a user-attributed `Item`.
 
 ### Source
 

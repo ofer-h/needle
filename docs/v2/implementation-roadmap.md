@@ -20,13 +20,20 @@ Done when typecheck/lint pass and the branch is pushed.
 
 Goal: keep Today UI working while changing the mock store shape.
 
-- Introduce a domain fixture with `items`, `itemRelations`, `itemPlans`, `itemOccurrences`, `assignments`, and `actors`.
+- Introduce a domain fixture with `items`, `itemRelations`, `itemPlans`, `itemOccurrences`, `assignments`, `actors`, `rituals`, `interventions`, and `captureEntries`.
+- Seed at least one example of each guidance concept so selectors and AI flows have realistic data to exercise:
+  - one `Item` with `commitmentLevel = 'unmissable'` (a 1:1 meeting).
+  - one `Ritual` with `trigger = before_occurrence` (-5 min) and a `fire_intervention(modal_capture)` action.
+  - one materialized `ItemPlan` with `relativeTo = { occurrenceId, offsetMinutes: -5 }` for the generated prep task.
+  - one scheduled `Intervention` linked to that occurrence + ritual.
+  - one example `CaptureEntry` linked to a `TransitionEvent`.
 - Add selectors that produce the existing Today view model:
   - overdue rows
   - today rows
   - upcoming/stash rows
   - subtask progress
   - event rows
+- Add selectors that surface `pendingInterventions` per item and `activeInterventions` for the daily flow view, even before the UI renders them.
 - Keep existing components mostly unchanged.
 
 ## Phase B2 - Daily Flow State

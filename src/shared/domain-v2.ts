@@ -26,6 +26,9 @@ export type UsageEventId = Brand<string, 'UsageEventId'>;
 export type SyncCursorId = Brand<string, 'SyncCursorId'>;
 export type ActivityLogId = Brand<string, 'ActivityLogId'>;
 export type SyncOperationId = Brand<string, 'SyncOperationId'>;
+export type InterventionId = Brand<string, 'InterventionId'>;
+export type RitualId = Brand<string, 'RitualId'>;
+export type CaptureEntryId = Brand<string, 'CaptureEntryId'>;
 
 export type ISODate = Brand<string, 'ISODate'>;
 export type ISODateTime = Brand<string, 'ISODateTime'>;
@@ -53,6 +56,7 @@ export type ItemKind = 'task' | 'event' | 'note' | 'memory' | 'habit';
 export type Bucket = 'act' | 'remember';
 export type ItemStatus = 'open' | 'in_progress' | 'done' | 'skipped' | 'cancelled' | 'archived';
 export type ItemVisibility = 'private' | 'workspace' | 'shared_link';
+export type CommitmentLevel = 'soft' | 'firm' | 'unmissable';
 
 export type ItemRelationType =
   | 'contains'
@@ -124,6 +128,85 @@ export type AppSurface = 'desktop' | 'web' | 'mobile' | 'server';
 export type SyncDirection = 'push' | 'pull';
 export type SyncConflictState = 'none' | 'pending' | 'resolved' | 'needs_review';
 
+export type InterventionStrategy =
+  | 'ambient_pill'
+  | 'banner'
+  | 'modal_capture'
+  | 'attention_takeover_torch'
+  | 'breathing_reset'
+  | 'escalated_alert'
+  | 'silent_log';
+
+export type InterventionSurface =
+  | 'in_app'
+  | 'system_notification'
+  | 'screen_overlay'
+  | 'sound'
+  | 'push'
+  | 'wearable';
+
+export type InterventionTriggerKind =
+  | 'time'
+  | 'ritual'
+  | 'ai_signal'
+  | 'idle'
+  | 'manual'
+  | 'escalation';
+
+export type InterventionIntensity = 1 | 2 | 3 | 4 | 5;
+
+export type InterventionStatus =
+  | 'scheduled'
+  | 'active'
+  | 'acknowledged'
+  | 'dismissed'
+  | 'completed_ritual'
+  | 'escalated'
+  | 'missed'
+  | 'cancelled';
+
+export type InterventionOutcome = 'acknowledged' | 'dismissed' | 'completed' | 'missed';
+
+export type RitualKind =
+  | 'pre_meeting_capture'
+  | 'pre_meeting_focus_break'
+  | 'post_meeting_reset'
+  | 'pre_focus_warmup'
+  | 'end_of_day_review'
+  | 'custom';
+
+export type RitualMatch = {
+  itemKinds?: ItemKind[];
+  titleContains?: string;
+  sourceIds?: SourceId[];
+  minCommitmentLevel?: CommitmentLevel;
+};
+
+export type RitualTrigger =
+  | { kind: 'before_occurrence'; offsetMinutes: number; match?: RitualMatch }
+  | { kind: 'after_occurrence'; offsetMinutes: number; match?: RitualMatch }
+  | { kind: 'before_focus_start' }
+  | { kind: 'on_transition'; from?: FlowSessionState; to?: FlowSessionState }
+  | { kind: 'time_of_day'; localTime: LocalTime };
+
+export type RitualAction =
+  | { kind: 'generate_prep_item'; title: string; relationType: 'prep_for' }
+  | {
+      kind: 'fire_intervention';
+      strategy: InterventionStrategy;
+      surface: InterventionSurface;
+      intensity: InterventionIntensity;
+      offsetMinutes?: number;
+    }
+  | { kind: 'open_capture' };
+
+export type CaptureEntryStatus = 'raw' | 'promoted' | 'dismissed';
+
+export type RelativeTiming = {
+  occurrenceId: ItemOccurrenceId;
+  offsetMinutes: number;
+};
+
 export type Timestamped = {
   createdAt: ISODateTime;
   updatedAt: ISODateTime;
@@ -179,6 +262,7 @@ export type Item = Timestamped & {
   body?: string;
   status: ItemStatus;
   visibility: ItemVisibility;
+  commitmentLevel: CommitmentLevel;
   sourceId?: SourceId;
   createdByActorId: ActorId;
   updatedByActorId: ActorId;
@@ -218,6 +302,7 @@ export type ItemPlan = Timestamped & {
   slotIndex?: number;
   slotOrder?: number;
   timezone: TimeZone;
+  relativeTo?: RelativeTiming;
 };
 
 export type ItemOccurrence = Timestamped & {
@@ -316,6 +401,52 @@ export type BehavioralInsight = Timestamped & {
   status: BehavioralInsightStatus;
   confidence?: number;
   evidence: JsonObject;
+};
+
+export type Ritual = Timestamped & {
+  id: RitualId;
+  workspaceId: WorkspaceId;
+  actorId: ActorId;
+  createdByActorId: ActorId;
+  kind: RitualKind;
+  name: string;
+  trigger: RitualTrigger;
+  actions: RitualAction[];
+  enabled: boolean;
+};
+
+export type Intervention = Timestamped & {
+  id: InterventionId;
+  workspaceId: WorkspaceId;
+  actorId: ActorId;
+  createdByActorId: ActorId;
+  strategy: InterventionStrategy;
+  surface: InterventionSurface;
+  intensity: InterventionIntensity;
+  triggeredBy: InterventionTriggerKind;
+  itemId?: ItemId;
+  occurrenceId?: ItemOccurrenceId;
+  flowSessionId?: FlowSessionId;
+  ritualId?: RitualId;
+  scheduledFor: ISODateTime;
+  activatedAt?: ISODateTime;
+  resolvedAt?: ISODateTime;
+  status: InterventionStatus;
+  outcome?: InterventionOutcome;
+  escalatesToInterventionId?: InterventionId;
+  payload: JsonObject;
+};
+
+export type CaptureEntry = Timestamped & {
+  id: CaptureEntryId;
+  workspaceId: WorkspaceId;
+  actorId: ActorId;
+  body: string;
+  status: CaptureEntryStatus;
+  promotedItemId?: ItemId;
+  transitionEventId?: TransitionEventId;
+  flowSessionId?: FlowSessionId;
+  capturedAt: ISODateTime;
 };
 
 export type Invitation = Timestamped & {
@@ -436,7 +567,10 @@ export type ActivityLog = {
     | 'invitation'
     | 'notification_preference'
     | 'notification_event'
-    | 'notification_delivery';
+    | 'notification_delivery'
+    | 'ritual'
+    | 'intervention'
+    | 'capture_entry';
   entityId: string;
   action: string;
   before?: JsonObject;
@@ -483,6 +617,7 @@ export type TodayItemView = {
   eventState?: 'upcoming' | 'in_progress' | 'past';
   isOverdue: boolean;
   dateLabel: string;
+  pendingInterventions: Intervention[];
 };
 
 export type DailyFlowView = {
@@ -491,5 +626,7 @@ export type DailyFlowView = {
   next?: TodayItemView;
   pendingSuggestions: Suggestion[];
   activeInsights: BehavioralInsight[];
+  activeInterventions: Intervention[];
+  pendingCaptureEntries: CaptureEntry[];
   transitionPrompt?: string;
 };

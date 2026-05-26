@@ -104,6 +104,7 @@ items (
   body text,
   status text not null, -- open | in_progress | done | skipped | cancelled | archived
   visibility text not null default 'workspace', -- private | workspace | shared_link
+  commitment_level text not null default 'firm', -- soft | firm | unmissable
   source_id text,
   created_by_actor_id text not null,
   updated_by_actor_id text not null,
@@ -112,6 +113,8 @@ items (
   archived_at text
 )
 ```
+
+`commitment_level` drives how aggressively the planning service materializes interventions for the item. `unmissable` typically yields screen-takeover or escalated alerts; `soft` stays ambient.
 
 ### item_relations
 
@@ -167,11 +170,15 @@ item_plans (
   slot_index integer,
   slot_order real,
   timezone text not null,
+  relative_to_occurrence_id text, -- when set, wall-clock derives from the linked occurrence
+  relative_offset_minutes integer, -- negative = before, positive = after
   created_at text not null,
   updated_at text not null,
   archived_at text
 )
 ```
+
+When `relative_to_occurrence_id` is set, the planning service computes effective `start_time` / `plan_date` from the linked occurrence at read time. If the occurrence moves or is cancelled, the planner cascades changes (and writes activity log entries) rather than mutating the plan directly.
 
 ### item_occurrences
 
@@ -333,6 +340,83 @@ behavioral_insights (
   confidence real,
   evidence_json text not null default '{}',
   status text not null, -- active | dismissed | stale | archived
+  created_at text not null,
+  updated_at text not null,
+  archived_at text
+)
+```
+
+### rituals
+
+Standing rules that generate prep items and/or interventions in response to occurrences, focus state, or time of day. Authored by users or by AI (after a user-accepted suggestion).
+
+```sql
+rituals (
+  id text primary key,
+  workspace_id text not null,
+  actor_id text not null, -- whose day this ritual applies to
+  created_by_actor_id text not null, -- user | ai_agent | system
+  kind text not null, -- pre_meeting_capture | pre_meeting_focus_break | post_meeting_reset | pre_focus_warmup | end_of_day_review | custom
+  name text not null,
+  trigger_json text not null, -- discriminated union: before_occurrence | after_occurrence | before_focus_start | on_transition | time_of_day
+  actions_json text not null, -- ordered array of actions: generate_prep_item | fire_intervention | open_capture
+  enabled integer not null default 1,
+  created_at text not null,
+  updated_at text not null,
+  archived_at text
+)
+```
+
+Triggers and actions are stored as JSON to keep the schema small while strategies evolve. The TypeScript contract (`RitualTrigger`, `RitualAction`) is the source of truth for shape validation at write time.
+
+### interventions
+
+A scheduled or active attention moment. Strategies range from ambient pills to screen-takeover effects to escalated push alerts. Every intervention is actor-attributed and outcome-tracked.
+
+```sql
+interventions (
+  id text primary key,
+  workspace_id text not null,
+  actor_id text not null, -- target actor (whose attention)
+  created_by_actor_id text not null, -- user | ai_agent | system | integration
+  strategy text not null, -- ambient_pill | banner | modal_capture | attention_takeover_torch | breathing_reset | escalated_alert | silent_log
+  surface text not null, -- in_app | system_notification | screen_overlay | sound | push | wearable
+  intensity integer not null, -- 1..5
+  triggered_by text not null, -- time | ritual | ai_signal | idle | manual | escalation
+  item_id text,
+  occurrence_id text,
+  flow_session_id text,
+  ritual_id text,
+  scheduled_for text not null,
+  activated_at text,
+  resolved_at text,
+  status text not null, -- scheduled | active | acknowledged | dismissed | completed_ritual | escalated | missed | cancelled
+  outcome text, -- acknowledged | dismissed | completed | missed
+  escalates_to_intervention_id text, -- chain when first surface is ignored
+  payload_json text not null default '{}',
+  created_at text not null,
+  updated_at text not null,
+  archived_at text
+)
+```
+
+`escalates_to_intervention_id` lets a torch on desktop escalate to a phone push, which can escalate to a watch buzz — without a separate policy table. The chain is materialized at scheduling time.
+
+### capture_entries
+
+Raw brain-dump items captured during transitions or freeform capture. Each entry is promotable to a real `Item` (manually or via AI) so a 30-second dump becomes structured work.
+
+```sql
+capture_entries (
+  id text primary key,
+  workspace_id text not null,
+  actor_id text not null,
+  body text not null,
+  status text not null default 'raw', -- raw | promoted | dismissed
+  promoted_item_id text,
+  transition_event_id text,
+  flow_session_id text,
+  captured_at text not null,
   created_at text not null,
   updated_at text not null,
   archived_at text
@@ -563,6 +647,12 @@ create index idx_flow_sessions_actor_date on flow_sessions (workspace_id, actor_
 create index idx_focus_sessions_actor_time on focus_sessions (workspace_id, actor_id, started_at);
 create index idx_suggestions_target_status on suggestions (workspace_id, target_actor_id, status, created_at);
 create index idx_behavioral_insights_target on behavioral_insights (workspace_id, target_actor_id, status, kind);
+create index idx_rituals_actor_enabled on rituals (workspace_id, actor_id, enabled);
+create index idx_interventions_actor_status on interventions (workspace_id, actor_id, status, scheduled_for);
+create index idx_interventions_item on interventions (workspace_id, item_id, status);
+create index idx_interventions_occurrence on interventions (workspace_id, occurrence_id, status);
+create index idx_capture_entries_actor_status on capture_entries (workspace_id, actor_id, status, captured_at);
+create index idx_item_plans_relative_to on item_plans (workspace_id, relative_to_occurrence_id);
 create index idx_invitations_workspace_status on invitations (workspace_id, status, expires_at);
 create index idx_devices_user_seen on devices (user_id, last_seen_at);
 create index idx_notification_preferences_actor on notification_preferences (workspace_id, actor_id, channel, topic);
@@ -595,6 +685,19 @@ create index idx_sync_cursors_device on sync_cursors (workspace_id, actor_id, de
 1. Query `item_assignments` by actor/workspace.
 2. Join `items`.
 3. Join plans for the current actor only.
+
+### Effective time for a relatively-timed plan
+
+1. Read `item_plans` row.
+2. If `relative_to_occurrence_id` is set, fetch the occurrence's `starts_at`.
+3. Apply `relative_offset_minutes` to compute effective `start_time` / `plan_date`.
+4. If the occurrence is `cancelled`, the planning service marks the plan and any linked interventions `cancelled` in the next planning pass.
+
+### Active interventions for an actor
+
+1. Query `interventions` where `actor_id = me` and `status in ('scheduled', 'active')` and `scheduled_for` within the next window.
+2. Join the related `item`, `occurrence`, or `ritual` for context.
+3. UI consumes `strategy`, `surface`, `intensity`, and `payload_json` to render the right experience.
 
 ## Migration Rule
 
