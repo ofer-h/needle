@@ -4,13 +4,22 @@ export type TimelineItem =
   | { kind: 'task'; data: Task }
   | { kind: 'event'; data: CalendarEvent };
 
-export function buildTimeline(tasks: Task[], events: CalendarEvent[]): TimelineItem[] {
-  const fixedTasks = tasks.filter((t) => t.scheduleKind === 'fixed' && t.startTime != null);
-  const flexibleTasks = tasks.filter((t) => t.scheduleKind === 'flexible');
+export function buildTimeline(
+  tasks: Task[],
+  events: CalendarEvent[],
+  forDate?: string,
+): TimelineItem[] {
+  const tasksForDate =
+    forDate === undefined ? tasks : tasks.filter((t) => t.date === forDate);
+  const eventsForDate =
+    forDate === undefined ? events : events.filter((e) => e.date === forDate);
+
+  const fixedTasks = tasksForDate.filter((t) => t.scheduleKind === 'fixed' && t.startTime != null);
+  const flexibleTasks = tasksForDate.filter((t) => t.scheduleKind === 'flexible');
 
   // Sort fixed tasks and events together by startTime; fixed task wins ties
   const anchors: TimelineItem[] = [
-    ...events.map((e): TimelineItem => ({ kind: 'event', data: e })),
+    ...eventsForDate.map((e): TimelineItem => ({ kind: 'event', data: e })),
     ...fixedTasks.map((t): TimelineItem => ({ kind: 'task', data: t })),
   ].sort((a, b) => {
     const aTime = a.kind === 'event' ? a.data.startTime : (a.data.startTime ?? '');

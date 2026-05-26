@@ -1,9 +1,8 @@
-import { ipcMain, BrowserWindow } from 'electron';
+import { ipcMain, BrowserWindow, nativeTheme } from 'electron';
 
 export function registerIpcHandlers(): void {
   // Theme query — return system appearance
   ipcMain.handle('app:getTheme', () => {
-    const { nativeTheme } = require('electron');
     return nativeTheme.shouldUseDarkColors ? 'dark' : 'light';
   });
 

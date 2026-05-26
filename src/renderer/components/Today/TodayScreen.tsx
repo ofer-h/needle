@@ -21,17 +21,12 @@ import OverlayRow from './dnd/OverlayRow';
 import { anchorsBeforeGap, computeNewSlotOrder } from './dnd/reorder';
 import { useAppStore } from '../../state/store';
 import { buildTimeline, type TimelineItem } from '../../utils/timeline';
+import { formatLongDate, formatShortDate, toISODate } from '../../utils/date';
 import './TodayScreen.css';
 
 type Props = {
   onNavigateCapture: () => void;
 };
-
-const UPCOMING_PLACEHOLDER = [
-  'Review PR from Tal',
-  'Book dentist appointment',
-  "Plan dad's birthday gift",
-];
 
 export default function TodayScreen({ onNavigateCapture }: Props) {
   const tasks = useAppStore((s) => s.tasks);
@@ -45,11 +40,15 @@ export default function TodayScreen({ onNavigateCapture }: Props) {
   // 5px move threshold avoids eating checkbox clicks
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
-  const todayTasks = tasks.filter((t) => t.timeSlot === 'today');
-  const overdueTasks = todayTasks.filter((t) => t.isOverdue === true && !t.done);
-  const activeTodayTasks = todayTasks.filter((t) => t.isOverdue !== true);
+  const today = toISODate();
+  const todayTasks = tasks.filter((t) => t.date === today || (t.isOverdue === true && !t.done));
+  const overdueTasks = tasks.filter((t) => t.isOverdue === true && !t.done);
+  const activeTodayTasks = tasks.filter((t) => t.date === today && t.isOverdue !== true);
+  const upcomingItems = tasks
+    .filter((t) => t.date !== today && t.isOverdue !== true && !t.done)
+    .map((t) => t.title);
 
-  const timelineItems = buildTimeline(activeTodayTasks, events);
+  const timelineItems = buildTimeline(activeTodayTasks, events, today);
   const overdueTimeline = buildTimeline(overdueTasks, []);
 
   const total = todayTasks.length;
@@ -107,7 +106,7 @@ export default function TodayScreen({ onNavigateCapture }: Props) {
   return (
     <FxWindow title="Focus · Today">
       <TodayToolbar
-        dateLabel="Sunday, May 25"
+        dateLabel={formatLongDate(today)}
         total={total}
         doneCount={doneCount}
         onAddTask={onNavigateCapture}
@@ -135,7 +134,7 @@ export default function TodayScreen({ onNavigateCapture }: Props) {
                       scheduleKind={t.scheduleKind}
                       kind={t.kind}
                       label={t.title}
-                      date={t.date}
+                      date={dateLabelForTask(t)}
                       done={t.done}
                       onToggle={() => toggleDone(t.id)}
                       {...(t.sublabel !== undefined && { sublabel: t.sublabel })}
@@ -156,7 +155,7 @@ export default function TodayScreen({ onNavigateCapture }: Props) {
                 <OverlayRow
                   kind={activeTask.kind}
                   label={activeTask.title}
-                  date={activeTask.date}
+                  date={dateLabelForTask(activeTask)}
                   {...(activeTask.sublabel !== undefined && { sublabel: activeTask.sublabel })}
                   {...(activeTask.datePill !== undefined && { datePill: activeTask.datePill })}
                 />
@@ -170,7 +169,7 @@ export default function TodayScreen({ onNavigateCapture }: Props) {
           onDragStart={handleDragStart}
           onDragEnd={(e) => handleDragEnd(e, timelineItems, 'today')}
         >
-          <Section title="Today" date="Sun, May 25" count={activeTodayTasks.length}>
+          <Section title="Today" date={formatShortDate(today)} count={activeTodayTasks.length}>
             <GapDropZone id="gap-today-0" disabled={!isGapVisible(0, timelineItems)} />
             {timelineItems.map((item, index) => {
               const gapK = index + 1;
@@ -198,7 +197,7 @@ export default function TodayScreen({ onNavigateCapture }: Props) {
                     scheduleKind={t.scheduleKind}
                     kind={t.kind}
                     label={t.title}
-                    date={t.date}
+                    date={dateLabelForTask(t)}
                     done={t.done}
                     onToggle={() => toggleDone(t.id)}
                     {...(t.sublabel !== undefined && { sublabel: t.sublabel })}
@@ -219,7 +218,7 @@ export default function TodayScreen({ onNavigateCapture }: Props) {
               <OverlayRow
                 kind={activeTask.kind}
                 label={activeTask.title}
-                date={activeTask.date}
+                date={dateLabelForTask(activeTask)}
                 {...(activeTask.sublabel !== undefined && { sublabel: activeTask.sublabel })}
                 {...(activeTask.datePill !== undefined && { datePill: activeTask.datePill })}
               />
@@ -230,7 +229,7 @@ export default function TodayScreen({ onNavigateCapture }: Props) {
         <QuickAddRow onActivate={onNavigateCapture} />
 
         <UpcomingFooter
-          items={UPCOMING_PLACEHOLDER}
+          items={upcomingItems}
           expanded={upcomingExpanded}
           onToggle={() => setUpcomingExpanded((v) => !v)}
         />
@@ -239,4 +238,9 @@ export default function TodayScreen({ onNavigateCapture }: Props) {
       <CaptureFab onClick={onNavigateCapture} />
     </FxWindow>
   );
+}
+
+function dateLabelForTask(task: { date: string | null; dateLabel?: string }): string {
+  if (task.dateLabel !== undefined) return task.dateLabel;
+  return task.date ?? 'unplanned';
 }

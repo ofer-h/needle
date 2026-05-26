@@ -11,12 +11,27 @@ export type TaskKind = 'urgent' | 'upcoming' | 'faded';
 
 export type ScheduleKind = 'fixed' | 'flexible';
 
+export type SourceId = 'manual' | 'calendar' | 'slack' | 'email';
+
+export type Relation = {
+  type: 'person' | 'event' | 'task';
+  id: string;
+  label: string;
+};
+
+export type Subtask = {
+  id: string;
+  title: string;
+  done: boolean;
+};
+
 export type Task = {
   id: string;
   title: string;
   sublabel?: string;
   kind: TaskKind;
-  date: string;
+  date: string | null; // YYYY-MM-DD; null means not yet planned onto a day
+  dateLabel?: string;  // UI copy for the row pill, e.g. "yesterday", "anytime", "1 PM"
   link?: string;
   datePill?: 'urgent' | 'upcoming';
   done: boolean;
@@ -24,6 +39,11 @@ export type Task = {
   timeSlot: TimeSlot;
   rawInput?: string;
   aiReason?: string;
+  subtasks?: Subtask[];
+  notes?: string;
+  leadTimeMins?: number;
+  relations?: Relation[];
+  source?: SourceId;
   scheduleKind: ScheduleKind;
   startTime?: string;  // 'HH:MM' — required for fixed tasks, absent for flexible
   slotIndex: number;   // which gap between anchors (0 = before all anchors); for flexible tasks
@@ -33,9 +53,13 @@ export type Task = {
 
 export type CalendarEvent = {
   id: string;
+  date: string;       // YYYY-MM-DD
   startTime: string;  // 'HH:MM' — drives sort order and slot boundaries
+  endTime?: string;   // 'HH:MM' — later used to derive in-progress/past state
   label: string;
   sublabel?: string;
+  source?: SourceId;
+  relations?: Relation[];
 };
 
 export type CaptureState = 'empty' | 'typing' | 'classified' | 'voice';

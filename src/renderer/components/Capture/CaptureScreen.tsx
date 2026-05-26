@@ -311,7 +311,7 @@ function CaptureVoice({ onStop, onCancel }: { onStop: () => void; onCancel: () =
             fontStyle: 'italic',
           }}
         >
-          I'm listening…
+          I&apos;m listening…
         </div>
       </div>
 
@@ -338,8 +338,8 @@ function CaptureVoice({ onStop, onCancel }: { onStop: () => void; onCancel: () =
           }}
           className="t-serif-i"
         >
-          "need to prep for the one on one with my manager on thursday
-          <span className="caret-bar" />"
+          &ldquo;need to prep for the one on one with my manager on thursday
+          <span className="caret-bar" />&rdquo;
         </div>
 
         <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 28 }}>

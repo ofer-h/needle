@@ -9,6 +9,8 @@ export default function App() {
   const setScreen = useAppStore((s) => s.setScreen);
   const theme = useAppStore((s) => s.theme);
   const setTheme = useAppStore((s) => s.setTheme);
+  const expandedItemId = useAppStore((s) => s.expandedItemId);
+  const expandItem = useAppStore((s) => s.expandItem);
 
   // Apply theme to <html> for CSS custom properties
   useEffect(() => {
@@ -32,14 +34,30 @@ export default function App() {
     return unsub;
   }, [setScreen]);
 
-  // Keyboard: Escape returns to today
+  // Keyboard: Escape returns to today / collapses details; Cmd-E expands focused item.
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && screen === 'capture') setScreen('today');
+      if (e.key === 'Escape' && screen === 'capture') {
+        setScreen('today');
+        return;
+      }
+      if (e.key === 'Escape' && expandedItemId !== null) {
+        expandItem(null);
+        return;
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'e' && screen === 'today') {
+        const activeElement = document.activeElement;
+        if (!(activeElement instanceof HTMLElement)) return;
+        const row = activeElement.closest<HTMLElement>('[data-item-id]');
+        const itemId = row?.dataset.itemId;
+        if (itemId === undefined) return;
+        e.preventDefault();
+        expandItem(itemId);
+      }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [screen, setScreen]);
+  }, [expandedItemId, expandItem, screen, setScreen]);
 
   return (
     <>

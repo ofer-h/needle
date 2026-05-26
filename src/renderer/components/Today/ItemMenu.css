@@ -1,0 +1,41 @@
+.item-menu__trigger {
+  color: var(--icon-muted);
+}
+
+.item-menu__popover {
+  z-index: 30;
+  min-width: 184px;
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  border: 0.5px solid var(--hairline-2);
+  border-radius: var(--radius-3);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.item-menu__popover button {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius-2);
+  padding: 0 var(--space-3);
+  color: var(--ink-2);
+  font-size: var(--text-13);
+  text-align: left;
+}
+
+.item-menu__popover button:hover,
+.item-menu__popover button:focus-visible {
+  background: var(--surface-sub);
+  color: var(--ink);
+}
+
+.item-menu__popover button:focus-visible {
+  outline: 2px solid var(--border-strong);
+  outline-offset: 1px;
+}
+
+.item-menu__popover .item-menu__danger {
+  color: var(--urgent);
+}

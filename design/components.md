@@ -156,26 +156,67 @@ Current inventory of Needle's React components. Updated by `needle-ui-audit` and
 - Composes: `Icon`, `Kbd`
 - Status: **tokenized**
 
+### ItemRow
+
+- Location: `src/renderer/components/Today/ItemRow.tsx`
+- Purpose: Unified row implementation for timeline items (`kind: task | event`). Tasks render completion + optional drag affordance; events render calendar source + time pill and remain non-checkable.
+- Props: task variant: `id`, `scheduleKind`, `priority`, `label`, `date`, `sublabel?`, `link?`, `datePill?`, `done?`, `onToggle?`; event variant: `label`, `startTime`, `sublabel?`
+- Composes: `Checkbox`, `Icon`, `IconButton`, `Pill`, `ItemDetail`, `ItemMenu`
+- States: default, hover, focus-visible, expanded, done for tasks, flexible drag wrapper/ghost state, event default. Checkbox and IconButton bring focus states.
+- Tokens: `--ink`, `--ink-2`, `--ink-3`, `--ink-4`, `--urgent`, `--upcoming`, `--calendar`, `--surface-sub`, `--hairline-2`, `--border-strong`, `--icon-muted`
+- Status: **tokenized** — shared implementation with inline expansion and anchored menu for tasks
+- Used by: `TaskRow`, `EventRow`
+
+### ItemDetail
+
+- Location: `src/renderer/components/Today/ItemDetail.tsx`
+- Purpose: Inline expanded task detail region with original input, AI reason, notes, subtasks, and quick actions.
+- Props: `id`, `taskId`, `labelledBy`
+- Composes: `Button`, `SubtaskList`
+- States: visible when the task is expanded; notes textarea focus-visible; actions inherit Button states
+- Tokens: `--ink`, `--ink-2`, `--ink-3`, `--ink-4`, `--bg`, `--hairline-2`, `--border-strong`
+- Status: **tokenized**
+
+### SubtaskList
+
+- Location: `src/renderer/components/Today/SubtaskList.tsx`
+- Purpose: Flat subtask checklist with inline add, check, and delete.
+- Props: `taskId`, `subtasks`
+- Composes: `Checkbox`, `IconButton`
+- States: empty, populated, checked, disabled add button, focus-visible input/button
+- Tokens: `--ink`, `--ink-2`, `--ink-3`, `--ink-4`, `--bg`, `--surface-sub`, `--surface-active`, `--surface-disabled`, `--ink-disabled`, `--hairline-2`, `--border-strong`
+- Status: **tokenized**
+
+### ItemMenu
+
+- Location: `src/renderer/components/Today/ItemMenu.tsx`
+- Purpose: Anchored task action menu using `@floating-ui/react`.
+- Props: `taskId`
+- Composes: `IconButton`
+- States: closed, open, hover/focus menu item, danger item
+- Tokens: `--surface`, `--surface-sub`, `--ink`, `--ink-2`, `--urgent`, `--hairline-2`, `--border-strong`, `--shadow-card`
+- Status: **tokenized**
+
 ### TaskRow
 
 - Location: `src/renderer/components/Today/TaskRow.tsx`
-- Purpose: A single task row (fixed or flexible), with checkbox, label, sublabel, date pill, link tag
+- Purpose: Compatibility wrapper for task rows. Adapts the existing `TaskRow` API to `ItemRow`.
 - Props: `id`, `scheduleKind`, `kind` (urgent / upcoming / faded), `label`, `sublabel?`, `date`, `link?`, `datePill?`, `done?`, `onToggle?`
-- Composes: `Checkbox`, `Pill`, `IconButton`
-- States: default, hover, done; flexible variant adds drag handle (hover-reveal). Checkbox brings its own focus state.
-- Tokens: `--ink`, `--ink-3`, `--ink-4`, `--urgent`, `--upcoming`, `--surface-sub`, `--hairline-2`, `--icon-muted`
-- Status: **tokenized** — single `RowBody` shared between fixed and flexible variants
+- Composes: `ItemRow`
+- States: inherited from `ItemRow`
+- Tokens: inherited from `ItemRow`
+- Status: **tokenized** — compatibility wrapper
 - Used by: TodayScreen
 
 ### EventRow
 
 - Location: `src/renderer/components/Today/EventRow.tsx`
-- Purpose: Calendar event in the timeline
+- Purpose: Compatibility wrapper for calendar event rows. Adapts the existing `EventRow` API to `ItemRow`.
 - Props: `startTime`, `label`, `sublabel?`
-- Composes: `Icon`, `Pill`
-- States: default only
-- Tokens: `--calendar`, `--ink-2`, `--hairline-2`
-- Status: **tokenized**
+- Composes: `ItemRow`
+- States: inherited from `ItemRow`
+- Tokens: inherited from `ItemRow`
+- Status: **tokenized** — compatibility wrapper
 
 ### Section
 

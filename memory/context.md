@@ -29,6 +29,7 @@ Intelligent second brain: capture anything, AI classifies it, surfaces the right
 - No backend, no AI, no DB yet — pure UI shell.
 - **AI-first design system layer landed 2026-05-26**: 4 rules (`.cursor/rules/design-*.mdc`), 5 skills (`.cursor/skills/needle-*`), 5 docs (`design/`). Read `design/llms.txt` first for any UI task.
 - **Today screen primitive refactor landed 2026-05-26**: 3-layer tokens (`primitives.css` + `tokens.css`), dark-mode contrast fixed (`--ink-3` now 5.6:1 AA-pass), 8 reusable primitives in `src/renderer/components/primitives/` (`Icon`, `Kbd`, `Divider`, `ProgressBar`, `Pill`, `Checkbox`, `Button`, `IconButton`), TodayScreen split into `TodayToolbar` / `QuickAddRow` / `UpcomingFooter` / `CaptureFab` + `dnd/` artefacts. TodayScreen.tsx cut from 626 → 218 lines. See `design/components.md` for the inventory.
+- **Forward plan approved and started 2026-05-26**: plan lives at `docs/needle-forward-implementation-plan.md`. Baseline lint is clean. Step 1 model foundation, Step 2 unified row, and Step 3 first edit slice are complete: `docs/glossary.md`, ISO date utilities, real `Task.date` / `CalendarEvent.date` fields, optional future item metadata, date-filtered `buildTimeline()`, store-driven upcoming items, shared `ItemRow`, inline task expansion, notes, subtasks, and anchored item menu are in place.
 
 ## Task scheduling model (implemented 2026-05-26)
 - Two task kinds: `fixed` (has `startTime`, immovable) and `flexible` (has `slotIndex` + `slotOrder`, freely draggable).
@@ -40,6 +41,10 @@ Intelligent second brain: capture anything, AI classifies it, surfaces the right
 - `reorderTask(id, newSlotIndex, newSlotOrder)` in Zustand store handles all reordering; uses fractional indexing.
 - Today screen shows only `timeSlot === 'today'` tasks + a collapsed "Upcoming" footer for future items.
 - Overdue tasks (isOverdue: true) have their own section and their own DndContext above the today timeline.
+- `Task.date` is now `YYYY-MM-DD | null`; `dateLabel` carries row display copy. `CalendarEvent.date` is now `YYYY-MM-DD`; `endTime` exists for future event state.
+- `ItemRow` is the shared row implementation for tasks and events. `TaskRow` / `EventRow` are compatibility wrappers while TodayScreen stays stable.
+- Task rows can expand inline. Zustand owns `expandedItemId`, notes, subtasks, lead time, date planning, bucket changes, and delete actions. `ItemMenu` uses `@floating-ui/react`.
+- Calendar meetings in mock data are event-only and non-checkable; prep work remains checkable Act items.
 
 ## Key paths
 - Design source: `/Users/groot/Downloads/Needle/` (local only, do not commit)

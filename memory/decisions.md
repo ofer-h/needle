@@ -74,3 +74,32 @@ Format: `### YYYY-MM-DD — <topic> (<who made the call>)`
 - **Lint config:** ESLint flat config lacked browser/node globals → 23 pre-existing `no-undef` errors. Added `globals` package import + per-folder language options. Lint now passes everything in Today scope; 4 pre-existing errors remain in `CaptureScreen` and `main/ipc/index.ts` (out of scope).
 - **Verification:** `npm run typecheck` clean. `npm run lint` clean for all touched files. `vite build` succeeds, renderer bundle 215 KB / 21 KB CSS gzipped.
 - **Out of scope (still pending):** Capture screen refactor, completion animation, item expansion, single-FAB enforcement (PRD says only FAB; current screen has toolbar CTA + quick-add + FAB), keyboard reorder via `KeyboardSensor`, empty state, store-driven upcoming list.
+
+### 2026-05-26 — Forward plan approved (Ofer, AI recommendation accepted)
+- Reviewed the Claude plan at `/Users/groot/.claude/plans/analize-this-project-the-spicy-hamming.md` against `PRD.md`, current Needle implementation, `.cursor/rules`, `.cursor/skills`, `design/`, and project memory.
+- Decision: use the Claude plan as the strategic map, but execute conservatively: clear baseline lint first, then tighten Phase 0 around real ISO dates, unified row modeling, and a stable type surface before feature UI.
+- Product direction reaffirmed: inline expansion is the primary edit UI; non-modal anchored menu handles cross-row actions; meetings do not get checkboxes and instead derive state from the wall clock.
+- Vocabulary direction reaffirmed: `Act` / `Remember` are buckets; `Anchor` / `Float` are UI-facing scheduling language; keep `fixed` / `flexible` TypeScript enums for now to avoid DnD churn.
+- Repo-visible plan: `docs/needle-forward-implementation-plan.md`.
+
+### 2026-05-26 — Forward plan execution started (Ofer, AI implemented)
+- Completed Step 0 baseline hygiene: replaced a main-process `require('electron')` with an ESM `nativeTheme` import and escaped Capture JSX text that violated lint.
+- Started and verified Step 1 model foundation: added `docs/glossary.md`, `src/renderer/utils/date.ts`, ISO-backed task/event dates, `dateLabel`, event `endTime`, and optional future fields (`subtasks`, `notes`, `leadTimeMins`, `relations`, `source`).
+- Updated mock data to cover yesterday, today, tomorrow, in-three-days, and unplanned stash items; `UpcomingFooter` now reads store data instead of a hardcoded local placeholder.
+- Updated `buildTimeline()` to accept an optional `forDate` filter while preserving the current Today UI and DnD behavior.
+- Verification: `npm run typecheck` and `npm run lint` both pass.
+
+### 2026-05-26 — Unified item row landed (Ofer, AI implemented)
+- Added `src/renderer/components/Today/ItemRow.tsx` as the shared implementation for task and event rows, with a discriminated `kind: 'task' | 'event'` prop.
+- Kept `TaskRow.tsx` and `EventRow.tsx` as thin compatibility wrappers so `TodayScreen` and existing DnD behavior remain stable for this step.
+- Preserved current row anatomy: tasks keep checkbox/drag/date/link behavior; events keep calendar icon/time pill and remain non-checkable.
+- Updated `design/components.md`, `memory/context.md`, and `docs/needle-forward-implementation-plan.md`.
+- Verification: `npm run typecheck` and `npm run lint` both pass.
+
+### 2026-05-26 — Inline item editing first slice (Ofer, AI implemented)
+- Installed `@floating-ui/react` using `npm install @floating-ui/react --legacy-peer-deps`, matching the repo's existing dependency-resolution pattern for the ESLint peer conflict.
+- Added Zustand actions for `expandedItemId`, subtasks, notes, lead time, date planning, bucket changes, and deleting tasks.
+- Added `ItemDetail`, `SubtaskList`, and `ItemMenu`; task rows now expand inline, show subtask progress, preserve checkbox/drag behavior, and use an anchored kebab menu for row actions.
+- Added keyboard support for the first edit slice: `Esc` collapses an expanded item and `Cmd-E` expands the focused task row.
+- Running-app smoke caught that the mock `Daily standup` existed as both a checkable task and a calendar event; removed the task fixture so meetings remain event-only and non-checkable.
+- Verification: `npm run typecheck`, `npm run lint`, `git diff --check`, and a running Electron smoke pass. `npm install` reported 25 audit issues; audit remediation was left for a separate security/dependency pass.
