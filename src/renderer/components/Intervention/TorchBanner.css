@@ -1,0 +1,119 @@
+/* TorchBanner — compact action strip embedded at the top of each torch overlay.
+ * Overlays are normally pass-through (setIgnoreMouseEvents forward:true); the
+ * banner toggles interactivity via onMouseEnter/onMouseLeave. */
+
+.torch-banner {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(calc(100% - 32px), 720px);
+  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3, 8px);
+  padding: 0 var(--space-4, 12px);
+  /* Elevated, clearly separated from the dimming backdrop */
+  background: var(--urgent);
+  border-radius: var(--radius-3, 8px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(0, 0, 0, 0.40),
+    0 0 0 0.5px rgba(255, 255, 255, 0.10);
+  /* Must be above .torchlight (z-index: 8500) so the banner isn't blurred by its
+   * backdrop-filter and pointer events reach the banner, not the torchlight container. */
+  z-index: 9000;
+  /* pointer-events: auto so CSS hover works (OS-level interactivity is toggled via IPC) */
+  pointer-events: auto;
+  cursor: default;
+  animation: torch-banner-in 220ms var(--ease-out, cubic-bezier(0, 0, 0.2, 1)) both;
+}
+
+@keyframes torch-banner-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(-8px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.torch-banner--hidden {
+  display: none;
+}
+
+/* ── Label ───────────────────────────────────────────────────── */
+
+.torch-banner__label {
+  flex: 1;
+  font-size: var(--text-13, 13px);
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #fff;
+  min-width: 0;
+  cursor: default;
+  user-select: none;
+}
+
+/* ── Actions ─────────────────────────────────────────────────── */
+
+.torch-banner__actions {
+  display: flex;
+  gap: var(--space-2, 6px);
+  flex-shrink: 0;
+}
+
+.torch-banner__btn {
+  appearance: none;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #fff;
+  font-family: var(--sans, system-ui);
+  font-size: var(--text-12, 12px);
+  font-weight: 500;
+  height: 28px;
+  padding: 0 var(--space-3, 8px);
+  border-radius: var(--radius-2, 6px);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 120ms ease;
+}
+
+.torch-banner__btn:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.torch-banner__btn:active {
+  opacity: 0.80;
+}
+
+.torch-banner__btn--primary {
+  background: rgba(255, 255, 255, 0.22);
+  font-weight: 600;
+}
+
+.torch-banner__btn--primary:hover {
+  background: rgba(255, 255, 255, 0.36);
+}
+
+.torch-banner__btn--skip {
+  background: rgba(0, 0, 0, 0.18);
+  border-color: rgba(255, 255, 255, 0.20);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.torch-banner__btn--skip:hover {
+  background: rgba(0, 0, 0, 0.30);
+  color: #fff;
+}
+
+.torch-banner__btn:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.65);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .torch-banner {
+    animation: none;
+  }
+  .torch-banner__btn {
+    transition: none;
+  }
+}

@@ -1,4 +1,5 @@
 .today-toolbar {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--space-3);
@@ -26,6 +27,52 @@
 
 .today-toolbar__spacer {
   flex: 1;
+}
+
+/* ── Live clock ──────────────────────────────────────────────── */
+
+.today-clock {
+  /* Truly center the clock regardless of left/right panel widths */
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  /* Keep it above the list content but below interactive controls */
+  pointer-events: none;
+  user-select: none;
+}
+
+.today-clock__main {
+  font-family: var(--mono);
+  font-size: var(--text-38);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.today-clock__ampm {
+  font-family: var(--sans);
+  font-size: var(--text-13);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--ink-3);
+  /* Sit at the top of the clock baseline */
+  align-self: flex-start;
+  padding-top: 2px;
+}
+
+.today-clock__seconds {
+  font-family: var(--mono);
+  font-size: var(--text-16);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  color: var(--ink-4);
+  line-height: 1;
 }
 
 .today-toolbar__progress {

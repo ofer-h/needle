@@ -4,8 +4,13 @@ import type {
   CaptureEntryPayload,
   CapturePromotePayload,
   CaptureShowPayload,
+  TorchBrainDumpSubmitPayload,
   TorchClosePayload,
+  TorchHeroPayload,
+  TorchSetInteractivePayload,
   TorchShowPayload,
+  TorchSkipConfirmPayload,
+  TorchSnoozePayload,
 } from '../shared/ipc-contracts';
 
 declare global {
@@ -19,9 +24,20 @@ declare global {
         show(payload: TorchShowPayload): void;
         hide(): void;
         dismiss(payload: TorchClosePayload): void;
+        snooze(payload: TorchSnoozePayload): void;
+        skipInit(correlationId: string): void;
+        skipConfirm(payload: TorchSkipConfirmPayload): void;
+        skipCancel(correlationId: string): void;
+        brainDumpInit(correlationId: string): void;
+        brainDumpSubmit(payload: TorchBrainDumpSubmitPayload): void;
+        brainDumpCancel(correlationId: string): void;
+        /** Toggle this window's click-through state. Call on mouseenter/mouseleave of interactive elements. */
+        setInteractive(interactive: boolean): void;
         onPayload(cb: (payload: TorchShowPayload) => void): () => void;
         onClosed(cb: (payload: TorchClosePayload) => void): () => void;
         onCursor(cb: (point: { x: number; y: number }) => void): () => void;
+        onSnoozed(cb: (payload: TorchSnoozePayload) => void): () => void;
+        onHero(cb: (payload: TorchHeroPayload) => void): () => void;
       };
       capture: {
         show(payload: CaptureShowPayload): void;

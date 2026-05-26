@@ -125,3 +125,60 @@ Format: `### YYYY-MM-DD — <topic> (<who made the call>)`
 - Decision: do not migrate folders to a monorepo yet; use a checkpoint branch and `git mv` only when a second app/server/package makes it worth the risk.
 - Added architecture docs: `architecture-guidelines.md`, `sync-access-observability.md`, `multi-app-roadmap.md`, and `research-notes.md`.
 - Extended the v2 data/type model with invitations, devices, notification preferences/events/deliveries, app sessions, usage events, and sync cursors.
+
+### 2026-05-27 — Torch intervention system: full build (Ofer directed, AI implemented)
+
+**Overlay hardening**
+- Raised opacity ceiling to 0.95 (`rgba(22,22,26, calc(0.06 + intensity * 0.89))`), blur to 12px. Screen is functionally unreadable at full escalation — intentional hard block.
+- Escalation curve: ease-out (fast start, slows toward ceiling).
+
+**Hero banner → embedded TorchBanner**
+- Decided to remove the separate `heroBannerWindow` and embed the action strip directly inside each full-screen `TorchWindow` overlay.
+- Reason: separate window had z-order + focusable issues that broke button clicks; embedding in the overlay is architecturally cleaner and shows the banner on every display simultaneously.
+- `TorchBanner` component: compact 48px bar, absolutely positioned at top of overlay, centered with `left:50%; transform:translateX(-50%)`.
+- Click-through is managed with Electron's documented hover-detection pattern: overlay stays `setIgnoreMouseEvents(true, { forward:true })` by default; `onMouseEnter` sends `torch:set-interactive {interactive:true}` → main calls `win.setIgnoreMouseEvents(false)` on the sender window; `onMouseLeave` restores pass-through.
+- New `torch:set-interactive` IPC channel; main identifies sender via `event.sender` + `BrowserWindow.fromWebContents`.
+
+**Banner buttons**
+- "I'm on it" removed — replaced by context (countdown + clock tells user the urgency; no need to dismiss via a soft button).
+- Two buttons: **Brain dump** (launches brain-dump mode) and **Skip…** (launches skip mode).
+- Banner hides automatically when skip or brain-dump panel takes over.
+
+**Skip flow (Ofer directed)**
+- `torch:skip-init` → `enterSkipMode()`: makes all overlays interactive, broadcasts `torch:hero {mode:'skip'}`.
+- `SkipPanel` renders on every display: reason radio buttons (meeting or task flavours), optional free-text "Other" field, 4-second SVG countdown button that shows `Skip (3)…` and cancels if clicked again.
+- On confirm: `torch:skip-confirm {correlationId, reason, notes}` → main relays `torch:closed {reason:'skipped', skipReason, skipNotes}` → hides torch.
+- On cancel: `torch:skip-cancel` → `exitSkipMode()` → overlays back to pass-through, banner reappears.
+- `InterventionLayer` resolves intervention as 'acknowledged' for both 'acknowledged' and 'skipped' reasons.
+
+**Brain dump flow (Ofer directed)**
+- `torch:brain-dump-init` → `enterBrainDumpMode()`: overlays become interactive, broadcasts `torch:hero {mode:'brain-dump'}`.
+- `BrainDumpPanel` renders on every display: Fraunces serif title, subtitle with event name, large textarea, "Save & continue" / "Cancel" buttons, `⌘↵` keyboard shortcut.
+- All tokens resolve correctly because `main.tsx` now sets `data-theme='dark'` on `<html>` for torch-mode windows.
+- On submit: `torch:brain-dump-submit {correlationId, text}` → main relays `torch:closed {brainDumpText}` → hides torch.
+- `InterventionLayer` calls `addCaptureEntry({body: brainDumpText})` before resolving the intervention.
+- On cancel: `torch:brain-dump-cancel` → `exitBrainDumpMode()` → back to normal mode.
+
+**IPC contracts added**
+- `TorchShowPayload`: `+meetingStartTime?: string`
+- `TorchDismissReason`: `+'skipped'`
+- `TorchClosePayload`: `+skipReason?, +skipNotes?, +brainDumpText?`
+- New: `TorchHeroPayload {mode: 'skip'|'brain-dump'|'normal'}`
+- New: `TorchSkipConfirmPayload`
+- New: `TorchBrainDumpSubmitPayload`
+- New: `TorchSetInteractivePayload`
+- Preload + `window.d.ts` mirror all new channels.
+
+**`InterventionLayer` wiring**
+- Resolves `ItemOccurrence.startsAt` → HH:MM local string → passed as `meetingStartTime` to `torch.show`.
+- `isMeeting` = linked item has `commitmentLevel === 'unmissable'`.
+
+**Capture window fix**
+- `capture.ts`: replaced `screen.getPrimaryDisplay()` with `screen.getDisplayNearestPoint(screen.getCursorScreenPoint())` — brain-dump always opens on the display the user is actively on.
+
+### 2026-05-27 — Live clock in Today toolbar (Ofer directed, AI implemented)
+- Added `LiveClock` component inline in `TodayToolbar.tsx` — no new file.
+- Ticks every second via `setInterval(1000)`.
+- Layout: absolutely centered in the toolbar (`position:absolute; left:50%; transform:translateX(-50%)`), positioned above content layers, `pointer-events:none`.
+- Typography: `var(--text-38)` + `var(--mono)` + `font-variant-numeric:tabular-nums` for hours:minutes (no layout jitter), muted `var(--text-13)` sans for AM/PM, muted `var(--text-16)` mono for seconds.
+- Rationale: ADHD users need persistent, glanceable time awareness. Centered placement makes it a passive ambient anchor without competing with the task list.

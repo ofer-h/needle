@@ -29,9 +29,9 @@ export function showCapture(payload: CaptureShowPayload): void {
     return;
   }
 
-  const primary = screen.getPrimaryDisplay();
-  const x = Math.round(primary.bounds.x + (primary.bounds.width - CAPTURE_WIDTH) / 2);
-  const y = Math.round(primary.bounds.y + (primary.bounds.height - CAPTURE_HEIGHT) / 3);
+  const cursorDisplay = screen.getDisplayNearestPoint(screen.getCursorScreenPoint());
+  const x = Math.round(cursorDisplay.bounds.x + (cursorDisplay.bounds.width - CAPTURE_WIDTH) / 2);
+  const y = Math.round(cursorDisplay.bounds.y + (cursorDisplay.bounds.height - CAPTURE_HEIGHT) / 3);
 
   captureWindow = new BrowserWindow({
     x,

@@ -22,7 +22,7 @@ Always note in `decisions.md` who drove each decision.
 Focus — macOS desktop app for a software engineer with ADHD.
 Intelligent second brain: capture anything, AI classifies it, surfaces the right things at the right time.
 
-## Current state (as of 2026-05-26)
+## Current state (as of 2026-05-27)
 - Full Electron app scaffolded and running (`npm start`).
 - Today screen fully redesigned: today-only scope, fixed-anchor + flexible-task timeline, drag-and-drop reordering.
 - Capture screen implemented with mock data (still raw inline styles — pending refactor).
@@ -33,6 +33,14 @@ Intelligent second brain: capture anything, AI classifies it, surfaces the right
 - **V2 architecture branch started 2026-05-26**: `codex-v2-architecture` defines the next domain model in `docs/v2/` and `src/shared/domain-v2.ts`. Key decision: subtasks are first-class `Item`s connected by `ItemRelation(type='contains')`, not embedded `Subtask[]` durable state.
 - **Daily-flow product direction encoded 2026-05-26**: v2 is now aimed at an AI-guided daily flow / intentional task manager, not a generic task database. North star lives at `docs/v2/product-direction.md`. The target model now includes `FlowSession`, `FocusSession`, `TransitionEvent`, `Reflection`, `Suggestion`, and `BehavioralInsight` so the app can support today-first planning, hard-time events vs flexible tasks, conscious transitions, gentle accountability, AI companion behavior, and future web/mobile/server sync.
 - **V2 platform architecture plan added 2026-05-26**: planning now covers monorepo timing, NestJS modular-monolith backend, local-first sync/outbox, access control, coach/accountability access, notifications, metrics/logs, low-budget growth, and staged macOS -> server/web/mobile evolution. Start with docs: `docs/v2/architecture-guidelines.md`, `docs/v2/sync-access-observability.md`, `docs/v2/multi-app-roadmap.md`, and `docs/v2/research-notes.md`.
+- **Torch intervention system built and iterated 2026-05-27**: full attention-takeover UX shipped. See decisions log for the full arc. Current stable state:
+  - Full-screen dimming overlays on all displays (`TorchWindow`) with cursor spotlight, opacity ceiling 0.95 at full escalation (0.06 + intensity × 0.89), 12px blur.
+  - `TorchBanner` embedded directly in each overlay (no separate window): compact strip at top, shows `title · in Xm · HH:MM`, two buttons — **Brain dump** and **Skip…**. Hover detection via `onMouseEnter/Leave` + `torch:set-interactive` IPC (Electron forward-event pattern) toggles click-through per window.
+  - **Skip flow**: clicking Skip… → overlays become fully interactive → `SkipPanel` renders on all screens → reason selection (meeting or task flavours) + 4-second SVG countdown → confirms with `torch:skip-confirm` → main relays `torch:closed {reason:'skipped'}` → hides torch.
+  - **Brain dump flow**: clicking Brain dump → overlays become fully interactive → `BrainDumpPanel` renders on all screens → Fraunces serif title, textarea, Save/Cancel → on submit `brainDumpText` is stored as a capture entry via `addCaptureEntry`.
+  - All overlay windows get `data-theme='dark'` so design tokens resolve correctly.
+  - `InterventionLayer` passes `meetingStartTime` (HH:MM derived from `ItemOccurrence.startsAt`) and `isMeeting` flag to `torch.show`. Capture window opens on cursor display (not always primary).
+- **Live clock in Today toolbar 2026-05-27**: `LiveClock` component embedded in `TodayToolbar`, absolutely centered. Ticks every second. `var(--text-38)` monospace hours:minutes, muted AM/PM indicator, smaller muted seconds. Uses `font-variant-numeric: tabular-nums` — no layout jitter.
 
 ## Task scheduling model (implemented 2026-05-26)
 - Two task kinds: `fixed` (has `startTime`, immovable) and `flexible` (has `slotIndex` + `slotOrder`, freely draggable).

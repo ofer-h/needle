@@ -7,6 +7,8 @@ import EscalatedBanner from './EscalatedBanner';
 export default function InterventionLayer() {
   const meActorId = useV2Store((s) => s.meActorId);
   const interventions = useV2Store((s) => s.interventions);
+  const items = useV2Store((s) => s.items);
+  const itemOccurrences = useV2Store((s) => s.itemOccurrences);
   const captureEntries = useV2Store((s) => s.captureEntries);
   const activateIntervention = useV2Store((s) => s.activateIntervention);
   const resolveIntervention = useV2Store((s) => s.resolveIntervention);
@@ -62,19 +64,36 @@ export default function InterventionLayer() {
       const title = typeof activeTorch.payload.title === 'string' ? activeTorch.payload.title : 'Time to move';
       const subtitle =
         typeof activeTorch.payload.subtitle === 'string' ? activeTorch.payload.subtitle : 'Acknowledge to continue.';
-      console.info('[InterventionLayer] torch.show', { id: activeTorch.id, title });
+      // Check whether the linked item is an unmissable commitment so the banner
+      // can offer meeting-safe snooze durations instead of longer task delays.
+      const linkedItem = activeTorch.itemId !== undefined
+        ? items.find((i) => i.id === activeTorch.itemId)
+        : undefined;
+      const isMeeting = linkedItem?.commitmentLevel === 'unmissable';
+      // Resolve the linked occurrence's start time for the banner countdown.
+      let meetingStartTime: string | undefined;
+      if (activeTorch.occurrenceId !== undefined) {
+        const occ = itemOccurrences.find((o) => o.id === activeTorch.occurrenceId);
+        if (occ !== undefined) {
+          const dt = new Date(occ.startsAt);
+          meetingStartTime = `${String(dt.getHours()).padStart(2, '0')}:${String(dt.getMinutes()).padStart(2, '0')}`;
+        }
+      }
+      console.info('[InterventionLayer] torch.show', { id: activeTorch.id, title, isMeeting, meetingStartTime });
       window.api.torch.show({
         correlationId: activeTorch.id,
         title,
         subtitle,
         durationMs: 30_000,
+        isMeeting,
+        ...(meetingStartTime !== undefined ? { meetingStartTime } : {}),
       });
       lastTorchIdRef.current = activeTorch.id;
     } else if (activeTorch === null && lastTorchIdRef.current !== null) {
       window.api.torch.hide();
       lastTorchIdRef.current = null;
     }
-  }, [top]);
+  }, [top, items, itemOccurrences]);
 
   // Drive the standalone capture window.
   useEffect(() => {
@@ -109,7 +128,11 @@ export default function InterventionLayer() {
     if (window.api?.torch === undefined || window.api?.capture === undefined) return;
     const unsub = window.api.torch.onClosed((payload) => {
       const id = payload.correlationId as InterventionId;
-      if (payload.reason === 'acknowledged') {
+      if (payload.reason === 'acknowledged' || payload.reason === 'skipped') {
+        // If the user left a brain dump, save it as a capture entry.
+        if (typeof payload.brainDumpText === 'string' && payload.brainDumpText.length > 0) {
+          addCaptureEntry({ body: payload.brainDumpText });
+        }
         resolveIntervention(id, 'acknowledged', nowIso());
       } else {
         escalateIntervention(id, nowIso());

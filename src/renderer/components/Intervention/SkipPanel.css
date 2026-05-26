@@ -1,0 +1,195 @@
+/* SkipPanel — full-screen interactive overlay rendered inside TorchWindow
+ * when skip mode is active. The parent TorchWindow supplies the 0.95-opacity
+ * dark background; this component sits on top and centers the card. */
+
+.skip-panel {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Above .torchlight (8500) and .torch-banner (9000) */
+  z-index: 9100;
+  background: rgba(22, 22, 26, 0.95);
+}
+
+.skip-panel__card {
+  width: min(480px, calc(100vw - 48px));
+  padding: var(--space-7) var(--space-8);
+  background: rgba(22, 22, 26, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-5);
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.7), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  color: #fff;
+}
+
+/* ── Header ──────────────────────────────────────────────────── */
+
+.skip-panel__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.skip-panel__title {
+  font-family: var(--serif);
+  font-size: var(--text-22);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.skip-panel__countdown {
+  font-size: var(--text-14);
+  font-weight: 600;
+  color: var(--urgent-dark, #e8674a);
+  letter-spacing: 0;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Divider ─────────────────────────────────────────────────── */
+
+.skip-panel__divider {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.10);
+  margin: 0;
+}
+
+/* ── Reason section ──────────────────────────────────────────── */
+
+.skip-panel__label {
+  font-size: var(--text-12);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.50);
+  margin: 0;
+}
+
+.skip-panel__reasons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.skip-panel__reason {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-14);
+  color: rgba(255, 255, 255, 0.88);
+  cursor: pointer;
+  padding: var(--space-1) 0;
+}
+
+.skip-panel__reason:hover {
+  color: #fff;
+}
+
+.skip-panel__radio {
+  accent-color: var(--urgent-dark, #e8674a);
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.skip-panel__notes {
+  margin-top: var(--space-1);
+  height: 32px;
+  padding: 0 var(--space-3);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--radius-2);
+  color: #fff;
+  font-family: var(--sans);
+  font-size: var(--text-13);
+  outline: none;
+}
+
+.skip-panel__notes::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.skip-panel__notes:focus {
+  border-color: rgba(255, 255, 255, 0.40);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* ── Actions ─────────────────────────────────────────────────── */
+
+.skip-panel__actions {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: flex-end;
+}
+
+.skip-panel__btn {
+  appearance: none;
+  height: 36px;
+  padding: 0 var(--space-5);
+  border-radius: var(--radius-3);
+  font-family: var(--sans);
+  font-size: var(--text-13);
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity var(--duration-fast) var(--ease-out),
+    background var(--duration-fast) var(--ease-out);
+}
+
+.skip-panel__btn--cancel {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.skip-panel__btn--cancel:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+
+.skip-panel__btn--skip {
+  background: var(--urgent-dark, #e8674a);
+  border: 1px solid transparent;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 100px;
+  justify-content: center;
+}
+
+.skip-panel__btn--skip:hover {
+  opacity: 0.9;
+}
+
+.skip-panel__btn--counting {
+  background: rgba(232, 103, 74, 0.75);
+}
+
+.skip-panel__btn--counting:hover {
+  background: rgba(232, 103, 74, 0.60);
+}
+
+.skip-panel__ring {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.skip-panel__btn:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.6);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skip-panel__btn {
+    transition: none;
+  }
+}

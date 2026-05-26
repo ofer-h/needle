@@ -20,14 +20,19 @@
   align-items: flex-end;
   justify-content: center;
   padding-bottom: 12vh;
+  /* Never consume pointer events — the banner and panels sit above and need events */
+  pointer-events: none;
 }
 
 .torchlight__backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(22, 22, 26, 0.42);
-  backdrop-filter: blur(2px) saturate(0.85);
-  -webkit-backdrop-filter: blur(2px) saturate(0.85);
+  /* Intensity ramps 0→1 over the intervention duration (set via inline --torch-intensity).
+   * Ceiling is 0.95 — the screen is functionally unreadable at full escalation. */
+  background: rgba(22, 22, 26, calc(0.06 + var(--torch-intensity, 0) * 0.89));
+  backdrop-filter: blur(calc(var(--torch-intensity, 0) * 12px)) saturate(0.85);
+  -webkit-backdrop-filter: blur(calc(var(--torch-intensity, 0) * 12px)) saturate(0.85);
+  /* mask-image still transitions smoothly as the cursor moves. */
   transition: mask-image 350ms var(--ease-out), -webkit-mask-image 350ms var(--ease-out);
   pointer-events: none;
 }

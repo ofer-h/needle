@@ -5,8 +5,13 @@ import type {
   CaptureEntryPayload,
   CapturePromotePayload,
   CaptureShowPayload,
+  TorchBrainDumpSubmitPayload,
   TorchClosePayload,
+  TorchHeroPayload,
+  TorchSetInteractivePayload,
   TorchShowPayload,
+  TorchSkipConfirmPayload,
+  TorchSnoozePayload,
 } from '../shared/ipc-contracts';
 
 const api = {
@@ -28,6 +33,9 @@ const api = {
     dismiss: (payload: TorchClosePayload): void => {
       ipcRenderer.send('torch:dismiss', payload);
     },
+    snooze: (payload: TorchSnoozePayload): void => {
+      ipcRenderer.send('torch:snooze', payload);
+    },
     onPayload: (cb: (payload: TorchShowPayload) => void) => {
       const handler = (_event: Electron.IpcRendererEvent, payload: TorchShowPayload) => cb(payload);
       ipcRenderer.on('torch:payload', handler);
@@ -42,6 +50,38 @@ const api = {
       const handler = (_event: Electron.IpcRendererEvent, point: { x: number; y: number }) => cb(point);
       ipcRenderer.on('torch:cursor', handler);
       return () => ipcRenderer.removeListener('torch:cursor', handler);
+    },
+    onSnoozed: (cb: (payload: TorchSnoozePayload) => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, payload: TorchSnoozePayload) => cb(payload);
+      ipcRenderer.on('torch:snoozed', handler);
+      return () => ipcRenderer.removeListener('torch:snoozed', handler);
+    },
+    skipInit: (correlationId: string): void => {
+      ipcRenderer.send('torch:skip-init', { correlationId });
+    },
+    skipConfirm: (payload: TorchSkipConfirmPayload): void => {
+      ipcRenderer.send('torch:skip-confirm', payload);
+    },
+    skipCancel: (correlationId: string): void => {
+      ipcRenderer.send('torch:skip-cancel', { correlationId });
+    },
+    onHero: (cb: (payload: TorchHeroPayload) => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, payload: TorchHeroPayload) => cb(payload);
+      ipcRenderer.on('torch:hero', handler);
+      return () => ipcRenderer.removeListener('torch:hero', handler);
+    },
+    brainDumpInit: (correlationId: string): void => {
+      ipcRenderer.send('torch:brain-dump-init', { correlationId });
+    },
+    brainDumpSubmit: (payload: TorchBrainDumpSubmitPayload): void => {
+      ipcRenderer.send('torch:brain-dump-submit', payload);
+    },
+    brainDumpCancel: (correlationId: string): void => {
+      ipcRenderer.send('torch:brain-dump-cancel', { correlationId });
+    },
+    setInteractive: (interactive: boolean): void => {
+      const payload: TorchSetInteractivePayload = { interactive };
+      ipcRenderer.send('torch:set-interactive', payload);
     },
   },
   capture: {
