@@ -1,0 +1,60 @@
+.dev-clock {
+  position: fixed;
+  right: var(--space-16);
+  bottom: var(--space-16);
+  z-index: 9000;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  padding: var(--space-12);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-8);
+  font-family: var(--mono);
+  font-size: var(--text-xs);
+  color: var(--ink-2);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.12);
+  pointer-events: auto;
+}
+
+.dev-clock__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.dev-clock__label {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+}
+
+.dev-clock__time {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.dev-clock__buttons {
+  flex-wrap: wrap;
+}
+
+.dev-clock__preset,
+.dev-clock__resume {
+  appearance: none;
+  background: var(--surface-sub);
+  border: 1px solid var(--border-subtle);
+  color: var(--ink-2);
+  font-family: inherit;
+  font-size: var(--text-xs);
+  padding: 4px 8px;
+  border-radius: var(--radius-6);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.dev-clock__preset:hover,
+.dev-clock__resume:hover {
+  background: var(--surface-hover);
+}
