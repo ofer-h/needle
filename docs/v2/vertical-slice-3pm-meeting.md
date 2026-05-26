@@ -368,8 +368,89 @@ Other steps are tightly sequential (fixture → selectors → wiring) and not wo
 Captured as they arise; resolved before they block.
 
 - If the user doesn't resolve the modal capture before 14:59, the torch (higher intensity) preempts it visually. The capture intervention stays `status='active'` in the store — should it auto-resolve to `dismissed`/`completed` when preempted? Acceptable wart for the slice; revisit after the user walks through the scenario.
-- The V2 island subscribes to the whole v2 store (no selector). Re-renders on every store change. Fine for the slice; tune with selectors when the v2 store fans out.
 - The InterventionLayer activates scheduled-but-due interventions inside a `useEffect`. If multiple slice scenarios run in real-time (not frozen), the effect re-runs as `now` ticks. The early-return on empty `scheduledDueIds` keeps it harmless. Real-time ticking is not part of this slice — `useNow` integration is later.
+- Torch currently **captures mouse** (not click-through). The user cannot use other apps until they dismiss. Uncompromising. Might want a setting / `intensity`-driven toggle to allow click-through at lower intensities.
+- Hero banner currently fires only on the **focused** display (cursor heuristic). User asked "focused OR all" — needs a product call which we choose at fire time.
+- Hero banner uses the **urgent red** accent. May feel too aggressive for non-critical reminders; revisit per `commitmentLevel`.
+- System notification currently uses `urgency: 'critical'` and is non-silent. May want to tune per intervention strategy / commitment level.
+
+## Discussion log
+
+Captured for continuity. Each entry is a turn-level summary of why a decision was made.
+
+### 2026-05-26 — Pre-Phase-B data-modeling pass
+
+User asked to make the v2 data model bulletproof before building selectors. Walked through the concrete product moments the user cares about (3 PM meeting, brain-dump 5 min before, torchlight nudge, escalation across devices). Identified four real gaps in the existing v2 contract:
+
+- No relative/derived timing (couldn't model "5 min before this meeting").
+- No first-class concept for attention strategy + lifecycle (interventions were going to disappear into `metadata` blobs).
+- No standing rules that generate prep work per matching occurrence (rituals).
+- No structured capture stream during a transition (`Reflection.followUpItemId` was singular).
+
+Locked: `Intervention`, `Ritual`, `CaptureEntry` as first-class entities; `Item.commitmentLevel` and `ItemPlan.relativeTo` as extensions. Free-array `Ritual.actions`. Commitment level on `Item` only for MVP. AI suggests, user authors — both flows attributed via `createdByActorId`.
+
+### 2026-05-26 — Vertical slice over bottom-up Phase B
+
+Offered two paths: (A) build Phase B fixture + selectors against the existing UI, then layer in product moments; (B) take one concrete scenario (3 PM meeting) and build it end-to-end against the v2 contract. User chose B. Reasoning: data model already solid enough to commit; risk is no longer wrong model, risk is spending sessions on plumbing before learning whether the loop feels right.
+
+Constraint: the slice must read/write through v2 selectors and store actions only, so finishing Phase B later is just porting remaining rows onto the same selectors.
+
+### 2026-05-26 — Torch must be a system-level surface
+
+After the in-window torch landed, user said: must cover the full mac system, across all spaces, including over full-screen apps. Moved torchlight from an in-window React overlay to a separate transparent Electron `BrowserWindow` (`alwaysOnTop('screen-saver')`, `setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })`). Cursor-tracking spotlight inside the window. Single primary display first.
+
+### 2026-05-26 — Capture should also be standalone always-on-top
+
+Symmetric request after the torch landed. Promoted the brain-dump modal to its own floating Electron window (smaller, sized to the card, `alwaysOnTop('floating')`). Also removed the debug-only "v2 slice" island from Today because it was confusing once both intervention surfaces became separate windows.
+
+### 2026-05-26 — Confusion about the v2 island + dev clock
+
+User saw the debug v2 island and the dev clock and didn't understand what they were. Walked through what each piece is (debug surface vs developer tool vs product UI), removed the island, kept the dev clock with clearer presets. Status pointer updated.
+
+### 2026-05-26 — Torch didn't appear on first walk-through
+
+User clicked the dev clock and nothing happened. Two root causes:
+
+1. **Stale main process**: Electron does not hot-reload main + preload. Needed a full Cmd-Q + `npm start`. Added defensive `window.api?.torch` checks + `console.warn` so future stale-process states are visible in DevTools.
+2. **Real-time bug**: seeded `scheduledFor` times (14:55, 14:59 UTC) were already past `Date.now()`, so every intervention immediately surfaced on app open. Fixed by defaulting the dev clock to `${TODAY}T14:54:00.000Z`. Real time is never the source unless the user explicitly clicks "resume."
+
+### 2026-05-26 — Multi-surface attention
+
+User clarified that the torch alone is not enough — wants the moment to feel like the whole mac is helping the user move. Implemented three surfaces firing concurrently with one `correlationId`:
+
+- Torch overlay on **every connected display** via `screen.getAllDisplays()`.
+- macOS native `Notification` (urgency `critical`, click routes to dismiss the chain).
+- Slim hero banner across the top of the **focused display** (cursor-determined via `screen.getDisplayNearestPoint(screen.getCursorScreenPoint())`).
+
+Dismissing any one closes everything via `hideTorch()`.
+
+## Backlog / next-todo
+
+Captured for the next session(s). Not in scope for the current slice.
+
+### Mouse cursor as a "fire" / OS-wide cursor effect when time runs out
+
+Idea: when the user is over their commitment time (e.g. meeting started, no dismiss), morph the system mouse pointer into something visceral — flame trail, burning cursor, ember sparks. The cursor follows the user across other apps too, so the urgency comes with them.
+
+Investigation notes for whoever picks this up:
+
+- **Pure visual overlay (no system cursor change)** — easiest path. A transparent always-on-top Electron `BrowserWindow` that's `setIgnoreMouseEvents(true, { forward: true })` so clicks pass through to other apps. Main process polls `screen.getCursorScreenPoint()` at ~30-60Hz and broadcasts to the overlay window. The window renders a fire/ember trail that follows the cursor. Works without any special permission. Does NOT change the actual OS cursor shape — instead, a trail follows behind/around it.
+- **Replacing the actual macOS cursor shape** — much harder. Standard macOS `NSCursor` APIs only affect cursor inside your own app's windows. Changing the cursor in other apps requires either:
+  - A native module loading private CoreGraphics APIs (`CGSSetSystemCursor`) — fragile, version-dependent, likely AppStore-rejected.
+  - Accessibility permission (System Preferences → Privacy & Security → Accessibility) — grants the ability to inject events and read other windows, but **does not** give cursor-shape control directly. Useful for related effects (e.g. dimming other windows) but not the cursor itself.
+- **Recommended first cut**: the pure visual overlay. Reuse the torch BrowserWindow infrastructure — add a new `cursor_effect` Electron window strategy that polls cursor position and renders a fire trail. Trigger when the torch's 30s timer elapses without acknowledge (the same path that today fires `escalateIntervention`).
+- **`Intervention` shape supports this already** — add `cursor_effect_fire` to `InterventionStrategy` and `screen_overlay` surface. No schema changes needed.
+
+Other backlog items:
+
+- Multi-display hero banner (currently focused-display only).
+- Torch click-through mode for lower-intensity interventions.
+- Auto-resolve preempted capture when torch fires.
+- Persistence (SQLite) for v2 store.
+- Real calendar sync replacing the seeded `ItemOccurrence`.
+- Selector-based subscriptions instead of `useV2Store()` in components.
+- macOS Notification permission UX: handle the first-launch prompt gracefully.
+- Notarization for production system notifications.
 
 ---
 
