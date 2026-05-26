@@ -9,6 +9,8 @@ export type TimeSlot =
 
 export type TaskKind = 'urgent' | 'upcoming' | 'faded';
 
+export type ScheduleKind = 'fixed' | 'flexible';
+
 export type Task = {
   id: string;
   title: string;
@@ -22,11 +24,16 @@ export type Task = {
   timeSlot: TimeSlot;
   rawInput?: string;
   aiReason?: string;
+  scheduleKind: ScheduleKind;
+  startTime?: string;  // 'HH:MM' — required for fixed tasks, absent for flexible
+  slotIndex: number;   // which gap between anchors (0 = before all anchors); for flexible tasks
+  slotOrder: number;   // position within slot; 0, 100, 200... (gap for easy insert); for flexible tasks
+  isOverdue?: boolean;
 };
 
 export type CalendarEvent = {
   id: string;
-  time: string;
+  startTime: string;  // 'HH:MM' — drives sort order and slot boundaries
   label: string;
   sublabel?: string;
 };

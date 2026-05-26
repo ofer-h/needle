@@ -1,40 +1,255 @@
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  useDroppable,
+  useSensor,
+  useSensors,
+  type DragStartEvent,
+  type DragEndEvent,
+} from '@dnd-kit/core';
 import FxWindow from '../Window/FxWindow';
 import Section from './Section';
 import TaskRow from './TaskRow';
 import EventRow from './EventRow';
 import { IconPlus, IconChevron } from '../Icons';
+import { useAppStore } from '../../state/store';
+import { buildTimeline } from '../../utils/timeline';
+import type { TimelineItem } from '../../utils/timeline';
 
 type Props = {
   onNavigateCapture: () => void;
 };
 
-const INITIAL_TASKS = [
-  { id: '1', done: false },
-  { id: '2', done: false },
-  { id: '3', done: false },
-  { id: '4', done: true },
-  { id: '5', done: false },
-  { id: '6', done: false },
-  { id: '7', done: false },
-  { id: '8', done: false },
-  { id: '9', done: false },
-];
+// ── Gap drop zone ──────────────────────────────────────────────────────────
+// Rendered between every consecutive pair of timeline items (and before/after).
+// Each zone is a droppable pocket; when hovered it shows as a colored insert line.
+
+type GapProps = {
+  id: string;
+  isDragging: boolean;
+};
+
+function GapDropZone({ id, isDragging }: GapProps) {
+  const { setNodeRef, isOver } = useDroppable({ id });
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        height: isOver ? 3 : isDragging ? 6 : 2,
+        margin: '1px 0',
+        borderRadius: 2,
+        background: isOver ? 'var(--urgent)' : 'transparent',
+        transition: 'background 0.1s, height 0.1s',
+      }}
+    />
+  );
+}
+
+// ── Overlay row ────────────────────────────────────────────────────────────
+// Pure display clone rendered in DragOverlay — no DnD hooks, so it's safe
+// to render outside the normal sortable item lifecycle.
+
+type OverlayRowProps = {
+  kind?: 'urgent' | 'upcoming' | 'faded';
+  label: string;
+  sublabel?: string;
+  date: string;
+  datePill?: 'urgent' | 'upcoming';
+};
+
+function OverlayRow({ kind = 'urgent', label, sublabel, date, datePill }: OverlayRowProps) {
+  return (
+    <div
+      className="t-row t-row-flexible"
+      role="listitem"
+      style={{
+        boxShadow: '0 6px 24px rgba(0,0,0,0.14)',
+        borderRadius: 8,
+        background: 'var(--bg)',
+        cursor: 'grabbing',
+      }}
+    >
+      <button
+        aria-hidden="true"
+        tabIndex={-1}
+        style={{
+          background: 'none',
+          border: 'none',
+          padding: '0 4px',
+          cursor: 'grabbing',
+          color: 'var(--ink-4)',
+          fontSize: 14,
+          lineHeight: 1,
+          opacity: 1,
+          display: 'inline-flex',
+          alignItems: 'center',
+          alignSelf: 'center',
+          flexShrink: 0,
+        }}
+      >
+        ⠿
+      </button>
+      <div
+        className={`checkbox ${kind}`}
+        style={{ width: 18, height: 18, borderRadius: '50%', border: '1.5px solid', flexShrink: 0 }}
+      />
+      <div className="label">
+        <span className={`priority-dot ${kind}`} />
+        <span>{label}</span>
+        {sublabel && <span className="sublabel">· {sublabel}</span>}
+      </div>
+      <div className="meta-right">
+        <span className={`pill${datePill ? ` ${datePill}` : ''}`}>{date}</span>
+      </div>
+    </div>
+  );
+}
+
+// ── Drag-end logic ─────────────────────────────────────────────────────────
+
+function computeNewSlotOrder(
+  tasks: ReturnType<typeof useAppStore.getState>['tasks'],
+  timeline: TimelineItem[],
+  activeId: string,
+  gapN: number,
+  newSlotIndex: number,
+  isOverdueSection: boolean,
+): number {
+  // Flexible peers in the target slot, excluding the task being moved
+  const slotPeers = tasks
+    .filter(
+      (t) =>
+        t.id !== activeId &&
+        t.scheduleKind === 'flexible' &&
+        t.slotIndex === newSlotIndex &&
+        t.timeSlot === 'today' &&
+        (isOverdueSection ? t.isOverdue === true : t.isOverdue !== true),
+    )
+    .sort((a, b) => a.slotOrder - b.slotOrder);
+
+  // Map each peer to its position in the current timeline
+  const timelineIndexById = new Map<string, number>();
+  timeline.forEach((item, idx) => {
+    if (item.kind === 'task') {
+      timelineIndexById.set(item.data.id, idx);
+    }
+  });
+
+  // Split peers into those that appear before vs. at/after the gap position
+  const peersBeforeGap = slotPeers.filter((p) => (timelineIndexById.get(p.id) ?? -1) < gapN);
+  const peersAfterGap = slotPeers.filter(
+    (p) => (timelineIndexById.get(p.id) ?? timeline.length) >= gapN,
+  );
+
+  const predecessor = peersBeforeGap[peersBeforeGap.length - 1];
+  const successor = peersAfterGap[0];
+
+  if (predecessor === undefined && successor === undefined) return 0;
+  if (predecessor === undefined) return (successor?.slotOrder ?? 0) - 1;
+  if (successor === undefined) return predecessor.slotOrder + 100;
+  return (predecessor.slotOrder + successor.slotOrder) / 2;
+}
+
+// ── Screen ─────────────────────────────────────────────────────────────────
 
 export default function TodayScreen({ onNavigateCapture }: Props) {
-  const [doneIds, setDoneIds] = useState<Set<string>>(new Set(['4']));
+  const tasks = useAppStore((s) => s.tasks);
+  const events = useAppStore((s) => s.events);
+  const toggleDone = useAppStore((s) => s.toggleDone);
+  const reorderTask = useAppStore((s) => s.reorderTask);
 
-  const toggle = (id: string) =>
-    setDoneIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+  const [upcomingExpanded, setUpcomingExpanded] = useState(false);
+  const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
 
-  const total = INITIAL_TASKS.length;
-  const doneCount = doneIds.size;
-  const progressPct = Math.round((doneCount / total) * 100);
+  // Require a 5px move before starting a drag to avoid eating checkbox clicks
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+  );
+
+  // Partition today tasks
+  const todayTasks = tasks.filter((t) => t.timeSlot === 'today');
+  const overdueTasks = todayTasks.filter((t) => t.isOverdue === true && !t.done);
+  const activeTodayTasks = todayTasks.filter((t) => t.isOverdue !== true);
+
+  // Build merged timelines
+  const timelineItems = buildTimeline(activeTodayTasks, events);
+  const overdueTimeline = buildTimeline(overdueTasks, []);
+
+  const total = todayTasks.length;
+  const doneCount = todayTasks.filter((t) => t.done).length;
+  const progressPct = total > 0 ? Math.round((doneCount / total) * 100) : 0;
+
+  // The task currently being dragged (used for DragOverlay rendering)
+  const activeTask = activeTaskId !== null ? tasks.find((t) => t.id === activeTaskId) : undefined;
+
+  function handleDragStart(event: DragStartEvent) {
+    setActiveTaskId(String(event.active.id));
+  }
+
+  function handleDragEnd(
+    event: DragEndEvent,
+    timeline: TimelineItem[],
+    section: 'today' | 'overdue',
+  ) {
+    setActiveTaskId(null);
+
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeId = String(active.id);
+    if (!tasks.find((t) => t.id === activeId)) return;
+
+    // Parse gap zone ID: "gap-today-3" or "gap-overdue-3"
+    const gapMatch = /^gap-(today|overdue)-(\d+)$/.exec(String(over.id));
+    if (!gapMatch) return;
+    const gapSection = gapMatch[1];
+    const gapNStr = gapMatch[2];
+    if (!gapSection || !gapNStr || gapSection !== section) return;
+    const gapN = parseInt(gapNStr, 10);
+
+    // Count anchors (events + fixed tasks) that appear before position gapN
+    // → that count is the target slotIndex
+    let newSlotIndex = 0;
+    for (let i = 0; i < gapN && i < timeline.length; i++) {
+      const item = timeline[i];
+      if (
+        item !== undefined &&
+        (item.kind === 'event' ||
+          (item.kind === 'task' && item.data.scheduleKind === 'fixed'))
+      ) {
+        newSlotIndex++;
+      }
+    }
+
+    const newSlotOrder = computeNewSlotOrder(
+      tasks,
+      timeline,
+      activeId,
+      gapN,
+      newSlotIndex,
+      section === 'overdue',
+    );
+
+    reorderTask(activeId, newSlotIndex, newSlotOrder);
+  }
+
+  function handleOverdueDragEnd(event: DragEndEvent) {
+    handleDragEnd(event, overdueTimeline, 'overdue');
+  }
+
+  function handleTodayDragEnd(event: DragEndEvent) {
+    handleDragEnd(event, timelineItems, 'today');
+  }
+
+  const isDragging = activeTaskId !== null;
+
+  const UPCOMING_PLACEHOLDER = [
+    'Review PR from Tal',
+    'Book dentist appointment',
+    "Plan dad's birthday gift",
+  ];
 
   return (
     <FxWindow title="Focus · Today">
@@ -146,90 +361,110 @@ export default function TodayScreen({ onNavigateCapture }: Props) {
           padding: '12px 32px 100px',
         }}
       >
-        {/* Overdue */}
-        <Section title="Overdue" count={1} accent="var(--urgent)">
-          <TaskRow
-            kind="urgent"
-            label="Call back Dana"
-            sublabel="from your captured note"
-            date="yesterday"
-            datePill="urgent"
-            done={doneIds.has('1')}
-            onToggle={() => toggle('1')}
-          />
-        </Section>
+        {/* Overdue section */}
+        {overdueTasks.length > 0 && (
+          <DndContext
+            sensors={sensors}
+            onDragStart={handleDragStart}
+            onDragEnd={handleOverdueDragEnd}
+          >
+            <Section title="Overdue" count={overdueTasks.length} accent="var(--urgent)">
+              <GapDropZone id="gap-overdue-0" isDragging={isDragging} />
+              {overdueTimeline.map((item, index) => {
+                if (item.kind === 'event') return null;
+                const t = item.data;
+                return (
+                  <Fragment key={t.id}>
+                    <TaskRow
+                      id={t.id}
+                      scheduleKind={t.scheduleKind}
+                      kind={t.kind}
+                      label={t.title}
+                      date={t.date}
+                      done={t.done}
+                      onToggle={() => toggleDone(t.id)}
+                      {...(t.sublabel !== undefined && { sublabel: t.sublabel })}
+                      {...(t.link !== undefined && { link: t.link })}
+                      {...(t.datePill !== undefined && { datePill: t.datePill })}
+                    />
+                    <GapDropZone id={`gap-overdue-${index + 1}`} isDragging={isDragging} />
+                  </Fragment>
+                );
+              })}
+            </Section>
 
-        {/* Today */}
-        <Section title="Today" date="Sun, May 25" count={4}>
-          <TaskRow
-            kind="urgent"
-            label="Prep for manager 1:1"
-            sublabel="2 hr lead time"
-            date="1 PM"
-            link="Manager 1:1 · 3 PM"
-            done={doneIds.has('2')}
-            onToggle={() => toggle('2')}
-          />
-          <EventRow time="3:00 PM" label="Manager 1:1" sublabel="30 min · with Maya · Zoom" />
-          <TaskRow
-            kind="upcoming"
-            label="Email last week's recap"
-            date="anytime"
-            done={doneIds.has('3')}
-            onToggle={() => toggle('3')}
-          />
-          <TaskRow
-            done={doneIds.has('4')}
-            label="Pick up dry cleaning"
-            date="11 AM"
-            onToggle={() => toggle('4')}
-          />
-        </Section>
+            <DragOverlay>
+              {activeTask !== undefined && activeTask.scheduleKind === 'flexible' ? (
+                <OverlayRow
+                  kind={activeTask.kind}
+                  label={activeTask.title}
+                  date={activeTask.date}
+                  {...(activeTask.sublabel !== undefined && { sublabel: activeTask.sublabel })}
+                  {...(activeTask.datePill !== undefined && { datePill: activeTask.datePill })}
+                />
+              ) : null}
+            </DragOverlay>
+          </DndContext>
+        )}
 
-        {/* Tomorrow */}
-        <Section title="Tomorrow" date="Mon, May 26" count={2}>
-          <TaskRow
-            kind="upcoming"
-            label="Review PR from Tal"
-            sublabel="auth refactor — 12 files"
-            link="GitHub"
-            date="morning"
-            done={doneIds.has('5')}
-            onToggle={() => toggle('5')}
-          />
-          <TaskRow
-            kind="upcoming"
-            label="Book dentist"
-            date="9 AM"
-            done={doneIds.has('6')}
-            onToggle={() => toggle('6')}
-          />
-        </Section>
+        {/* Today timeline */}
+        <DndContext
+          sensors={sensors}
+          onDragStart={handleDragStart}
+          onDragEnd={handleTodayDragEnd}
+        >
+          <Section title="Today" date="Sun, May 25" count={activeTodayTasks.length}>
+            <GapDropZone id="gap-today-0" isDragging={isDragging} />
+            {timelineItems.map((item, index) => {
+              const gapId = `gap-today-${index + 1}`;
 
-        {/* This week */}
-        <Section title="This week" date="ends Sat, May 31" count={3}>
-          <TaskRow
-            kind="faded"
-            label="Fix kitchen light"
-            date="Next Sun"
-            done={doneIds.has('7')}
-            onToggle={() => toggle('7')}
-          />
-          <TaskRow
-            kind="faded"
-            label="Renew driver's license"
-            date="Wed"
-            done={doneIds.has('8')}
-            onToggle={() => toggle('8')}
-          />
-          <TaskRow
-            kind="faded"
-            label="Plan dad's birthday gift"
-            date="Sat"
-            done={doneIds.has('9')}
-            onToggle={() => toggle('9')}
-          />
-        </Section>
+              if (item.kind === 'event') {
+                const e = item.data;
+                return (
+                  <Fragment key={`event-${e.id}`}>
+                    <EventRow
+                      startTime={e.startTime}
+                      label={e.label}
+                      {...(e.sublabel !== undefined && { sublabel: e.sublabel })}
+                    />
+                    <GapDropZone id={gapId} isDragging={isDragging} />
+                  </Fragment>
+                );
+              }
+
+              const t = item.data;
+              return (
+                <Fragment key={`task-${t.id}`}>
+                  <TaskRow
+                    id={t.id}
+                    scheduleKind={t.scheduleKind}
+                    kind={t.kind}
+                    label={t.title}
+                    date={t.date}
+                    done={t.done}
+                    onToggle={() => toggleDone(t.id)}
+                    {...(t.sublabel !== undefined && { sublabel: t.sublabel })}
+                    {...(t.link !== undefined && { link: t.link })}
+                    {...(t.datePill !== undefined && { datePill: t.datePill })}
+                  />
+                  <GapDropZone id={gapId} isDragging={isDragging} />
+                </Fragment>
+              );
+            })}
+          </Section>
+
+          <DragOverlay>
+            {activeTask !== undefined && activeTask.scheduleKind === 'flexible' ? (
+              <OverlayRow
+                kind={activeTask.kind}
+                label={activeTask.title}
+                date={activeTask.date}
+                {...(activeTask.sublabel !== undefined && { sublabel: activeTask.sublabel })}
+                {...(activeTask.datePill !== undefined && { datePill: activeTask.datePill })}
+              />
+            ) : null}
+          </DragOverlay>
+        </DndContext>
 
         {/* Quick-add row */}
         <div className="t-quickadd" onClick={onNavigateCapture} role="button" tabIndex={0}>
@@ -253,7 +488,7 @@ export default function TodayScreen({ onNavigateCapture }: Props) {
           </span>
         </div>
 
-        {/* Someday footer */}
+        {/* Upcoming footer */}
         <div
           style={{
             display: 'flex',
@@ -266,15 +501,22 @@ export default function TodayScreen({ onNavigateCapture }: Props) {
           }}
         >
           <span style={{ flex: 1, height: 0.5, background: 'var(--hairline)', display: 'block' }} />
-          <span
+          <button
+            onClick={() => setUpcomingExpanded((v) => !v)}
             style={{
+              background: 'none',
+              border: 'none',
+              padding: 0,
+              cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
               gap: 6,
-              cursor: 'pointer',
+              color: 'var(--ink-3)',
+              fontFamily: 'var(--sans)',
+              fontSize: 12,
             }}
           >
-            <span>Someday</span>
+            <span>Upcoming</span>
             <span
               style={{
                 fontSize: 10.5,
@@ -285,12 +527,46 @@ export default function TodayScreen({ onNavigateCapture }: Props) {
                 color: 'var(--ink-2)',
               }}
             >
-              14
+              5
             </span>
-            <IconChevron size={11} />
-          </span>
+            <span
+              style={{
+                display: 'inline-flex',
+                transform: upcomingExpanded ? 'rotate(180deg)' : undefined,
+                transition: 'transform 0.2s',
+              }}
+            >
+              <IconChevron size={11} />
+            </span>
+          </button>
           <span style={{ flex: 1, height: 0.5, background: 'var(--hairline)', display: 'block' }} />
         </div>
+
+        {upcomingExpanded && (
+          <div
+            style={{
+              marginTop: 8,
+              padding: '0 10px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 2,
+            }}
+          >
+            {UPCOMING_PLACEHOLDER.map((title) => (
+              <div
+                key={title}
+                style={{
+                  padding: '6px 8px',
+                  fontSize: 13,
+                  color: 'var(--ink-3)',
+                  borderRadius: 6,
+                }}
+              >
+                {title}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* FAB */}

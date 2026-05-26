@@ -61,7 +61,7 @@ button {
 /* ── Task list rows ─────────────────────────────────────────── */
 .t-row {
   display: grid;
-  grid-template-columns: 22px 1fr auto;
+  grid-template-columns: 20px 22px 1fr auto;
   align-items: center;
   gap: 12px;
   padding: 9px 10px 9px 8px;
@@ -70,9 +70,6 @@ button {
   transition: background 0.15s;
 }
 
-.t-row + .t-row {
-  margin-top: -1px;
-}
 
 .t-row:hover {
   background: var(--surface-sub);
@@ -201,6 +198,18 @@ button {
 .t-row.event .label {
   color: var(--ink-2);
   font-weight: 400;
+}
+
+/* ── Flexible (draggable) task rows ────────────────────────── */
+.t-row-flexible {}
+
+.t-row-flexible:hover .drag-handle {
+  opacity: 1 !important;
+}
+
+.t-row-flexible .drag-handle:active {
+  cursor: grabbing;
+  opacity: 1 !important;
 }
 
 /* ── Sections ───────────────────────────────────────────────── */

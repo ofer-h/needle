@@ -16,6 +16,14 @@ Format: `### YYYY-MM-DD — <topic> (<who made the call>)`
 - Fix: explicit `lib.fileName` in each vite config → `main.js` / `preload.js` in `.vite/build/`.
 - `package.json` main updated to `.vite/build/main.js`.
 
+### 2026-05-24 — Gap-based drag-and-drop (AI recommendation, Ofer approved)
+- Replaced `SortableContext` + `useSortable` (element-swap pattern) with gap drop zones + `useDraggable` (insert-between pattern).
+- Each gap between timeline items is a `useDroppable` zone with ID `gap-{section}-{n}`; dropping into it inserts at that slot position rather than swapping items.
+- `DragOverlay` renders a floating clone; original item goes `opacity: 0` during drag.
+- Fixed tasks and calendar events are never draggable; gap zones around them still accept drops.
+- Activation constraint: `distance: 5px` on PointerSensor prevents checkbox clicks triggering drag.
+- Removed `.t-row + .t-row { margin-top: -1px }` CSS rule — gap zones now own inter-row spacing.
+
 ### 2026-05-24 — Titlebar fixes (Ofer)
 - Removed HTML `.lights` div — `titleBarStyle: 'hiddenInset'` already renders native macOS traffic lights.
 - Fixed window drag: `.titlebar > *` was applying `-webkit-app-region: no-drag` to `.title-center` (inset:0), blocking all dragging. Scoped `no-drag` to `button, a, input, select` only.

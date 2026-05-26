@@ -1,18 +1,20 @@
 import { IconCal } from '../Icons';
 
 type Props = {
-  time: string;
+  startTime: string;
   label: string;
   sublabel?: string;
 };
 
-export default function EventRow({ time, label, sublabel }: Props) {
+export default function EventRow({ startTime, label, sublabel }: Props) {
   return (
     <div className="t-row event" role="listitem">
+      {/* Drag handle placeholder — keeps columns aligned with task rows */}
+      <span style={{ width: 20, flexShrink: 0, visibility: 'hidden' }} aria-hidden="true" />
       <div
         style={{
-          width: 18,
-          height: 18,
+          width: 22,
+          height: 22,
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -35,7 +37,7 @@ export default function EventRow({ time, label, sublabel }: Props) {
             fontVariantNumeric: 'tabular-nums',
           }}
         >
-          {time}
+          {startTime}
         </span>
       </div>
     </div>
