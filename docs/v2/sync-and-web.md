@@ -64,6 +64,9 @@ Start simple:
 - Relations: unique constraint prevents duplicates; archived rows represent removal.
 - Plans: actor-scoped, so two users planning the same item do not conflict.
 - Assignments: unique `(item_id, actor_id, role)`.
+- Flow sessions: actor/date scoped, so each user has their own daily flow.
+- Focus sessions, transition events, reflections: append-first; edits are rare and auditable.
+- Suggestions and insights: status changes are last-write-wins, content is actor-attributed.
 
 Later:
 
@@ -81,6 +84,7 @@ Initial rules:
 - Assignees can update their assignment status.
 - Coaches/accountability partners can comment and nudge, not silently complete user work.
 - AI actor actions must be visible and reversible.
+- AI suggestions must be optional; accepting a suggestion creates a user-attributed operation.
 
 ## Actors And Trust
 
@@ -103,10 +107,16 @@ Keep the first API boring:
 GET /workspaces/:id/changes?since=cursor
 POST /workspaces/:id/operations
 GET /workspaces/:id/today?actorId=&date=
+GET /workspaces/:id/flow?actorId=&date=
 GET /items/:id
 POST /items
 PATCH /items/:id
 POST /item-relations
+POST /focus-sessions
+POST /transition-events
+POST /reflections
+POST /suggestions/:id/accept
+POST /suggestions/:id/dismiss
 POST /comments
 ```
 

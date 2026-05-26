@@ -110,3 +110,11 @@ Format: `### YYYY-MM-DD — <topic> (<who made the call>)`
 - Added v2 architecture docs under `docs/v2/`, a Superpowers-style spec at `docs/superpowers/specs/2026-05-26-v2-domain-architecture.md`, and a domain workflow skill at `.cursor/skills/needle-domain-architecture/SKILL.md`.
 - Added `src/shared/domain-v2.ts` with target shared contracts for workspace/user/actor/item/relation/assignment/plan/occurrence/comment/activity/sync models.
 - Next implementation step: build a domain fixture/store adapter so the current Today UI can read from v2-shaped state before replacing embedded subtasks in the UI.
+
+### 2026-05-26 — Daily flow product direction encoded (Ofer, AI implemented)
+- Ofer provided the guiding PRD: Needle should become a calm AI-guided daily flow / intentional task manager, centered on today, hard-time commitments, flexible tasks, conscious transitions, gentle accountability, and AI as companion rather than operator.
+- Added `docs/v2/product-direction.md` as the v2 product north star and linked it from the v2 README and Superpowers spec.
+- Extended the v2 architecture with `FlowSession`, `FocusSession`, `TransitionEvent`, `Reflection`, `Suggestion`, `BehavioralInsight`, and `DailyFlowView`.
+- Data model now reserves tables/indexes for daily flow state, focus history, transition prompts, lightweight reflections, optional AI suggestions, and long-lived behavioral insights.
+- Sync/web notes now treat user edits as source of truth, suggestions as optional/reversible, and behavioral insights as low-frequency records that should not block daily planning.
+- Roadmap now includes a Daily Flow State phase before deeper AI automation so the product can answer "what should I focus on right now?" without becoming noisy or over-automated.

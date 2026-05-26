@@ -210,6 +210,135 @@ comments (
 )
 ```
 
+### flow_sessions
+
+One actor's intentional day.
+
+```sql
+flow_sessions (
+  id text primary key,
+  workspace_id text not null,
+  actor_id text not null,
+  flow_date text not null, -- YYYY-MM-DD
+  state text not null, -- planning | focusing | transitioning | paused | reviewing | done
+  active_item_id text,
+  created_at text not null,
+  updated_at text not null,
+  archived_at text,
+  unique (workspace_id, actor_id, flow_date)
+)
+```
+
+### focus_sessions
+
+Actual focus time spent on an item.
+
+```sql
+focus_sessions (
+  id text primary key,
+  workspace_id text not null,
+  actor_id text not null,
+  item_id text not null,
+  flow_session_id text,
+  started_at text not null,
+  ended_at text,
+  outcome text, -- completed | paused | interrupted | abandoned | deferred
+  energy_before integer,
+  energy_after integer,
+  metadata_json text not null default '{}',
+  created_at text not null,
+  updated_at text not null,
+  archived_at text
+)
+```
+
+### transition_events
+
+Lightweight records for task-to-task movement.
+
+```sql
+transition_events (
+  id text primary key,
+  workspace_id text not null,
+  actor_id text not null,
+  flow_session_id text not null,
+  from_item_id text,
+  to_item_id text,
+  kind text not null, -- start_day | close_item | switch_item | reset | break | resume | end_day
+  prompt text,
+  response text,
+  created_at text not null
+)
+```
+
+### reflections
+
+Short completion/transition notes.
+
+```sql
+reflections (
+  id text primary key,
+  workspace_id text not null,
+  actor_id text not null,
+  item_id text,
+  flow_session_id text,
+  focus_session_id text,
+  kind text not null, -- completion | transition | end_of_day | overload | freeform
+  mood text,
+  energy integer,
+  body text,
+  follow_up_item_id text,
+  created_at text not null,
+  updated_at text not null,
+  archived_at text
+)
+```
+
+### suggestions
+
+Optional guidance from AI, coaches, accountability partners, or system logic.
+
+```sql
+suggestions (
+  id text primary key,
+  workspace_id text not null,
+  actor_id text not null, -- who/what made the suggestion
+  target_actor_id text not null,
+  item_id text,
+  flow_session_id text,
+  kind text not null, -- reorder | reschedule | split | break | reduce_scope | cluster | reflect | nudge
+  title text not null,
+  rationale text,
+  payload_json text not null default '{}',
+  status text not null, -- pending | accepted | dismissed | snoozed | expired
+  created_at text not null,
+  updated_at text not null,
+  archived_at text
+)
+```
+
+### behavioral_insights
+
+Pattern observations learned over time.
+
+```sql
+behavioral_insights (
+  id text primary key,
+  workspace_id text not null,
+  actor_id text not null, -- who/what observed it
+  target_actor_id text not null,
+  kind text not null, -- energy_pattern | overload_pattern | focus_window | procrastination_pattern | recovery_gap
+  title text not null,
+  body text not null,
+  confidence real,
+  evidence_json text not null default '{}',
+  status text not null, -- active | dismissed | stale | archived
+  created_at text not null,
+  updated_at text not null,
+  archived_at text
+)
+```
+
 ### activity_log
 
 Append-only audit and sync-friendly history.
@@ -258,6 +387,10 @@ create index idx_item_relations_to on item_relations (workspace_id, to_item_id, 
 create index idx_item_assignments_actor on item_assignments (workspace_id, actor_id, status);
 create index idx_item_plans_actor_date on item_plans (workspace_id, actor_id, plan_date, mode, slot_index, slot_order);
 create index idx_item_occurrences_time on item_occurrences (workspace_id, starts_at, ends_at);
+create index idx_flow_sessions_actor_date on flow_sessions (workspace_id, actor_id, flow_date);
+create index idx_focus_sessions_actor_time on focus_sessions (workspace_id, actor_id, started_at);
+create index idx_suggestions_target_status on suggestions (workspace_id, target_actor_id, status, created_at);
+create index idx_behavioral_insights_target on behavioral_insights (workspace_id, target_actor_id, status, kind);
 create index idx_activity_log_workspace_time on activity_log (workspace_id, created_at);
 ```
 

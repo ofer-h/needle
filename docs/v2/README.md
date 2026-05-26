@@ -4,11 +4,12 @@ This folder is the architectural source of truth for the next model iteration.
 
 Read in order:
 
-1. `current-model-audit.md` - why the current UI-shaped model is not enough.
-2. `domain-model.md` - product/domain concepts.
-3. `data-model.md` - persistence shape for SQLite/Postgres.
-4. `sync-and-web.md` - desktop/web/server/sync direction.
-5. `implementation-roadmap.md` - migration path from the current app.
+1. `product-direction.md` - product north star for AI-guided daily flow.
+2. `current-model-audit.md` - why the current UI-shaped model is not enough.
+3. `domain-model.md` - product/domain concepts.
+4. `data-model.md` - persistence shape for SQLite/Postgres.
+5. `sync-and-web.md` - desktop/web/server/sync direction.
+6. `implementation-roadmap.md` - migration path from the current app.
 
 Related artifacts:
 

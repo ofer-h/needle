@@ -9,6 +9,8 @@
 
 Move Needle from a UI-shaped task model to a durable product model that can support:
 
+- AI-guided daily flow and current-focus state.
+- Intentional task transitions and lightweight reflections.
 - Desktop and web clients.
 - Local-first persistence on desktop.
 - Server-backed sync for web and collaboration.
@@ -30,9 +32,12 @@ This keeps one model for:
 
 Product language can keep saying "subtask." Architecture should say "child item."
 
+Daily flow is also first-class. The app is not only an item database: it must model focus sessions, transitions, reflections, suggestions, and behavioral insights so AI can guide without becoming noisy or controlling.
+
 ## Artifact map
 
 - `docs/v2/current-model-audit.md` - audit of the current UI-shaped model.
+- `docs/v2/product-direction.md` - AI-guided daily flow product north star.
 - `docs/v2/domain-model.md` - domain concepts and boundaries.
 - `docs/v2/data-model.md` - database-oriented schema plan.
 - `docs/v2/sync-and-web.md` - web/local-first/sync architecture.

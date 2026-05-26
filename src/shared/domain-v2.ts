@@ -10,6 +10,12 @@ export type ItemPlanId = Brand<string, 'ItemPlanId'>;
 export type ItemOccurrenceId = Brand<string, 'ItemOccurrenceId'>;
 export type SourceId = Brand<string, 'SourceId'>;
 export type CommentId = Brand<string, 'CommentId'>;
+export type FlowSessionId = Brand<string, 'FlowSessionId'>;
+export type FocusSessionId = Brand<string, 'FocusSessionId'>;
+export type TransitionEventId = Brand<string, 'TransitionEventId'>;
+export type ReflectionId = Brand<string, 'ReflectionId'>;
+export type SuggestionId = Brand<string, 'SuggestionId'>;
+export type BehavioralInsightId = Brand<string, 'BehavioralInsightId'>;
 export type ActivityLogId = Brand<string, 'ActivityLogId'>;
 export type SyncOperationId = Brand<string, 'SyncOperationId'>;
 
@@ -54,6 +60,34 @@ export type AssignmentStatus = 'open' | 'in_progress' | 'done' | 'skipped' | 'ca
 
 export type PlanMode = 'anchor' | 'float' | 'stash';
 export type OccurrenceStatus = 'confirmed' | 'tentative' | 'cancelled';
+export type FlowSessionState = 'planning' | 'focusing' | 'transitioning' | 'paused' | 'reviewing' | 'done';
+export type FocusSessionOutcome = 'completed' | 'paused' | 'interrupted' | 'abandoned' | 'deferred';
+export type TransitionKind =
+  | 'start_day'
+  | 'close_item'
+  | 'switch_item'
+  | 'reset'
+  | 'break'
+  | 'resume'
+  | 'end_day';
+export type ReflectionKind = 'completion' | 'transition' | 'end_of_day' | 'overload' | 'freeform';
+export type SuggestionKind =
+  | 'reorder'
+  | 'reschedule'
+  | 'split'
+  | 'break'
+  | 'reduce_scope'
+  | 'cluster'
+  | 'reflect'
+  | 'nudge';
+export type SuggestionStatus = 'pending' | 'accepted' | 'dismissed' | 'snoozed' | 'expired';
+export type BehavioralInsightKind =
+  | 'energy_pattern'
+  | 'overload_pattern'
+  | 'focus_window'
+  | 'procrastination_pattern'
+  | 'recovery_gap';
+export type BehavioralInsightStatus = 'active' | 'dismissed' | 'stale' | 'archived';
 export type SyncConflictState = 'none' | 'pending' | 'resolved' | 'needs_review';
 
 export type Timestamped = {
@@ -173,6 +207,83 @@ export type Comment = Timestamped & {
   body: string;
 };
 
+export type FlowSession = Timestamped & {
+  id: FlowSessionId;
+  workspaceId: WorkspaceId;
+  actorId: ActorId;
+  flowDate: ISODate;
+  state: FlowSessionState;
+  activeItemId?: ItemId;
+};
+
+export type FocusSession = Timestamped & {
+  id: FocusSessionId;
+  workspaceId: WorkspaceId;
+  actorId: ActorId;
+  itemId: ItemId;
+  flowSessionId?: FlowSessionId;
+  startedAt: ISODateTime;
+  endedAt?: ISODateTime;
+  outcome?: FocusSessionOutcome;
+  energyBefore?: number;
+  energyAfter?: number;
+  metadata: JsonObject;
+};
+
+export type TransitionEvent = {
+  id: TransitionEventId;
+  workspaceId: WorkspaceId;
+  actorId: ActorId;
+  flowSessionId: FlowSessionId;
+  fromItemId?: ItemId;
+  toItemId?: ItemId;
+  kind: TransitionKind;
+  prompt?: string;
+  response?: string;
+  createdAt: ISODateTime;
+};
+
+export type Reflection = Timestamped & {
+  id: ReflectionId;
+  workspaceId: WorkspaceId;
+  actorId: ActorId;
+  kind: ReflectionKind;
+  itemId?: ItemId;
+  flowSessionId?: FlowSessionId;
+  focusSessionId?: FocusSessionId;
+  mood?: string;
+  energy?: number;
+  body?: string;
+  followUpItemId?: ItemId;
+};
+
+export type Suggestion = Timestamped & {
+  id: SuggestionId;
+  workspaceId: WorkspaceId;
+  actorId: ActorId;
+  targetActorId: ActorId;
+  kind: SuggestionKind;
+  title: string;
+  status: SuggestionStatus;
+  itemId?: ItemId;
+  flowSessionId?: FlowSessionId;
+  rationale?: string;
+  payload: JsonObject;
+};
+
+export type BehavioralInsight = Timestamped & {
+  id: BehavioralInsightId;
+  workspaceId: WorkspaceId;
+  actorId: ActorId;
+  targetActorId: ActorId;
+  kind: BehavioralInsightKind;
+  title: string;
+  body: string;
+  status: BehavioralInsightStatus;
+  confidence?: number;
+  evidence: JsonObject;
+};
+
 export type ActivityLog = {
   id: ActivityLogId;
   workspaceId: WorkspaceId;
@@ -186,7 +297,13 @@ export type ActivityLog = {
     | 'item_assignment'
     | 'item_plan'
     | 'item_occurrence'
-    | 'comment';
+    | 'comment'
+    | 'flow_session'
+    | 'focus_session'
+    | 'transition_event'
+    | 'reflection'
+    | 'suggestion'
+    | 'behavioral_insight';
   entityId: string;
   action: string;
   before?: JsonObject;
@@ -220,4 +337,13 @@ export type TodayItemView = {
   eventState?: 'upcoming' | 'in_progress' | 'past';
   isOverdue: boolean;
   dateLabel: string;
+};
+
+export type DailyFlowView = {
+  flowSession: FlowSession;
+  current?: TodayItemView;
+  next?: TodayItemView;
+  pendingSuggestions: Suggestion[];
+  activeInsights: BehavioralInsight[];
+  transitionPrompt?: string;
 };

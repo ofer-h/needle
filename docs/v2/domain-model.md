@@ -9,6 +9,9 @@ Core principles:
 - Items are the center of the product.
 - Subtasks are child items, not embedded checklist rows.
 - Scheduling is separate from item identity.
+- Daily flow is a first-class experience, not just a list of items.
+- Transitions and reflections are first-class product moments.
+- AI suggestions are optional, visible, reversible, and actor-attributed.
 - Collaboration is actor-based, not only user-based.
 - View labels are derived, not persisted as truth.
 - Every important change can be attributed and audited.
@@ -134,6 +137,91 @@ Occurrences support:
 - external calendar IDs
 - cancellation
 
+### Flow Session
+
+A flow session represents one actor's intentional day.
+
+It answers:
+
+- What day is this?
+- Who is flowing through it?
+- What is currently active?
+- Is the actor focused, transitioning, paused, reviewing, or done?
+
+Flow sessions let the product model "what should I focus on right now?" without burying that state inside UI components.
+
+### Focus Session
+
+A focus session records actual time spent with an item active.
+
+It can start from:
+
+- User manually starting a task.
+- User resuming after a transition.
+- AI suggestion accepted by the user.
+
+It can end with:
+
+- Completed.
+- Paused.
+- Interrupted.
+- Abandoned.
+
+Focus sessions support future insights such as "deep work tends to go better before 2 PM" without turning completion into a guilt mechanic.
+
+### Transition Event
+
+A transition event records the space between two tasks/events.
+
+Examples:
+
+- Close previous task.
+- Reset after meeting.
+- Start next task.
+- Take recovery break.
+
+Transition events are intentionally lightweight. They are not heavy journaling.
+
+### Reflection
+
+A reflection is a short structured note captured at completion or transition time.
+
+Examples:
+
+- Done.
+- Needs follow-up.
+- Revisit later.
+- Energy was low.
+- This was harder than expected.
+
+Reflections feed future guidance and accountability without requiring users to maintain a journal.
+
+### Suggestion
+
+Suggestions are AI or human recommendations that the user can accept, dismiss, or snooze.
+
+Examples:
+
+- Move task after meeting.
+- Reduce overload.
+- Cluster similar tasks.
+- Insert break.
+- Split task into child items.
+
+Suggestions are not silent automation. They are visible, optional, and actor-attributed.
+
+### Behavioral Insight
+
+A behavioral insight is an observed pattern surfaced by AI or a coach.
+
+Examples:
+
+- You usually avoid deep work after 4 PM.
+- Tuesdays are overloaded.
+- You have not had recovery time today.
+
+Insights should be gentle and useful. They should never become shame mechanics.
+
 ### Source
 
 A source records where an item came from:
@@ -174,6 +262,9 @@ Today UI should derive:
 - priority color
 - subtask progress
 - event state
+- current focus card
+- transition prompt
+- overload/flow indicators
 
 These are not canonical domain fields.
 

@@ -23,6 +23,18 @@ Goal: keep Today UI working while changing the mock store shape.
   - event rows
 - Keep existing components mostly unchanged.
 
+## Phase B2 - Daily Flow State
+
+Goal: make "what should I focus on right now?" explicit.
+
+- Add v2 fixture records for `FlowSession`, `FocusSession`, `TransitionEvent`, `Reflection`, and `Suggestion`.
+- Add selectors for:
+  - current focus item
+  - next item
+  - transition state
+  - pending suggestions
+- Keep the UI calm: one current-focus affordance, not a dashboard.
+
 ## Phase C - Subtasks As Child Items
 
 - Remove `Task.subtasks`.
@@ -62,3 +74,4 @@ Stop and re-plan if:
 - A shared task cannot explain per-user state.
 - A coach/AI action cannot be attributed to an actor.
 - Any DB table needs workspace scope but lacks it.
+- A flow/AI feature cannot explain whether it is guidance, observation, or user-approved action.
