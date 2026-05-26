@@ -1,16 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
-import type { ISODateTime, Intervention, ItemId } from '../../../shared/domain-v2';
+import { useEffect, useMemo, useRef } from 'react';
+import type { ISODateTime, InterventionId } from '../../../shared/domain-v2';
 import { useV2Store } from '../../state/store-v2';
 import { nowIso, useDevClock } from '../../utils/dev-clock';
 import EscalatedBanner from './EscalatedBanner';
 import ModalCapture from './ModalCapture';
-import Torchlight from './Torchlight';
-
-function getTargetRect(targetItemId: string | undefined): DOMRect | null {
-  if (targetItemId === undefined) return null;
-  const el = document.querySelector(`[data-v2-item-id="${targetItemId}"]`);
-  return el?.getBoundingClientRect() ?? null;
-}
 
 export default function InterventionLayer() {
   const meActorId = useV2Store((s) => s.meActorId);
@@ -42,13 +35,56 @@ export default function InterventionLayer() {
   useEffect(() => {
     if (scheduledDueIds === '') return;
     scheduledDueIds.split(',').forEach((id) => {
-      activateIntervention(id as Intervention['id'], now);
+      activateIntervention(id as InterventionId, now);
     });
   }, [scheduledDueIds, now, activateIntervention]);
 
-  if (surfacing.length === 0) return null;
+  const top = surfacing.length === 0 ? null : [...surfacing].sort((a, b) => b.intensity - a.intensity)[0]!;
+  const activeTorchId = top?.strategy === 'attention_takeover_torch' ? top.id : null;
+  const activeTorchIntervention = activeTorchId !== null ? top : null;
+  const lastTorchIdRef = useRef<InterventionId | null>(null);
 
-  const top = [...surfacing].sort((a, b) => b.intensity - a.intensity)[0]!;
+  // Drive the system-level torch window through IPC.
+  useEffect(() => {
+    if (window.api === undefined) return;
+    if (activeTorchIntervention !== null && activeTorchId !== lastTorchIdRef.current) {
+      const title =
+        typeof activeTorchIntervention.payload.title === 'string'
+          ? activeTorchIntervention.payload.title
+          : 'Time to move';
+      const subtitle =
+        typeof activeTorchIntervention.payload.subtitle === 'string'
+          ? activeTorchIntervention.payload.subtitle
+          : 'Acknowledge to continue.';
+      window.api.torch.show({
+        correlationId: activeTorchIntervention.id,
+        title,
+        subtitle,
+        durationMs: 30_000,
+      });
+      lastTorchIdRef.current = activeTorchId;
+    } else if (activeTorchIntervention === null && lastTorchIdRef.current !== null) {
+      window.api.torch.hide();
+      lastTorchIdRef.current = null;
+    }
+  }, [activeTorchId, activeTorchIntervention]);
+
+  // Receive torch close events and route to the right store action.
+  useEffect(() => {
+    if (window.api === undefined) return;
+    const unsub = window.api.torch.onClosed((payload) => {
+      const id = payload.correlationId as InterventionId;
+      if (payload.reason === 'acknowledged') {
+        resolveIntervention(id, 'acknowledged', nowIso());
+      } else {
+        escalateIntervention(id, nowIso());
+      }
+    });
+    return unsub;
+  }, [resolveIntervention, escalateIntervention]);
+
+  if (surfacing.length === 0) return null;
+  if (top === null) return null;
 
   if (top.strategy === 'modal_capture') {
     const entries = captureEntries.filter(
@@ -66,18 +102,8 @@ export default function InterventionLayer() {
   }
 
   if (top.strategy === 'attention_takeover_torch') {
-    const targetItemId = typeof top.payload.targetItemId === 'string' ? top.payload.targetItemId : undefined;
-    const title = typeof top.payload.title === 'string' ? top.payload.title : 'Time to move';
-    const subtitle = typeof top.payload.subtitle === 'string' ? top.payload.subtitle : 'Acknowledge to continue.';
-    return (
-      <TorchlightForTarget
-        targetItemId={targetItemId as ItemId | undefined}
-        title={title}
-        subtitle={subtitle}
-        onAcknowledge={() => resolveIntervention(top.id, 'acknowledged', nowIso())}
-        onTimeout={() => escalateIntervention(top.id, nowIso())}
-      />
-    );
+    // Rendered by the system torch BrowserWindow via IPC effect above. Nothing to render in-window.
+    return null;
   }
 
   if (top.strategy === 'escalated_alert') {
@@ -90,44 +116,4 @@ export default function InterventionLayer() {
   }
 
   return null;
-}
-
-/**
- * Re-measures the target's DOMRect on resize and a short interval so the
- * spotlight tracks layout shifts during the slice. Cheap for one element.
- */
-function TorchlightForTarget(props: {
-  targetItemId: ItemId | undefined;
-  title: string;
-  subtitle: string;
-  onAcknowledge: () => void;
-  onTimeout: () => void;
-}) {
-  const [rect, setRect] = useState<DOMRect | null>(() => getTargetRect(props.targetItemId));
-
-  useEffect(() => {
-    function measure() {
-      setRect(getTargetRect(props.targetItemId));
-    }
-    measure();
-    const interval = window.setInterval(measure, 500);
-    window.addEventListener('resize', measure);
-    window.addEventListener('scroll', measure, true);
-    return () => {
-      window.clearInterval(interval);
-      window.removeEventListener('resize', measure);
-      window.removeEventListener('scroll', measure, true);
-    };
-  }, [props.targetItemId]);
-
-  return (
-    <Torchlight
-      active
-      title={props.title}
-      subtitle={props.subtitle}
-      targetRect={rect}
-      onAcknowledge={props.onAcknowledge}
-      onTimeout={props.onTimeout}
-    />
-  );
 }

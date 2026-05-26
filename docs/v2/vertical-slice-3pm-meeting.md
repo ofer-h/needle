@@ -19,9 +19,48 @@ Build the first end-to-end product moment using the v2 contract: an unmissable 3
 
 ## Status pointer
 
-▸ **Step 8 — verification by user.** Run `npm start`, walk the dev clock through 14:54 → 14:55 → 14:59 → 15:00, and note what feels right / wrong.
+▸ **Step 9 done; Step 8 still open** — system-level torch BrowserWindow implemented. User to verify by running `npm start` and jumping the dev clock to 14:59.
 
 (When resuming: update this line first, before doing any other work.)
+
+### Step 9 — System-level torch (added 2026-05-26, done)
+
+User feedback after Step 7: the torch must be a full-system overlay, not just inside the main window. Wherever the user is on their mac, the torch appears.
+
+Implemented:
+
+- `src/main/windows/torch.ts` — `showTorch(payload)` opens a transparent, frameless BrowserWindow covering the primary display's bounds. `alwaysOnTop('screen-saver')`, `setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })`, `skipTaskbar`, `fullscreenable: false`. Loads the renderer with `?mode=torch`.
+- `src/main/ipc/index.ts` — handlers for `torch:show`, `torch:hide`, `torch:dismiss`. The dismiss handler forwards `torch:closed` to the main-app window and closes the torch window.
+- `src/shared/ipc-contracts.ts` — `TorchShowPayload`, `TorchDismissReason`, `TorchClosePayload` types with a `correlationId` so the main-app renderer can match the close back to the originating intervention.
+- `src/preload/index.ts` + `src/renderer/window.d.ts` — `window.api.torch.{show, hide, dismiss, onPayload, onClosed}`.
+- `src/renderer/main.tsx` — checks `?mode=torch` query, mounts either `<App />` or `<TorchWindow />`. Adds `body.torch-mode` class so torch-only CSS doesn't leak into the main app.
+- `src/renderer/components/Intervention/TorchWindow.tsx` + `.css` — full-window component that listens for `torch:payload`, tracks `mousemove`, renders `Torchlight` with a cursor-driven spotlight. Cursor IS the torch.
+- `Torchlight.tsx` extended — added `cursor?: { x, y, radius }` prop, `showCta`, `timeoutMs`. In cursor mode the spotlight follows the mouse via inline mask updates.
+- `InterventionLayer.tsx` rewritten — for `attention_takeover_torch`, fires `window.api.torch.show()` (an effect tracks the active torch id and hides on transition). Listens for `torch:closed` and routes to `resolveIntervention` (acknowledged) or `escalateIntervention` (timeout).
+
+Architectural notes:
+
+- Mouse is captured by the torch window (not click-through). The user cannot interact with apps underneath until they dismiss. Trade-off: "uncompromising attention" vs "cursor-following-everywhere distraction." Acceptable for the first cut.
+- Primary display only. Multi-display extension is a follow-up: iterate `screen.getAllDisplays()` and open a torch window per display, share the same correlationId, dismiss all on first acknowledge.
+- The CSS for torch transparency is scoped by `body.torch-mode` so the main window keeps its normal opaque background.
+- Vite verified to bundle main + preload + renderer cleanly.
+
+Architecture:
+- New Electron BrowserWindow created on demand by main process.
+- Properties: `transparent: true`, `frame: false`, `alwaysOnTop` at `'screen-saver'` level, `setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })`, `skipTaskbar: true`, `fullscreenable: false`, `focusable: true`, `resizable: false`, covers the primary display's full bounds.
+- Mouse is captured (NOT click-through). The user cannot interact with other apps until they dismiss. That is the "take the user's attention" experience.
+- Cursor IS the torch — spotlight follows `mousemove` on the overlay. Matches the user's original brainstorm.
+- 30s timer fires `escalateIntervention` if the user does not dismiss.
+- Single primary display for v1; multi-display TODO.
+
+Reuses the existing renderer bundle with a `?mode=torch` URL flag — `src/renderer/main.tsx` checks the query string and mounts either `<App />` or `<TorchWindow />`. No new Vite entry needed.
+
+New IPC channels (`src/shared/ipc-contracts.ts`):
+- `torch:show` (renderer → main): `{ title, subtitle, durationMs }` — open the window.
+- `torch:hide` (renderer → main): force-close (e.g. when the source intervention is cancelled).
+- `torch:payload` (main → torch renderer): pushes title/subtitle/durationMs into the torch window after it loads.
+- `torch:dismiss` (torch renderer → main): user clicked CTA OR the timer elapsed. Reason: `'acknowledged' | 'timeout'`.
+- `torch:closed` (main → main-app renderer): forwarded after the torch window closes, so InterventionLayer can call `resolveIntervention` / `escalateIntervention`.
 
 ### Progress log
 

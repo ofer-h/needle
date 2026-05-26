@@ -1,0 +1,20 @@
+body.torch-mode {
+  background: transparent !important;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+body.torch-mode html,
+body.torch-mode #root {
+  background: transparent;
+  width: 100%;
+  height: 100%;
+}
+
+.torch-window {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+}

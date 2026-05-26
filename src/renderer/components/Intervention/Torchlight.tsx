@@ -5,12 +5,19 @@ export type TorchlightProps = {
   active: boolean;
   title: string;
   subtitle: string;
+  /** When set, the spotlight is centered on this rect (legacy in-window mode). */
   targetRect: DOMRect | null;
+  /** When set, the spotlight is centered on this cursor position with a fixed radius. */
+  cursor?: { x: number; y: number; radius?: number } | null;
+  /** When false, the dismiss CTA is hidden — used when the host process drives timing. */
+  showCta?: boolean;
+  /** Override the default 30s auto-timeout. Pass 0 to disable. */
+  timeoutMs?: number;
   onAcknowledge: () => void;
   onTimeout: () => void;
 };
 
-const TIMEOUT_MS = 30_000;
+const DEFAULT_TIMEOUT_MS = 30_000;
 const DEFAULT_RADIUS = 200;
 const HALO_PADDING = 60;
 const RADIUS_FACTOR = 0.8;
@@ -22,7 +29,17 @@ type SpotlightGeometry = {
   radius: number;
 };
 
-function computeSpotlight(rect: DOMRect | null): SpotlightGeometry {
+function computeSpotlight(
+  rect: DOMRect | null,
+  cursor?: { x: number; y: number; radius?: number } | null,
+): SpotlightGeometry {
+  if (cursor) {
+    return {
+      cx: cursor.x,
+      cy: cursor.y,
+      radius: cursor.radius ?? DEFAULT_RADIUS,
+    };
+  }
   if (rect === null) {
     return {
       cx: window.innerWidth / 2,
@@ -42,6 +59,9 @@ export default function Torchlight({
   title,
   subtitle,
   targetRect,
+  cursor,
+  showCta = true,
+  timeoutMs = DEFAULT_TIMEOUT_MS,
   onAcknowledge,
   onTimeout,
 }: TorchlightProps): JSX.Element | null {
@@ -54,17 +74,17 @@ export default function Torchlight({
     onTimeoutRef.current = onTimeout;
   }, [onTimeout]);
 
-  // 30s auto-timeout. Cleared on unmount, when `active` flips to false,
+  // Auto-timeout. Cleared on unmount, when `active` flips to false,
   // and re-armed if the parent toggles `active` back on.
   useEffect(() => {
-    if (!active) return;
+    if (!active || timeoutMs <= 0) return;
     const id = window.setTimeout(() => {
       onTimeoutRef.current();
-    }, TIMEOUT_MS);
+    }, timeoutMs);
     return () => {
       window.clearTimeout(id);
     };
-  }, [active]);
+  }, [active, timeoutMs]);
 
   // Lock background scroll while the overlay is up.
   useEffect(() => {
@@ -84,7 +104,7 @@ export default function Torchlight({
 
   if (!active) return null;
 
-  const { cx, cy, radius } = computeSpotlight(targetRect);
+  const { cx, cy, radius } = computeSpotlight(targetRect, cursor);
 
   // The mask cuts a soft circular hole over the target. The inner stop
   // (0 → 70% of radius) is fully transparent (no scrim, no blur shows there);
@@ -127,15 +147,17 @@ export default function Torchlight({
           {title}
         </h2>
         <p className="torchlight__subtitle">{subtitle}</p>
-        <button
-          ref={ctaRef}
-          type="button"
-          className="torchlight__cta"
-          onClick={onAcknowledge}
-          onKeyDown={handleCtaKeyDown}
-        >
-          I&rsquo;m moving to it
-        </button>
+        {showCta && (
+          <button
+            ref={ctaRef}
+            type="button"
+            className="torchlight__cta"
+            onClick={onAcknowledge}
+            onKeyDown={handleCtaKeyDown}
+          >
+            I&rsquo;m moving to it
+          </button>
+        )}
       </div>
     </div>
   );
