@@ -2,6 +2,8 @@ import { useEffect } from 'react';
 import { useAppStore } from './state/store';
 import TodayScreen from './components/Today/TodayScreen';
 import CaptureScreen from './components/Capture/CaptureScreen';
+import DevClockControl from './components/DevTools/DevClockControl';
+import InterventionLayer from './components/Intervention/InterventionLayer';
 import type { Screen } from '../shared/types';
 
 export default function App() {
@@ -67,6 +69,8 @@ export default function App() {
       {screen === 'capture' && (
         <CaptureScreen onBack={() => setScreen('today')} />
       )}
+      <InterventionLayer />
+      <DevClockControl />
     </>
   );
 }

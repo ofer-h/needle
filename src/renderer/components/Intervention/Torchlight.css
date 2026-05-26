@@ -1,0 +1,101 @@
+/* Torchlight — at T-1 min before an unmissable meeting, the screen dims and a
+ * soft circular spotlight draws the eye to the next item. Calm, uncompromising.
+ *
+ * Approach: a single fixed-position scrim with `backdrop-filter: blur(8px)` and
+ * a dark tint; a radial-gradient `mask-image` punches a soft hole over the
+ * target. The masked-out region renders nothing at all — so neither the blur
+ * nor the scrim bleed into the spotlight.
+ *
+ * The spotlight position lives on the mask, so a CSS transition on `mask-image`
+ * gives a smooth slide when the parent moves `targetRect`. We use a slightly
+ * longer ease-out than the global `--duration-slow` because this motion is
+ * deliberate, not snappy.
+ */
+
+.torchlight {
+  position: fixed;
+  inset: 0;
+  z-index: 8500;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 12vh;
+}
+
+.torchlight__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(22, 22, 26, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: mask-image 350ms var(--ease-out), -webkit-mask-image 350ms var(--ease-out);
+  pointer-events: none;
+}
+
+.torchlight__card {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  max-width: 420px;
+  padding: var(--space-6) var(--space-8);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-5);
+  box-shadow: var(--shadow-win);
+  text-align: center;
+}
+
+.torchlight__title {
+  font-size: var(--text-22);
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.torchlight__subtitle {
+  font-size: var(--text-14);
+  color: var(--ink-2);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.torchlight__cta {
+  margin-top: var(--space-3);
+  height: 44px;
+  padding: 0 var(--space-6);
+  font-family: var(--sans);
+  font-size: var(--text-14);
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  color: #2a1f08;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-3);
+  cursor: pointer;
+  transition: opacity var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.torchlight__cta:hover {
+  opacity: 0.92;
+}
+
+.torchlight__cta:active {
+  transform: translateY(0.5px);
+}
+
+.torchlight__cta:focus-visible {
+  outline: 2px solid var(--border-strong);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .torchlight__backdrop {
+    transition: none;
+  }
+  .torchlight__cta {
+    transition: none;
+  }
+}

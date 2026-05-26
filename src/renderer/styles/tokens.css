@@ -22,10 +22,18 @@
   --surface-active: #e6dccb;
   --surface-disabled: var(--sand-200);
 
+  /* Semantic surface aliases — see design/tokens.md migration table */
+  --surface-raised: var(--surface);
+  --surface-hover: var(--surface-sub);
+
   /* Borders (Radix steps 6–8) */
   --hairline: rgba(34, 24, 12, 0.08);
   --hairline-2: rgba(34, 24, 12, 0.14);
   --border-strong: rgba(34, 24, 12, 0.32);
+
+  /* Semantic border aliases */
+  --border-subtle: var(--hairline);
+  --border-default: var(--hairline-2);
 
   /* Ink (Apple HIG label tiers — primary→quaternary) */
   --ink: var(--sand-700);
@@ -67,10 +75,18 @@
   --surface-active: #34343b;
   --surface-disabled: var(--ink-700);
 
+  /* Semantic surface aliases — see design/tokens.md migration table */
+  --surface-raised: var(--surface);
+  --surface-hover: var(--surface-sub);
+
   /* Borders */
   --hairline: rgba(255, 255, 255, 0.07);
   --hairline-2: rgba(255, 255, 255, 0.12);
   --border-strong: rgba(255, 255, 255, 0.28);
+
+  /* Semantic border aliases */
+  --border-subtle: var(--hairline);
+  --border-default: var(--hairline-2);
 
   /* Ink — `--ink-3` recalibrated from #807a70 → #9a948a for 5.6:1 (was 4.2:1, failed AA) */
   --ink: var(--ink-50);

@@ -1,0 +1,37 @@
+.escalated-banner {
+  position: fixed;
+  top: var(--space-4);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 8800;
+  width: min(560px, calc(100vw - var(--space-8)));
+  background: var(--urgent);
+  color: #fff;
+  border-radius: var(--radius-3);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.25);
+}
+
+.escalated-banner__body {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+}
+
+.escalated-banner__copy {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.escalated-banner__title {
+  font-weight: 600;
+  font-size: var(--text-14);
+  letter-spacing: -0.005em;
+}
+
+.escalated-banner__subtitle {
+  font-size: var(--text-13);
+  opacity: 0.92;
+}

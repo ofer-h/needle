@@ -16,6 +16,7 @@ import TodayToolbar from './TodayToolbar';
 import QuickAddRow from './QuickAddRow';
 import UpcomingFooter from './UpcomingFooter';
 import CaptureFab from './CaptureFab';
+import V2TodayIsland from '../Intervention/V2TodayIsland';
 import GapDropZone from './dnd/GapDropZone';
 import OverlayRow from './dnd/OverlayRow';
 import { anchorsBeforeGap, computeNewSlotOrder } from './dnd/reorder';
@@ -227,6 +228,8 @@ export default function TodayScreen({ onNavigateCapture }: Props) {
         </DndContext>
 
         <QuickAddRow onActivate={onNavigateCapture} />
+
+        <V2TodayIsland />
 
         <UpcomingFooter
           items={upcomingItems}

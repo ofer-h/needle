@@ -19,7 +19,7 @@ Build the first end-to-end product moment using the v2 contract: an unmissable 3
 
 ## Status pointer
 
-▸ **Steps 5 + 6 next** — modal capture + torchlight overlay (run in parallel).
+▸ **Step 8 — verification by user.** Run `npm start`, walk the dev clock through 14:54 → 14:55 → 14:59 → 15:00, and note what feels right / wrong.
 
 (When resuming: update this line first, before doing any other work.)
 
@@ -31,6 +31,40 @@ Build the first end-to-end product moment using the v2 contract: an unmissable 3
   - `src/renderer/utils/dev-clock.ts` — zustand-based frozen-time singleton; `nowIso()` reads frozen or real.
   - `src/renderer/components/DevTools/DevClockControl.tsx` — floating preset jumper (14:54 / 14:55 / 14:59 / 15:00 / 15:01 + resume).
   - Not yet mounted in `App.tsx` / `TodayScreen.tsx` — wiring deferred to Step 7.
+  - Committed as `ed22b05`.
+- 2026-05-26 — Step 5 complete (modal capture).
+  - `src/renderer/components/Intervention/ModalCapture.tsx` + `.css` — props are `{ intervention, entries, onClose }`; uses `useV2Store` for `addCaptureEntry` / `promoteCaptureEntry` / `dismissCaptureEntry` / `resolveIntervention`. Cmd/Ctrl+Enter commits a draft. Closing with entries records `completed`; closing empty records `dismissed`. Locks body scroll while open.
+  - Typecheck + lint clean.
+- 2026-05-26 — Step 6 complete (torchlight overlay, via background subagent).
+  - `src/renderer/components/Intervention/Torchlight.tsx` + `.css` — self-contained, no store dependency.
+  - Decision the agent made: `mask-image` + radial-gradient on a single backdrop element (not SVG, not clip-path). Reason: masked-out regions render nothing — neither dim nor blur leaks into the spotlight. Mask transitions get smooth slide for free.
+  - Spotlight follows `targetRect`: center on rect, radius = `max(w,h) * 0.8 + 60`. Falls back to viewport center @ 200px when null.
+  - 30s auto-timeout via `useRef` to avoid resetting the timer on callback identity changes.
+  - `prefers-reduced-motion` disables transitions.
+  - Concerns flagged: no portal — parent must mount near root or a transformed ancestor will break z-index escape (handled in Step 7: mounted in App.tsx).
+- 2026-05-26 — Token migration patch.
+  - The new components referenced `--surface-raised` / `--border-subtle` / `--surface-hover` / `--border-default` which were target names in `design/tokens.md` but not yet defined.
+  - Added them as aliases in `src/renderer/styles/tokens.css` for both light and dark themes (mapped per the migration table in `design/tokens.md`).
+  - Fixed token names in `DevClockControl.css` and `ModalCapture.css` to use the project's step-based scale (`--space-3`, `--text-13`, `--radius-3` etc.) instead of pixel-named tokens.
+- 2026-05-26 — Step 7 complete (wiring).
+  - `src/renderer/components/Intervention/InterventionLayer.tsx` — reads `useV2Store` + `useDevClock`, derives surfacing interventions (active OR scheduled-but-due), auto-activates the scheduled-but-due ones via `useEffect`, routes the highest-intensity one to the right component by strategy. Re-measures the torch's target rect on resize/scroll/500ms interval.
+  - `src/renderer/components/Intervention/EscalatedBanner.tsx` + `.css` — top banner stand-in for what would be a push notification.
+  - `src/renderer/components/Intervention/V2TodayIsland.tsx` + `.css` — renders the v2 prep + meeting items so the torch has a DOM target (`data-v2-item-id`). Also shows captured-but-unpromoted entries inline.
+  - Mounted `<InterventionLayer />` and `<DevClockControl />` in `App.tsx` (top-level, no transformed ancestors).
+  - Mounted `<V2TodayIsland />` inside `TodayScreen` between QuickAddRow and UpcomingFooter.
+  - Typecheck + lint clean.
+
+### Dry-run trace (what should happen)
+
+| Clock | Surfacing | Renders | Side effects |
+|---|---|---|---|
+| live (not jumped) | none | dev clock + v2 island only | — |
+| 14:54 | none | same | — |
+| 14:55 | capture (was scheduled) | ModalCapture | `activateIntervention` runs, status=active. User types thoughts → `addCaptureEntry`. "Promote to task" → new `Item`. "Done" → `resolveIntervention(outcome='completed')`. |
+| 14:59 | torch (now due) | Torchlight pointing at Manager 1:1 row | `activateIntervention(torch)`. User clicks CTA → `resolveIntervention(outcome='acknowledged')`. If no click for 30s → `escalateIntervention` activates the chained `escalated_alert`. |
+| 15:00 (no ack) | escalation | EscalatedBanner | User dismisses → `resolveIntervention(outcome='acknowledged')`. |
+
+Every transition writes `ActivityLog` rows attributed to the correct actor (user vs system).
 
 ---
 
@@ -179,7 +213,9 @@ Other steps are tightly sequential (fixture → selectors → wiring) and not wo
 
 Captured as they arise; resolved before they block.
 
-- (none yet)
+- If the user doesn't resolve the modal capture before 14:59, the torch (higher intensity) preempts it visually. The capture intervention stays `status='active'` in the store — should it auto-resolve to `dismissed`/`completed` when preempted? Acceptable wart for the slice; revisit after the user walks through the scenario.
+- The V2 island subscribes to the whole v2 store (no selector). Re-renders on every store change. Fine for the slice; tune with selectors when the v2 store fans out.
+- The InterventionLayer activates scheduled-but-due interventions inside a `useEffect`. If multiple slice scenarios run in real-time (not frozen), the effect re-runs as `now` ticks. The early-return on empty `scheduledDueIds` keeps it harmless. Real-time ticking is not part of this slice — `useNow` integration is later.
 
 ---
 

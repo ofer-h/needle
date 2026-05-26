@@ -1,0 +1,121 @@
+.modal-capture {
+  position: fixed;
+  inset: 0;
+  z-index: 7000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+}
+
+.modal-capture__scrim {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.modal-capture__card {
+  position: relative;
+  width: min(560px, 100%);
+  max-height: calc(100vh - var(--space-10) * 2);
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-4);
+  box-shadow: 0 20px 60px rgb(0 0 0 / 0.25);
+  color: var(--ink);
+}
+
+.modal-capture__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.modal-capture__title {
+  font-family: var(--serif);
+  font-size: var(--text-22);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin: 0;
+}
+
+.modal-capture__subtitle {
+  font-size: var(--text-13);
+  color: var(--ink-2);
+  margin: 0;
+}
+
+.modal-capture__input {
+  appearance: none;
+  width: 100%;
+  resize: vertical;
+  min-height: 80px;
+  padding: var(--space-3);
+  background: var(--surface-sub);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-3);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: var(--text-15);
+  line-height: 1.45;
+}
+
+.modal-capture__input:focus {
+  outline: none;
+  border-color: var(--border-strong);
+}
+
+.modal-capture__draft-actions {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
+.modal-capture__entries {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.modal-capture__entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--surface-sub);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-3);
+}
+
+.modal-capture__entry-body {
+  flex: 1;
+  font-size: var(--text-13);
+  color: var(--ink);
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.modal-capture__entry-actions {
+  display: flex;
+  gap: var(--space-1);
+  flex-shrink: 0;
+}
+
+.modal-capture__footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border-subtle);
+}
