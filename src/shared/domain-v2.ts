@@ -16,6 +16,14 @@ export type TransitionEventId = Brand<string, 'TransitionEventId'>;
 export type ReflectionId = Brand<string, 'ReflectionId'>;
 export type SuggestionId = Brand<string, 'SuggestionId'>;
 export type BehavioralInsightId = Brand<string, 'BehavioralInsightId'>;
+export type InvitationId = Brand<string, 'InvitationId'>;
+export type DeviceId = Brand<string, 'DeviceId'>;
+export type NotificationPreferenceId = Brand<string, 'NotificationPreferenceId'>;
+export type NotificationEventId = Brand<string, 'NotificationEventId'>;
+export type NotificationDeliveryId = Brand<string, 'NotificationDeliveryId'>;
+export type AppSessionId = Brand<string, 'AppSessionId'>;
+export type UsageEventId = Brand<string, 'UsageEventId'>;
+export type SyncCursorId = Brand<string, 'SyncCursorId'>;
 export type ActivityLogId = Brand<string, 'ActivityLogId'>;
 export type SyncOperationId = Brand<string, 'SyncOperationId'>;
 
@@ -88,6 +96,32 @@ export type BehavioralInsightKind =
   | 'procrastination_pattern'
   | 'recovery_gap';
 export type BehavioralInsightStatus = 'active' | 'dismissed' | 'stale' | 'archived';
+export type InvitationStatus = 'pending' | 'accepted' | 'revoked' | 'expired';
+export type DevicePlatform = 'macos' | 'web' | 'ios' | 'android';
+export type PushProvider = 'apns' | 'fcm' | 'expo' | 'web_push' | 'none';
+export type NotificationChannel = 'in_app' | 'system' | 'push' | 'email';
+export type NotificationTopic =
+  | 'current_focus'
+  | 'transition'
+  | 'task_reminder'
+  | 'calendar'
+  | 'coach'
+  | 'accountability'
+  | 'ai_suggestion'
+  | 'daily_review'
+  | 'sync'
+  | 'system';
+export type NotificationPriority = 'low' | 'normal' | 'high';
+export type NotificationStatus =
+  | 'queued'
+  | 'sent'
+  | 'delivered'
+  | 'opened'
+  | 'dismissed'
+  | 'failed'
+  | 'cancelled';
+export type AppSurface = 'desktop' | 'web' | 'mobile' | 'server';
+export type SyncDirection = 'push' | 'pull';
 export type SyncConflictState = 'none' | 'pending' | 'resolved' | 'needs_review';
 
 export type Timestamped = {
@@ -284,6 +318,101 @@ export type BehavioralInsight = Timestamped & {
   evidence: JsonObject;
 };
 
+export type Invitation = Timestamped & {
+  id: InvitationId;
+  workspaceId: WorkspaceId;
+  itemId?: ItemId;
+  invitedEmail?: string;
+  invitedUserId?: UserId;
+  invitedActorKind: Extract<ActorKind, 'user' | 'coach' | 'accountability_partner'>;
+  workspaceRole?: WorkspaceRole;
+  assignmentRole?: AssignmentRole;
+  tokenHash: string;
+  status: InvitationStatus;
+  invitedByActorId: ActorId;
+  acceptedByUserId?: UserId;
+  expiresAt?: ISODateTime;
+  acceptedAt?: ISODateTime;
+};
+
+export type Device = Timestamped & {
+  id: DeviceId;
+  userId: UserId;
+  actorId?: ActorId;
+  platform: DevicePlatform;
+  appVersion?: string;
+  deviceName?: string;
+  pushProvider: PushProvider;
+  pushTokenHash?: string;
+  lastSeenAt?: ISODateTime;
+};
+
+export type NotificationPreference = Timestamped & {
+  id: NotificationPreferenceId;
+  workspaceId: WorkspaceId;
+  actorId: ActorId;
+  channel: NotificationChannel;
+  topic: NotificationTopic;
+  enabled: boolean;
+  quietHoursStart?: LocalTime;
+  quietHoursEnd?: LocalTime;
+  timezone: TimeZone;
+  metadata: JsonObject;
+};
+
+export type NotificationEvent = Timestamped & {
+  id: NotificationEventId;
+  workspaceId: WorkspaceId;
+  actorId: ActorId;
+  sourceActorId?: ActorId;
+  topic: NotificationTopic;
+  title: string;
+  body?: string;
+  itemId?: ItemId;
+  flowSessionId?: FlowSessionId;
+  suggestionId?: SuggestionId;
+  scheduledFor?: ISODateTime;
+  priority: NotificationPriority;
+  status: NotificationStatus;
+  metadata: JsonObject;
+};
+
+export type NotificationDelivery = Timestamped & {
+  id: NotificationDeliveryId;
+  workspaceId: WorkspaceId;
+  notificationEventId: NotificationEventId;
+  deviceId?: DeviceId;
+  channel: NotificationChannel;
+  provider?: string;
+  providerMessageId?: string;
+  status: NotificationStatus;
+  error?: string;
+  attemptedAt: ISODateTime;
+};
+
+export type AppSession = {
+  id: AppSessionId;
+  workspaceId?: WorkspaceId;
+  actorId?: ActorId;
+  deviceId?: DeviceId;
+  surface: AppSurface;
+  appVersion?: string;
+  startedAt: ISODateTime;
+  endedAt?: ISODateTime;
+  createdAt: ISODateTime;
+  updatedAt: ISODateTime;
+};
+
+export type UsageEvent = {
+  id: UsageEventId;
+  workspaceId?: WorkspaceId;
+  actorId?: ActorId;
+  appSessionId?: AppSessionId;
+  eventName: string;
+  properties: JsonObject;
+  createdAt: ISODateTime;
+};
+
 export type ActivityLog = {
   id: ActivityLogId;
   workspaceId: WorkspaceId;
@@ -303,7 +432,11 @@ export type ActivityLog = {
     | 'transition_event'
     | 'reflection'
     | 'suggestion'
-    | 'behavioral_insight';
+    | 'behavioral_insight'
+    | 'invitation'
+    | 'notification_preference'
+    | 'notification_event'
+    | 'notification_delivery';
   entityId: string;
   action: string;
   before?: JsonObject;
@@ -315,6 +448,7 @@ export type SyncOperation = {
   id: SyncOperationId;
   workspaceId: WorkspaceId;
   actorId: ActorId;
+  deviceId?: DeviceId;
   operationType: 'create' | 'update' | 'archive' | 'restore' | 'delete';
   entityType: ActivityLog['entityType'];
   entityId: string;
@@ -322,6 +456,18 @@ export type SyncOperation = {
   localCreatedAt: ISODateTime;
   syncedAt?: ISODateTime;
   conflictState: SyncConflictState;
+};
+
+export type SyncCursor = {
+  id: SyncCursorId;
+  workspaceId: WorkspaceId;
+  actorId: ActorId;
+  deviceId: DeviceId;
+  direction: SyncDirection;
+  cursor: string;
+  lastSyncedAt?: ISODateTime;
+  createdAt: ISODateTime;
+  updatedAt: ISODateTime;
 };
 
 export type TodayItemView = {

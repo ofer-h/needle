@@ -339,6 +339,158 @@ behavioral_insights (
 )
 ```
 
+### invitations
+
+Pending access paths for workspace, item, coach, or accountability access.
+
+```sql
+invitations (
+  id text primary key,
+  workspace_id text not null,
+  item_id text,
+  invited_email text,
+  invited_user_id text,
+  invited_actor_kind text, -- user | coach | accountability_partner
+  workspace_role text, -- owner | admin | member | viewer
+  assignment_role text, -- assignee | watcher | coach | accountability_partner
+  token_hash text not null,
+  status text not null, -- pending | accepted | revoked | expired
+  invited_by_actor_id text not null,
+  accepted_by_user_id text,
+  expires_at text,
+  accepted_at text,
+  created_at text not null,
+  updated_at text not null,
+  archived_at text
+)
+```
+
+### devices
+
+Installed clients or browser profiles used for sync, diagnostics, and notifications.
+
+```sql
+devices (
+  id text primary key,
+  user_id text not null,
+  actor_id text,
+  platform text not null, -- macos | web | ios | android
+  app_version text,
+  device_name text,
+  push_provider text, -- apns | fcm | expo | web_push | none
+  push_token_hash text,
+  last_seen_at text,
+  created_at text not null,
+  updated_at text not null,
+  archived_at text
+)
+```
+
+### notification_preferences
+
+Per-actor notification settings.
+
+```sql
+notification_preferences (
+  id text primary key,
+  workspace_id text not null,
+  actor_id text not null,
+  channel text not null, -- in_app | system | push | email
+  topic text not null, -- current_focus | transition | task_reminder | calendar | coach | accountability | ai_suggestion | daily_review | sync | system
+  enabled integer not null default 1,
+  quiet_hours_start text,
+  quiet_hours_end text,
+  timezone text not null,
+  metadata_json text not null default '{}',
+  created_at text not null,
+  updated_at text not null,
+  archived_at text,
+  unique (workspace_id, actor_id, channel, topic)
+)
+```
+
+### notification_events
+
+Queued or delivered notification intents.
+
+```sql
+notification_events (
+  id text primary key,
+  workspace_id text not null,
+  actor_id text not null, -- target actor
+  source_actor_id text, -- coach, AI, integration, system, or user who caused it
+  topic text not null,
+  title text not null,
+  body text,
+  item_id text,
+  flow_session_id text,
+  suggestion_id text,
+  scheduled_for text,
+  priority text not null default 'normal', -- low | normal | high
+  status text not null, -- queued | sent | delivered | opened | dismissed | failed | cancelled
+  metadata_json text not null default '{}',
+  created_at text not null,
+  updated_at text not null,
+  archived_at text
+)
+```
+
+### notification_deliveries
+
+Append-only delivery attempts for notification events.
+
+```sql
+notification_deliveries (
+  id text primary key,
+  workspace_id text not null,
+  notification_event_id text not null,
+  device_id text,
+  channel text not null, -- in_app | system | push | email
+  provider text, -- electron | expo | apns | fcm | web_push | email
+  provider_message_id text,
+  status text not null, -- queued | sent | delivered | opened | dismissed | failed | cancelled
+  error text,
+  attempted_at text not null,
+  created_at text not null,
+  updated_at text not null
+)
+```
+
+### app_sessions
+
+Coarse app usage sessions. These support product learning without mixing usage data into domain audit.
+
+```sql
+app_sessions (
+  id text primary key,
+  workspace_id text,
+  actor_id text,
+  device_id text,
+  surface text not null, -- desktop | web | mobile | server
+  app_version text,
+  started_at text not null,
+  ended_at text,
+  created_at text not null,
+  updated_at text not null
+)
+```
+
+### usage_events
+
+Product telemetry. Do not store task titles, note bodies, reflection bodies, calendar text, or raw prompts here.
+
+```sql
+usage_events (
+  id text primary key,
+  workspace_id text,
+  actor_id text,
+  app_session_id text,
+  event_name text not null,
+  properties_json text not null default '{}',
+  created_at text not null
+)
+```
+
 ### activity_log
 
 Append-only audit and sync-friendly history.
@@ -366,6 +518,7 @@ sync_operations (
   id text primary key,
   workspace_id text not null,
   actor_id text not null,
+  device_id text,
   operation_type text not null,
   entity_type text not null,
   entity_id text not null,
@@ -373,6 +526,25 @@ sync_operations (
   local_created_at text not null,
   synced_at text,
   conflict_state text not null default 'none'
+)
+```
+
+### sync_cursors
+
+Local/server cursors for incremental sync.
+
+```sql
+sync_cursors (
+  id text primary key,
+  workspace_id text not null,
+  actor_id text not null,
+  device_id text not null,
+  direction text not null, -- push | pull
+  cursor text not null,
+  last_synced_at text,
+  created_at text not null,
+  updated_at text not null,
+  unique (workspace_id, actor_id, device_id, direction)
 )
 ```
 
@@ -391,7 +563,16 @@ create index idx_flow_sessions_actor_date on flow_sessions (workspace_id, actor_
 create index idx_focus_sessions_actor_time on focus_sessions (workspace_id, actor_id, started_at);
 create index idx_suggestions_target_status on suggestions (workspace_id, target_actor_id, status, created_at);
 create index idx_behavioral_insights_target on behavioral_insights (workspace_id, target_actor_id, status, kind);
+create index idx_invitations_workspace_status on invitations (workspace_id, status, expires_at);
+create index idx_devices_user_seen on devices (user_id, last_seen_at);
+create index idx_notification_preferences_actor on notification_preferences (workspace_id, actor_id, channel, topic);
+create index idx_notification_events_actor_status on notification_events (workspace_id, actor_id, status, scheduled_for);
+create index idx_notification_deliveries_event on notification_deliveries (workspace_id, notification_event_id, attempted_at);
+create index idx_app_sessions_actor_time on app_sessions (workspace_id, actor_id, started_at);
+create index idx_usage_events_name_time on usage_events (event_name, created_at);
 create index idx_activity_log_workspace_time on activity_log (workspace_id, created_at);
+create index idx_sync_operations_pending on sync_operations (workspace_id, synced_at, local_created_at);
+create index idx_sync_cursors_device on sync_cursors (workspace_id, actor_id, device_id, direction);
 ```
 
 ## Query Examples

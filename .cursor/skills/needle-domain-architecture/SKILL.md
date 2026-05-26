@@ -18,10 +18,12 @@ Triggers:
 ## Process
 
 1. Read `docs/v2/current-model-audit.md`.
-2. Read `docs/v2/domain-model.md`.
-3. Read `docs/v2/data-model.md`.
-4. Check `src/shared/domain-v2.ts` for the target contract.
-5. Decide whether the request is:
+2. Read `docs/v2/architecture-guidelines.md`.
+3. Read `docs/v2/domain-model.md`.
+4. Read `docs/v2/data-model.md`.
+5. Read `docs/v2/sync-access-observability.md` if the request touches sync, permissions, notifications, metrics, logs, or coach/accountability access.
+6. Check `src/shared/domain-v2.ts` for the target contract.
+7. Decide whether the request is:
    - **Domain decision**: update docs + memory first.
    - **Schema work**: update `docs/v2/data-model.md` before adding migrations.
    - **App refactor**: preserve current UI while moving state toward `domain-v2`.
@@ -32,7 +34,9 @@ Triggers:
 - `User` means a human account. `Actor` means anything that can create, modify, coach, or sync: user, AI agent, coach, accountability partner, integration, or system.
 - Scheduling is not stored directly on the item. Use plans/occurrences so shared items can appear differently for different users.
 - UI display fields such as `dateLabel`, `datePill`, `isOverdue`, and Today grouping are derived view state, not canonical persistence fields.
-- Every persistent record carries workspace scope and audit timestamps.
+- Every workspace-scoped product record carries workspace scope and audit timestamps.
+- Do not move to the monorepo shape until a second app/server/package makes it useful.
+- Notifications, usage metrics, logs, and coach/accountability access must preserve user trust and actor attribution.
 
 ## Verification
 

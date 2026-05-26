@@ -118,3 +118,10 @@ Format: `### YYYY-MM-DD — <topic> (<who made the call>)`
 - Data model now reserves tables/indexes for daily flow state, focus history, transition prompts, lightweight reflections, optional AI suggestions, and long-lived behavioral insights.
 - Sync/web notes now treat user edits as source of truth, suggestions as optional/reversible, and behavioral insights as low-frequency records that should not block daily planning.
 - Roadmap now includes a Daily Flow State phase before deeper AI automation so the product can answer "what should I focus on right now?" without becoming noisy or over-automated.
+
+### 2026-05-26 — V2 platform architecture plan (Ofer, AI recommendation accepted)
+- Ofer asked for a detailed forward architecture covering native/web/mobile, data sync, monorepo structure, NestJS backend, coach/accountability access, notifications, metrics/logs, low-budget growth, and safe folder-change recovery.
+- Decision: keep macOS/Electron first, then local SQLite, then extract shared TypeScript domain/tokens, then add NestJS/Postgres sync, then web, Expo mobile, and coach/accountability surfaces.
+- Decision: do not migrate folders to a monorepo yet; use a checkpoint branch and `git mv` only when a second app/server/package makes it worth the risk.
+- Added architecture docs: `architecture-guidelines.md`, `sync-access-observability.md`, `multi-app-roadmap.md`, and `research-notes.md`.
+- Extended the v2 data/type model with invitations, devices, notification preferences/events/deliveries, app sessions, usage events, and sync cursors.

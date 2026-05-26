@@ -2,6 +2,12 @@
 
 This roadmap moves Needle from the current UI-state model to the v2 domain model without breaking the running app.
 
+For the broader platform path, see:
+
+- `architecture-guidelines.md`
+- `sync-access-observability.md`
+- `multi-app-roadmap.md`
+
 ## Phase A - Architecture Lock
 
 - Land v2 docs and `src/shared/domain-v2.ts`.
@@ -60,11 +66,30 @@ Goal: make "what should I focus on right now?" explicit.
 - Keep it behind a repository API.
 - Do not mix SQL directly into React components.
 
-## Phase G - Web/Server Split
+## Phase F2 - Local Backup And Diagnostics
+
+- Add workspace export/import.
+- Add local diagnostic bundle export.
+- Add local-only usage events for core daily-flow metrics.
+- Keep analytics opt-in and avoid sending task/reflection text anywhere.
+
+## Phase G - Package Extraction
+
+- Extract pure domain types/selectors/commands to a package only after the v2-shaped store is working.
+- Keep the desktop app in place during the first package extraction.
+- Add design-token package only when a second app or native surface begins.
+
+## Phase H - Web/Server Split
 
 - Extract domain package only when the web app or server exists.
 - Add server Postgres schema matching `docs/v2/data-model.md`.
 - Add sync cursor/outbox once two clients can edit the same workspace.
+
+## Phase I - Multi-App Growth
+
+- Add web app after the server can sync one personal workspace.
+- Add Expo mobile after the daily loop, capture, and notification needs are stable enough to justify a second UI.
+- Add coach/accountability surfaces as scoped web access before building a separate coach app.
 
 ## Stop Conditions
 
@@ -75,3 +100,5 @@ Stop and re-plan if:
 - A coach/AI action cannot be attributed to an actor.
 - Any DB table needs workspace scope but lacks it.
 - A flow/AI feature cannot explain whether it is guidance, observation, or user-approved action.
+- A platform/repo move happens without a clean checkpoint, branch, and verification plan.
+- A coach, partner, AI, or integration action cannot be explained as an actor-attributed operation.

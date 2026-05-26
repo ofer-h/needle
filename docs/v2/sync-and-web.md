@@ -25,6 +25,23 @@ server
   conflict handling
 ```
 
+For the broader multi-app plan, see `architecture-guidelines.md`, `sync-access-observability.md`, and `multi-app-roadmap.md`.
+
+## Platform Direction
+
+Needle should stay macOS-first while keeping the product model portable.
+
+Recommended sequence:
+
+1. Electron macOS app proves the daily-flow loop.
+2. Local SQLite persistence lands behind a repository API.
+3. Pure domain code is extracted to a package.
+4. NestJS server and Postgres are added for account/sync.
+5. Web app reuses the domain package and server API.
+6. Expo mobile app reuses domain, selectors, and tokens, but uses native components.
+
+Do not migrate to a monorepo until a second app/server/package exists.
+
 ## Local-First Desktop
 
 Desktop should keep working offline.
@@ -118,9 +135,41 @@ POST /reflections
 POST /suggestions/:id/accept
 POST /suggestions/:id/dismiss
 POST /comments
+POST /notification-events
+PATCH /notification-preferences/:id
 ```
 
 For web, API handlers can use the same domain types from `src/shared/domain-v2.ts` or a future extracted package.
+
+## Backend Direction
+
+Prefer NestJS as a modular monolith when cloud starts.
+
+Initial modules:
+
+- Auth
+- Workspaces
+- Items
+- Planning
+- Flow
+- Sync
+- Notifications
+- Suggestions
+- Integrations
+- Telemetry
+
+Persistence:
+
+- SQLite locally.
+- Postgres on the server.
+- Drizzle or Kysely should be evaluated first because they keep SQL visible and TypeScript-friendly across SQLite/Postgres.
+- Prisma remains a viable fallback if migration/tooling speed beats local/server portability in practice.
+
+Auth and authorization:
+
+- Local-only MVP needs no account.
+- Cloud phase needs user accounts, sessions, workspace memberships, invitations, and server-side policy checks.
+- Better Auth, Supabase Auth, or Auth.js can be evaluated when server work starts; choose the one that keeps NestJS integration, passkeys/magic links, and migration away from the provider simple.
 
 ## Package Direction
 
