@@ -98,7 +98,20 @@ function FlexibleTaskRow({
 
   return (
     // Wrapper takes the draggable ref; opacity 0 hides the original while DragOverlay floats
-    <div ref={setNodeRef} style={{ opacity: isDragging ? 0 : 1 }}>
+    <div
+      ref={setNodeRef}
+      aria-hidden={isDragging || undefined}
+      style={
+        isDragging
+          ? {
+              opacity: 0.25,
+              pointerEvents: 'none',
+              borderRadius: 6,
+              outline: '1.5px dashed var(--hairline-2)',
+            }
+          : undefined
+      }
+    >
       <div
         className={`t-row t-row-flexible${done ? ' done' : ''}`}
         role="listitem"

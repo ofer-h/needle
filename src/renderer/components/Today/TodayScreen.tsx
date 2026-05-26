@@ -28,22 +28,38 @@ type Props = {
 
 type GapProps = {
   id: string;
-  isDragging: boolean;
+  // When true the zone stays in the DOM (preserving layout) but won't accept drops.
+  // This avoids any layout shift: all gaps are always rendered.
+  disabled?: boolean;
 };
 
-function GapDropZone({ id, isDragging }: GapProps) {
-  const { setNodeRef, isOver } = useDroppable({ id });
+function GapDropZone({ id, disabled = false }: GapProps) {
+  const { setNodeRef, isOver } = useDroppable({ id, disabled });
+  const active = isOver && !disabled;
   return (
+    // Fixed outer height — never changes, so no layout shift when a drag starts
+    // or when adjacent gaps are disabled. The inner indicator expands on hover
+    // to signal "item will land here" without touching surrounding items.
     <div
       ref={setNodeRef}
       style={{
-        height: isOver ? 3 : isDragging ? 6 : 2,
-        margin: '1px 0',
-        borderRadius: 2,
-        background: isOver ? 'var(--urgent)' : 'transparent',
-        transition: 'background 0.1s, height 0.1s',
+        height: active ? 32 : 8,
+        display: 'flex',
+        alignItems: 'center',
+        transition: 'height 0.15s cubic-bezier(0.25, 1, 0.5, 1)',
       }}
-    />
+    >
+      <div
+        style={{
+          width: '100%',
+          height: active ? 3 : 0,
+          borderRadius: 2,
+          background: 'var(--urgent)',
+          opacity: active ? 1 : 0,
+          transition: 'height 0.15s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.1s ease',
+        }}
+      />
+    </div>
   );
 }
 
@@ -245,6 +261,18 @@ export default function TodayScreen({ onNavigateCapture }: Props) {
 
   const isDragging = activeTaskId !== null;
 
+  // A gap at position k sits between timelineItems[k-1] and timelineItems[k].
+  // Hide it when either neighbour is the item being dragged — dropping there is a
+  // no-op and showing two pockets around the ghost placeholder is confusing.
+  function isGapVisible(gapK: number, timeline: TimelineItem[]): boolean {
+    if (!activeTaskId) return true;
+    const before = gapK > 0 ? timeline[gapK - 1] : undefined;
+    const after = gapK < timeline.length ? timeline[gapK] : undefined;
+    const beforeActive = before?.kind === 'task' && before.data.id === activeTaskId;
+    const afterActive = after?.kind === 'task' && after.data.id === activeTaskId;
+    return !beforeActive && !afterActive;
+  }
+
   const UPCOMING_PLACEHOLDER = [
     'Review PR from Tal',
     'Book dentist appointment',
@@ -369,7 +397,10 @@ export default function TodayScreen({ onNavigateCapture }: Props) {
             onDragEnd={handleOverdueDragEnd}
           >
             <Section title="Overdue" count={overdueTasks.length} accent="var(--urgent)">
-              <GapDropZone id="gap-overdue-0" isDragging={isDragging} />
+              <GapDropZone
+                id="gap-overdue-0"
+                disabled={!isGapVisible(0, overdueTimeline)}
+              />
               {overdueTimeline.map((item, index) => {
                 if (item.kind === 'event') return null;
                 const t = item.data;
@@ -387,7 +418,10 @@ export default function TodayScreen({ onNavigateCapture }: Props) {
                       {...(t.link !== undefined && { link: t.link })}
                       {...(t.datePill !== undefined && { datePill: t.datePill })}
                     />
-                    <GapDropZone id={`gap-overdue-${index + 1}`} isDragging={isDragging} />
+                    <GapDropZone
+                      id={`gap-overdue-${index + 1}`}
+                      disabled={!isGapVisible(index + 1, overdueTimeline)}
+                    />
                   </Fragment>
                 );
               })}
@@ -414,9 +448,12 @@ export default function TodayScreen({ onNavigateCapture }: Props) {
           onDragEnd={handleTodayDragEnd}
         >
           <Section title="Today" date="Sun, May 25" count={activeTodayTasks.length}>
-            <GapDropZone id="gap-today-0" isDragging={isDragging} />
+            <GapDropZone
+              id="gap-today-0"
+              disabled={!isGapVisible(0, timelineItems)}
+            />
             {timelineItems.map((item, index) => {
-              const gapId = `gap-today-${index + 1}`;
+              const gapK = index + 1;
 
               if (item.kind === 'event') {
                 const e = item.data;
@@ -427,7 +464,10 @@ export default function TodayScreen({ onNavigateCapture }: Props) {
                       label={e.label}
                       {...(e.sublabel !== undefined && { sublabel: e.sublabel })}
                     />
-                    <GapDropZone id={gapId} isDragging={isDragging} />
+                    <GapDropZone
+                      id={`gap-today-${gapK}`}
+                      disabled={!isGapVisible(gapK, timelineItems)}
+                    />
                   </Fragment>
                 );
               }
@@ -447,7 +487,10 @@ export default function TodayScreen({ onNavigateCapture }: Props) {
                     {...(t.link !== undefined && { link: t.link })}
                     {...(t.datePill !== undefined && { datePill: t.datePill })}
                   />
-                  <GapDropZone id={gapId} isDragging={isDragging} />
+                  <GapDropZone
+                    id={`gap-today-${gapK}`}
+                    disabled={!isGapVisible(gapK, timelineItems)}
+                  />
                 </Fragment>
               );
             })}

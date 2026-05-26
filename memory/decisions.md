@@ -24,6 +24,31 @@ Format: `### YYYY-MM-DD — <topic> (<who made the call>)`
 - Activation constraint: `distance: 5px` on PointerSensor prevents checkbox clicks triggering drag.
 - Removed `.t-row + .t-row { margin-top: -1px }` CSS rule — gap zones now own inter-row spacing.
 
+### 2026-05-26 — Task scheduling redesign (Omri directed, Ofer implemented)
+- Discussed and planned architecture before implementing (plan file: `task_scheduling_architecture_74b9dc06`).
+- Two scheduling kinds: `fixed` (time-anchored, immovable) and `flexible` (no fixed hour, freely reorderable).
+- Single interleaved timeline: fixed anchors divide the day into slots; flexible tasks live inside slots.
+- `slotIndex` (which slot) + `slotOrder` (position within slot, fractional indexing) on each flexible task.
+- Replaced `CalendarEvent.time` (display string) with `startTime: 'HH:MM'` for actual sort ordering.
+- Added `isOverdue?: boolean` to `Task` for explicit overdue flagging.
+- Installed `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities` (`--legacy-peer-deps` due to pre-existing eslint peer conflict).
+- Today screen scope: only `timeSlot === 'today'` visible; Tomorrow/This Week removed; collapsed "Upcoming · 5" footer at bottom.
+- Overdue section above the timeline with its own independent DndContext.
+
+### 2026-05-26 — DnD approach: gap zones not SortableContext (AI recommendation, Ofer approved)
+- First attempt used `SortableContext` + `useSortable` → element-swap, not insert. Scrapped.
+- Final approach: `useDroppable` gap zones between every item (before first, between all, after last) + `useDraggable` on flexible tasks + `DragOverlay` floating clone.
+- Adjacent gaps around the dragged item are `disabled` (not removed from DOM) to prevent layout shift.
+- `onDragEnd` parses gap ID → counts anchors before that position → computes `newSlotIndex`; fractional midpoint of neighbors → `newSlotOrder`.
+- Original item shows as a dim ghost (opacity 0.25, dashed outline) during drag so user sees "came from here."
+- Gap zones expand to 32px with spring animation when hovered — the "making room" signal.
+- All gap zones always rendered (fixed 8px height); only inner indicator line appears on hover. Zero layout shift on drag start.
+- `PointerSensor` activation distance: 5px to prevent checkbox clicks triggering drag.
+
+### 2026-05-26 — Row alignment fix (AI recommendation, Ofer approved)
+- All rows (flexible task, fixed task, event) now share a 4-column CSS grid: `20px 22px 1fr auto` (drag-handle zone, icon/checkbox zone, label, meta).
+- Absent elements (no drag handle on fixed tasks/events) use `visibility: hidden` placeholders to preserve column width.
+
 ### 2026-05-24 — Titlebar fixes (Ofer)
 - Removed HTML `.lights` div — `titleBarStyle: 'hiddenInset'` already renders native macOS traffic lights.
 - Fixed window drag: `.titlebar > *` was applying `-webkit-app-region: no-drag` to `.title-center` (inset:0), blocking all dragging. Scoped `no-drag` to `button, a, input, select` only.
