@@ -3,7 +3,6 @@ import type { ISODateTime, InterventionId } from '../../../shared/domain-v2';
 import { useV2Store } from '../../state/store-v2';
 import { nowIso, useDevClock } from '../../utils/dev-clock';
 import EscalatedBanner from './EscalatedBanner';
-import ModalCapture from './ModalCapture';
 
 export default function InterventionLayer() {
   const meActorId = useV2Store((s) => s.meActorId);
@@ -12,6 +11,9 @@ export default function InterventionLayer() {
   const activateIntervention = useV2Store((s) => s.activateIntervention);
   const resolveIntervention = useV2Store((s) => s.resolveIntervention);
   const escalateIntervention = useV2Store((s) => s.escalateIntervention);
+  const addCaptureEntry = useV2Store((s) => s.addCaptureEntry);
+  const promoteCaptureEntry = useV2Store((s) => s.promoteCaptureEntry);
+  const dismissCaptureEntry = useV2Store((s) => s.dismissCaptureEntry);
   const frozenIso = useDevClock((s) => s.frozenIso);
 
   const now: ISODateTime = (frozenIso ?? (new Date().toISOString() as ISODateTime)) as ISODateTime;
@@ -40,36 +42,57 @@ export default function InterventionLayer() {
   }, [scheduledDueIds, now, activateIntervention]);
 
   const top = surfacing.length === 0 ? null : [...surfacing].sort((a, b) => b.intensity - a.intensity)[0]!;
-  const activeTorchId = top?.strategy === 'attention_takeover_torch' ? top.id : null;
-  const activeTorchIntervention = activeTorchId !== null ? top : null;
-  const lastTorchIdRef = useRef<InterventionId | null>(null);
 
-  // Drive the system-level torch window through IPC.
+  // Track which standalone windows we currently have open.
+  const lastTorchIdRef = useRef<InterventionId | null>(null);
+  const lastCaptureIdRef = useRef<InterventionId | null>(null);
+  // Map capture window's local entryId → v2 store CaptureEntryId so promote/dismiss can find them.
+  const entryIdMap = useRef(new Map<string, ReturnType<typeof addCaptureEntry>>());
+
+  // Drive the system-level torch window.
   useEffect(() => {
     if (window.api === undefined) return;
-    if (activeTorchIntervention !== null && activeTorchId !== lastTorchIdRef.current) {
-      const title =
-        typeof activeTorchIntervention.payload.title === 'string'
-          ? activeTorchIntervention.payload.title
-          : 'Time to move';
+    const activeTorch = top?.strategy === 'attention_takeover_torch' ? top : null;
+    if (activeTorch !== null && activeTorch.id !== lastTorchIdRef.current) {
+      const title = typeof activeTorch.payload.title === 'string' ? activeTorch.payload.title : 'Time to move';
       const subtitle =
-        typeof activeTorchIntervention.payload.subtitle === 'string'
-          ? activeTorchIntervention.payload.subtitle
-          : 'Acknowledge to continue.';
+        typeof activeTorch.payload.subtitle === 'string' ? activeTorch.payload.subtitle : 'Acknowledge to continue.';
       window.api.torch.show({
-        correlationId: activeTorchIntervention.id,
+        correlationId: activeTorch.id,
         title,
         subtitle,
         durationMs: 30_000,
       });
-      lastTorchIdRef.current = activeTorchId;
-    } else if (activeTorchIntervention === null && lastTorchIdRef.current !== null) {
+      lastTorchIdRef.current = activeTorch.id;
+    } else if (activeTorch === null && lastTorchIdRef.current !== null) {
       window.api.torch.hide();
       lastTorchIdRef.current = null;
     }
-  }, [activeTorchId, activeTorchIntervention]);
+  }, [top]);
 
-  // Receive torch close events and route to the right store action.
+  // Drive the standalone capture window.
+  useEffect(() => {
+    if (window.api === undefined) return;
+    const activeCapture = top?.strategy === 'modal_capture' ? top : null;
+    if (activeCapture !== null && activeCapture.id !== lastCaptureIdRef.current) {
+      const title = typeof activeCapture.payload.title === 'string' ? activeCapture.payload.title : 'Brain-dump';
+      const subtitle =
+        typeof activeCapture.payload.subtitle === 'string'
+          ? activeCapture.payload.subtitle
+          : 'Anything on your mind before the next thing?';
+      window.api.capture.show({
+        correlationId: activeCapture.id,
+        title,
+        subtitle,
+      });
+      lastCaptureIdRef.current = activeCapture.id;
+    } else if (activeCapture === null && lastCaptureIdRef.current !== null) {
+      window.api.capture.hide();
+      lastCaptureIdRef.current = null;
+    }
+  }, [top]);
+
+  // Receive torch close events.
   useEffect(() => {
     if (window.api === undefined) return;
     const unsub = window.api.torch.onClosed((payload) => {
@@ -83,28 +106,43 @@ export default function InterventionLayer() {
     return unsub;
   }, [resolveIntervention, escalateIntervention]);
 
-  if (surfacing.length === 0) return null;
+  // Receive capture events.
+  useEffect(() => {
+    if (window.api === undefined) return;
+    const offAdded = window.api.capture.onEntryAdded((payload) => {
+      const flowSessionId = top?.flowSessionId;
+      const storeEntryId = addCaptureEntry({
+        body: payload.body,
+        ...(flowSessionId !== undefined ? { flowSessionId } : {}),
+      });
+      entryIdMap.current.set(payload.entryId, storeEntryId);
+    });
+    const offPromoted = window.api.capture.onEntryPromoted((payload) => {
+      const storeEntryId = entryIdMap.current.get(payload.entryId);
+      if (storeEntryId !== undefined) promoteCaptureEntry(storeEntryId);
+    });
+    const offDismissed = window.api.capture.onEntryDismissed((payload) => {
+      const storeEntryId = entryIdMap.current.get(payload.entryId);
+      if (storeEntryId !== undefined) dismissCaptureEntry(storeEntryId);
+    });
+    const offClosed = window.api.capture.onClosed((payload) => {
+      const id = payload.correlationId as InterventionId;
+      resolveIntervention(id, payload.reason === 'completed' ? 'completed' : 'dismissed', nowIso());
+      lastCaptureIdRef.current = null;
+      entryIdMap.current.clear();
+    });
+    return () => {
+      offAdded();
+      offPromoted();
+      offDismissed();
+      offClosed();
+    };
+  }, [addCaptureEntry, promoteCaptureEntry, dismissCaptureEntry, resolveIntervention, top?.flowSessionId]);
+
+  // Avoid an unused-vars lint hit for now — captureEntries kept around for future selectors.
+  void captureEntries;
+
   if (top === null) return null;
-
-  if (top.strategy === 'modal_capture') {
-    const entries = captureEntries.filter(
-      (e) => e.flowSessionId === top.flowSessionId && e.actorId === meActorId,
-    );
-    return (
-      <ModalCapture
-        intervention={top}
-        entries={entries}
-        onClose={() => {
-          /* resolveIntervention is called inside ModalCapture's handleClose */
-        }}
-      />
-    );
-  }
-
-  if (top.strategy === 'attention_takeover_torch') {
-    // Rendered by the system torch BrowserWindow via IPC effect above. Nothing to render in-window.
-    return null;
-  }
 
   if (top.strategy === 'escalated_alert') {
     return (
@@ -115,5 +153,6 @@ export default function InterventionLayer() {
     );
   }
 
+  // Torch and modal_capture are rendered by separate Electron windows via IPC effects above.
   return null;
 }

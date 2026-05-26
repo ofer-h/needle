@@ -19,7 +19,7 @@ Build the first end-to-end product moment using the v2 contract: an unmissable 3
 
 ## Status pointer
 
-▸ **Step 9 done; Step 8 still open** — system-level torch BrowserWindow implemented. User to verify by running `npm start` and jumping the dev clock to 14:59.
+▸ **Step 10 done; Step 8 still open** — both torch and brain-dump capture are now standalone always-on-top Electron BrowserWindows. V2 debug island removed from Today. User to verify by **full-quitting and restarting** `npm start`, then jumping the dev clock to 14:55 (capture window) and 14:59 (torch window).
 
 (When resuming: update this line first, before doing any other work.)
 
@@ -44,6 +44,28 @@ Architectural notes:
 - Primary display only. Multi-display extension is a follow-up: iterate `screen.getAllDisplays()` and open a torch window per display, share the same correlationId, dismiss all on first acknowledge.
 - The CSS for torch transparency is scoped by `body.torch-mode` so the main window keeps its normal opaque background.
 - Vite verified to bundle main + preload + renderer cleanly.
+
+### Step 10 — Brain-dump capture as standalone always-on-top window (done)
+
+User feedback after Step 7: the in-window modal capture should also be a standalone always-on-top window, like the torch. Plus: the debug "v2 slice" island below QuickAdd was confusing and is not product UI — removed.
+
+Implemented:
+
+- `src/main/windows/capture.ts` — `showCapture(payload)` opens a transparent, frameless, 600x480 BrowserWindow centered horizontally and one-third down on the primary display. `alwaysOnTop('floating')`, visible on all workspaces incl. full-screen, `skipTaskbar`, `focusable: true` (so the textarea can receive keystrokes). Loads renderer with `?mode=capture`.
+- `src/main/ipc/index.ts` — handlers for `capture:show`, `capture:hide`, `capture:add-entry`, `capture:promote-entry`, `capture:dismiss-entry`, `capture:close`. All forwarded to the main-app window for store updates.
+- `src/shared/ipc-contracts.ts` — capture payload types with a `correlationId` that pairs every event back to the originating intervention.
+- `src/preload/index.ts` + `src/renderer/window.d.ts` — `window.api.capture.{show, hide, addEntry, promoteEntry, dismissEntry, close, onPayload, onEntryAdded, onEntryPromoted, onEntryDismissed, onClosed}`.
+- `src/renderer/main.tsx` — `?mode=capture` routes to `<CaptureWindow />`. Sets `body.capture-mode` so capture-only CSS does not leak.
+- `src/renderer/components/Intervention/CaptureWindow.tsx` + `.css` — full-window component with a local entry list (raw / promoted / dismissed). Emits IPC for each user action.
+- `InterventionLayer.tsx` updated — for `modal_capture`, fires `window.api.capture.show(...)`. Listens for capture entry events and routes them to v2 store actions (`addCaptureEntry`, `promoteCaptureEntry`, `dismissCaptureEntry`). On close, calls `resolveIntervention` with the right outcome.
+- Removed `ModalCapture.tsx` + `.css` — no longer used.
+- Removed `V2TodayIsland.tsx` + `.css` — was a debug surface; not product UI.
+
+Architectural notes:
+
+- The capture window is sized to the card itself, so clicking outside the window naturally uses other apps — no click-through magic needed.
+- State authority stays in the main-app renderer (the v2 store). The capture window holds local-only entry state for its own UI; canonical writes happen in the main window via IPC.
+- A small map (`entryIdMap`) in InterventionLayer translates the capture window's local entry ids into the v2 store's `CaptureEntryId`s, so promote/dismiss reach the right rows.
 
 Architecture:
 - New Electron BrowserWindow created on demand by main process.

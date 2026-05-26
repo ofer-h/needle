@@ -5,17 +5,18 @@ import './styles/tokens.css';
 import './styles/global.css';
 import App from './App';
 import TorchWindow from './components/Intervention/TorchWindow';
+import CaptureWindow from './components/Intervention/CaptureWindow';
 
 const rootEl = document.getElementById('root');
 if (!rootEl) throw new Error('Root element not found');
 
 const params = new URLSearchParams(window.location.search);
-const isTorchMode = params.get('mode') === 'torch';
+const mode = params.get('mode');
 
-if (isTorchMode) {
-  document.body.classList.add('torch-mode');
-}
+if (mode === 'torch') document.body.classList.add('torch-mode');
+if (mode === 'capture') document.body.classList.add('capture-mode');
 
-createRoot(rootEl).render(
-  <StrictMode>{isTorchMode ? <TorchWindow /> : <App />}</StrictMode>,
-);
+const tree =
+  mode === 'torch' ? <TorchWindow /> : mode === 'capture' ? <CaptureWindow /> : <App />;
+
+createRoot(rootEl).render(<StrictMode>{tree}</StrictMode>);
