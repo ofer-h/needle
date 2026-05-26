@@ -176,6 +176,20 @@ Format: `### YYYY-MM-DD — <topic> (<who made the call>)`
 **Capture window fix**
 - `capture.ts`: replaced `screen.getPrimaryDisplay()` with `screen.getDisplayNearestPoint(screen.getCursorScreenPoint())` — brain-dump always opens on the display the user is actively on.
 
+### 2026-05-26 — Office-hours session #1: Hard Stop Coach reframe (Ofer directed)
+- Ran `/office-hours` gstack skill at 2 AM. Mode: Startup. 8/8 founder signals (top tier).
+- **Product noun reframed** from "AI second brain / Remember-Act" (saturated lane — Saner.AI, Pith, Mind) to **"hard stop"** (uncrowded lane — no competitor ships hard-stop interventions).
+- A hard stop is the moment an intentional pause is needed. v1 triggers: (1) calendar meeting (EventKit), (2) user-authored time-of-day (lunch, hourly check-in), (3) manual `⌘⇧K`. v1 strategies: torch (unmissable) + ambient pill (firm). The "kit" thesis is 2D: trigger sources × intervention strategies.
+- **New warm lead named:** Alon, VP Product at an AI/insurance company. Verbal interest, willing to use/pay/collaborate. Not yet validated by behavior.
+- **9 premises locked** including: brain-dump is therapeutic (act of dumping = 90% value, not archival); product is a kit not a single torch (variety defeats ADHD habituation per Ofer's 2.5y coaching expertise); architecture investment parked until 5 paying users.
+- **PRD v1 paused; PRD v2 + torch promoted to v1.** Today screen, Remember/Act buckets, Capture screen as standalone, AI classification, subtasks UI polish, semantic search — all cut from wedge. Code stays in repo; just not shipped as primary UI.
+- **Distribution:** notarized .dmg week 1 (Alon's laptop likely MDM-managed), Cloudflare Worker + KV for Stripe entitlement, $20/mo as commitment device.
+- **Ship target:** 10-14 days. Hard ceiling day 14.
+- **Hard prerequisite before any code:** Apple Developer enrollment (24-48h lead), 1h observation of Alon working, 3 days of self-observation with manual hard-stop alarms, 30-min Omri sync.
+- 3 rounds of adversarial spec review. Final design doc score 8.5/10.
+- Outputs: planning branch `office-hours/hard-stop-wedge-2026-05-26`, design doc at [docs/office-hours/2026-05-26-hard-stop-coach-wedge.md](../docs/office-hours/2026-05-26-hard-stop-coach-wedge.md), session log at [docs/office-hours/SESSIONS.md](../docs/office-hours/SESSIONS.md).
+- Next skills queued for tomorrow: `/plan-eng-review`, `/plan-design-review`. Re-run `/office-hours` in 1-2 weeks after observation data.
+
 ### 2026-05-27 — Live clock in Today toolbar (Ofer directed, AI implemented)
 - Added `LiveClock` component inline in `TodayToolbar.tsx` — no new file.
 - Ticks every second via `setInterval(1000)`.
