@@ -59,9 +59,31 @@ Build the first end-to-end product moment using the v2 contract: an unmissable 3
 
 ## Status pointer
 
-▸ **Blocked on verification.** User reports clicking the dev clock preset (e.g. 14:59) produces no visible change — torch window does not appear. Almost certainly a stale-process issue (see Troubleshooting below). Next step is for the user to fully Cmd-Q the app, `npm start` fresh, open DevTools (Cmd+Option+I), click the preset, and report what they see in the console.
+▸ **Step 11 done; Step 8 still open.** Timing bug fixed (dev clock now defaults to 14:54 so interventions don't fire on app load). Multi-display torch + system notification + hero banner all wired. User to verify with a fresh `npm start`.
 
 (When resuming: update this line first, before doing any other work.)
+
+### Step 11 — Multi-surface attention + timing fix (added 2026-05-26, done)
+
+User feedback after Step 10:
+1. The torch was firing on app open instead of when the dev clock advanced — root cause: real-time `Date.now()` was already past the seeded UTC times (14:55, 14:59), so the activation filter immediately caught them.
+2. Torch needed to appear on every display, not just primary.
+3. Attention needed to be multi-surface — torch + macOS native notification + hero banner across the top of the screen — not just one overlay.
+
+Fixed:
+
+- **Dev clock initial state** (`src/renderer/utils/dev-clock.ts`): defaults to `${TODAY}T14:54:00.000Z` (before any scheduled intervention). Real time is never the source unless the user explicitly resumes.
+- **Multi-display torch** (`src/main/windows/torch.ts`): iterates `screen.getAllDisplays()` and opens one transparent overlay per display. Cursor naturally drives the spotlight on whichever display the user is on.
+- **macOS native notification**: `Notification.show()` with `urgency: 'critical'` and the same title/subtitle. Clicking the notification routes to the same dismiss path as the torch CTA.
+- **Hero banner** (`src/renderer/components/Intervention/HeroBannerWindow.tsx` + `.css`, `?mode=hero-banner` route): a slim 64px-tall window across the top of the focused display, urgent-colored, with a "Got it" CTA. `screen.getDisplayNearestPoint(screen.getCursorScreenPoint())` decides which display gets the banner.
+- All three surfaces share one `correlationId`. Dismissing any one (click banner CTA, click torch CTA, click system notification, or click the InterventionLayer's wiring) closes everything via `hideTorch()`.
+
+Architectural notes:
+
+- The hero banner window is `focusable: false` so it doesn't steal keyboard focus from whatever the user was doing.
+- The system notification uses Electron's built-in `Notification` API. In dev, macOS may show a one-time permission prompt the first time; in production, the app must be code-signed.
+- The "focused display" heuristic uses cursor position. If the user wants a stricter "active window's display" later, that needs accessibility permissions; current heuristic is sufficient.
+- `findMainAppWindow()` in `src/main/ipc/index.ts` now excludes the hero-banner mode URL too, so IPC routing stays correct.
 
 ## Troubleshooting (added 2026-05-26)
 

@@ -1,0 +1,69 @@
+body.hero-banner-mode {
+  background: transparent !important;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+body.hero-banner-mode html,
+body.hero-banner-mode #root {
+  background: transparent;
+  width: 100%;
+  height: 100%;
+}
+
+.hero-banner {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 0 var(--space-4);
+  background: var(--urgent);
+  color: #fff;
+  border-radius: var(--radius-3);
+  box-shadow: 0 16px 40px rgb(0 0 0 / 0.35);
+}
+
+.hero-banner__copy {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.hero-banner__title {
+  font-weight: 600;
+  font-size: var(--text-14);
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hero-banner__subtitle {
+  font-size: var(--text-12);
+  opacity: 0.92;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hero-banner__cta {
+  appearance: none;
+  background: rgb(255 255 255 / 0.18);
+  border: 1px solid rgb(255 255 255 / 0.32);
+  color: #fff;
+  font-family: var(--sans);
+  font-size: var(--text-13);
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: var(--radius-2);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.hero-banner__cta:hover {
+  background: rgb(255 255 255 / 0.26);
+}

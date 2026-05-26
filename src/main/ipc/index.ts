@@ -8,17 +8,27 @@ import type {
   TorchShowPayload,
 } from '../../shared/ipc-contracts';
 import { hideCapture, showCapture } from '../windows/capture';
-import { hideTorch, showTorch } from '../windows/torch';
+import { hideTorch, setTorchDismissHandler, showTorch } from '../windows/torch';
 
 function findMainAppWindow(): BrowserWindow | undefined {
   return BrowserWindow.getAllWindows().find(
     (w) =>
       !w.webContents.getURL().includes('mode=torch') &&
-      !w.webContents.getURL().includes('mode=capture'),
+      !w.webContents.getURL().includes('mode=capture') &&
+      !w.webContents.getURL().includes('mode=hero-banner'),
   );
 }
 
 export function registerIpcHandlers(): void {
+  // System notification click → ask main-app renderer to acknowledge the torch.
+  setTorchDismissHandler((correlationId) => {
+    findMainAppWindow()?.webContents.send('torch:closed', {
+      correlationId,
+      reason: 'acknowledged',
+    });
+    hideTorch();
+  });
+
   ipcMain.handle('app:getTheme', () => {
     return nativeTheme.shouldUseDarkColors ? 'dark' : 'light';
   });
