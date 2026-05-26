@@ -20,3 +20,13 @@ Related artifacts:
 - `src/shared/domain-v2.ts` - target shared TypeScript contract.
 - `.cursor/skills/needle-domain-architecture/SKILL.md` - workflow for future domain changes.
 - `docs/superpowers/specs/2026-05-26-v2-domain-architecture.md` - Superpowers-style spec for this branch.
+
+## Recent direction update — 2026-05-26
+
+An `/office-hours` session reframed the product wedge. PRD v1 ("Remember/Act capture") is paused; PRD v2 + torch is promoted to the v1 wedge under a new product noun: **"hard stop."** Calendar meetings are one trigger; lunch, on-track check-ins, and manual `⌘⇧K` are others. Read the decision before continuing v2 design work:
+
+- `../office-hours/2026-05-26-hard-stop-coach-wedge.md` — the approved wedge.
+- `../office-hours/SESSIONS.md` — narrative arc + premise revisions.
+- `../office-hours/README.md` — how the `/office-hours` skill works.
+
+The v2 architecture in this folder is still correct, but its priority order changes: `Intervention`, `Ritual`, `CaptureEntry`, and `Item.commitmentLevel` are now wedge-critical. `Item.bucket`, the Today screen, and the `Remember` flow are deferred until the wedge has 5 paying users.
