@@ -11,5 +11,11 @@
     "module": "ESNext",
     "target": "ES2022",
     "resolveJsonModule": true
-  }
+  },
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.main.json" },
+    { "path": "./tsconfig.preload.json" },
+    { "path": "./tsconfig.renderer.json" }
+  ]
 }
