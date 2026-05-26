@@ -1,0 +1,58 @@
+---
+description: Component API conventions for Needle React components — props, variants, states, file structure
+globs: src/renderer/components/**/*.tsx
+alwaysApply: false
+---
+
+# Component conventions
+
+Every component in `src/renderer/components/` follows this pattern. See `design/components.md` for the inventory and per-component contracts.
+
+## File structure
+
+```
+src/renderer/components/
+  <Domain>/<Component>.tsx   ← grouped by screen/feature (Today, Capture, Window)
+  primitives/<Primitive>.tsx ← shared design-system primitives (Button, Chip, Icon, …)
+  Icons.tsx                  ← icon set
+```
+
+Primitives go in `components/primitives/`. Screen-specific components live under their feature folder.
+
+## Props API
+
+- Define props as `type Props = { … }` above the component. No `React.FC`. No inline prop types.
+- Required props first, optional last. Defaults via destructuring (`{ size = 'md', … }`).
+- Variant unions are explicit: `variant?: 'primary' | 'secondary' | 'ghost'`. No boolean flags that mean different things together.
+- Children only when the component genuinely renders nested content. Otherwise use named props (`label`, `icon`, `meta`).
+
+## States to consider for every interactive component
+
+1. Default
+2. Hover
+3. Focus (visible focus ring — Apple HIG)
+4. Active / pressed
+5. Disabled
+6. Loading (if it triggers async work)
+
+A component that doesn't have a real visual for one of these states must still handle it correctly (e.g. disabled buttons block clicks).
+
+## Anti-patterns (fix on sight)
+
+| Bad | Why | Fix |
+|-----|-----|-----|
+| Inline `style={{ }}` with raw values | Bypasses tokens | Move to CSS class + semantic token |
+| `<button>` styled inline per use | Should be a primitive | Extract `<Button variant="…" />` |
+| Boolean flags `isPrimary` AND `isDanger` | Variant unions are clearer | `variant?: 'primary' \| 'danger'` |
+| Passing className from outside to override style | Breaks encapsulation | Add a proper `variant` or `tone` prop |
+| Component knows about its screen's layout | Cross-cutting concern | Layout is the parent's job; component is unaware |
+
+## Accessibility floor
+
+- Every interactive element needs an `aria-label` if not labelled visibly.
+- Buttons that toggle state announce both states (`Mark complete` / `Mark incomplete`, like the existing `TaskRow`).
+- Focus visible on every focusable element. Never `outline: none` without a replacement focus indicator.
+
+## When extracting a new primitive
+
+Invoke `needle-build-component`. It enforces the full pattern: props type → variants → states → tokens → story (when Ladle exists).

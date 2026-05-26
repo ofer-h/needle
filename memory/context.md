@@ -25,8 +25,10 @@ Intelligent second brain: capture anything, AI classifies it, surfaces the right
 ## Current state (as of 2026-05-26)
 - Full Electron app scaffolded and running (`npm start`).
 - Today screen fully redesigned: today-only scope, fixed-anchor + flexible-task timeline, drag-and-drop reordering.
-- Capture screen implemented with mock data.
+- Capture screen implemented with mock data (still raw inline styles — pending refactor).
 - No backend, no AI, no DB yet — pure UI shell.
+- **AI-first design system layer landed 2026-05-26**: 4 rules (`.cursor/rules/design-*.mdc`), 5 skills (`.cursor/skills/needle-*`), 5 docs (`design/`). Read `design/llms.txt` first for any UI task.
+- **Today screen primitive refactor landed 2026-05-26**: 3-layer tokens (`primitives.css` + `tokens.css`), dark-mode contrast fixed (`--ink-3` now 5.6:1 AA-pass), 8 reusable primitives in `src/renderer/components/primitives/` (`Icon`, `Kbd`, `Divider`, `ProgressBar`, `Pill`, `Checkbox`, `Button`, `IconButton`), TodayScreen split into `TodayToolbar` / `QuickAddRow` / `UpcomingFooter` / `CaptureFab` + `dnd/` artefacts. TodayScreen.tsx cut from 626 → 218 lines. See `design/components.md` for the inventory.
 
 ## Task scheduling model (implemented 2026-05-26)
 - Two task kinds: `fixed` (has `startTime`, immovable) and `flexible` (has `slotIndex` + `slotOrder`, freely draggable).

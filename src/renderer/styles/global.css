@@ -1,4 +1,6 @@
-/* Global resets and shared class utilities ported from focus-app.css */
+/* Global resets and DOMAIN-LEVEL styles. Primitive component styles live
+ * with their primitive (see `components/primitives/`). Application-screen
+ * styles (Today, Capture) live alongside their components. */
 
 *,
 *::before,
@@ -51,75 +53,37 @@ button {
 
 .t-eyebrow {
   font-family: var(--sans);
-  font-size: 10.5px;
+  font-size: var(--text-11);
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ink-3);
 }
 
-/* ── Task list rows ─────────────────────────────────────────── */
+/* ── Task list rows (domain) ────────────────────────────────── */
 .t-row {
   display: grid;
   grid-template-columns: 20px 22px 1fr auto;
   align-items: center;
-  gap: 12px;
-  padding: 9px 10px 9px 8px;
-  border-radius: 8px;
+  gap: var(--space-3);
+  padding: 9px var(--space-3) 9px var(--space-2);
+  border-radius: var(--radius-3);
   position: relative;
-  transition: background 0.15s;
+  transition: background var(--duration-base) var(--ease-out);
 }
-
 
 .t-row:hover {
   background: var(--surface-sub);
 }
 
-.t-row .checkbox {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  border: 1.5px solid var(--ink-3);
-  background: transparent;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+.t-row__handle-placeholder {
+  width: 20px;
   flex-shrink: 0;
-  position: relative;
-  transition: border-color 0.15s, background 0.15s;
-}
-
-.t-row .checkbox.urgent {
-  border-color: var(--urgent);
-}
-.t-row .checkbox.upcoming {
-  border-color: var(--upcoming);
-}
-.t-row .checkbox.done {
-  border-color: var(--upcoming);
-  background: var(--upcoming);
-  color: #fff;
-}
-[data-theme='dark'] .t-row .checkbox.done {
-  color: #0e1817;
-}
-
-.t-row .checkbox::after {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  border-radius: 50%;
-  background: var(--urgent);
-  opacity: 0;
-  z-index: -1;
-  filter: blur(8px);
-}
-.t-row .checkbox.urgent::after {
-  opacity: 0.22;
+  visibility: hidden;
 }
 
 .t-row .label {
-  font-size: 14.5px;
+  font-size: var(--text-14);
   color: var(--ink);
   letter-spacing: -0.005em;
   font-weight: 450;
@@ -127,7 +91,7 @@ button {
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .t-row .label .priority-dot {
@@ -141,11 +105,14 @@ button {
   background: var(--upcoming);
 }
 .t-row .label .priority-dot.faded {
-  background: var(--ink-4);
+  background: var(--icon-muted);
+}
+.t-row.done .label .priority-dot {
+  opacity: 0.3;
 }
 
 .t-row .label .sublabel {
-  font-size: 12.5px;
+  font-size: var(--text-12);
   color: var(--ink-3);
   font-weight: 400;
 }
@@ -160,64 +127,71 @@ button {
 .t-row .meta-right {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-size: 12px;
+  gap: var(--space-2);
+  font-size: var(--text-12);
   color: var(--ink-3);
   flex-shrink: 0;
 }
 
-.t-row .meta-right .pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  height: 22px;
-  padding: 0 9px;
-  border-radius: 999px;
-  background: var(--surface-sub);
-  color: var(--ink-2);
-  font-size: 11.5px;
-  font-weight: 450;
-}
-.t-row .meta-right .pill.urgent {
-  background: var(--urgent-soft);
-  color: var(--urgent);
-}
-.t-row .meta-right .pill.upcoming {
-  background: var(--upcoming-soft);
-  color: var(--upcoming);
-}
-
 .t-row .meta-right .link-tag {
-  font-size: 11px;
+  font-size: var(--text-11);
   color: var(--ink-3);
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
-.t-row.event .label {
+.t-row .meta-right .link-tag__dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--icon-muted);
+  display: inline-block;
+}
+
+/* ── Event row specifics ──────────────────────────────────── */
+.t-row__event-icon {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.t-row__event-label {
   color: var(--ink-2);
-  font-weight: 400;
+  font-weight: 450;
 }
 
-/* ── Flexible (draggable) task rows ────────────────────────── */
-.t-row-flexible {}
-
-.t-row-flexible:hover .drag-handle {
-  opacity: 1 !important;
+/* ── Flexible (draggable) task wrapper ──────────────────── */
+.t-row-flexible-wrap {
+  position: relative;
 }
 
-.t-row-flexible .drag-handle:active {
+.t-row-flexible-wrap--dragging {
+  opacity: 0.25;
+  pointer-events: none;
+  border-radius: var(--radius-2);
+  outline: 1.5px dashed var(--hairline-2);
+}
+
+.t-row__drag {
+  color: var(--icon-muted);
+  cursor: grab;
+  font-size: var(--text-14);
+  line-height: 1;
+}
+
+.t-row__drag:active {
   cursor: grabbing;
-  opacity: 1 !important;
 }
 
 /* ── Sections ───────────────────────────────────────────────── */
 .t-section {
-  margin-top: 26px;
+  margin-top: var(--space-6);
 }
 .t-section:first-child {
-  margin-top: 8px;
+  margin-top: var(--space-2);
 }
 .t-section .t-section-head {
   display: flex;
@@ -228,51 +202,23 @@ button {
   margin-bottom: 6px;
 }
 .t-section .t-section-title {
-  font-size: 13.5px;
+  font-size: var(--text-14);
   font-weight: 600;
   color: var(--ink);
   letter-spacing: -0.005em;
 }
 .t-section .t-section-date {
-  font-size: 12px;
+  font-size: var(--text-12);
   color: var(--ink-3);
 }
 .t-section .t-section-count {
-  font-size: 11.5px;
+  font-size: var(--text-12);
   color: var(--ink-3);
   margin-left: auto;
   font-variant-numeric: tabular-nums;
 }
 
-/* ── Quick-add row ──────────────────────────────────────────── */
-.t-quickadd {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 10px 10px 8px;
-  margin-top: 4px;
-  border-radius: 8px;
-  color: var(--ink-3);
-  font-size: 13.5px;
-  cursor: text;
-  transition: background 0.15s;
-}
-.t-quickadd:hover {
-  background: var(--surface-sub);
-  color: var(--ink-2);
-}
-.t-quickadd .plus-bubble {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  border: 1.5px dashed var(--ink-4);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--ink-4);
-}
-
-/* ── Chips ──────────────────────────────────────────────────── */
+/* ── Chips (Capture screen — out of Today scope) ────────────── */
 .chip {
   display: inline-flex;
   align-items: center;
@@ -280,7 +226,7 @@ button {
   height: 28px;
   padding: 0 12px;
   border-radius: 999px;
-  font-size: 13px;
+  font-size: var(--text-13);
   font-weight: 450;
   color: var(--ink-2);
   background: var(--surface-sub);
@@ -318,69 +264,19 @@ button {
   font-weight: 500;
 }
 
-/* ── FAB ────────────────────────────────────────────────────── */
-.fab {
-  position: absolute;
-  bottom: 22px;
-  left: 50%;
-  transform: translateX(-50%);
-  height: 44px;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 18px 0 14px;
-  border-radius: 999px;
-  background: var(--ink);
-  color: var(--bg);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18), 0 1px 0 rgba(255, 255, 255, 0.04) inset;
-  font-size: 14px;
-  font-weight: 500;
-  z-index: 3;
-  cursor: pointer;
-  border: none;
-  font-family: var(--sans);
-  letter-spacing: -0.005em;
-}
-[data-theme='dark'] .fab {
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 0 0.5px rgba(255, 255, 255, 0.08);
-}
-.fab .ic {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--accent);
-  color: #2a1f08;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  font-size: 16px;
-  line-height: 1;
-}
-.fab .kbd {
-  font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--ink-3);
-  padding-left: 6px;
-  margin-left: 2px;
-  border-left: 1px solid var(--hairline);
-  opacity: 0.65;
-}
-
-/* ── Capture composer ───────────────────────────────────────── */
+/* ── Capture composer (out of Today scope) ──────────────────── */
 .composer {
   background: var(--surface);
-  border-radius: 16px;
+  border-radius: var(--radius-5);
   border: 0.5px solid var(--hairline-2);
   box-shadow: var(--shadow-card);
-  padding: 24px 28px;
+  padding: var(--space-6) 28px;
   min-height: 168px;
   display: flex;
   flex-direction: column;
 }
 .composer .input-text {
-  font-size: 22px;
+  font-size: var(--text-22);
   font-weight: 400;
   line-height: 1.4;
   color: var(--ink);
@@ -407,13 +303,13 @@ button {
 
 .input-mode-row {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
   margin-top: 18px;
 }
 
-/* ── AI result card ─────────────────────────────────────────── */
+/* ── AI result card (Capture — out of scope) ────────────────── */
 .result-card {
-  border-radius: 16px;
+  border-radius: var(--radius-5);
   background: var(--surface);
   border: 0.5px solid var(--hairline-2);
   box-shadow: var(--shadow-card);
@@ -431,11 +327,11 @@ button {
   background: var(--urgent);
 }
 
-/* ── Waveform ───────────────────────────────────────────────── */
+/* ── Waveform (Capture — out of scope) ─────────────────────── */
 .wave {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   height: 64px;
 }
 .wave i {
@@ -456,12 +352,12 @@ button {
   }
 }
 
-/* ── AI thinking dots ───────────────────────────────────────── */
+/* ── AI thinking dots (Capture — out of scope) ─────────────── */
 .thinking {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 12.5px;
+  gap: var(--space-1);
+  font-size: var(--text-12);
   color: var(--ink-3);
 }
 .thinking i {
@@ -491,19 +387,7 @@ button {
   }
 }
 
-/* ── Dividers ───────────────────────────────────────────────── */
-.divider {
-  height: 0.5px;
-  background: var(--hairline);
-  margin: 4px 0;
-}
-.divider.dotted {
-  height: 0;
-  border-top: 1px dotted var(--hairline-2);
-  margin: 8px 0;
-}
-
-/* ── Window chrome ──────────────────────────────────────────── */
+/* ── Window chrome (FxWindow + Titlebar) ────────────────────── */
 .win {
   width: 100%;
   height: 100%;
@@ -531,9 +415,7 @@ button {
   -webkit-app-region: drag;
 }
 
-/* Only interactive elements inside the titlebar opt out of window dragging.
-   Never apply this to non-interactive elements (e.g. .title-center with
-   pointer-events:none) — those still block drag even with pointer-events:none. */
+/* Only interactive elements inside the titlebar opt out of window dragging. */
 .titlebar button,
 .titlebar a,
 .titlebar input,
@@ -543,7 +425,7 @@ button {
 
 .lights {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
 }
 .lights .l {
   width: 12px;
@@ -571,7 +453,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-size: var(--text-13);
   font-weight: 500;
   color: var(--ink-3);
   pointer-events: none;
@@ -586,14 +468,14 @@ button {
   overflow: hidden;
 }
 
-/* ── Expanded item panel ────────────────────────────────────── */
+/* ── Expanded item panel (Capture — out of scope) ──────────── */
 .expanded {
   background: var(--surface);
-  border-radius: 12px;
+  border-radius: var(--radius-4);
   border: 0.5px solid var(--hairline-2);
   box-shadow: var(--shadow-card);
-  padding: 16px 18px 14px;
-  margin: 4px 0;
+  padding: var(--space-4) 18px 14px;
+  margin: var(--space-1) 0;
   position: relative;
 }
 .expanded::before {
@@ -605,4 +487,17 @@ button {
   width: 3px;
   border-radius: 2px;
   background: var(--urgent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-row,
+  .chip,
+  .composer .input-text {
+    transition: none;
+  }
+  .wave i,
+  .thinking i,
+  .caret-bar {
+    animation: none;
+  }
 }

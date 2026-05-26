@@ -1,0 +1,45 @@
+.quickadd {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px var(--space-3) 10px var(--space-2);
+  margin-top: var(--space-1);
+  border-radius: var(--radius-3);
+  color: var(--ink-3);
+  font-size: var(--text-13);
+  cursor: text;
+  transition: background var(--duration-base) var(--ease-out),
+    color var(--duration-base) var(--ease-out);
+}
+
+.quickadd:hover {
+  background: var(--surface-sub);
+  color: var(--ink-2);
+}
+
+.quickadd:focus-visible {
+  outline: 2px solid var(--border-strong);
+  outline-offset: 2px;
+}
+
+.quickadd__bubble {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px dashed var(--icon-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--icon-muted);
+}
+
+.quickadd__text {
+  display: inline-flex;
+  align-items: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quickadd {
+    transition: none;
+  }
+}

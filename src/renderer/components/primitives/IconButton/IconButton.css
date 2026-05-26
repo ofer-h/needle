@@ -1,0 +1,75 @@
+.ds-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-2);
+  color: var(--icon-default);
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+  transition: background var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out), opacity var(--duration-fast) var(--ease-out);
+}
+
+.ds-icon-btn:focus-visible {
+  outline: 2px solid var(--border-strong);
+  outline-offset: 2px;
+}
+
+.ds-icon-btn:disabled {
+  cursor: not-allowed;
+  color: var(--ink-disabled);
+}
+
+/* Sizes — touch target stays >= 24px even at sm */
+.ds-icon-btn--sm {
+  width: 24px;
+  height: 24px;
+}
+
+.ds-icon-btn--md {
+  width: 32px;
+  height: 32px;
+}
+
+/* Variants */
+.ds-icon-btn--ghost {
+  background: transparent;
+}
+
+.ds-icon-btn--ghost:hover:not(:disabled) {
+  background: var(--surface-sub);
+  color: var(--ink);
+}
+
+.ds-icon-btn--subtle {
+  background: var(--surface-sub);
+  color: var(--ink-2);
+}
+
+.ds-icon-btn--subtle:hover:not(:disabled) {
+  background: var(--surface-active);
+  color: var(--ink);
+}
+
+/* Hover-reveal pattern: hidden until ancestor `.ds-hover-reveal` is hovered/focused-within */
+.ds-icon-btn--hover-reveal {
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.ds-hover-reveal:hover .ds-icon-btn--hover-reveal,
+.ds-hover-reveal:focus-within .ds-icon-btn--hover-reveal,
+.ds-icon-btn--hover-reveal:focus-visible,
+.ds-icon-btn--hover-reveal:active {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ds-icon-btn,
+  .ds-icon-btn--hover-reveal {
+    transition: none;
+  }
+}

@@ -1,0 +1,94 @@
+/* Primitive tokens — raw values, theme-agnostic.
+ *
+ * Components MUST NOT reference these directly. They are consumed by
+ * `tokens.css` which maps them to semantic roles per theme.
+ *
+ * See `.cursor/rules/design-tokens.mdc` and `design/tokens.md`. */
+
+:root {
+  /* ── Color: sand (warm-light palette) ─────────────────────────────── */
+  --sand-50: #fbf7f0;
+  --sand-100: #f6f1eb;
+  --sand-200: #efe9df;
+  --sand-300: #d4c5a8;
+  --sand-400: #a8997f;
+  --sand-500: #7a6e5d;
+  --sand-600: #4a3f32;
+  --sand-700: #1f1a14;
+
+  /* ── Color: ink (deep-dark palette) ───────────────────────────────── */
+  --ink-50: #f2efe9;
+  --ink-100: #e8e6e0;
+  --ink-200: #bdb7ad;
+  --ink-300: #9a948a; /* dark-mode tertiary — recalibrated from #807a70 for 5.6:1 on ink-900 */
+  --ink-400: #807a70;
+  --ink-500: #585249;
+  --ink-600: #2a2a30;
+  --ink-700: #232328;
+  --ink-800: #1c1c21;
+  --ink-900: #16161a;
+
+  /* ── Color: icons — separate scale from text ─────────────────────── */
+  --icon-light-default: #6a614f; /* on sand bg: ~6.4:1 */
+  --icon-light-muted: #9c8e75;   /* on sand bg: ~3.4:1 */
+  --icon-dark-default: #b6afa3;  /* on ink-900: ~7.0:1 */
+  --icon-dark-muted: #807a70;    /* on ink-900: ~4.2:1 (>= 3:1 UI minimum) */
+
+  /* ── Color: accents (per-theme variants) ─────────────────────────── */
+  --urgent-light: #c4622d;
+  --urgent-dark: #e8674a;
+  --urgent-soft-light: rgba(196, 98, 45, 0.1);
+  --urgent-soft-dark: rgba(232, 103, 74, 0.14);
+
+  --upcoming-light: #6f9272;
+  --upcoming-dark: #6fbdb4;
+  --upcoming-soft-light: rgba(111, 146, 114, 0.1);
+  --upcoming-soft-dark: rgba(111, 189, 180, 0.14);
+
+  --calendar-light: #2c2c3a;
+  --calendar-dark: #b9baca;
+
+  --remember-light: #6b7fa3;
+  --remember-dark: #b0a4d6;
+
+  --accent-light: #d4a847;
+  --accent-dark: #f0b429;
+
+  /* ── Spacing scale (4-based) ──────────────────────────────────────── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-14: 56px;
+
+  /* ── Radius scale ─────────────────────────────────────────────────── */
+  --radius-1: 4px;
+  --radius-2: 6px;
+  --radius-3: 8px;
+  --radius-4: 12px;
+  --radius-5: 16px;
+  --radius-pill: 999px;
+
+  /* ── Type scale ───────────────────────────────────────────────────── */
+  --text-10: 10px;
+  --text-11: 11px;
+  --text-12: 12px;
+  --text-13: 13px;
+  --text-14: 14px;
+  --text-15: 15px;
+  --text-16: 16px;
+  --text-18: 18px;
+  --text-22: 22px;
+  --text-32: 32px;
+  --text-38: 38px;
+
+  /* ── Motion ───────────────────────────────────────────────────────── */
+  --duration-fast: 100ms;
+  --duration-base: 150ms;
+  --duration-slow: 250ms;
+  --ease-out: cubic-bezier(0.25, 1, 0.5, 1);
+}

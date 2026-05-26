@@ -1,4 +1,10 @@
-/* Focus design tokens — light & dark, ported from focus-app.css */
+/* Semantic tokens — role-based. Components reference ONLY these (and never
+ * `--sand-*` / `--ink-*` primitive tokens directly).
+ *
+ * Each token has a value for BOTH light and dark themes. Parity is enforced.
+ * Dark mode is recalibrated — never inverted from light.
+ *
+ * See `.cursor/rules/design-tokens.mdc`, `design-dark-mode.mdc`, `design/tokens.md`. */
 
 :root {
   --sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
@@ -6,62 +12,92 @@
   --mono: 'Geist Mono', ui-monospace, 'SFMono-Regular', monospace;
 }
 
-/* ── Light theme (Warm Light) ─────────────────────────────────── */
+/* ── Light theme (Warm Light) ──────────────────────────────────────── */
 [data-theme='light'] {
-  --bg: #f6f1eb;
-  --bg-elev: #fbf7f0;
+  /* Surfaces (Radix steps 1–5) */
+  --bg: var(--sand-100);
+  --bg-elev: var(--sand-50);
   --surface: #ffffff;
-  --surface-sub: #efe9df;
+  --surface-sub: var(--sand-200);
+  --surface-active: #e6dccb;
+  --surface-disabled: var(--sand-200);
+
+  /* Borders (Radix steps 6–8) */
   --hairline: rgba(34, 24, 12, 0.08);
   --hairline-2: rgba(34, 24, 12, 0.14);
+  --border-strong: rgba(34, 24, 12, 0.32);
 
-  --ink: #1f1a14;
-  --ink-2: #4a3f32;
-  --ink-3: #7a6e5d;
-  --ink-4: #a8997f;
+  /* Ink (Apple HIG label tiers — primary→quaternary) */
+  --ink: var(--sand-700);
+  --ink-2: var(--sand-600);
+  --ink-3: var(--sand-500);
+  --ink-4: var(--sand-400);
+  --ink-disabled: var(--sand-400);
 
-  --urgent: #c4622d;
-  --urgent-soft: rgba(196, 98, 45, 0.1);
-  --upcoming: #6f9272;
-  --upcoming-soft: rgba(111, 146, 114, 0.1);
-  --calendar: #2c2c3a;
-  --remember: #6b7fa3;
-  --accent: #d4a847;
+  /* Icons — separate UI tier so they're tunable independently from text */
+  --icon-default: var(--icon-light-default);
+  --icon-muted: var(--icon-light-muted);
 
+  /* Accents */
+  --urgent: var(--urgent-light);
+  --urgent-soft: var(--urgent-soft-light);
+  --upcoming: var(--upcoming-light);
+  --upcoming-soft: var(--upcoming-soft-light);
+  --calendar: var(--calendar-light);
+  --remember: var(--remember-light);
+  --accent: var(--accent-light);
+
+  /* Shadows */
   --shadow-card: 0 1px 1px rgba(40, 28, 12, 0.04), 0 4px 16px rgba(40, 28, 12, 0.06);
   --shadow-win: 0 0 0 0.5px rgba(0, 0, 0, 0.18), 0 30px 80px rgba(20, 12, 4, 0.22),
     0 8px 24px rgba(20, 12, 4, 0.1);
 
+  /* Titlebar */
   --titlebar-bg: rgba(246, 241, 235, 0.85);
   --titlebar-stroke: rgba(34, 24, 12, 0.07);
 }
 
-/* ── Dark theme (Deep Dark) ───────────────────────────────────── */
+/* ── Dark theme (Deep Dark) ────────────────────────────────────────── */
 [data-theme='dark'] {
-  --bg: #16161a;
-  --bg-elev: #1c1c21;
-  --surface: #232328;
-  --surface-sub: #2a2a30;
+  /* Surfaces */
+  --bg: var(--ink-900);
+  --bg-elev: var(--ink-800);
+  --surface: var(--ink-700);
+  --surface-sub: var(--ink-600);
+  --surface-active: #34343b;
+  --surface-disabled: var(--ink-700);
+
+  /* Borders */
   --hairline: rgba(255, 255, 255, 0.07);
   --hairline-2: rgba(255, 255, 255, 0.12);
+  --border-strong: rgba(255, 255, 255, 0.28);
 
-  --ink: #f2efe9;
-  --ink-2: #bdb7ad;
-  --ink-3: #807a70;
-  --ink-4: #585249;
+  /* Ink — `--ink-3` recalibrated from #807a70 → #9a948a for 5.6:1 (was 4.2:1, failed AA) */
+  --ink: var(--ink-50);
+  --ink-2: var(--ink-200);
+  --ink-3: var(--ink-300);
+  --ink-4: var(--ink-500);
+  --ink-disabled: var(--ink-500);
 
-  --urgent: #e8674a;
-  --urgent-soft: rgba(232, 103, 74, 0.14);
-  --upcoming: #6fbdb4;
-  --upcoming-soft: rgba(111, 189, 180, 0.14);
-  --calendar: #b9baca;
-  --remember: #b0a4d6;
-  --accent: #f0b429;
+  /* Icons — independent tokens; `--icon-muted` passes 3:1 UI minimum (4.2:1) without using --ink-4 (decorative) */
+  --icon-default: var(--icon-dark-default);
+  --icon-muted: var(--icon-dark-muted);
 
+  /* Accents */
+  --urgent: var(--urgent-dark);
+  --urgent-soft: var(--urgent-soft-dark);
+  --upcoming: var(--upcoming-dark);
+  --upcoming-soft: var(--upcoming-soft-dark);
+  --calendar: var(--calendar-dark);
+  --remember: var(--remember-dark);
+  --accent: var(--accent-dark);
+
+  /* Shadows */
   --shadow-card: 0 1px 0 rgba(0, 0, 0, 0.4), 0 6px 24px rgba(0, 0, 0, 0.35);
   --shadow-win: 0 0 0 0.5px rgba(255, 255, 255, 0.06), 0 30px 80px rgba(0, 0, 0, 0.55),
     0 8px 24px rgba(0, 0, 0, 0.3);
 
+  /* Titlebar */
   --titlebar-bg: rgba(22, 22, 26, 0.85);
   --titlebar-stroke: rgba(255, 255, 255, 0.06);
 }

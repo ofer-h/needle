@@ -1,0 +1,44 @@
+# Needle Design System
+
+> Machine-readable index of Needle's design system docs. AI agents working on Needle's UI should read this file first, then load the linked docs as needed. Per the [llmstxt.org](https://llmstxt.org) spec.
+
+Needle is an Electron macOS app for software engineers with ADHD — an intelligent second brain for capture and surfacing. This design system covers the visual layer: tokens, components, themes, accessibility, and the conventions that keep them consistent.
+
+## How AI agents should use this
+
+1. **Always-on rules** auto-load via `.cursor/rules/` based on globs. They enforce token discipline, dark mode contrast, macOS conventions, and component API rules. You don't need to fetch them — Cursor injects them.
+
+2. **Skills** in `.cursor/skills/` are workflows. Invoke them by name when the task matches:
+   - Discovery / routing → `needle-design-system`
+   - Audit / inventory / gap analysis → `needle-ui-audit`
+   - Fix dark mode contrast → `needle-dark-mode-fix`
+   - Migrate raw hex / inline styles → `needle-token-migration`
+   - Build a new component (or extract a primitive) → `needle-build-component`
+   - Add a new design token → `needle-add-token`
+   - Pre-merge design review → `needle-design-review`
+
+3. **Docs in this folder** are the ground truth for the system itself. Skills update them as work happens.
+
+## Core docs
+
+- [tokens.md](./tokens.md) — Token system: 3-layer architecture, current state, target state, role of each step
+- [components.md](./components.md) — Component inventory: per-component contract, status, tokens used, where it's consumed
+- [anti-patterns.md](./anti-patterns.md) — Explicit don'ts with code examples
+- [sources.md](./sources.md) — Pinned trusted research links
+
+## Decision log
+
+- [decisions.md](./decisions.md) — Chronological design decisions with date + driver
+
+## Where to find related context outside this folder
+
+- Cursor rules: `.cursor/rules/design-tokens.mdc`, `design-dark-mode.mdc`, `design-macos.mdc`, `design-components.mdc`, `design-primitives.mdc`
+- Cursor skills: `.cursor/skills/needle-*/SKILL.md`
+- Token source: `src/renderer/styles/tokens.css` (+ future `primitives.css`)
+- Global CSS: `src/renderer/styles/global.css`
+- Components: `src/renderer/components/` (with reusable library at `primitives/` after Phase 2)
+- Project memory: `memory/context.md`, `memory/decisions.md`
+- Product spec: `PRD.md`
+- Specs:
+  - Phase 1 (AI-first foundation): `docs/superpowers/specs/2026-05-26-needle-design-system-design.md`
+  - Phase 2 (full design system buildout): `docs/superpowers/specs/2026-05-26-phase-2-design-system-buildout.md`

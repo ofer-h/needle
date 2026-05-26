@@ -1,0 +1,60 @@
+.ds-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  border-radius: var(--radius-pill);
+  font-family: var(--sans);
+  font-weight: 450;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ds-pill__leading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ds-pill__label {
+  display: inline-block;
+}
+
+/* Sizes */
+.ds-pill--sm {
+  height: 18px;
+  padding: 0 var(--space-2);
+  font-size: var(--text-10);
+}
+
+.ds-pill--md {
+  height: 22px;
+  padding: 0 9px;
+  font-size: var(--text-12);
+  gap: 5px;
+}
+
+/* Variants */
+.ds-pill--neutral {
+  background: var(--surface-sub);
+  color: var(--ink-2);
+}
+
+.ds-pill--urgent {
+  background: var(--urgent-soft);
+  color: var(--urgent);
+}
+
+.ds-pill--upcoming {
+  background: var(--upcoming-soft);
+  color: var(--upcoming);
+}
+
+.ds-pill--outline {
+  background: transparent;
+  border: 0.5px solid var(--hairline-2);
+  color: var(--ink-2);
+}
+
+.ds-pill--tabular {
+  font-variant-numeric: tabular-nums;
+}

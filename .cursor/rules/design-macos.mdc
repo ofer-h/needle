@@ -1,0 +1,52 @@
+---
+description: Native macOS design conventions for Needle UI — ink hierarchy, motion, materials
+globs: src/renderer/**/*.tsx,src/renderer/**/*.css
+alwaysApply: false
+---
+
+# macOS design conventions
+
+Per Apple HIG. Needle targets macOS first — UI should feel native, not web-app.
+
+## Ink hierarchy (4 levels)
+
+Mirror Apple's `labelColor`, `secondaryLabelColor`, `tertiaryLabelColor`, `quaternaryLabelColor`:
+
+| Semantic | Role | Examples |
+|----------|------|----------|
+| `ink-primary` | Body, headings, primary content | Task title, screen title |
+| `ink-secondary` | Supporting content | Subtle labels, event labels |
+| `ink-tertiary` | Metadata, captions | Sublabels, dates, hints |
+| `ink-quaternary` | Decorative, disabled, placeholders | Empty-state hints, off-state icons |
+
+Never use a lower-tier ink for primary content. Reserve `ink-quaternary` for genuinely decorative use — it intentionally fails text contrast at small sizes.
+
+## Type
+
+- Display / headlines: serif (`Fraunces` via `--serif`). Use for screen titles and prompts only.
+- UI: `Geist` via `--sans`. 12–16pt range. Tight tracking (`letter-spacing: -0.005em`).
+- Code / keyboard hints: `Geist Mono` via `--mono`.
+
+Apple HIG-style font-feature-settings (`ss01`, `ss02`, `cv11`) are already set globally in `global.css`.
+
+## Spacing and density
+
+- Mac apps run denser than web. Use 4/8/12/16 for most padding. 24/32/40 for screen-edge gutters.
+- Row height for task lists: 36–44px (current).
+- Touch targets: 32px minimum (mouse), not the 44px mobile minimum.
+
+## Motion
+
+- Durations: 100ms (instant feedback), 150–200ms (state changes), 250–300ms (panel transitions).
+- Easing: `cubic-bezier(0.25, 1, 0.5, 1)` (already used for gap-drop animations) for natural deceleration.
+- Honor `prefers-reduced-motion`. Skip non-essential animation.
+
+## Window chrome and materials
+
+- Titlebar uses native macOS traffic lights (set via Electron `titleBarStyle: 'hiddenInset'`). Do not draw fake lights in HTML.
+- Vibrancy / blur (`backdrop-filter`) is acceptable on titlebar and overlays. Keep `saturate(160%)` and `blur(20px)` as the baseline.
+- Avoid drawing colored content under vibrant surfaces — Apple's blend mode shifts colored content unpredictably (per HIG).
+
+## Keyboard
+
+Every primary action needs a keyboard equivalent (⌘N for capture, ⌘, for preferences, etc.). Surface shortcuts visually in UI where they matter (e.g. the `⌘ K` hint in the FAB).

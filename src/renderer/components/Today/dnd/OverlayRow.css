@@ -1,0 +1,18 @@
+.overlay-row {
+  box-shadow: var(--shadow-card);
+  border-radius: var(--radius-3);
+  background: var(--bg);
+  cursor: grabbing;
+}
+
+.overlay-row__handle {
+  color: var(--icon-muted);
+  font-size: var(--text-14);
+  line-height: 1;
+  padding: 0 var(--space-1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}

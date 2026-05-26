@@ -1,0 +1,28 @@
+.ds-kbd {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--mono);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-2);
+  background: var(--surface-sub);
+  border-radius: var(--radius-1);
+  letter-spacing: 0;
+}
+
+.ds-kbd--sm {
+  font-size: var(--text-10);
+  padding: 1px 5px;
+}
+
+.ds-kbd--md {
+  font-size: var(--text-11);
+  padding: 2px 6px;
+}
+
+.ds-kbd--ghost {
+  background: transparent;
+  color: var(--ink-3);
+  padding-left: 0;
+  padding-right: 0;
+}

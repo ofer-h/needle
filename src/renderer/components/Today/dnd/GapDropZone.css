@@ -1,0 +1,31 @@
+.gap-dropzone {
+  height: 8px;
+  display: flex;
+  align-items: center;
+  transition: height var(--duration-base) var(--ease-out);
+}
+
+.gap-dropzone--active {
+  height: 32px;
+}
+
+.gap-dropzone__indicator {
+  width: 100%;
+  height: 0;
+  border-radius: 2px;
+  background: var(--urgent);
+  opacity: 0;
+  transition: height var(--duration-base) var(--ease-out), opacity var(--duration-fast) ease;
+}
+
+.gap-dropzone--active .gap-dropzone__indicator {
+  height: 3px;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gap-dropzone,
+  .gap-dropzone__indicator {
+    transition: none;
+  }
+}

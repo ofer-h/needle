@@ -1,0 +1,41 @@
+---
+description: Design token discipline — 3-layer architecture, no raw hex in components
+globs: src/renderer/**/*.tsx,src/renderer/**/*.css
+alwaysApply: false
+---
+
+# Design tokens
+
+Needle uses a 3-layer token system. See `design/tokens.md` for the full reference.
+
+## The three layers
+
+1. **Primitive** — raw values. Defined once. Never referenced by components.
+   - Example: `--sand-50: #f6f1eb;`
+
+2. **Semantic** — role-based names. Resolve to primitives. Swapped between light/dark.
+   - Example: `--surface-base`, `--ink-primary`, `--border-subtle`, `--accent-urgent`
+
+3. **Component** — component-specific tokens. Only when a component needs unique values.
+   - Example: `--task-row-hover-bg`
+
+## Rules
+
+- Components reference **semantic tokens only**. Never primitives, never raw hex.
+- New colors require a primitive + a semantic mapping for **both** light and dark mode.
+- No inline `style={{ color: '#xxx' }}` in `.tsx`. Use `var(--token-name)` via CSS class or, if truly one-off, inline `style={{ color: 'var(--ink-2)' }}`.
+- Spacing follows a multiplied-by-4 scale (4, 8, 12, 16, 20, 24, 32, 40, 56). No arbitrary `padding: 7px`.
+- Radii: `4`, `6`, `8`, `12`, `16`, `999` (pill). No others without justification.
+
+## When you see this in a diff, fix it
+
+| Bad | Why | Fix |
+|-----|-----|-----|
+| `color: '#666'` | Raw hex in component | `color: 'var(--ink-3)'` |
+| `background: '#16161a'` | Raw hex | `background: 'var(--bg)'` |
+| `var(--sand-50)` in a component | Primitive in component | Use the semantic token that maps to it |
+| `padding: '7px 13px'` | Off-scale | Snap to 8/12 |
+
+## Adding a new token
+
+Invoke the `needle-add-token` skill — it walks the full primitive → semantic → contrast-check pipeline.

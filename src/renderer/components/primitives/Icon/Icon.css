@@ -1,0 +1,39 @@
+.ds-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: transform var(--duration-base) var(--ease-out),
+    color var(--duration-base) var(--ease-out);
+}
+
+.ds-icon--default {
+  color: var(--icon-default);
+}
+
+.ds-icon--muted {
+  color: var(--icon-muted);
+}
+
+.ds-icon--inherit {
+  color: inherit;
+}
+
+.ds-icon--urgent {
+  color: var(--urgent);
+}
+
+.ds-icon--upcoming {
+  color: var(--upcoming);
+}
+
+.ds-icon--calendar {
+  color: var(--calendar);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ds-icon {
+    transition: none;
+  }
+}

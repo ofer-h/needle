@@ -1,4 +1,5 @@
-import { IconCal } from '../Icons';
+import { Icon } from '../primitives/Icon';
+import { Pill } from '../primitives/Pill';
 
 type Props = {
   startTime: string;
@@ -9,36 +10,18 @@ type Props = {
 export default function EventRow({ startTime, label, sublabel }: Props) {
   return (
     <div className="t-row event" role="listitem">
-      {/* Drag handle placeholder — keeps columns aligned with task rows */}
-      <span style={{ width: 20, flexShrink: 0, visibility: 'hidden' }} aria-hidden="true" />
-      <div
-        style={{
-          width: 22,
-          height: 22,
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'var(--calendar)',
-        }}
-      >
-        <IconCal size={14} />
-      </div>
+      <span className="t-row__handle-placeholder" aria-hidden="true" />
+      <span className="t-row__event-icon">
+        <Icon name="calendar" size={14} tone="calendar" />
+      </span>
       <div className="label">
-        <span style={{ color: 'var(--ink-2)', fontWeight: 450 }}>{label}</span>
-        {sublabel && <span className="sublabel">· {sublabel}</span>}
+        <span className="t-row__event-label">{label}</span>
+        {sublabel !== undefined && <span className="sublabel">· {sublabel}</span>}
       </div>
       <div className="meta-right">
-        <span
-          className="pill"
-          style={{
-            background: 'transparent',
-            border: '0.5px solid var(--hairline-2)',
-            color: 'var(--ink-2)',
-            fontVariantNumeric: 'tabular-nums',
-          }}
-        >
+        <Pill variant="outline" tabular>
           {startTime}
-        </span>
+        </Pill>
       </div>
     </div>
   );

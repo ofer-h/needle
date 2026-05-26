@@ -52,3 +52,25 @@ Format: `### YYYY-MM-DD — <topic> (<who made the call>)`
 ### 2026-05-24 — Titlebar fixes (Ofer)
 - Removed HTML `.lights` div — `titleBarStyle: 'hiddenInset'` already renders native macOS traffic lights.
 - Fixed window drag: `.titlebar > *` was applying `-webkit-app-region: no-drag` to `.title-center` (inset:0), blocking all dragging. Scoped `no-drag` to `button, a, input, select` only.
+
+### 2026-05-26 — AI-first design-system foundation (Ofer, AI recommendation accepted)
+- Built persistent AI-readable knowledge layer **before** any app-code refactor. No `src/` changes.
+- Trigger: dark mode unreadable + no formal design system + no AI persistence between sessions.
+- Researched only gold-standard sources (Anthropic Skills, Radix Colors, W3C DTCG 2025.10, WCAG 2.2 AA, Apple HIG, high-star OSS). Curated in `design/sources.md`.
+- Created lean core: 4 always-on rules (`.cursor/rules/design-*.mdc`), 5 skills (`.cursor/skills/needle-*`), 5 docs (`design/`).
+- Skills follow Anthropic progressive-disclosure pattern: small `SKILL.md`, references on demand.
+- Skill set: `needle-design-system` (router), `needle-ui-audit` (analysis), `needle-dark-mode-fix` + `needle-token-migration` (refactor, narrow-bridge), `needle-build-component` (template).
+- Stayed with CSS variables — explicitly rejected Tailwind/vanilla-extract/Storybook/Chromatic.
+- Spec at `docs/superpowers/specs/2026-05-26-needle-design-system-design.md`. Design-layer decisions log: `design/decisions.md`.
+- Phase 2 (next): use the skills to run the real audit, fix dark mode, restructure `tokens.css` into 3 layers.
+
+### 2026-05-26 — Today screen refactor + primitive library (Ofer, AI recommendation accepted)
+- Audited Today screen UI and executed full token + component refactor in one chat. Single-batch landing (per Ofer: "no piecemeal").
+- **Tokens:** Introduced `src/renderer/styles/primitives.css` (raw `--sand-*`, `--ink-*`, accents, plus `--space-*`, `--radius-*`, `--text-*`, `--duration-*`, `--ease-*` scales). `tokens.css` rewritten as pure semantic-layer references. Added missing tokens: `--surface-active`, `--border-strong`, `--icon-default`, `--icon-muted`, `--ink-disabled`, `--surface-disabled`. Fixed dark-mode `--ink-3` (`#807a70` → `#9a948a`, 4.2:1 → 5.6:1, passes WCAG AA).
+- **Primitives:** Created 8 reusable primitives in `src/renderer/components/primitives/`: `Icon`, `Kbd`, `Divider`, `ProgressBar`, `Pill`, `Checkbox`, `Button`, `IconButton`. Each is `<Component>.tsx + .css + index.ts`; all classes namespaced `ds-*`. `Icon` wraps the existing `Icons.tsx` glyph source (kept in place since Capture still imports raw glyphs — Capture migration deferred).
+- **Domain refactor:** `TaskRow` and `EventRow` rebuilt to consume `Checkbox`, `Pill`, `Icon`, `IconButton`. `TaskRow` now has a single `RowBody` shared between fixed and flexible variants (no triplicated bodies). Drag handle migrated to `IconButton` with hover-reveal pattern.
+- **Screen split:** `TodayScreen.tsx` cut from 626 lines to 218, purely orchestration. Extracted `TodayToolbar`, `QuickAddRow`, `UpcomingFooter`, `CaptureFab`. DnD artefacts moved to `Today/dnd/` (`GapDropZone`, `OverlayRow`, `reorder.ts`).
+- **A11y fixes:** Quick-add row now responds to Enter/Space. Upcoming toggle has `aria-expanded` + `aria-controls` + `aria-label`. All buttons have `:focus-visible` outlines. `prefers-reduced-motion` respected on all transitions.
+- **Lint config:** ESLint flat config lacked browser/node globals → 23 pre-existing `no-undef` errors. Added `globals` package import + per-folder language options. Lint now passes everything in Today scope; 4 pre-existing errors remain in `CaptureScreen` and `main/ipc/index.ts` (out of scope).
+- **Verification:** `npm run typecheck` clean. `npm run lint` clean for all touched files. `vite build` succeeds, renderer bundle 215 KB / 21 KB CSS gzipped.
+- **Out of scope (still pending):** Capture screen refactor, completion animation, item expansion, single-FAB enforcement (PRD says only FAB; current screen has toolbar CTA + quick-add + FAB), keyboard reorder via `KeyboardSensor`, empty state, store-driven upcoming list.

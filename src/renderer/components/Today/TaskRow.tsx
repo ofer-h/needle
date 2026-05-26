@@ -1,11 +1,17 @@
+import type { ReactNode } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import type { ScheduleKind } from '../../../shared/types';
-import { IconCheck } from '../Icons';
+import { Checkbox } from '../primitives/Checkbox';
+import { IconButton } from '../primitives/IconButton';
+import { Pill } from '../primitives/Pill';
+import type { PillVariant } from '../primitives/Pill';
+
+type Kind = 'urgent' | 'upcoming' | 'faded';
 
 type Props = {
   id: string;
   scheduleKind: ScheduleKind;
-  kind?: 'urgent' | 'upcoming' | 'faded';
+  kind?: Kind;
   label: string;
   sublabel?: string;
   date: string;
@@ -15,9 +21,65 @@ type Props = {
   onToggle?: () => void;
 };
 
-export default function TaskRow({
-  id,
-  scheduleKind,
+export default function TaskRow(props: Props) {
+  if (props.scheduleKind === 'flexible') return <FlexibleTaskRow {...props} />;
+  return <FixedTaskRow {...props} />;
+}
+
+/* ── Shared body content ───────────────────────────────────────── */
+
+type BodyProps = {
+  kind: Kind;
+  label: string;
+  sublabel?: string;
+  date: string;
+  link?: string;
+  datePill?: 'urgent' | 'upcoming';
+  done: boolean;
+  onToggle?: (() => void) | undefined;
+};
+
+function RowBody({ kind, label, sublabel, date, link, datePill, done, onToggle }: BodyProps) {
+  const checkboxTone: 'neutral' | 'urgent' | 'upcoming' =
+    kind === 'urgent' ? 'urgent' : kind === 'upcoming' ? 'upcoming' : 'neutral';
+
+  return (
+    <>
+      <Checkbox
+        checked={done}
+        {...(onToggle !== undefined ? { onToggle } : {})}
+        tone={checkboxTone}
+        label={done ? 'Mark incomplete' : 'Mark complete'}
+      />
+      <div className="label">
+        <span className={`priority-dot ${kind}`} aria-hidden="true" />
+        <span>{label}</span>
+        {sublabel !== undefined && <span className="sublabel">· {sublabel}</span>}
+      </div>
+      <div className="meta-right">
+        {link !== undefined && (
+          <span className="link-tag">
+            <span className="link-tag__dot" aria-hidden="true" />
+            {link}
+          </span>
+        )}
+        <Pill variant={pillVariantFor(datePill)} tabular>
+          {date}
+        </Pill>
+      </div>
+    </>
+  );
+}
+
+function pillVariantFor(kind?: 'urgent' | 'upcoming'): PillVariant {
+  if (kind === 'urgent') return 'urgent';
+  if (kind === 'upcoming') return 'upcoming';
+  return 'neutral';
+}
+
+/* ── Fixed (anchored) row — no drag handle ─────────────────────── */
+
+function FixedTaskRow({
   kind = 'urgent',
   label,
   sublabel,
@@ -27,61 +89,24 @@ export default function TaskRow({
   done = false,
   onToggle,
 }: Props) {
-  if (scheduleKind === 'flexible') {
-    return (
-      <FlexibleTaskRow
-        id={id}
-        kind={kind}
-        label={label}
-        date={date}
-        done={done}
-        {...(onToggle !== undefined && { onToggle })}
-        {...(sublabel !== undefined && { sublabel })}
-        {...(link !== undefined && { link })}
-        {...(datePill !== undefined && { datePill })}
-      />
-    );
-  }
-
   return (
     <div className={`t-row${done ? ' done' : ''}`} role="listitem">
-      {/* Drag handle placeholder — keeps columns aligned with flexible rows */}
-      <span style={{ width: 20, flexShrink: 0, visibility: 'hidden' }} aria-hidden="true" />
-      <button
-        className={`checkbox ${done ? 'done' : kind}`}
-        onClick={onToggle}
-        aria-label={done ? 'Mark incomplete' : 'Mark complete'}
-        style={{ background: 'none', border: '1.5px solid', cursor: 'pointer' }}
-      >
-        {done && <IconCheck size={11} />}
-      </button>
-      <div className="label">
-        <span className={`priority-dot ${kind}`} style={done ? { opacity: 0.3 } : undefined} />
-        <span>{label}</span>
-        {sublabel && <span className="sublabel">· {sublabel}</span>}
-      </div>
-      <div className="meta-right">
-        {link && (
-          <span className="link-tag">
-            <span
-              style={{
-                width: 4,
-                height: 4,
-                borderRadius: 2,
-                background: 'var(--ink-4)',
-                display: 'inline-block',
-              }}
-            />
-            {link}
-          </span>
-        )}
-        <span className={`pill${datePill ? ` ${datePill}` : ''}`}>{date}</span>
-      </div>
+      <span className="t-row__handle-placeholder" aria-hidden="true" />
+      <RowBody
+        kind={kind}
+        label={label}
+        {...(sublabel !== undefined ? { sublabel } : {})}
+        date={date}
+        {...(link !== undefined ? { link } : {})}
+        {...(datePill !== undefined ? { datePill } : {})}
+        done={done}
+        onToggle={onToggle}
+      />
     </div>
   );
 }
 
-type FlexibleRowProps = Omit<Props, 'scheduleKind'> & { id: string };
+/* ── Flexible (draggable) row ─────────────────────────────────── */
 
 function FlexibleTaskRow({
   id,
@@ -93,83 +118,42 @@ function FlexibleTaskRow({
   datePill,
   done = false,
   onToggle,
-}: FlexibleRowProps) {
+}: Props) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id });
 
-  return (
-    // Wrapper takes the draggable ref; opacity 0 hides the original while DragOverlay floats
-    <div
-      ref={setNodeRef}
-      aria-hidden={isDragging || undefined}
-      style={
-        isDragging
-          ? {
-              opacity: 0.25,
-              pointerEvents: 'none',
-              borderRadius: 6,
-              outline: '1.5px dashed var(--hairline-2)',
-            }
-          : undefined
-      }
+  const wrapperClass = `t-row-flexible-wrap ds-hover-reveal${
+    isDragging ? ' t-row-flexible-wrap--dragging' : ''
+  }`;
+
+  const handle: ReactNode = (
+    <IconButton
+      label="Drag to reorder"
+      variant="ghost"
+      size="sm"
+      hoverReveal
+      className="t-row__drag"
+      {...attributes}
+      {...listeners}
+      tabIndex={-1}
     >
-      <div
-        className={`t-row t-row-flexible${done ? ' done' : ''}`}
-        role="listitem"
-      >
-        <button
-          className="drag-handle"
-          {...attributes}
-          {...listeners}
-          aria-label="Drag to reorder"
-          tabIndex={-1}
-          style={{
-            background: 'none',
-            border: 'none',
-            padding: '0 4px',
-            cursor: 'grab',
-            color: 'var(--ink-4)',
-            fontSize: 14,
-            lineHeight: 1,
-            opacity: 0,
-            transition: 'opacity 0.15s',
-            display: 'inline-flex',
-            alignItems: 'center',
-            alignSelf: 'center',
-            flexShrink: 0,
-          }}
-        >
-          ⠿
-        </button>
-        <button
-          className={`checkbox ${done ? 'done' : kind}`}
-          onClick={onToggle}
-          aria-label={done ? 'Mark incomplete' : 'Mark complete'}
-          style={{ background: 'none', border: '1.5px solid', cursor: 'pointer' }}
-        >
-          {done && <IconCheck size={11} />}
-        </button>
-        <div className="label">
-          <span className={`priority-dot ${kind}`} style={done ? { opacity: 0.3 } : undefined} />
-          <span>{label}</span>
-          {sublabel && <span className="sublabel">· {sublabel}</span>}
-        </div>
-        <div className="meta-right">
-          {link && (
-            <span className="link-tag">
-              <span
-                style={{
-                  width: 4,
-                  height: 4,
-                  borderRadius: 2,
-                  background: 'var(--ink-4)',
-                  display: 'inline-block',
-                }}
-              />
-              {link}
-            </span>
-          )}
-          <span className={`pill${datePill ? ` ${datePill}` : ''}`}>{date}</span>
-        </div>
+      <span aria-hidden="true">⠿</span>
+    </IconButton>
+  );
+
+  return (
+    <div ref={setNodeRef} className={wrapperClass} aria-hidden={isDragging || undefined}>
+      <div className={`t-row t-row-flexible${done ? ' done' : ''}`} role="listitem">
+        {handle}
+        <RowBody
+          kind={kind}
+          label={label}
+          {...(sublabel !== undefined ? { sublabel } : {})}
+          date={date}
+          {...(link !== undefined ? { link } : {})}
+          {...(datePill !== undefined ? { datePill } : {})}
+          done={done}
+          onToggle={onToggle}
+        />
       </div>
     </div>
   );

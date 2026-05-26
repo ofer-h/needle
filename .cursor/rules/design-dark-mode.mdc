@@ -1,0 +1,48 @@
+---
+description: Dark mode contrast and theming rules — WCAG AA minimums, semantic token swaps
+globs: src/renderer/**/*.tsx,src/renderer/**/*.css
+alwaysApply: false
+---
+
+# Dark mode and contrast
+
+Needle ships both light and dark themes at equal quality. Dark mode is not an inverted afterthought.
+
+## Non-negotiable thresholds (WCAG 2.2 AA)
+
+| Pairing | Minimum contrast |
+|---------|------------------|
+| Normal text on its surface | 4.5:1 |
+| Large text (≥ 18pt or 14pt bold) | 3:1 |
+| UI components, borders, focus rings | 3:1 |
+| Icons (treated as UI) | 3:1 |
+
+Every token pair (text-token + surface-token) is verified independently for light AND dark. Inverting light-mode values is forbidden — it almost always fails.
+
+## Token semantics (per Radix Colors model)
+
+| Semantic role | Step | Use for |
+|---------------|------|---------|
+| `surface-base` | 1 | App background |
+| `surface-sub` | 2 | Subtle component background, striped rows |
+| `surface-raised` | 3 | Cards, raised components |
+| `surface-hover` | 4 | Hover state on components |
+| `surface-active` | 5 | Pressed / selected component |
+| `border-subtle` | 6 | Non-interactive borders, dividers |
+| `border-default` | 7 | Interactive component borders |
+| `border-strong` | 8 | Focus rings, strong borders |
+| `ink-secondary` | 11 | Low-contrast text (labels, metadata) |
+| `ink-primary` | 12 | High-contrast text (body, headings) |
+
+Accent colors (`urgent`, `upcoming`, `calendar`, `accent`) have their own light/dark variants tuned per theme. Dark-mode accents are typically lighter + more saturated than their light-mode siblings.
+
+## Common dark-mode mistakes (fix on sight)
+
+- **Pure white text on near-black** — too high contrast, causes halation. Use off-white (`#e8e6e0` range).
+- **Same gray for icons as for body text** — icons need their own semantic token (`--icon-muted`, `--icon-default`).
+- **Disabled state = `opacity: 0.5`** — disabled needs its own token to stay above 3:1 minimum.
+- **Hover state from light mode literally inverted** — recalibrate.
+
+## Workflow
+
+To fix a contrast issue, invoke `needle-dark-mode-fix`. It enforces the narrow-bridge process: identify failing pairing → propose new token mapping → verify against WCAG → update both themes in lockstep.

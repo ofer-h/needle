@@ -1,0 +1,31 @@
+.ds-progress {
+  display: inline-block;
+  height: 4px;
+  width: 88px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-sub);
+  overflow: hidden;
+  vertical-align: middle;
+}
+
+.ds-progress__fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--ink-2);
+  transition: width var(--duration-slow) var(--ease-out);
+}
+
+.ds-progress--urgent .ds-progress__fill {
+  background: var(--urgent);
+}
+
+.ds-progress--upcoming .ds-progress__fill {
+  background: var(--upcoming);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ds-progress__fill {
+    transition: none;
+  }
+}

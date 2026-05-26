@@ -1,0 +1,101 @@
+---
+description: Conventions for reusable design-system primitives in src/renderer/components/primitives/
+globs: src/renderer/components/primitives/**/*.tsx,src/renderer/components/primitives/**/*.css
+alwaysApply: false
+---
+
+# Primitives — reusable design-system components
+
+Primitives live in `src/renderer/components/primitives/`. They are imported by every screen. Treat them like a tiny published library — small, predictable, documented.
+
+## Folder structure (per primitive)
+
+```
+primitives/<Name>/
+  <Name>.tsx     ← component + Props type
+  <Name>.css     ← optional, only if the primitive needs its own CSS rules
+  index.ts       ← re-export
+```
+
+`index.ts` is just `export { default } from './<Name>';` plus any type re-exports. Screens import from the folder, not the file.
+
+## Props contract
+
+- `type Props = {…}` above the component, never inline.
+- Required props first, optional with defaults destructured (`{ size = 'md' }`).
+- Variants and sizes as **union types**, not boolean flags.
+- Pass-through ARIA props (`aria-label`, `aria-describedby`) where the primitive doesn't always carry visible text.
+- Event handlers named (`onClick`, `onToggle`); avoid leaking implementation-specific event types.
+
+## Variants cap
+
+A primitive has at most **4 variants** (e.g. `primary | secondary | ghost | danger`). If you need more, you have two components, not one — split it.
+
+## State coverage
+
+Every interactive primitive handles, visually:
+
+1. default
+2. hover
+3. focus-visible (visible ring using `--border-strong`)
+4. active / pressed
+5. disabled (uses `--ink-disabled`, `--surface-disabled` — not `opacity`)
+6. loading (if it triggers async)
+
+Non-interactive primitives (`Pill`, `Kbd`, `Divider`) just handle default + optional emphasis.
+
+## Tokens only
+
+Primitives reference only semantic tokens (`var(--ink-primary)`, `var(--surface-raised)`). Never:
+
+- Raw hex / rgb / hsl
+- Primitive layer tokens (`--sand-50`, `--ink-50`)
+- Hard-coded font/spacing/radius values off the scale
+
+## No external layout
+
+A primitive does NOT impose margins on its outer edge. The parent positions. Internal padding is fine.
+
+```tsx
+// Bad — primitive imposes layout
+<button style={{ marginTop: 12 }}>…</button>
+
+// Good — parent positions
+<div style={{ marginTop: 12 }}><Button>…</Button></div>
+```
+
+## Composition
+
+Primitives compose other primitives. Example: `IconButton` uses `Icon`. `Card` may render any children. Composite primitives (`Card`, `EmptyState`, `Toast`) are allowed and live in the same folder.
+
+## Documentation
+
+Every primitive has an entry in `design/components.md`. The entry includes:
+
+- Location
+- Purpose (one line)
+- Props summary
+- Variants
+- States covered
+- Tokens used
+- Status: `mvp | tokenized | primitive | ready`
+- Used by (which components/screens consume it)
+
+When you add or change a primitive's API, update the doc in the same change.
+
+## Story (when Ladle exists)
+
+Once Ladle is installed (Phase 2g), every primitive gets `<Name>.stories.tsx` next to its source — one story per variant, plus an "all states" story.
+
+## Anti-patterns (auto-reject)
+
+| Bad | Why |
+|-----|-----|
+| Primitive owns its margin/position | Mixes layout and component concerns |
+| `className` prop that overrides internal style | Breaks encapsulation — add a real `tone`/`variant`/`size` instead |
+| `disabled` styled with `opacity: 0.5` | Multiplies against background; token-driven disabled is required |
+| Boolean flags that mean variant (`isPrimary`, `isDanger`) | Variant union is clearer and exhaustive |
+| Children + label both for the same content | Pick one API; document it |
+| 200+ line component file | Split. A primitive should be ≤150 lines |
+
+Invoke `needle-build-component` to create or extract a primitive; it walks the full contract.

@@ -1,0 +1,70 @@
+.ds-checkbox {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink-3);
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  padding: 0;
+  position: relative;
+  transition: border-color var(--duration-base) var(--ease-out),
+    background var(--duration-base) var(--ease-out);
+}
+
+.ds-checkbox:focus-visible {
+  outline: 2px solid var(--border-strong);
+  outline-offset: 2px;
+}
+
+/* Tone */
+.ds-checkbox--urgent {
+  border-color: var(--urgent);
+}
+
+.ds-checkbox--upcoming {
+  border-color: var(--upcoming);
+}
+
+/* Soft glow for urgent — emphasises pending priority */
+.ds-checkbox--urgent::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background: var(--urgent);
+  opacity: 0.22;
+  z-index: -1;
+  filter: blur(8px);
+}
+
+/* Checked: fill with upcoming colour, checkmark inverts to surface */
+.ds-checkbox--checked {
+  border-color: var(--upcoming);
+  background: var(--upcoming);
+  color: #ffffff;
+}
+
+[data-theme='dark'] .ds-checkbox--checked {
+  color: var(--ink-900, #0e1817);
+}
+
+.ds-checkbox--checked.ds-checkbox--urgent::after {
+  opacity: 0;
+}
+
+/* Disabled */
+.ds-checkbox--disabled {
+  border-color: var(--ink-disabled);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ds-checkbox {
+    transition: none;
+  }
+}
