@@ -10,6 +10,19 @@ The Claude plan is solid as a strategic map. We will execute it with a tighter f
 
 Needle is currently a UI shell with a strong Today timeline, design tokens, reusable primitives, and Cursor rules/skills. It is not yet an everyday tool because items are not fully editable, dates are display strings instead of real scheduling data, Upcoming is placeholder content, Capture is still mock-heavy, and there is no persistence, AI, DB, or calendar integration yet.
 
+## V2 Architecture Pause
+
+As of branch `codex-v2-architecture`, do not continue deep UI editing from this plan without first moving the app model toward `docs/v2/` and `src/shared/domain-v2.ts`.
+
+Important correction:
+
+- Embedded `Task.subtasks?: Subtask[]` was useful as a UI spike, but should not become durable state.
+- Subtasks are first-class `Item`s connected by `ItemRelation(type = 'contains')`.
+- Scheduling should move out of item records and into actor-scoped `ItemPlan` / concrete `ItemOccurrence`.
+- Users, actors, assignments, comments, sources, and activity logs are part of the v2 foundation.
+
+Use `.cursor/skills/needle-domain-architecture/SKILL.md` for future domain/model changes.
+
 ## Decisions
 
 - Edit UI: inline expansion first; anchored non-modal menu for secondary actions.
@@ -132,4 +145,4 @@ Every step ends with:
 - Step 3 first slice complete: `@floating-ui/react` installed; task rows expand inline; single-expanded state, notes, subtasks, lead time, bucket changes, date planning, and delete actions exist in the store; `ItemDetail`, `SubtaskList`, and `ItemMenu` are wired into `ItemRow`; Escape collapses details and Cmd-E expands the focused row.
 - Removed the mock `Daily standup` task so the meeting appears only as a calendar event with no checkbox.
 - Verified each completed slice with `npm run typecheck` and `npm run lint`; also smoke-tested against the already-running Electron app.
-- Next step: harden Step 3 with focus-return polish, fuller keyboard menu controls, and manual Electron smoke before moving to Plan Stash.
+- V2 architecture branch created after this checkpoint. Next product-model step: implement the domain fixture/store adapter from `docs/v2/implementation-roadmap.md`, then replace embedded subtasks with child items.

@@ -103,3 +103,10 @@ Format: `### YYYY-MM-DD — <topic> (<who made the call>)`
 - Added keyboard support for the first edit slice: `Esc` collapses an expanded item and `Cmd-E` expands the focused task row.
 - Running-app smoke caught that the mock `Daily standup` existed as both a checkable task and a calendar event; removed the task fixture so meetings remain event-only and non-checkable.
 - Verification: `npm run typecheck`, `npm run lint`, `git diff --check`, and a running Electron smoke pass. `npm install` reported 25 audit issues; audit remediation was left for a separate security/dependency pass.
+
+### 2026-05-26 — V2 domain architecture branch (Ofer, AI recommendation accepted)
+- Checkpointed and pushed the current inline-edit work on `master`, then created `codex-v2-architecture` for the next-level app model.
+- Audited the current model and decided embedded `Subtask[]` is transitional only; durable subtasks are first-class `Item`s connected by `ItemRelation(type='contains')`.
+- Added v2 architecture docs under `docs/v2/`, a Superpowers-style spec at `docs/superpowers/specs/2026-05-26-v2-domain-architecture.md`, and a domain workflow skill at `.cursor/skills/needle-domain-architecture/SKILL.md`.
+- Added `src/shared/domain-v2.ts` with target shared contracts for workspace/user/actor/item/relation/assignment/plan/occurrence/comment/activity/sync models.
+- Next implementation step: build a domain fixture/store adapter so the current Today UI can read from v2-shaped state before replacing embedded subtasks in the UI.
