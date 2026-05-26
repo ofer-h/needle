@@ -1,11 +1,51 @@
 # Vertical Slice — 3 PM Meeting Scenario
 
-**Status:** In progress
+**Status:** Implementation complete; user verification blocked on env restart.
 **Branch:** `codex-v2-architecture`
 **Started:** 2026-05-26
 **Owner:** Ofer
 
 This is a living working doc. Update it at the end of every meaningful change. If a session is interrupted, the next session reads this top-to-bottom and resumes from the **Status pointer**.
+
+## TL;DR — where everything lives
+
+| Topic | File |
+|---|---|
+| **This plan + status pointer + troubleshooting** | `docs/v2/vertical-slice-3pm-meeting.md` (this file) |
+| Architecture north star | `docs/v2/product-direction.md` |
+| Domain concepts (Item, Intervention, Ritual, CaptureEntry, etc.) | `docs/v2/domain-model.md` |
+| Database tables | `docs/v2/data-model.md` |
+| Multi-app roadmap (rings 0→7) | `docs/v2/multi-app-roadmap.md` |
+| Implementation phases (A→I) | `docs/v2/implementation-roadmap.md` |
+| Shared TypeScript contract | `src/shared/domain-v2.ts` |
+| v2 store + seeded fixture | `src/renderer/state/store-v2.ts` |
+| v2 selectors | `src/renderer/state/selectors-v2.ts` |
+| Dev clock + control | `src/renderer/utils/dev-clock.ts`, `src/renderer/components/DevTools/DevClockControl.tsx` |
+| InterventionLayer (router + IPC) | `src/renderer/components/Intervention/InterventionLayer.tsx` |
+| Torch (system-level, separate window) | `src/main/windows/torch.ts`, `src/renderer/components/Intervention/TorchWindow.tsx`, `Torchlight.tsx` |
+| Brain-dump capture (separate window) | `src/main/windows/capture.ts`, `src/renderer/components/Intervention/CaptureWindow.tsx` |
+| Escalation banner (in-app) | `src/renderer/components/Intervention/EscalatedBanner.tsx` |
+| IPC contracts | `src/shared/ipc-contracts.ts` |
+| Preload + window typing | `src/preload/index.ts`, `src/renderer/window.d.ts` |
+| Main process bootstrap | `src/main/index.ts`, `src/main/ipc/index.ts`, `src/main/windows/main.ts` |
+
+## What's done
+
+1. **v2 contract** (`src/shared/domain-v2.ts`) — full domain types incl. `Intervention`, `Ritual`, `CaptureEntry`, `Item.commitmentLevel`, `ItemPlan.relativeTo`. Shipped in commit `7d507db`.
+2. **v2 store + fixture** (`src/renderer/state/store-v2.ts`) — seeded with the 3 PM 1:1 scenario: workspace, actors, sources, unmissable event item, ritual, prep task with `relativeTo` plan, three chained interventions (capture, torch, escalation). Activity log entries on every mutation.
+3. **v2 selectors** (`src/renderer/state/selectors-v2.ts`) — `selectTodayItems`, `selectActiveInterventions`, `selectDailyFlow`, `selectPendingCaptureEntries`. Handles `relativeTo` derived timing.
+4. **Dev clock** (`src/renderer/utils/dev-clock.ts` + `DevClockControl.tsx`) — bottom-right control with presets 14:54 / 14:55 / 14:59 / 15:00 / 15:01 + "resume" to return to real time.
+5. **Brain-dump capture** — standalone Electron BrowserWindow (`src/main/windows/capture.ts` + `src/renderer/components/Intervention/CaptureWindow.tsx`). 600x480, always-on-top floating, visible across all macOS spaces.
+6. **System torch** — full-screen Electron BrowserWindow (`src/main/windows/torch.ts` + `src/renderer/components/Intervention/TorchWindow.tsx`). Covers primary display, all spaces incl. over full-screen apps, cursor-tracking spotlight.
+7. **Escalation banner** (`EscalatedBanner.tsx`) — top-banner stand-in for what would be a push notification.
+8. **InterventionLayer** (`InterventionLayer.tsx`) — reads v2 store + dev clock, auto-activates scheduled-but-due interventions, routes the highest-intensity one to the right surface via IPC. Listens for close events and updates the store.
+9. **Removed**: debug-only `V2TodayIsland` + the in-window `ModalCapture` (superseded by the standalone window).
+
+## What's open
+
+1. **Step 8 — user verification.** Walk the scenario, report what you see and feel. **Blocked**: requires a full app restart to pick up new main-process + preload code (see Troubleshooting).
+2. **Open product questions** logged at the bottom — auto-resolve capture when preempted by torch, mouse-capture vs click-through for torch, escalation timer trigger, etc.
+3. **Future** (not in this slice): multi-display torch, real push for escalation, real calendar sync, multi-actor, SQLite persistence, AI-suggested rituals, mouse-as-flashlight across other apps with click-through.
 
 ---
 
@@ -19,9 +59,40 @@ Build the first end-to-end product moment using the v2 contract: an unmissable 3
 
 ## Status pointer
 
-▸ **Step 10 done; Step 8 still open** — both torch and brain-dump capture are now standalone always-on-top Electron BrowserWindows. V2 debug island removed from Today. User to verify by **full-quitting and restarting** `npm start`, then jumping the dev clock to 14:55 (capture window) and 14:59 (torch window).
+▸ **Blocked on verification.** User reports clicking the dev clock preset (e.g. 14:59) produces no visible change — torch window does not appear. Almost certainly a stale-process issue (see Troubleshooting below). Next step is for the user to fully Cmd-Q the app, `npm start` fresh, open DevTools (Cmd+Option+I), click the preset, and report what they see in the console.
 
 (When resuming: update this line first, before doing any other work.)
+
+## Troubleshooting (added 2026-05-26)
+
+### Symptom: clicking a dev-clock preset does nothing
+
+**Most likely cause:** Electron main-process and preload code are loaded only at startup. Vite's hot-reload covers the renderer but NOT the main process and NOT the preload. If `npm start` was running before commits `7d507db` (intervention contracts), `ed22b05` (v2 store), `4566c61` (in-window slice), `d59caa7` (system torch), or `dc172a7` (capture window), then the running Electron has old main + old preload code. The renderer can call `window.api.torch.show(...)` but main has no handler, OR `window.api.torch` is undefined entirely because preload didn't expose it.
+
+**Fix:**
+1. Cmd-Q the app (fully quit, not just close the window).
+2. From `/Users/groot/dev/needle`, run `npm start` again.
+3. Open DevTools (View → Developer → Toggle Developer Tools, or Cmd+Option+I).
+4. Click the **14:59** preset on the dev clock (bottom-right).
+5. If nothing happens, check the console for errors and paste them.
+
+### Quick manual sanity check
+
+In DevTools console:
+
+```js
+window.api?.torch?.show({ correlationId: 'manual-test', title: 'TEST', subtitle: 'manual', durationMs: 5000 });
+```
+
+- If the torch overlay appears: the IPC + window plumbing works, the bug is in InterventionLayer's activation logic.
+- If `window.api` or `window.api.torch` is `undefined`: preload is stale or didn't load.
+- If the call returns but no window opens: main-process IPC handler is missing (stale main).
+
+Same for capture:
+
+```js
+window.api?.capture?.show({ correlationId: 'manual-test', title: 'TEST', subtitle: 'manual' });
+```
 
 ### Step 9 — System-level torch (added 2026-05-26, done)
 

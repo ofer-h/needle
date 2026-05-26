@@ -23,7 +23,15 @@ export default function DevClockControl() {
       </div>
       <div className="dev-clock__row dev-clock__buttons">
         {PRESET_TIMES.map((t) => (
-          <button key={t} type="button" className="dev-clock__preset" onClick={() => jumpToTime(t)}>
+          <button
+            key={t}
+            type="button"
+            className="dev-clock__preset"
+            onClick={() => {
+              console.info('[DevClock] jump', t);
+              jumpToTime(t);
+            }}
+          >
             {t}
           </button>
         ))}

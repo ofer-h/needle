@@ -51,12 +51,18 @@ export default function InterventionLayer() {
 
   // Drive the system-level torch window.
   useEffect(() => {
-    if (window.api === undefined) return;
+    if (window.api?.torch === undefined) {
+      if (top?.strategy === 'attention_takeover_torch') {
+        console.warn('[InterventionLayer] torch intervention active but window.api.torch is undefined — preload likely stale. Full-quit and restart npm start.');
+      }
+      return;
+    }
     const activeTorch = top?.strategy === 'attention_takeover_torch' ? top : null;
     if (activeTorch !== null && activeTorch.id !== lastTorchIdRef.current) {
       const title = typeof activeTorch.payload.title === 'string' ? activeTorch.payload.title : 'Time to move';
       const subtitle =
         typeof activeTorch.payload.subtitle === 'string' ? activeTorch.payload.subtitle : 'Acknowledge to continue.';
+      console.info('[InterventionLayer] torch.show', { id: activeTorch.id, title });
       window.api.torch.show({
         correlationId: activeTorch.id,
         title,
@@ -72,7 +78,12 @@ export default function InterventionLayer() {
 
   // Drive the standalone capture window.
   useEffect(() => {
-    if (window.api === undefined) return;
+    if (window.api?.capture === undefined) {
+      if (top?.strategy === 'modal_capture') {
+        console.warn('[InterventionLayer] capture intervention active but window.api.capture is undefined — preload likely stale. Full-quit and restart npm start.');
+      }
+      return;
+    }
     const activeCapture = top?.strategy === 'modal_capture' ? top : null;
     if (activeCapture !== null && activeCapture.id !== lastCaptureIdRef.current) {
       const title = typeof activeCapture.payload.title === 'string' ? activeCapture.payload.title : 'Brain-dump';
@@ -80,6 +91,7 @@ export default function InterventionLayer() {
         typeof activeCapture.payload.subtitle === 'string'
           ? activeCapture.payload.subtitle
           : 'Anything on your mind before the next thing?';
+      console.info('[InterventionLayer] capture.show', { id: activeCapture.id, title });
       window.api.capture.show({
         correlationId: activeCapture.id,
         title,
@@ -94,7 +106,7 @@ export default function InterventionLayer() {
 
   // Receive torch close events.
   useEffect(() => {
-    if (window.api === undefined) return;
+    if (window.api?.torch === undefined || window.api?.capture === undefined) return;
     const unsub = window.api.torch.onClosed((payload) => {
       const id = payload.correlationId as InterventionId;
       if (payload.reason === 'acknowledged') {
@@ -108,7 +120,7 @@ export default function InterventionLayer() {
 
   // Receive capture events.
   useEffect(() => {
-    if (window.api === undefined) return;
+    if (window.api?.torch === undefined || window.api?.capture === undefined) return;
     const offAdded = window.api.capture.onEntryAdded((payload) => {
       const flowSessionId = top?.flowSessionId;
       const storeEntryId = addCaptureEntry({
