@@ -1,4 +1,4 @@
-import type { Theme } from './types';
+import type { CalendarEvent, CaptureEntry, Task, Theme } from './types';
 
 export type TorchShowPayload = {
   /** Stable correlation id provided by the requester. Used to match the close
@@ -84,6 +84,23 @@ export type CaptureClosePayload = {
   reason: CaptureCloseReason;
 };
 
+export type DbCreateTaskPayload = Omit<Task, 'id'>;
+export type DbUpdateTaskPayload = { id: string; patch: Partial<Task> };
+export type DbDeleteTaskPayload = { id: string };
+export type DbGetTasksByDatePayload = { date: string };
+export type DbCreateEventPayload = Omit<CalendarEvent, 'id'>;
+export type DbAddCapturePayload = { body: string };
+export type DbGetCapturePayload = { limit?: number };
+
 export type IpcContracts = {
   'app:getTheme': { req: void; res: Theme };
+  'db:get-tasks': { req: void; res: Task[] };
+  'db:get-tasks-by-date': { req: DbGetTasksByDatePayload; res: Task[] };
+  'db:create-task': { req: DbCreateTaskPayload; res: Task };
+  'db:update-task': { req: DbUpdateTaskPayload; res: Task };
+  'db:delete-task': { req: DbDeleteTaskPayload; res: void };
+  'db:get-events': { req: void; res: CalendarEvent[] };
+  'db:create-event': { req: DbCreateEventPayload; res: CalendarEvent };
+  'db:add-capture': { req: DbAddCapturePayload; res: CaptureEntry };
+  'db:get-capture-entries': { req: DbGetCapturePayload; res: CaptureEntry[] };
 };

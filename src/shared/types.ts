@@ -75,3 +75,10 @@ export type CaptureResult = {
 export type Screen = 'today' | 'capture';
 
 export type Theme = 'light' | 'dark';
+
+/** Persisted quick-capture inbox row (Phase F local SQLite). */
+export type CaptureEntry = {
+  id: string;
+  body: string;
+  createdAt: string;
+};

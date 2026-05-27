@@ -1,10 +1,17 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import type { Screen, Theme } from '../shared/types';
+import type { CalendarEvent, CaptureEntry, Screen, Task, Theme } from '../shared/types';
 import type {
   CaptureClosePayload,
   CaptureEntryPayload,
   CapturePromotePayload,
   CaptureShowPayload,
+  DbAddCapturePayload,
+  DbCreateEventPayload,
+  DbCreateTaskPayload,
+  DbDeleteTaskPayload,
+  DbGetCapturePayload,
+  DbGetTasksByDatePayload,
+  DbUpdateTaskPayload,
   TorchBrainDumpSubmitPayload,
   TorchClosePayload,
   TorchHeroPayload,
@@ -83,6 +90,27 @@ const api = {
       const payload: TorchSetInteractivePayload = { interactive };
       ipcRenderer.send('torch:set-interactive', payload);
     },
+  },
+  db: {
+    getTasks: (): Promise<Task[]> => ipcRenderer.invoke('db:get-tasks'),
+    getTasksByDate: (date: string): Promise<Task[]> =>
+      ipcRenderer.invoke('db:get-tasks-by-date', { date } satisfies DbGetTasksByDatePayload),
+    createTask: (payload: DbCreateTaskPayload): Promise<Task> =>
+      ipcRenderer.invoke('db:create-task', payload),
+    updateTask: (id: string, patch: Partial<Task>): Promise<Task> =>
+      ipcRenderer.invoke('db:update-task', { id, patch } satisfies DbUpdateTaskPayload),
+    deleteTask: (id: string): Promise<void> =>
+      ipcRenderer.invoke('db:delete-task', { id } satisfies DbDeleteTaskPayload),
+    getEvents: (): Promise<CalendarEvent[]> => ipcRenderer.invoke('db:get-events'),
+    createEvent: (payload: DbCreateEventPayload): Promise<CalendarEvent> =>
+      ipcRenderer.invoke('db:create-event', payload),
+    addCapture: (body: string): Promise<CaptureEntry> =>
+      ipcRenderer.invoke('db:add-capture', { body } satisfies DbAddCapturePayload),
+    getCaptureEntries: (limit?: number): Promise<CaptureEntry[]> =>
+      ipcRenderer.invoke(
+        'db:get-capture-entries',
+        limit === undefined ? {} : ({ limit } satisfies DbGetCapturePayload),
+      ),
   },
   capture: {
     show: (payload: CaptureShowPayload): void => {
