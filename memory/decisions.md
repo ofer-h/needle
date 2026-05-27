@@ -176,6 +176,32 @@ Format: `### YYYY-MM-DD — <topic> (<who made the call>)`
 **Capture window fix**
 - `capture.ts`: replaced `screen.getPrimaryDisplay()` with `screen.getDisplayNearestPoint(screen.getCursorScreenPoint())` — brain-dump always opens on the display the user is actively on.
 
+### 2026-05-27 — Parallel agent branches merged into needle-ai-orchestration (Ofer + AI orchestration)
+
+**What:** Integrated four agent workstreams onto `needle-ai-orchestration` from base `d63515b`.
+
+| Agent | Branch | Landed as |
+|-------|--------|-----------|
+| C | `7305147` (via cherry-pick; `agent/capture-refactor` was empty) | `e53d335` |
+| A | `agent/v2-store-adapter` | merge `4856a09` |
+| B | `agent/sqlite-persistence` | merge `c1593d2` |
+| D | `agent/anthropic-api` | merge `dc5fa78` |
+
+**Why:** Single integration branch for AI orchestration work without force-push; preserve both `db:*` and `ai:*` IPC and preload bindings.
+
+**Verification:** typecheck + lint (0 errors) + 14 vitest tests pass after `npm install --legacy-peer-deps`. `npm run package` fails on adhoc/notarize signing in dev (expected).
+
+**Open questions:**
+- Wire Today to v2 adapter and/or SQLite hydrate.
+- Persist classify results via `db:add-capture` / task create.
+- Whether to bump `agent/capture-refactor` to track full integration tip or keep it capture-only.
+
+### 2026-05-27 — Local `.env` for Anthropic API key (Ofer + AI)
+- **What:** `dotenv` loads repo-root `.env` in main before bootstrap (`src/main/load-env.ts`); `.env.example` documents `ANTHROPIC_API_KEY`. Dev only — `app.isPackaged` skips file load.
+- **Why:** Faster local classify smoke tests without pasting the key into Capture UI every time; env still wins over userData `config.json`.
+- **Path:** `.vite/build/main.js` → `../../.env` with `electron-forge start`. Packaged builds: use OS env or Capture API key UI.
+- **Plan:** `docs/next-integration-steps.md` — phases 2–4 (SQLite hydrate, classify persist, v2 Today dogfood).
+
 ### 2026-05-27 — Live clock in Today toolbar (Ofer directed, AI implemented)
 - Added `LiveClock` component inline in `TodayToolbar.tsx` — no new file.
 - Ticks every second via `setInterval(1000)`.

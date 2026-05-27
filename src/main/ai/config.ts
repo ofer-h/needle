@@ -26,6 +26,11 @@ function readUserConfig(): UserConfig {
   }
 }
 
+/**
+ * API key resolution (first match wins; never log key values):
+ * 1. `process.env.ANTHROPIC_API_KEY` — OS/shell, or repo-root `.env` in dev (`load-env.ts`)
+ * 2. `userData/config.json` `anthropicApiKey` — Capture UI / `saveApiKey()`
+ */
 export function getApiKey(): string | null {
   const fromEnv = process.env.ANTHROPIC_API_KEY?.trim();
   if (fromEnv) return fromEnv;

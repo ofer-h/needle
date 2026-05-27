@@ -25,8 +25,9 @@ Intelligent second brain: capture anything, AI classifies it, surfaces the right
 ## Current state (as of 2026-05-27)
 - Full Electron app scaffolded and running (`npm start`).
 - Today screen fully redesigned: today-only scope, fixed-anchor + flexible-task timeline, drag-and-drop reordering.
-- Capture screen implemented with mock data (still raw inline styles — pending refactor).
-- No backend, no AI, no DB yet — pure UI shell.
+- **Orchestration merge on `needle-ai-orchestration` (@ `dc5fa78`):** capture token refactor, v2 store adapter + fixture, SQLite `db:*` IPC + seed, Anthropic `ai:classify` + ApiKeySettings. Today UI still uses v1 mock store; renderer not hydrated from DB; classify does not persist yet.
+- **Local Anthropic key:** repo-root `.env` (`ANTHROPIC_API_KEY`) loaded in main on dev `npm start` via `dotenv`; `.env.example` committed, `.env` gitignored. Precedence: env → userData `config.json`. Forward plan: `docs/next-integration-steps.md`.
+- Capture screen: token-based `CaptureScreen.css`, primitives, live Claude classify (needs API key in UI).
 - **AI-first design system layer landed 2026-05-26**: 4 rules (`.cursor/rules/design-*.mdc`), 5 skills (`.cursor/skills/needle-*`), 5 docs (`design/`). Read `design/llms.txt` first for any UI task.
 - **Today screen primitive refactor landed 2026-05-26**: 3-layer tokens (`primitives.css` + `tokens.css`), dark-mode contrast fixed (`--ink-3` now 5.6:1 AA-pass), 8 reusable primitives in `src/renderer/components/primitives/` (`Icon`, `Kbd`, `Divider`, `ProgressBar`, `Pill`, `Checkbox`, `Button`, `IconButton`), TodayScreen split into `TodayToolbar` / `QuickAddRow` / `UpcomingFooter` / `CaptureFab` + `dnd/` artefacts. TodayScreen.tsx cut from 626 → 218 lines. See `design/components.md` for the inventory.
 - **Forward plan approved and started 2026-05-26**: plan lives at `docs/needle-forward-implementation-plan.md`. Baseline lint is clean. Step 1 model foundation, Step 2 unified row, and Step 3 first edit slice are complete: `docs/glossary.md`, ISO date utilities, real `Task.date` / `CalendarEvent.date` fields, optional future item metadata, date-filtered `buildTimeline()`, store-driven upcoming items, shared `ItemRow`, inline task expansion, notes, subtasks, and anchored item menu are in place.

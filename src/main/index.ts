@@ -1,4 +1,7 @@
+import { loadLocalEnv } from './load-env';
 import { app, BrowserWindow, globalShortcut, session } from 'electron';
+
+loadLocalEnv();
 import { close, open } from './db';
 import { seedIfEmpty } from './db/seed';
 import { createMainWindow } from './windows/main';
