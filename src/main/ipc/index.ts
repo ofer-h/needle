@@ -11,6 +11,7 @@ import type {
   TorchSnoozePayload,
 } from '../../shared/ipc-contracts';
 import { hideCapture, showCapture } from '../windows/capture';
+import { registerDbHandlers } from './db-handlers';
 import {
   broadcastSnoozedToOverlays,
   enterBrainDumpMode,
@@ -33,6 +34,8 @@ function findMainAppWindow(): BrowserWindow | undefined {
 }
 
 export function registerIpcHandlers(): void {
+  registerDbHandlers();
+
   // System notification click → ask main-app renderer to acknowledge the torch.
   setTorchDismissHandler((correlationId) => {
     findMainAppWindow()?.webContents.send('torch:closed', {

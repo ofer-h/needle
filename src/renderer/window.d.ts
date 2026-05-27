@@ -1,9 +1,11 @@
-import type { Screen, Theme } from '../shared/types';
+import type { CalendarEvent, CaptureEntry, Screen, Task, Theme } from '../shared/types';
 import type {
   CaptureClosePayload,
   CaptureEntryPayload,
   CapturePromotePayload,
   CaptureShowPayload,
+  DbCreateEventPayload,
+  DbCreateTaskPayload,
   TorchBrainDumpSubmitPayload,
   TorchClosePayload,
   TorchHeroPayload,
@@ -37,6 +39,17 @@ declare global {
         onCursor(cb: (point: { x: number; y: number }) => void): () => void;
         onSnoozed(cb: (payload: TorchSnoozePayload) => void): () => void;
         onHero(cb: (payload: TorchHeroPayload) => void): () => void;
+      };
+      db: {
+        getTasks(): Promise<Task[]>;
+        getTasksByDate(date: string): Promise<Task[]>;
+        createTask(payload: DbCreateTaskPayload): Promise<Task>;
+        updateTask(id: string, patch: Partial<Task>): Promise<Task>;
+        deleteTask(id: string): Promise<void>;
+        getEvents(): Promise<CalendarEvent[]>;
+        createEvent(payload: DbCreateEventPayload): Promise<CalendarEvent>;
+        addCapture(body: string): Promise<CaptureEntry>;
+        getCaptureEntries(limit?: number): Promise<CaptureEntry[]>;
       };
       capture: {
         show(payload: CaptureShowPayload): void;
