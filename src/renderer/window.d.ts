@@ -1,4 +1,4 @@
-import type { Screen, Theme } from '../shared/types';
+import type { ClassifyResponse, Screen, Theme } from '../shared/types';
 import type {
   CaptureClosePayload,
   CaptureEntryPayload,
@@ -38,6 +38,11 @@ declare global {
         onCursor(cb: (point: { x: number; y: number }) => void): () => void;
         onSnoozed(cb: (payload: TorchSnoozePayload) => void): () => void;
         onHero(cb: (payload: TorchHeroPayload) => void): () => void;
+      };
+      ai: {
+        classify(text: string): Promise<ClassifyResponse>;
+        setApiKey(apiKey: string): Promise<{ ok: true } | { error: string }>;
+        hasApiKey(): Promise<boolean>;
       };
       capture: {
         show(payload: CaptureShowPayload): void;

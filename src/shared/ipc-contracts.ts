@@ -1,4 +1,4 @@
-import type { Theme } from './types';
+import type { ClassifyResponse, Theme } from './types';
 
 export type TorchShowPayload = {
   /** Stable correlation id provided by the requester. Used to match the close
@@ -84,6 +84,17 @@ export type CaptureClosePayload = {
   reason: CaptureCloseReason;
 };
 
+export type AiClassifyPayload = {
+  text: string;
+};
+
+export type AiSetApiKeyPayload = {
+  apiKey: string;
+};
+
 export type IpcContracts = {
   'app:getTheme': { req: void; res: Theme };
+  'ai:classify': { req: AiClassifyPayload; res: ClassifyResponse };
+  'ai:setApiKey': { req: AiSetApiKeyPayload; res: { ok: true } | { error: string } };
+  'ai:hasApiKey': { req: void; res: boolean };
 };

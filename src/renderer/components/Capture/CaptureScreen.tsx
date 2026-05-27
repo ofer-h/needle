@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import FxWindow from '../Window/FxWindow';
+import type { ClassificationResult } from '../../../shared/types';
 import {
   IconBack,
   IconMic,
@@ -10,8 +11,24 @@ import {
   IconPlus,
   IconSpark,
 } from '../Icons';
+import ApiKeySettings from './ApiKeySettings';
 
-type CaptureState = 'empty' | 'typing' | 'classified' | 'voice';
+type CaptureState = 'empty' | 'typing' | 'classifying' | 'classified' | 'classify-error' | 'voice';
+
+function bucketLabel(bucket: ClassificationResult['bucket']): string {
+  const labels: Record<ClassificationResult['bucket'], string> = {
+    today: 'Today',
+    tomorrow: 'Tomorrow',
+    later: 'Later',
+    someday: 'Someday',
+  };
+  return labels[bucket];
+}
+
+function formatLatency(ms: number): string {
+  if (ms < 1000) return `${Math.round(ms)} ms`;
+  return `${(ms / 1000).toFixed(1)} s`;
+}
 
 type Props = {
   onBack: () => void;
@@ -193,17 +210,86 @@ function CaptureTyping({
   );
 }
 
+// ── State: Classifying ───────────────────────────────────────────
+function CaptureClassifying({ rawInput }: { rawInput: string }) {
+  return (
+    <>
+      <Prompt>Classifying…</Prompt>
+      <div style={{ maxWidth: 720, width: '100%', margin: '0 auto' }}>
+        <div className="composer" style={{ minHeight: 0, padding: '14px 22px' }}>
+          <div className="input-text" style={{ fontSize: 16, color: 'var(--ink-2)' }}>
+            {rawInput}
+          </div>
+        </div>
+        <div className="thinking" style={{ marginTop: 22, justifyContent: 'center' }}>
+          <i /><i /><i />
+          <span style={{ marginLeft: 6 }}>classifying</span>
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ── State: Classify error ────────────────────────────────────────
+function CaptureClassifyError({
+  rawInput,
+  message,
+  onRetry,
+  onSaveRemember,
+  onOpenApiKey,
+}: {
+  rawInput: string;
+  message: string;
+  onRetry: () => void;
+  onSaveRemember: () => void;
+  onOpenApiKey: () => void;
+}) {
+  return (
+    <>
+      <Prompt>Something went wrong</Prompt>
+      <div style={{ maxWidth: 720, width: '100%', margin: '0 auto' }}>
+        <div className="composer" style={{ minHeight: 0, padding: '14px 22px' }}>
+          <div className="input-text" style={{ fontSize: 16, color: 'var(--ink-2)' }}>
+            {rawInput}
+          </div>
+        </div>
+        <div className="result-card" style={{ marginTop: 16 }}>
+          <div style={{ fontSize: 14, color: 'var(--urgent)', lineHeight: 1.45 }}>{message}</div>
+          <div style={{ display: 'flex', gap: 10, marginTop: 18, flexWrap: 'wrap' }}>
+            <button type="button" className="chip outline" style={{ height: 32 }} onClick={onRetry}>
+              Try again
+            </button>
+            <button type="button" className="chip outline" style={{ height: 32 }} onClick={onOpenApiKey}>
+              API key
+            </button>
+            <button type="button" className="chip" style={{ height: 32 }} onClick={onSaveRemember}>
+              Save as Remember
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
 // ── State 3: Classified ──────────────────────────────────────────
 function CaptureClassified({
   rawInput,
+  result,
+  latencyMs,
   onAddAnother,
   onBack,
 }: {
   rawInput: string;
+  result: ClassificationResult;
+  latencyMs: number;
   onAddAnother: () => void;
   onBack: () => void;
 }) {
-  const [selectedChip, setSelectedChip] = useState(0);
+  const chipIndex = TIME_CHIPS.findIndex(
+    (c) => c.toLowerCase() === bucketLabel(result.bucket).toLowerCase(),
+  );
+  const [selectedChip, setSelectedChip] = useState(chipIndex >= 0 ? chipIndex : 0);
 
   return (
     <>
@@ -212,7 +298,7 @@ function CaptureClassified({
         {/* Compact input recap */}
         <div className="composer" style={{ minHeight: 0, padding: '14px 22px' }}>
           <div className="input-text" style={{ fontSize: 16, color: 'var(--ink-2)' }}>
-            {rawInput || 'prep for the 1on1 with my manager on thursday'}
+            {rawInput}
           </div>
         </div>
 
@@ -223,11 +309,11 @@ function CaptureClassified({
               <IconSpark size={12} />
             </span>
             <span className="t-eyebrow" style={{ color: 'var(--urgent)' }}>
-              Act · Today
+              {bucketLabel(result.bucket)}
             </span>
             <span style={{ flex: 1 }} />
             <span className="t-mono" style={{ fontSize: 10, color: 'var(--ink-4)' }}>
-              1.2 s
+              {formatLatency(latencyMs)}
             </span>
           </div>
 
@@ -240,10 +326,10 @@ function CaptureClassified({
               letterSpacing: '-0.015em',
             }}
           >
-            Prep for manager 1:1
+            {result.title}
           </div>
           <div style={{ fontSize: 13.5, color: 'var(--ink-3)', marginTop: 4 }}>
-            Linked to your Thursday 3 PM meeting · 2 hr lead
+            {result.reasoning}
           </div>
 
           {/* Time chips */}
@@ -364,13 +450,42 @@ function CaptureVoice({ onStop, onCancel }: { onStop: () => void; onCancel: () =
 export default function CaptureScreen({ onBack }: Props) {
   const [state, setState] = useState<CaptureState>('empty');
   const [inputValue, setInputValue] = useState('');
+  const [classification, setClassification] = useState<ClassificationResult | null>(null);
+  const [classifyError, setClassifyError] = useState<string | null>(null);
+  const [latencyMs, setLatencyMs] = useState(0);
+  const [apiKeyOpen, setApiKeyOpen] = useState(false);
 
   const footer: Record<CaptureState, string> = {
     empty: '⌘ K captures from anywhere on your Mac',
     typing: '⏎ to confirm · ⎋ to dismiss',
+    classifying: 'classifying with Claude…',
     classified: 'thumbs up to save · ↩ or wait 3s to return',
+    'classify-error': 'fix the issue or save without classification',
     voice: 'tap to stop · auto-stops on silence',
   };
+
+  const runClassify = useCallback(async (text: string) => {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+
+    setClassifyError(null);
+    setClassification(null);
+    setState('classifying');
+
+    const started = performance.now();
+    const response = await window.api.ai.classify(trimmed);
+    const elapsed = performance.now() - started;
+    setLatencyMs(elapsed);
+
+    if ('error' in response) {
+      setClassifyError(response.error);
+      setState('classify-error');
+      return;
+    }
+
+    setClassification(response);
+    setState('classified');
+  }, []);
 
   const handleStartTyping = (v: string) => {
     setInputValue(v);
@@ -378,11 +493,13 @@ export default function CaptureScreen({ onBack }: Props) {
   };
 
   const handleSubmit = () => {
-    if (inputValue.trim()) setState('classified');
+    if (inputValue.trim()) void runClassify(inputValue);
   };
 
   const handleAddAnother = () => {
     setInputValue('');
+    setClassification(null);
+    setClassifyError(null);
     setState('empty');
   };
 
@@ -413,19 +530,33 @@ export default function CaptureScreen({ onBack }: Props) {
             onSubmit={handleSubmit}
           />
         )}
-        {state === 'classified' && (
+        {state === 'classifying' && <CaptureClassifying rawInput={inputValue} />}
+        {state === 'classify-error' && classifyError !== null && (
+          <CaptureClassifyError
+            rawInput={inputValue}
+            message={classifyError}
+            onRetry={() => void runClassify(inputValue)}
+            onSaveRemember={onBack}
+            onOpenApiKey={() => setApiKeyOpen(true)}
+          />
+        )}
+        {state === 'classified' && classification !== null && (
           <CaptureClassified
             rawInput={inputValue}
+            result={classification}
+            latencyMs={latencyMs}
             onAddAnother={handleAddAnother}
             onBack={onBack}
           />
         )}
         {state === 'voice' && (
           <CaptureVoice
-            onStop={() => setState('classified')}
+            onStop={() => void runClassify(inputValue || 'voice capture placeholder')}
             onCancel={() => setState('empty')}
           />
         )}
+
+        <ApiKeySettings open={apiKeyOpen} onClose={() => setApiKeyOpen(false)} />
 
         {/* Footer hint */}
         <div
@@ -443,6 +574,14 @@ export default function CaptureScreen({ onBack }: Props) {
           <span className="t-mono" style={{ fontSize: 11 }}>
             {footer[state]}
           </span>
+          <button
+            type="button"
+            className="chip outline"
+            style={{ height: 24, fontSize: 11, padding: '0 8px' }}
+            onClick={() => setApiKeyOpen(true)}
+          >
+            API key
+          </button>
         </div>
       </div>
     </FxWindow>

@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import type { Screen, Theme } from '../shared/types';
+import type { ClassifyResponse, Screen, Theme } from '../shared/types';
 import type {
   CaptureClosePayload,
   CaptureEntryPayload,
@@ -83,6 +83,13 @@ const api = {
       const payload: TorchSetInteractivePayload = { interactive };
       ipcRenderer.send('torch:set-interactive', payload);
     },
+  },
+  ai: {
+    classify: (text: string): Promise<ClassifyResponse> =>
+      ipcRenderer.invoke('ai:classify', { text }),
+    setApiKey: (apiKey: string): Promise<{ ok: true } | { error: string }> =>
+      ipcRenderer.invoke('ai:setApiKey', { apiKey }),
+    hasApiKey: (): Promise<boolean> => ipcRenderer.invoke('ai:hasApiKey'),
   },
   capture: {
     show: (payload: CaptureShowPayload): void => {

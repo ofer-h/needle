@@ -75,3 +75,16 @@ export type CaptureResult = {
 export type Screen = 'today' | 'capture';
 
 export type Theme = 'light' | 'dark';
+
+export type ClassificationBucket = 'today' | 'tomorrow' | 'later' | 'someday';
+
+export type ClassificationResult = {
+  bucket: ClassificationBucket;
+  title: string;
+  suggestedDate?: string;
+  suggestedTime?: string;
+  reasoning: string;
+  confidence: number;
+};
+
+export type ClassifyResponse = ClassificationResult | { error: string };
