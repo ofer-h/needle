@@ -1,4 +1,6 @@
 import { app, BrowserWindow, globalShortcut, session } from 'electron';
+import { close, open } from './db';
+import { seedIfEmpty } from './db/seed';
 import { createMainWindow } from './windows/main';
 import { buildMenu } from './menu';
 import { registerIpcHandlers } from './ipc/index';
@@ -6,6 +8,9 @@ import { registerIpcHandlers } from './ipc/index';
 let mainWindow: BrowserWindow | null = null;
 
 function bootstrap(): void {
+  const database = open();
+  seedIfEmpty(database);
+
   buildMenu();
   registerIpcHandlers();
 
@@ -43,4 +48,5 @@ app.on('activate', () => {
 
 app.on('will-quit', () => {
   globalShortcut.unregisterAll();
+  close();
 });
