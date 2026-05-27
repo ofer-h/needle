@@ -40,13 +40,26 @@ export default function BuildDiagnostics() {
       ? 'key: .env'
       : diag.apiKeySource === 'config'
         ? 'key: userData'
-        : 'key: missing';
+        : diag.envFileLoaded
+          ? 'key: empty (.env)'
+          : 'key: missing';
 
   return (
     <div className="build-diag" role="status" aria-label="Build diagnostics">
       <span className="build-diag__item">v{diag.version}</span>
       <span className="build-diag__item">{diag.gitSha}</span>
-      <span className="build-diag__item">{keyLabel}</span>
+      <span
+        className={`build-diag__item ${
+          keyLabel === 'key: empty (.env)' ? 'build-diag__item--warn' : ''
+        }`}
+        title={
+          keyLabel === 'key: empty (.env)'
+            ? 'ANTHROPIC_API_KEY is blank in .env on disk — add your key and save the file, then restart'
+            : undefined
+        }
+      >
+        {keyLabel}
+      </span>
       {diag.envFileLoaded && diag.envFilePath !== null && (
         <span className="build-diag__item build-diag__item--muted" title={diag.envFilePath}>
           .env ok

@@ -30,12 +30,16 @@ export function loadLocalEnv(): EnvLoadResult {
 
   for (const envPath of candidates) {
     if (!existsSync(envPath)) continue;
-    const result = config({ path: envPath });
+    // Dev toolchain (Forge/Vite) may set ANTHROPIC_API_KEY="" before main runs.
+    // dotenv skips existing keys by default — override so repo .env wins.
+    const result = config({ path: envPath, override: true });
     const loaded = !result.error;
     envLoadResult = { loaded, path: envPath };
+    const keyInProcess = Boolean(process.env.ANTHROPIC_API_KEY?.trim());
     needleLog('env', loaded ? 'loaded .env' : 'failed to load .env', {
       path: envPath,
       parsedKeys: result.parsed ? Object.keys(result.parsed) : [],
+      keyAppliedToProcess: keyInProcess,
     });
     return envLoadResult;
   }
