@@ -210,6 +210,10 @@ Format: `### YYYY-MM-DD — <topic> (<who made the call>)`
 
 **Open:** Phase 4 v2 Today dogfood; optional task create from classification payload.
 
+### 2026-05-27 — Merge orchestration to master (Ofer + AI)
+- **What:** Fast-forward `master` to `731b155` (`needle-ai-orchestration` + `.env` override fix). Pushed `origin/master`.
+- **Next branch:** `needle-integration-followup` for P0 async/observability gaps and Phase 4 optional work.
+
 ### 2026-05-27 — Live clock in Today toolbar (Ofer directed, AI implemented)
 - Added `LiveClock` component inline in `TodayToolbar.tsx` — no new file.
 - Ticks every second via `setInterval(1000)`.

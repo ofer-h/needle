@@ -23,9 +23,8 @@ Focus — macOS desktop app for a software engineer with ADHD.
 Intelligent second brain: capture anything, AI classifies it, surfaces the right things at the right time.
 
 ## Current state (as of 2026-05-27)
-- Full Electron app scaffolded and running (`npm start`).
-- Today screen fully redesigned: today-only scope, fixed-anchor + flexible-task timeline, drag-and-drop reordering.
-- **Orchestration merge on `needle-ai-orchestration`:** capture token refactor, v2 store adapter + fixture, SQLite `db:*` IPC + seed, Anthropic `ai:classify` + ApiKeySettings. **Persistence wired:** Today hydrates from SQLite on launch; task edits persist via `db:*`; Capture classify and brain-dump write `capture_entries`. v2 Today adapter still optional (Phase 4).
+- **`master`** includes orchestration merge: SQLite `db:*`, Anthropic classify, Today hydration, async UX, dev diagnostics, `.env` key loading (Electron 41.7.1 pin).
+- **Active branch:** `needle-integration-followup` — P0 gaps from async/observability decision doc (hydrate pending UI, DB persist feedback, intervention logging); optional Phase 4 v2 Today adapter.
 - **Local Anthropic key:** repo-root `.env` (`ANTHROPIC_API_KEY`) loaded in main on dev `npm start` via `dotenv`; `.env.example` committed, `.env` gitignored. Precedence: env → userData `config.json`. Forward plan: `docs/next-integration-steps.md`.
 - **Async UX + observability (2026-05-27):** Capture classify uses `usePendingOperation` + `AsyncStatusPanel` (timeout, cancel, errors). Dev strip: `BuildDiagnostics` (version, SHA, key source, last classify ms). Logging: `[needle]` terminal, `[needle-ui]` DevTools. Flow health: `app:getFlowHealth`. **Revisit:** `docs/decisions/2026-05-27-async-ux-and-observability.md`. Skills: `needle-async-ux`, `needle-observability`, `needle-debug-app-state`. **Still open:** Today hydrate pending UI, silent task persist, intervention logging.
 - Capture screen: token-based `CaptureScreen.css`, primitives, live Claude classify (needs API key in UI or `.env` in dev).
