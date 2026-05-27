@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { toISODate } from '../utils/date';
 import type {
   ActivityLog,
   ActivityLogId,
@@ -10,34 +9,26 @@ import type {
   CommitmentLevel,
   FlowSession,
   FlowSessionId,
-  ISODate,
+  FocusSession,
   ISODateTime,
   Intervention,
   InterventionId,
   InterventionOutcome,
   Item,
   ItemAssignment,
-  ItemAssignmentId,
   ItemId,
   ItemOccurrence,
-  ItemOccurrenceId,
   ItemPlan,
-  ItemPlanId,
   ItemRelation,
-  ItemRelationId,
   JsonObject,
-  LocalTime,
   Ritual,
-  RitualId,
   Source,
-  SourceId,
-  TimeZone,
+  TransitionEvent,
   TransitionEventId,
   User,
-  UserId,
   Workspace,
-  WorkspaceId,
 } from '../../shared/domain-v2';
+import { createV2Fixture, FIXTURE_IDS } from './fixture-v2';
 
 /* ─── ID + timestamp helpers ──────────────────────────────────── */
 
@@ -53,324 +44,8 @@ function nowIso(): ISODateTime {
   return new Date().toISOString() as ISODateTime;
 }
 
-function isoDateTimeFor(date: ISODate, hhmm: string): ISODateTime {
-  return `${date}T${hhmm}:00.000Z` as ISODateTime;
-}
-
-const LOCAL_TZ = (Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC') as TimeZone;
-
-/* ─── Seed fixture ────────────────────────────────────────────── */
-
-const TODAY_ISO = toISODate() as ISODate;
-const NOW = nowIso();
-
-const WORKSPACE_ID: WorkspaceId = 'ws_personal' as WorkspaceId;
-const USER_ID: UserId = 'user_ofer' as UserId;
-const ACTOR_USER_ID: ActorId = 'actor_user_ofer' as ActorId;
-const ACTOR_AI_ID: ActorId = 'actor_ai_companion' as ActorId;
-const ACTOR_CALENDAR_ID: ActorId = 'actor_calendar' as ActorId;
-const ACTOR_SYSTEM_ID: ActorId = 'actor_system' as ActorId;
-const SOURCE_MANUAL_ID: SourceId = 'src_manual' as SourceId;
-const SOURCE_CALENDAR_ID: SourceId = 'src_calendar' as SourceId;
-const FLOW_SESSION_ID: FlowSessionId = 'flow_today_ofer' as FlowSessionId;
-
-const EVENT_ITEM_ID: ItemId = 'item_1on1_manager' as ItemId;
-const OCCURRENCE_ID: ItemOccurrenceId = 'occ_1on1_manager_today' as ItemOccurrenceId;
-const PREP_ITEM_ID: ItemId = 'item_prep_1on1' as ItemId;
-const PREP_PLAN_ID: ItemPlanId = 'plan_prep_1on1' as ItemPlanId;
-const PREP_RELATION_ID: ItemRelationId = 'rel_prep_for_1on1' as ItemRelationId;
-const EVENT_PLAN_ID: ItemPlanId = 'plan_event_1on1' as ItemPlanId;
-const ASSIGNMENT_ID: ItemAssignmentId = 'assign_ofer_prep' as ItemAssignmentId;
-const RITUAL_ID: RitualId = 'ritual_pre_1on1' as RitualId;
-const INTERVENTION_CAPTURE_ID: InterventionId = 'int_capture_1on1' as InterventionId;
-const INTERVENTION_TORCH_ID: InterventionId = 'int_torch_1on1' as InterventionId;
-const INTERVENTION_ESCALATION_ID: InterventionId = 'int_escalation_1on1' as InterventionId;
-
-const SEED_WORKSPACE: Workspace = {
-  id: WORKSPACE_ID,
-  name: 'Ofer personal',
-  kind: 'personal',
-  createdByActorId: ACTOR_USER_ID,
-  createdAt: NOW,
-  updatedAt: NOW,
-};
-
-const SEED_USER: User = {
-  id: USER_ID,
-  displayName: 'Ofer',
-  createdAt: NOW,
-  updatedAt: NOW,
-};
-
-const SEED_ACTORS: Actor[] = [
-  {
-    id: ACTOR_USER_ID,
-    workspaceId: WORKSPACE_ID,
-    kind: 'user',
-    displayName: 'Ofer',
-    userId: USER_ID,
-    metadata: {},
-    createdAt: NOW,
-    updatedAt: NOW,
-  },
-  {
-    id: ACTOR_AI_ID,
-    workspaceId: WORKSPACE_ID,
-    kind: 'ai_agent',
-    displayName: 'Needle companion',
-    metadata: {},
-    createdAt: NOW,
-    updatedAt: NOW,
-  },
-  {
-    id: ACTOR_CALENDAR_ID,
-    workspaceId: WORKSPACE_ID,
-    kind: 'integration',
-    displayName: 'Calendar sync',
-    metadata: { provider: 'google' },
-    createdAt: NOW,
-    updatedAt: NOW,
-  },
-  {
-    id: ACTOR_SYSTEM_ID,
-    workspaceId: WORKSPACE_ID,
-    kind: 'system',
-    displayName: 'Needle system',
-    metadata: {},
-    createdAt: NOW,
-    updatedAt: NOW,
-  },
-];
-
-const SEED_SOURCES: Source[] = [
-  {
-    id: SOURCE_MANUAL_ID,
-    workspaceId: WORKSPACE_ID,
-    kind: 'manual',
-    label: 'Manual capture',
-    metadata: {},
-    createdAt: NOW,
-    updatedAt: NOW,
-  },
-  {
-    id: SOURCE_CALENDAR_ID,
-    workspaceId: WORKSPACE_ID,
-    kind: 'calendar',
-    label: 'Calendar',
-    metadata: {},
-    createdAt: NOW,
-    updatedAt: NOW,
-  },
-];
-
-const SEED_FLOW_SESSION: FlowSession = {
-  id: FLOW_SESSION_ID,
-  workspaceId: WORKSPACE_ID,
-  actorId: ACTOR_USER_ID,
-  flowDate: TODAY_ISO,
-  state: 'focusing',
-  createdAt: NOW,
-  updatedAt: NOW,
-};
-
-const SEED_ITEMS: Item[] = [
-  {
-    id: EVENT_ITEM_ID,
-    workspaceId: WORKSPACE_ID,
-    kind: 'event',
-    bucket: 'act',
-    title: 'Manager 1:1',
-    status: 'open',
-    visibility: 'workspace',
-    commitmentLevel: 'unmissable',
-    sourceId: SOURCE_CALENDAR_ID,
-    createdByActorId: ACTOR_CALENDAR_ID,
-    updatedByActorId: ACTOR_CALENDAR_ID,
-    createdAt: NOW,
-    updatedAt: NOW,
-  },
-  {
-    id: PREP_ITEM_ID,
-    workspaceId: WORKSPACE_ID,
-    kind: 'task',
-    bucket: 'act',
-    title: 'Brain-dump before 1:1',
-    body: 'Capture anything on your mind so you can show up clear.',
-    status: 'open',
-    visibility: 'workspace',
-    commitmentLevel: 'firm',
-    sourceId: SOURCE_MANUAL_ID,
-    createdByActorId: ACTOR_SYSTEM_ID,
-    updatedByActorId: ACTOR_SYSTEM_ID,
-    createdAt: NOW,
-    updatedAt: NOW,
-  },
-];
-
-const SEED_OCCURRENCES: ItemOccurrence[] = [
-  {
-    id: OCCURRENCE_ID,
-    workspaceId: WORKSPACE_ID,
-    itemId: EVENT_ITEM_ID,
-    startsAt: isoDateTimeFor(TODAY_ISO, '15:00'),
-    endsAt: isoDateTimeFor(TODAY_ISO, '15:30'),
-    timezone: LOCAL_TZ,
-    status: 'confirmed',
-    sourceId: SOURCE_CALENDAR_ID,
-    externalId: 'gcal-evt-abc123',
-    createdAt: NOW,
-    updatedAt: NOW,
-  },
-];
-
-const SEED_PLANS: ItemPlan[] = [
-  {
-    id: EVENT_PLAN_ID,
-    workspaceId: WORKSPACE_ID,
-    itemId: EVENT_ITEM_ID,
-    actorId: ACTOR_USER_ID,
-    planDate: TODAY_ISO,
-    mode: 'anchor',
-    startTime: '15:00' as LocalTime,
-    endTime: '15:30' as LocalTime,
-    timezone: LOCAL_TZ,
-    createdAt: NOW,
-    updatedAt: NOW,
-  },
-  {
-    id: PREP_PLAN_ID,
-    workspaceId: WORKSPACE_ID,
-    itemId: PREP_ITEM_ID,
-    actorId: ACTOR_USER_ID,
-    planDate: TODAY_ISO,
-    mode: 'anchor',
-    timezone: LOCAL_TZ,
-    relativeTo: { occurrenceId: OCCURRENCE_ID, offsetMinutes: -5 },
-    createdAt: NOW,
-    updatedAt: NOW,
-  },
-];
-
-const SEED_RELATIONS: ItemRelation[] = [
-  {
-    id: PREP_RELATION_ID,
-    workspaceId: WORKSPACE_ID,
-    fromItemId: PREP_ITEM_ID,
-    toItemId: EVENT_ITEM_ID,
-    relationType: 'prep_for',
-    sortOrder: 0,
-    createdByActorId: ACTOR_SYSTEM_ID,
-    createdAt: NOW,
-  },
-];
-
-const SEED_ASSIGNMENTS: ItemAssignment[] = [
-  {
-    id: ASSIGNMENT_ID,
-    workspaceId: WORKSPACE_ID,
-    itemId: PREP_ITEM_ID,
-    actorId: ACTOR_USER_ID,
-    role: 'owner',
-    status: 'open',
-    createdByActorId: ACTOR_USER_ID,
-    createdAt: NOW,
-    updatedAt: NOW,
-  },
-];
-
-const SEED_RITUALS: Ritual[] = [
-  {
-    id: RITUAL_ID,
-    workspaceId: WORKSPACE_ID,
-    actorId: ACTOR_USER_ID,
-    createdByActorId: ACTOR_USER_ID,
-    kind: 'pre_meeting_capture',
-    name: '5-min brain-dump before unmissable meetings',
-    trigger: {
-      kind: 'before_occurrence',
-      offsetMinutes: -5,
-      match: { itemKinds: ['event'], minCommitmentLevel: 'unmissable' },
-    },
-    actions: [
-      { kind: 'open_capture' },
-      {
-        kind: 'fire_intervention',
-        strategy: 'attention_takeover_torch',
-        surface: 'screen_overlay',
-        intensity: 4,
-        offsetMinutes: -1,
-      },
-    ],
-    enabled: true,
-    createdAt: NOW,
-    updatedAt: NOW,
-  },
-];
-
-const SEED_INTERVENTIONS: Intervention[] = [
-  {
-    id: INTERVENTION_CAPTURE_ID,
-    workspaceId: WORKSPACE_ID,
-    actorId: ACTOR_USER_ID,
-    createdByActorId: ACTOR_SYSTEM_ID,
-    strategy: 'modal_capture',
-    surface: 'in_app',
-    intensity: 2,
-    triggeredBy: 'ritual',
-    itemId: PREP_ITEM_ID,
-    occurrenceId: OCCURRENCE_ID,
-    flowSessionId: FLOW_SESSION_ID,
-    ritualId: RITUAL_ID,
-    scheduledFor: isoDateTimeFor(TODAY_ISO, '14:55'),
-    status: 'scheduled',
-    payload: { title: 'Brain-dump before Manager 1:1', subtitle: 'Anything on your mind?' },
-    createdAt: NOW,
-    updatedAt: NOW,
-  },
-  {
-    id: INTERVENTION_TORCH_ID,
-    workspaceId: WORKSPACE_ID,
-    actorId: ACTOR_USER_ID,
-    createdByActorId: ACTOR_SYSTEM_ID,
-    strategy: 'attention_takeover_torch',
-    surface: 'screen_overlay',
-    intensity: 4,
-    triggeredBy: 'ritual',
-    itemId: EVENT_ITEM_ID,
-    occurrenceId: OCCURRENCE_ID,
-    flowSessionId: FLOW_SESSION_ID,
-    ritualId: RITUAL_ID,
-    scheduledFor: isoDateTimeFor(TODAY_ISO, '14:59'),
-    status: 'scheduled',
-    escalatesToInterventionId: INTERVENTION_ESCALATION_ID,
-    payload: {
-      title: 'Manager 1:1 starting',
-      subtitle: 'Move to it now.',
-      targetItemId: EVENT_ITEM_ID,
-    },
-    createdAt: NOW,
-    updatedAt: NOW,
-  },
-  {
-    id: INTERVENTION_ESCALATION_ID,
-    workspaceId: WORKSPACE_ID,
-    actorId: ACTOR_USER_ID,
-    createdByActorId: ACTOR_SYSTEM_ID,
-    strategy: 'escalated_alert',
-    surface: 'in_app',
-    intensity: 5,
-    triggeredBy: 'escalation',
-    itemId: EVENT_ITEM_ID,
-    occurrenceId: OCCURRENCE_ID,
-    flowSessionId: FLOW_SESSION_ID,
-    ritualId: RITUAL_ID,
-    scheduledFor: isoDateTimeFor(TODAY_ISO, '15:00'),
-    status: 'scheduled',
-    payload: { title: 'Manager 1:1 is happening now', subtitle: 'You missed the heads-up.' },
-    createdAt: NOW,
-    updatedAt: NOW,
-  },
-];
+const V2_FIXTURE = createV2Fixture();
+const SOURCE_MANUAL_ID = FIXTURE_IDS.sourceManual;
 
 /* ─── Store shape ─────────────────────────────────────────────── */
 
@@ -380,6 +55,8 @@ type V2State = {
   actors: Actor[];
   sources: Source[];
   flowSessions: FlowSession[];
+  focusSessions: FocusSession[];
+  transitionEvents: TransitionEvent[];
   items: Item[];
   itemRelations: ItemRelation[];
   itemAssignments: ItemAssignment[];
@@ -436,21 +113,23 @@ function logActivity(
 /* ─── Store ───────────────────────────────────────────────────── */
 
 export const useV2Store = create<V2Store>((set, get) => ({
-  workspace: SEED_WORKSPACE,
-  user: SEED_USER,
-  actors: SEED_ACTORS,
-  sources: SEED_SOURCES,
-  flowSessions: [SEED_FLOW_SESSION],
-  items: SEED_ITEMS,
-  itemRelations: SEED_RELATIONS,
-  itemAssignments: SEED_ASSIGNMENTS,
-  itemPlans: SEED_PLANS,
-  itemOccurrences: SEED_OCCURRENCES,
-  rituals: SEED_RITUALS,
-  interventions: SEED_INTERVENTIONS,
-  captureEntries: [],
+  workspace: V2_FIXTURE.workspace,
+  user: V2_FIXTURE.user,
+  actors: V2_FIXTURE.actors,
+  sources: V2_FIXTURE.sources,
+  flowSessions: V2_FIXTURE.flowSessions,
+  focusSessions: V2_FIXTURE.focusSessions,
+  transitionEvents: V2_FIXTURE.transitionEvents,
+  items: V2_FIXTURE.items,
+  itemRelations: V2_FIXTURE.itemRelations,
+  itemAssignments: V2_FIXTURE.itemAssignments,
+  itemPlans: V2_FIXTURE.itemPlans,
+  itemOccurrences: V2_FIXTURE.itemOccurrences,
+  rituals: V2_FIXTURE.rituals,
+  interventions: V2_FIXTURE.interventions,
+  captureEntries: V2_FIXTURE.captureEntries,
   activityLog: [],
-  meActorId: ACTOR_USER_ID,
+  meActorId: V2_FIXTURE.meActorId,
 
   scheduleIntervention: (input) => {
     const id = mintId<InterventionId>('int');
@@ -644,20 +323,6 @@ export const useV2Store = create<V2Store>((set, get) => ({
   },
 }));
 
-/* ─── Exported seed IDs for selectors / tests ─────────────────── */
+export { FIXTURE_IDS as SEED_IDS } from './fixture-v2';
 
-export const SEED_IDS = {
-  workspace: WORKSPACE_ID,
-  meActor: ACTOR_USER_ID,
-  aiActor: ACTOR_AI_ID,
-  calendarActor: ACTOR_CALENDAR_ID,
-  systemActor: ACTOR_SYSTEM_ID,
-  flowSession: FLOW_SESSION_ID,
-  eventItem: EVENT_ITEM_ID,
-  prepItem: PREP_ITEM_ID,
-  occurrence: OCCURRENCE_ID,
-  ritual: RITUAL_ID,
-  interventionCapture: INTERVENTION_CAPTURE_ID,
-  interventionTorch: INTERVENTION_TORCH_ID,
-  interventionEscalation: INTERVENTION_ESCALATION_ID,
-} as const;
+export { selectTodayViewModel } from './selectors-v2';
