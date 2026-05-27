@@ -7,7 +7,6 @@ import type {
   TorchBrainDumpSubmitPayload,
   TorchClosePayload,
   TorchHeroPayload,
-  TorchSetInteractivePayload,
   TorchShowPayload,
   TorchSkipConfirmPayload,
   TorchSnoozePayload,

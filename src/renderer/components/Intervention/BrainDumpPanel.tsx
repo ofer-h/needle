@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import './BrainDumpPanel.css';
 
 export type BrainDumpPanelProps = {
@@ -26,7 +26,7 @@ export default function BrainDumpPanel({
     onSubmit(text.trim());
   }
 
-  function handleKeyDown(e: React.KeyboardEvent) {
+  function handleKeyDown(e: KeyboardEvent) {
     if (e.key === 'Escape') {
       e.preventDefault();
       onCancel();
