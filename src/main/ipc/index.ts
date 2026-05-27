@@ -10,6 +10,7 @@ import type {
   TorchSkipConfirmPayload,
   TorchSnoozePayload,
 } from '../../shared/ipc-contracts';
+import { registerAiHandlers } from './ai-handlers';
 import { hideCapture, showCapture } from '../windows/capture';
 import { registerDbHandlers } from './db-handlers';
 import {
@@ -35,6 +36,7 @@ function findMainAppWindow(): BrowserWindow | undefined {
 
 export function registerIpcHandlers(): void {
   registerDbHandlers();
+  registerAiHandlers();
 
   // System notification click → ask main-app renderer to acknowledge the torch.
   setTorchDismissHandler((correlationId) => {

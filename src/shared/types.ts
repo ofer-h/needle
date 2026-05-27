@@ -82,3 +82,16 @@ export type CaptureEntry = {
   body: string;
   createdAt: string;
 };
+
+export type ClassificationBucket = 'today' | 'tomorrow' | 'later' | 'someday';
+
+export type ClassificationResult = {
+  bucket: ClassificationBucket;
+  title: string;
+  suggestedDate?: string;
+  suggestedTime?: string;
+  reasoning: string;
+  confidence: number;
+};
+
+export type ClassifyResponse = ClassificationResult | { error: string };

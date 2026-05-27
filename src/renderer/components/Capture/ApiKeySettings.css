@@ -1,0 +1,86 @@
+.api-key-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.api-key-overlay__backdrop {
+  position: absolute;
+  inset: 0;
+  border: none;
+  background: color-mix(in srgb, var(--ink) 25%, transparent);
+  cursor: pointer;
+}
+
+.api-key-panel {
+  position: relative;
+  width: min(420px, calc(100vw - 48px));
+  padding: 24px;
+  border-radius: var(--radius-lg, 12px);
+  background: var(--surface-raised, var(--bg));
+  border: 1px solid var(--border-subtle, var(--border));
+  box-shadow: 0 12px 40px color-mix(in srgb, var(--ink) 12%, transparent);
+}
+
+.api-key-panel__title {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.api-key-panel__hint {
+  margin: 0 0 16px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink-3);
+}
+
+.api-key-panel__hint code {
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.api-key-panel__label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  color: var(--ink-2);
+}
+
+.api-key-panel__input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border-radius: var(--radius-md, 8px);
+  border: 1px solid var(--border-default, var(--border));
+  background: var(--surface-base, var(--bg));
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+.api-key-panel__input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.api-key-panel__status {
+  margin: 12px 0 0;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+.api-key-panel__status--ok {
+  color: var(--upcoming, var(--ink-2));
+}
+
+.api-key-panel__actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}

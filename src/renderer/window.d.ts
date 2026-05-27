@@ -1,4 +1,4 @@
-import type { CalendarEvent, CaptureEntry, Screen, Task, Theme } from '../shared/types';
+import type { CalendarEvent, CaptureEntry, ClassifyResponse, Screen, Task, Theme } from '../shared/types';
 import type {
   CaptureClosePayload,
   CaptureEntryPayload,
@@ -50,6 +50,11 @@ declare global {
         createEvent(payload: DbCreateEventPayload): Promise<CalendarEvent>;
         addCapture(body: string): Promise<CaptureEntry>;
         getCaptureEntries(limit?: number): Promise<CaptureEntry[]>;
+      };
+      ai: {
+        classify(text: string): Promise<ClassifyResponse>;
+        setApiKey(apiKey: string): Promise<{ ok: true } | { error: string }>;
+        hasApiKey(): Promise<boolean>;
       };
       capture: {
         show(payload: CaptureShowPayload): void;

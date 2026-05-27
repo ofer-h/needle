@@ -1,33 +1,31 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import FxWindow from '../Window/FxWindow';
+import type { ClassificationResult } from '../../../shared/types';
 import { Button, Divider, Icon, Pill } from '../primitives';
+import ApiKeySettings from './ApiKeySettings';
 import './CaptureScreen.css';
 
-type CaptureState = 'empty' | 'typing' | 'classifying' | 'classified' | 'voice';
+type CaptureState = 'empty' | 'typing' | 'classifying' | 'classified' | 'classify-error' | 'voice';
 
-type CaptureClassification = {
-  bucket: 'act' | 'remember';
-  title: string;
-  suggestedDate?: string;
-  reasoning: string;
-};
-
-const CLASSIFY_MS = 1500;
 const WAVE_BAR_COUNT = 40;
 
-const MOCK_CLASSIFICATION: CaptureClassification = {
-  bucket: 'act',
-  title: 'Prep for manager 1:1',
-  suggestedDate: 'Today',
-  reasoning: 'Linked to your Thursday 3 PM meeting · 2 hr lead',
-};
+function bucketLabel(bucket: ClassificationResult['bucket']): string {
+  const labels: Record<ClassificationResult['bucket'], string> = {
+    today: 'Today',
+    tomorrow: 'Tomorrow',
+    later: 'Later',
+    someday: 'Someday',
+  };
+  return labels[bucket];
+}
 
-function formatBucketLabel(bucket: CaptureClassification['bucket'], suggestedDate?: string): string {
-  const name = bucket === 'act' ? 'Act' : 'Remember';
-  if (bucket === 'act' && suggestedDate) {
-    return `${name} · ${suggestedDate}`;
-  }
-  return name;
+function formatLatency(ms: number): string {
+  if (ms < 1000) return `${Math.round(ms)} ms`;
+  return `${(ms / 1000).toFixed(1)} s`;
+}
+
+function bucketPillVariant(bucket: ClassificationResult['bucket']): 'urgent' | 'upcoming' {
+  return bucket === 'today' || bucket === 'tomorrow' ? 'urgent' : 'upcoming';
 }
 
 type Props = {
@@ -196,19 +194,64 @@ function CaptureClassifying({ rawInput }: { rawInput: string }) {
   );
 }
 
+function CaptureClassifyError({
+  rawInput,
+  message,
+  onRetry,
+  onSaveRemember,
+  onOpenApiKey,
+}: {
+  rawInput: string;
+  message: string;
+  onRetry: () => void;
+  onSaveRemember: () => void;
+  onOpenApiKey: () => void;
+}) {
+  return (
+    <div className="capture-panel-enter">
+      <Prompt>Something went wrong</Prompt>
+      <div className="capture-content">
+        <div className="composer capture-composer--compact">
+          <div className="input-text capture-composer__recap">{rawInput}</div>
+        </div>
+        <div className="result-card capture-result">
+          <p className="capture-result__subtitle" style={{ color: 'var(--urgent)' }}>
+            {message}
+          </p>
+          <div className="capture-feedback" style={{ marginTop: 16 }}>
+            <Button type="button" variant="ghost" size="sm" onClick={onRetry}>
+              Try again
+            </Button>
+            <Button type="button" variant="ghost" size="sm" onClick={onOpenApiKey}>
+              API key
+            </Button>
+            <Button type="button" variant="subtle" size="sm" onClick={onSaveRemember}>
+              Save as Remember
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function CaptureClassified({
   rawInput,
   result,
+  latencyMs,
   onAddAnother,
   onBack,
 }: {
   rawInput: string;
-  result: CaptureClassification;
+  result: ClassificationResult;
+  latencyMs: number;
   onAddAnother: () => void;
   onBack: () => void;
 }) {
-  const [selectedChip, setSelectedChip] = useState(0);
-  const pillVariant = result.bucket === 'act' ? 'urgent' : 'upcoming';
+  const chipIndex = TIME_CHIPS.findIndex(
+    (c) => c.toLowerCase() === bucketLabel(result.bucket).toLowerCase(),
+  );
+  const [selectedChip, setSelectedChip] = useState(chipIndex >= 0 ? chipIndex : 0);
 
   return (
     <div className="capture-panel-enter">
@@ -221,35 +264,31 @@ function CaptureClassified({
         <div className="result-card capture-result">
           <div className="capture-result__header">
             <Icon name="spark" size={12} tone="default" />
-            <Pill variant={pillVariant} size="sm">
-              {formatBucketLabel(result.bucket, result.suggestedDate)}
+            <Pill variant={bucketPillVariant(result.bucket)} size="sm">
+              {bucketLabel(result.bucket)}
             </Pill>
             <span className="capture-result__meta" />
-            <span className="capture-result__timing t-mono">
-              {(CLASSIFY_MS / 1000).toFixed(1)} s
-            </span>
+            <span className="capture-result__timing t-mono">{formatLatency(latencyMs)}</span>
           </div>
 
           <h2 className="capture-result__title">{result.title}</h2>
           <p className="capture-result__subtitle">{result.reasoning}</p>
 
-          {result.bucket === 'act' && (
-            <div className="capture-time-chips" role="listbox" aria-label="Schedule">
-              {TIME_CHIPS.map((chip, i) => (
-                <button
-                  key={chip}
-                  type="button"
-                  role="option"
-                  aria-selected={i === selectedChip}
-                  className={`capture-time-chip${i === selectedChip ? ' capture-time-chip--selected' : ''}`}
-                  onClick={() => setSelectedChip(i)}
-                >
-                  {i === selectedChip && <Icon name="check" size={11} tone="inherit" />}
-                  {chip}
-                </button>
-              ))}
-            </div>
-          )}
+          <div className="capture-time-chips" role="listbox" aria-label="Schedule">
+            {TIME_CHIPS.map((chip, i) => (
+              <button
+                key={chip}
+                type="button"
+                role="option"
+                aria-selected={i === selectedChip}
+                className={`capture-time-chip${i === selectedChip ? ' capture-time-chip--selected' : ''}`}
+                onClick={() => setSelectedChip(i)}
+              >
+                {i === selectedChip && <Icon name="check" size={11} tone="inherit" />}
+                {chip}
+              </button>
+            ))}
+          </div>
 
           <div className="capture-result__divider">
             <Divider />
@@ -333,24 +372,42 @@ function CaptureVoice({ onStop, onCancel }: { onStop: () => void; onCancel: () =
 export default function CaptureScreen({ onBack }: Props) {
   const [state, setState] = useState<CaptureState>('empty');
   const [inputValue, setInputValue] = useState('');
-  const [classification, setClassification] = useState<CaptureClassification | null>(null);
+  const [classification, setClassification] = useState<ClassificationResult | null>(null);
+  const [classifyError, setClassifyError] = useState<string | null>(null);
+  const [latencyMs, setLatencyMs] = useState(0);
+  const [apiKeyOpen, setApiKeyOpen] = useState(false);
 
   const footer: Record<CaptureState, string> = {
     empty: '⌘ K captures from anywhere on your Mac',
     typing: '⏎ to confirm · ⎋ to dismiss',
-    classifying: 'Needle is reading your capture…',
+    classifying: 'classifying with Claude…',
     classified: 'thumbs up to save · ↩ or wait 3s to return',
+    'classify-error': 'fix the issue or save without classification',
     voice: 'tap to stop · auto-stops on silence',
   };
 
-  useEffect(() => {
-    if (state !== 'classifying') return;
-    const timer = window.setTimeout(() => {
-      setClassification(MOCK_CLASSIFICATION);
-      setState('classified');
-    }, CLASSIFY_MS);
-    return () => window.clearTimeout(timer);
-  }, [state]);
+  const runClassify = useCallback(async (text: string) => {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+
+    setClassifyError(null);
+    setClassification(null);
+    setState('classifying');
+
+    const started = performance.now();
+    const response = await window.api.ai.classify(trimmed);
+    const elapsed = performance.now() - started;
+    setLatencyMs(elapsed);
+
+    if ('error' in response) {
+      setClassifyError(response.error);
+      setState('classify-error');
+      return;
+    }
+
+    setClassification(response);
+    setState('classified');
+  }, []);
 
   const handleStartTyping = (v: string) => {
     setInputValue(v);
@@ -358,12 +415,13 @@ export default function CaptureScreen({ onBack }: Props) {
   };
 
   const handleSubmit = () => {
-    if (inputValue.trim()) setState('classifying');
+    if (inputValue.trim()) void runClassify(inputValue);
   };
 
   const handleAddAnother = () => {
     setInputValue('');
     setClassification(null);
+    setClassifyError(null);
     setState('empty');
   };
 
@@ -387,28 +445,48 @@ export default function CaptureScreen({ onBack }: Props) {
           />
         )}
         {state === 'classifying' && <CaptureClassifying rawInput={inputValue} />}
+        {state === 'classify-error' && classifyError !== null && (
+          <CaptureClassifyError
+            rawInput={inputValue}
+            message={classifyError}
+            onRetry={() => void runClassify(inputValue)}
+            onSaveRemember={onBack}
+            onOpenApiKey={() => setApiKeyOpen(true)}
+          />
+        )}
         {state === 'classified' && classification !== null && (
           <CaptureClassified
             rawInput={inputValue}
             result={classification}
+            latencyMs={latencyMs}
             onAddAnother={handleAddAnother}
             onBack={onBack}
           />
         )}
         {state === 'voice' && (
           <CaptureVoice
-            onStop={() => {
-              const text =
-                inputValue.trim() || 'need to prep for the one on one with my manager on thursday';
-              setInputValue(text);
-              setState('classifying');
-            }}
+            onStop={() =>
+              void runClassify(
+                inputValue.trim() || 'need to prep for the one on one with my manager on thursday',
+              )
+            }
             onCancel={() => setState('empty')}
           />
         )}
 
+        <ApiKeySettings open={apiKeyOpen} onClose={() => setApiKeyOpen(false)} />
+
         <footer className="capture-footer">
           <span className="capture-footer__hint t-mono">{footer[state]}</span>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="capture-footer__api-key"
+            onClick={() => setApiKeyOpen(true)}
+          >
+            API key
+          </Button>
         </footer>
       </div>
     </FxWindow>

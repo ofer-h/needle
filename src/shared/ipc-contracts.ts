@@ -1,4 +1,4 @@
-import type { CalendarEvent, CaptureEntry, Task, Theme } from './types';
+import type { CalendarEvent, CaptureEntry, ClassifyResponse, Task, Theme } from './types';
 
 export type TorchShowPayload = {
   /** Stable correlation id provided by the requester. Used to match the close
@@ -92,6 +92,14 @@ export type DbCreateEventPayload = Omit<CalendarEvent, 'id'>;
 export type DbAddCapturePayload = { body: string };
 export type DbGetCapturePayload = { limit?: number };
 
+export type AiClassifyPayload = {
+  text: string;
+};
+
+export type AiSetApiKeyPayload = {
+  apiKey: string;
+};
+
 export type IpcContracts = {
   'app:getTheme': { req: void; res: Theme };
   'db:get-tasks': { req: void; res: Task[] };
@@ -103,4 +111,7 @@ export type IpcContracts = {
   'db:create-event': { req: DbCreateEventPayload; res: CalendarEvent };
   'db:add-capture': { req: DbAddCapturePayload; res: CaptureEntry };
   'db:get-capture-entries': { req: DbGetCapturePayload; res: CaptureEntry[] };
+  'ai:classify': { req: AiClassifyPayload; res: ClassifyResponse };
+  'ai:setApiKey': { req: AiSetApiKeyPayload; res: { ok: true } | { error: string } };
+  'ai:hasApiKey': { req: void; res: boolean };
 };

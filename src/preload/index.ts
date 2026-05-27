@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import type { CalendarEvent, CaptureEntry, Screen, Task, Theme } from '../shared/types';
+import type { CalendarEvent, CaptureEntry, ClassifyResponse, Screen, Task, Theme } from '../shared/types';
 import type {
   CaptureClosePayload,
   CaptureEntryPayload,
@@ -111,6 +111,13 @@ const api = {
         'db:get-capture-entries',
         limit === undefined ? {} : ({ limit } satisfies DbGetCapturePayload),
       ),
+  },
+  ai: {
+    classify: (text: string): Promise<ClassifyResponse> =>
+      ipcRenderer.invoke('ai:classify', { text }),
+    setApiKey: (apiKey: string): Promise<{ ok: true } | { error: string }> =>
+      ipcRenderer.invoke('ai:setApiKey', { apiKey }),
+    hasApiKey: (): Promise<boolean> => ipcRenderer.invoke('ai:hasApiKey'),
   },
   capture: {
     show: (payload: CaptureShowPayload): void => {
