@@ -1,3 +1,4 @@
+import type { FlowHealthSnapshot } from './flow-health';
 import type { CalendarEvent, CaptureEntry, ClassifyResponse, Task, Theme } from './types';
 
 export type TorchShowPayload = {
@@ -100,8 +101,20 @@ export type AiSetApiKeyPayload = {
   apiKey: string;
 };
 
+export type AppDiagnostics = {
+  version: string;
+  gitSha: string;
+  isPackaged: boolean;
+  envFilePath: string | null;
+  envFileLoaded: boolean;
+  apiKeySource: 'env' | 'config' | 'none';
+  hasApiKey: boolean;
+};
+
 export type IpcContracts = {
   'app:getTheme': { req: void; res: Theme };
+  'app:getDiagnostics': { req: void; res: AppDiagnostics };
+  'app:getFlowHealth': { req: void; res: FlowHealthSnapshot };
   'db:get-tasks': { req: void; res: Task[] };
   'db:get-tasks-by-date': { req: DbGetTasksByDatePayload; res: Task[] };
   'db:create-task': { req: DbCreateTaskPayload; res: Task };

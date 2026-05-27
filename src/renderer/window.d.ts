@@ -1,4 +1,6 @@
 import type { CalendarEvent, CaptureEntry, ClassifyResponse, Screen, Task, Theme } from '../shared/types';
+import type { AppDiagnostics } from '../shared/ipc-contracts';
+import type { FlowHealthSnapshot } from '../shared/flow-health';
 import type {
   CaptureClosePayload,
   CaptureEntryPayload,
@@ -19,6 +21,8 @@ declare global {
     api: {
       app: {
         getTheme(): Promise<Theme>;
+        getDiagnostics(): Promise<AppDiagnostics>;
+        getFlowHealth(): Promise<FlowHealthSnapshot>;
         onNavigate(cb: (screen: Screen) => void): () => void;
       };
       torch: {

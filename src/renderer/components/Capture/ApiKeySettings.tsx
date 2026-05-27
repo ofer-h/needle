@@ -1,5 +1,9 @@
 import { useEffect, useState } from 'react';
+import { usePendingOperation } from '../../hooks/usePendingOperation';
+import { uiLog } from '../../utils/ui-log';
 import './ApiKeySettings.css';
+
+const SAVE_KEY_TIMEOUT_MS = 10_000;
 
 type Props = {
   open: boolean;
@@ -10,30 +14,58 @@ export default function ApiKeySettings({ open, onClose }: Props) {
   const [value, setValue] = useState('');
   const [configured, setConfigured] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
+  const saveOp = usePendingOperation<{ ok: true } | { error: string }>();
+  const saving = saveOp.status === 'pending';
 
   useEffect(() => {
-    if (!open || !window.api) return;
-    void window.api.ai.hasApiKey().then(setConfigured);
+    if (!open) return;
     setValue('');
     setStatus(null);
+    if (!window.api?.ai) {
+      setConfigured(false);
+      setStatus('App bridge not ready — restart the app');
+      return;
+    }
+    void window.api.ai.hasApiKey().then((ok) => {
+      setConfigured(ok);
+      uiLog('api-key', 'hasApiKey', { configured: ok });
+    });
   }, [open]);
 
   if (!open) return null;
 
   const handleSave = async () => {
-    if (!window.api) return;
-    setSaving(true);
+    if (!window.api?.ai) {
+      setStatus('App bridge not ready — restart the app');
+      return;
+    }
     setStatus(null);
-    const result = await window.api.ai.setApiKey(value);
-    setSaving(false);
+    uiLog('api-key', 'save start');
+
+    const run = await saveOp.run(
+      () => window.api.ai.setApiKey(value),
+      { timeoutMs: SAVE_KEY_TIMEOUT_MS },
+    );
+
+    if (run.outcome === 'cancelled') return;
+
+    if (run.outcome === 'error') {
+      uiLog('api-key', 'save failed', { error: run.message });
+      setStatus(run.message);
+      return;
+    }
+
+    const result = run.value;
     if ('error' in result) {
+      uiLog('api-key', 'save failed', { error: result.error });
       setStatus(result.error);
       return;
     }
+
     setConfigured(true);
     setValue('');
     setStatus('Saved. Key is stored locally in userData/config.json.');
+    uiLog('api-key', 'save ok');
   };
 
   return (
@@ -76,7 +108,11 @@ export default function ApiKeySettings({ open, onClose }: Props) {
             disabled={saving || !value.trim()}
             onClick={() => void handleSave()}
           >
-            {saving ? 'Saving…' : 'Save key'}
+            {saving
+              ? saveOp.isSlow
+                ? `Still saving… (${(saveOp.elapsedMs / 1000).toFixed(0)}s)`
+                : 'Saving…'
+              : 'Save key'}
           </button>
         </div>
       </div>

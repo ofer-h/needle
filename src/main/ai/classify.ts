@@ -1,8 +1,11 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { ClassificationResult } from '../../shared/types';
-import { getApiKey } from './config';
+import { needleLog } from '../log';
+import { mintFlowId, recordFlowEvent } from '../services/flow-health';
+import { getApiKey, getApiKeySource } from './config';
 
 const MODEL = 'claude-haiku-4-5-20251001';
+const CLASSIFY_TIMEOUT_MS = 30_000;
 
 const SYSTEM_PROMPT = `You classify quick-capture text for a personal productivity app.
 Return ONLY valid JSON with this exact shape (no markdown, no extra keys):
@@ -69,6 +72,9 @@ function parseClassification(raw: string): ClassificationResult | { error: strin
 }
 
 function mapApiError(err: unknown): { error: string } {
+  if (err instanceof Error && err.message === 'classification_timeout') {
+    return { error: 'Classification timed out — check network and try again' };
+  }
   if (err && typeof err === 'object' && 'status' in err) {
     const status = (err as { status: number }).status;
     if (status === 401) return { error: 'Invalid API key' };
@@ -86,26 +92,78 @@ export async function classify(text: string): Promise<ClassificationResult | { e
 
   const apiKey = getApiKey();
   if (!apiKey) {
+    needleLog('ai', 'classify skipped — no API key');
     return { error: 'Anthropic API key not configured' };
   }
 
+  const keySource = getApiKeySource();
+  const flowId = mintFlowId();
+  needleLog('ai', 'classify start', { textLen: trimmed.length, keySource, flowId });
+  recordFlowEvent({
+    flowId,
+    flow: 'classify',
+    kind: 'start',
+    meta: { textLen: trimmed.length, keySource },
+  });
+
   const client = new Anthropic({ apiKey });
+  const started = Date.now();
 
   try {
-    const response = await client.messages.create({
-      model: MODEL,
-      max_tokens: 512,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: trimmed }],
-    });
+    const response = await Promise.race([
+      client.messages.create({
+        model: MODEL,
+        max_tokens: 512,
+        system: SYSTEM_PROMPT,
+        messages: [{ role: 'user', content: trimmed }],
+      }),
+      new Promise<never>((_resolve, reject) => {
+        setTimeout(() => reject(new Error('classification_timeout')), CLASSIFY_TIMEOUT_MS);
+      }),
+    ]);
 
     const block = response.content.find((b) => b.type === 'text');
     if (!block || block.type !== 'text') {
+      needleLog('ai', 'classify empty response', { ms: Date.now() - started });
       return { error: 'Empty model response' };
     }
 
-    return parseClassification(block.text);
+    const parsed = parseClassification(block.text);
+    const ms = Date.now() - started;
+    if ('error' in parsed) {
+      needleLog('ai', 'classify parse error', { ms, error: parsed.error, flowId });
+      recordFlowEvent({
+        flowId,
+        flow: 'classify',
+        kind: 'end',
+        ms,
+        outcome: 'error',
+        meta: { error: parsed.error },
+      });
+    } else {
+      needleLog('ai', 'classify ok', { ms, bucket: parsed.bucket, flowId });
+      recordFlowEvent({
+        flowId,
+        flow: 'classify',
+        kind: 'end',
+        ms,
+        outcome: 'ok',
+        meta: { bucket: parsed.bucket },
+      });
+    }
+    return parsed;
   } catch (err) {
-    return mapApiError(err);
+    const mapped = mapApiError(err);
+    const ms = Date.now() - started;
+    needleLog('ai', 'classify failed', { ms, error: mapped.error, flowId });
+    recordFlowEvent({
+      flowId,
+      flow: 'classify',
+      kind: 'end',
+      ms,
+      outcome: 'error',
+      meta: { error: mapped.error },
+    });
+    return mapped;
   }
 }

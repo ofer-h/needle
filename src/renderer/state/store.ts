@@ -1,151 +1,5 @@
 import { create } from 'zustand';
 import type { Screen, Theme, TimeSlot, Task, CalendarEvent } from '../../shared/types';
-import { addDaysISO, toISODate } from '../utils/date';
-
-const TODAY = toISODate();
-const YESTERDAY = addDaysISO(TODAY, -1);
-const TOMORROW = addDaysISO(TODAY, 1);
-const IN_THREE_DAYS = addDaysISO(TODAY, 3);
-
-const MOCK_TASKS: Task[] = [
-  {
-    id: 'task-dana',
-    title: 'Call back Dana',
-    sublabel: 'from yesterday',
-    kind: 'urgent',
-    date: YESTERDAY,
-    dateLabel: 'yesterday',
-    datePill: 'urgent',
-    done: false,
-    bucket: 'act',
-    timeSlot: 'today',
-    rawInput: 'Need to call Dana back',
-    aiReason: 'This looks like a follow-up action and it is already overdue.',
-    source: 'manual',
-    scheduleKind: 'flexible',
-    slotIndex: 0,
-    slotOrder: 0,
-    isOverdue: true,
-  },
-  {
-    id: 'task-recap',
-    title: "Email last week's recap",
-    kind: 'upcoming',
-    date: TODAY,
-    dateLabel: 'anytime',
-    done: false,
-    bucket: 'act',
-    timeSlot: 'today',
-    source: 'manual',
-    scheduleKind: 'flexible',
-    slotIndex: 0,
-    slotOrder: 100,
-  },
-  {
-    id: 'task-prep',
-    title: 'Prep for manager 1:1',
-    sublabel: '2 hr lead time',
-    kind: 'urgent',
-    date: TODAY,
-    dateLabel: '1 PM',
-    link: 'Manager 1:1 · 3 PM',
-    done: false,
-    bucket: 'act',
-    timeSlot: 'today',
-    leadTimeMins: 120,
-    rawInput: 'need to prep for the one on one with my manager on thursday',
-    aiReason: 'This is a prep action linked to a calendar meeting, so it should stay in Act with lead time.',
-    subtasks: [
-      { id: 'subtask-prep-notes', title: 'Review last 1:1 notes', done: false },
-      { id: 'subtask-prep-topics', title: 'Pick 2 topics to raise', done: false },
-    ],
-    notes: '',
-    source: 'calendar',
-    relations: [{ type: 'event', id: 'e2', label: 'Manager 1:1' }],
-    scheduleKind: 'flexible',
-    slotIndex: 1,
-    slotOrder: 0,
-  },
-  {
-    id: 'task-deploy',
-    title: 'Review deployment',
-    kind: 'upcoming',
-    date: TODAY,
-    dateLabel: 'anytime',
-    done: false,
-    bucket: 'act',
-    timeSlot: 'today',
-    source: 'manual',
-    scheduleKind: 'flexible',
-    slotIndex: 2,
-    slotOrder: 0,
-  },
-  {
-    id: 'task-pr-tal',
-    title: 'Review PR from Tal',
-    kind: 'faded',
-    date: TOMORROW,
-    dateLabel: 'tomorrow',
-    datePill: 'upcoming',
-    done: false,
-    bucket: 'act',
-    timeSlot: 'tomorrow',
-    source: 'manual',
-    scheduleKind: 'flexible',
-    slotIndex: 0,
-    slotOrder: 0,
-  },
-  {
-    id: 'task-dentist',
-    title: 'Book dentist appointment',
-    kind: 'faded',
-    date: null,
-    dateLabel: 'stash',
-    done: false,
-    bucket: 'act',
-    timeSlot: 'someday',
-    source: 'manual',
-    scheduleKind: 'flexible',
-    slotIndex: 0,
-    slotOrder: 100,
-  },
-  {
-    id: 'task-birthday',
-    title: "Plan dad's birthday gift",
-    kind: 'faded',
-    date: IN_THREE_DAYS,
-    dateLabel: 'in 3 days',
-    done: false,
-    bucket: 'act',
-    timeSlot: 'in-a-few-days',
-    source: 'manual',
-    scheduleKind: 'flexible',
-    slotIndex: 0,
-    slotOrder: 0,
-  },
-];
-
-const MOCK_EVENTS: CalendarEvent[] = [
-  {
-    id: 'e1',
-    date: TODAY,
-    startTime: '10:30',
-    endTime: '10:45',
-    label: 'Daily standup',
-    sublabel: '15 min',
-    source: 'calendar',
-  },
-  {
-    id: 'e2',
-    date: TODAY,
-    startTime: '15:00',
-    endTime: '15:30',
-    label: 'Manager 1:1',
-    sublabel: '30 min · with Maya · Zoom',
-    source: 'calendar',
-    relations: [{ type: 'person', id: 'person-maya', label: 'Maya' }],
-  },
-];
 
 type AppState = {
   screen: Screen;
@@ -153,6 +7,7 @@ type AppState = {
   tasks: Task[];
   events: CalendarEvent[];
   expandedItemId: string | null;
+  hydrateFromDb: () => Promise<void>;
   setScreen: (screen: Screen) => void;
   setTheme: (theme: Theme) => void;
   expandItem: (id: string | null) => void;
@@ -177,116 +32,197 @@ function createId(prefix: string): string {
   return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-export const useAppStore = create<AppState>((set) => ({
+function applyReorder(tasks: Task[], id: string, newSlotIndex: number, newSlotOrder: number): Task[] {
+  const updated = tasks.map((t) =>
+    t.id === id ? { ...t, slotIndex: newSlotIndex, slotOrder: newSlotOrder } : t,
+  );
+
+  const tasksInSlot = updated
+    .filter((t) => t.scheduleKind === 'flexible' && t.slotIndex === newSlotIndex)
+    .sort((a, b) => a.slotOrder - b.slotOrder);
+
+  const needsRenumber = tasksInSlot.some((t, i) => {
+    const next = tasksInSlot[i + 1];
+    return next !== undefined && Math.abs(next.slotOrder - t.slotOrder) < 1;
+  });
+
+  if (!needsRenumber) return updated;
+
+  const renumbered = new Map<string, number>();
+  tasksInSlot.forEach((t, i) => renumbered.set(t.id, i * 100));
+
+  return updated.map((t) => {
+    const newOrder = renumbered.get(t.id);
+    return newOrder !== undefined ? { ...t, slotOrder: newOrder } : t;
+  });
+}
+
+function slotFieldsChanged(before: Task, after: Task): boolean {
+  return before.slotIndex !== after.slotIndex || before.slotOrder !== after.slotOrder;
+}
+
+async function persistTaskPatch(id: string, patch: Partial<Task>): Promise<Task | null> {
+  try {
+    return await window.api.db.updateTask(id, patch);
+  } catch {
+    return null;
+  }
+}
+
+async function persistFullTask(task: Task): Promise<void> {
+  const { id, ...rest } = task;
+  await persistTaskPatch(id, rest);
+}
+
+export const useAppStore = create<AppState>((set, get) => ({
   screen: 'today',
   theme: 'light',
-  tasks: MOCK_TASKS,
-  events: MOCK_EVENTS,
+  tasks: [],
+  events: [],
   expandedItemId: null,
+
+  hydrateFromDb: async () => {
+    const [tasks, events] = await Promise.all([
+      window.api.db.getTasks(),
+      window.api.db.getEvents(),
+    ]);
+    set({ tasks, events });
+  },
+
   setScreen: (screen) => set({ screen }),
   setTheme: (theme) => set({ theme }),
   expandItem: (id) => set({ expandedItemId: id }),
-  toggleDone: (id) =>
-    set((state) => ({
-      tasks: state.tasks.map((t) => (t.id === id ? { ...t, done: !t.done } : t)),
-    })),
-  addSubtask: (taskId, title) =>
-    set((state) => {
-      const trimmedTitle = title.trim();
-      if (trimmedTitle.length === 0) return {};
 
-      return {
-        tasks: state.tasks.map((t) =>
-          t.id === taskId
-            ? {
-                ...t,
-                subtasks: [
-                  ...(t.subtasks ?? []),
-                  { id: createId('subtask'), title: trimmedTitle, done: false },
-                ],
-              }
-            : t,
-        ),
-      };
-    }),
-  toggleSubtask: (taskId, subtaskId) =>
-    set((state) => ({
-      tasks: state.tasks.map((t) =>
-        t.id === taskId
-          ? {
-              ...t,
-              subtasks: (t.subtasks ?? []).map((subtask) =>
-                subtask.id === subtaskId ? { ...subtask, done: !subtask.done } : subtask,
-              ),
-            }
-          : t,
+  toggleDone: (id) => {
+    const task = get().tasks.find((t) => t.id === id);
+    if (!task) return;
+    const done = !task.done;
+    set({
+      tasks: get().tasks.map((t) => (t.id === id ? { ...t, done } : t)),
+    });
+    void persistTaskPatch(id, { done }).then((saved) => {
+      if (saved) {
+        set({ tasks: get().tasks.map((t) => (t.id === id ? saved : t)) });
+      }
+    });
+  },
+
+  addSubtask: (taskId, title) => {
+    const trimmedTitle = title.trim();
+    if (trimmedTitle.length === 0) return;
+
+    const task = get().tasks.find((t) => t.id === taskId);
+    if (!task) return;
+
+    const next: Task = {
+      ...task,
+      subtasks: [
+        ...(task.subtasks ?? []),
+        { id: createId('subtask'), title: trimmedTitle, done: false },
+      ],
+    };
+    set({ tasks: get().tasks.map((t) => (t.id === taskId ? next : t)) });
+    void persistFullTask(next);
+  },
+
+  toggleSubtask: (taskId, subtaskId) => {
+    const task = get().tasks.find((t) => t.id === taskId);
+    if (!task) return;
+
+    const next: Task = {
+      ...task,
+      subtasks: (task.subtasks ?? []).map((subtask) =>
+        subtask.id === subtaskId ? { ...subtask, done: !subtask.done } : subtask,
       ),
-    })),
-  removeSubtask: (taskId, subtaskId) =>
-    set((state) => ({
-      tasks: state.tasks.map((t) =>
-        t.id === taskId
-          ? { ...t, subtasks: (t.subtasks ?? []).filter((subtask) => subtask.id !== subtaskId) }
-          : t,
-      ),
-    })),
-  setNotes: (taskId, notes) =>
-    set((state) => ({
-      tasks: state.tasks.map((t) => (t.id === taskId ? { ...t, notes } : t)),
-    })),
-  setLeadTime: (taskId, leadTimeMins) =>
-    set((state) => ({
-      tasks: state.tasks.map((t) => {
-        if (t.id !== taskId) return t;
-        if (leadTimeMins === undefined) {
-          const task = { ...t };
-          delete task.leadTimeMins;
-          return task;
-        }
-        return { ...t, leadTimeMins };
-      }),
-    })),
-  planTaskForDate: (taskId, date, dateLabel, timeSlot) =>
-    set((state) => ({
-      tasks: state.tasks.map((t) =>
-        t.id === taskId ? { ...t, date, dateLabel, timeSlot, isOverdue: false } : t,
-      ),
-    })),
-  changeBucket: (taskId, bucket) =>
-    set((state) => ({
-      tasks: state.tasks.map((t) => (t.id === taskId ? { ...t, bucket } : t)),
-    })),
-  deleteTask: (taskId) =>
-    set((state) => ({
-      tasks: state.tasks.filter((t) => t.id !== taskId),
-      expandedItemId: state.expandedItemId === taskId ? null : state.expandedItemId,
-    })),
-  reorderTask: (id, newSlotIndex, newSlotOrder) =>
-    set((state) => {
-      const updated = state.tasks.map((t) =>
-        t.id === id ? { ...t, slotIndex: newSlotIndex, slotOrder: newSlotOrder } : t,
-      );
+    };
+    set({ tasks: get().tasks.map((t) => (t.id === taskId ? next : t)) });
+    void persistFullTask(next);
+  },
 
-      // Re-number any slot where values are too close (< 1 apart)
-      const tasksInSlot = updated
-        .filter((t) => t.scheduleKind === 'flexible' && t.slotIndex === newSlotIndex)
-        .sort((a, b) => a.slotOrder - b.slotOrder);
+  removeSubtask: (taskId, subtaskId) => {
+    const task = get().tasks.find((t) => t.id === taskId);
+    if (!task) return;
 
-      const needsRenumber = tasksInSlot.some((t, i) => {
-        const next = tasksInSlot[i + 1];
-        return next !== undefined && Math.abs(next.slotOrder - t.slotOrder) < 1;
-      });
+    const next: Task = {
+      ...task,
+      subtasks: (task.subtasks ?? []).filter((subtask) => subtask.id !== subtaskId),
+    };
+    set({ tasks: get().tasks.map((t) => (t.id === taskId ? next : t)) });
+    void persistFullTask(next);
+  },
 
-      if (!needsRenumber) return { tasks: updated };
+  setNotes: (taskId, notes) => {
+    set({
+      tasks: get().tasks.map((t) => (t.id === taskId ? { ...t, notes } : t)),
+    });
+    void persistTaskPatch(taskId, { notes });
+  },
 
-      const renumbered = new Map<string, number>();
-      tasksInSlot.forEach((t, i) => renumbered.set(t.id, i * 100));
+  setLeadTime: (taskId, leadTimeMins) => {
+    const task = get().tasks.find((t) => t.id === taskId);
+    if (!task) return;
 
-      return {
-        tasks: updated.map((t) => {
-          const newOrder = renumbered.get(t.id);
-          return newOrder !== undefined ? { ...t, slotOrder: newOrder } : t;
+    let next: Task;
+    if (leadTimeMins === undefined) {
+      next = { ...task };
+      delete next.leadTimeMins;
+    } else {
+      next = { ...task, leadTimeMins };
+    }
+    set({ tasks: get().tasks.map((t) => (t.id === taskId ? next : t)) });
+    void persistFullTask(next);
+  },
+
+  planTaskForDate: (taskId, date, dateLabel, timeSlot) => {
+    const patch = { date, dateLabel, timeSlot, isOverdue: false as const };
+    set({
+      tasks: get().tasks.map((t) => (t.id === taskId ? { ...t, ...patch } : t)),
+    });
+    void persistTaskPatch(taskId, patch).then((saved) => {
+      if (saved) {
+        set({ tasks: get().tasks.map((t) => (t.id === taskId ? saved : t)) });
+      }
+    });
+  },
+
+  changeBucket: (taskId, bucket) => {
+    set({
+      tasks: get().tasks.map((t) => (t.id === taskId ? { ...t, bucket } : t)),
+    });
+    void persistTaskPatch(taskId, { bucket });
+  },
+
+  deleteTask: (taskId) => {
+    set({
+      tasks: get().tasks.filter((t) => t.id !== taskId),
+      expandedItemId: get().expandedItemId === taskId ? null : get().expandedItemId,
+    });
+    void window.api.db.deleteTask(taskId);
+  },
+
+  reorderTask: (id, newSlotIndex, newSlotOrder) => {
+    const prev = get().tasks;
+    const next = applyReorder(prev, id, newSlotIndex, newSlotOrder);
+    set({ tasks: next });
+
+    const changed = next.filter((task) => {
+      const before = prev.find((t) => t.id === task.id);
+      return before !== undefined && slotFieldsChanged(before, task);
+    });
+
+    void Promise.all(
+      changed.map((task) =>
+        persistTaskPatch(task.id, {
+          slotIndex: task.slotIndex,
+          slotOrder: task.slotOrder,
         }),
-      };
-    }),
+      ),
+    ).then((saved) => {
+      const byId = new Map(saved.filter((t): t is Task => t !== null).map((t) => [t.id, t]));
+      if (byId.size === 0) return;
+      set({
+        tasks: get().tasks.map((t) => byId.get(t.id) ?? t),
+      });
+    });
+  },
 }));

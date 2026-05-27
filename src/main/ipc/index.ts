@@ -11,6 +11,9 @@ import type {
   TorchSnoozePayload,
 } from '../../shared/ipc-contracts';
 import { registerAiHandlers } from './ai-handlers';
+import { getAppDiagnostics } from '../diagnostics';
+import { needleLog } from '../log';
+import { getFlowHealthSnapshot } from '../services/flow-health';
 import { hideCapture, showCapture } from '../windows/capture';
 import { registerDbHandlers } from './db-handlers';
 import {
@@ -49,6 +52,26 @@ export function registerIpcHandlers(): void {
 
   ipcMain.handle('app:getTheme', () => {
     return nativeTheme.shouldUseDarkColors ? 'dark' : 'light';
+  });
+
+  ipcMain.handle('app:getDiagnostics', () => {
+    const diag = getAppDiagnostics();
+    needleLog('ipc', 'app:getDiagnostics', {
+      version: diag.version,
+      gitSha: diag.gitSha,
+      apiKeySource: diag.apiKeySource,
+      envFileLoaded: diag.envFileLoaded,
+    });
+    return diag;
+  });
+
+  ipcMain.handle('app:getFlowHealth', () => {
+    const snapshot = getFlowHealthSnapshot();
+    needleLog('ipc', 'app:getFlowHealth', {
+      eventCount: snapshot.events.length,
+      lastClassifyMs: snapshot.lastClassify?.ms ?? null,
+    });
+    return snapshot;
   });
 
   ipcMain.on('navigate', (_event, screen: string) => {

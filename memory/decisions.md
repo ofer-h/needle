@@ -202,9 +202,29 @@ Format: `### YYYY-MM-DD — <topic> (<who made the call>)`
 - **Path:** `.vite/build/main.js` → `../../.env` with `electron-forge start`. Packaged builds: use OS env or Capture API key UI.
 - **Plan:** `docs/next-integration-steps.md` — phases 2–4 (SQLite hydrate, classify persist, v2 Today dogfood).
 
+### 2026-05-27 — Wire SQLite + capture persist into renderer (Ofer + AI)
+
+**What:** Today uses `hydrateFromDb()` on app mount; Zustand starts empty and loads from `window.api.db`. All Today mutations (`toggleDone`, subtasks, notes, reorder, delete, etc.) call `db:update-task` / `db:delete-task`. Removed duplicate `MOCK_*` data from `store.ts` (seed remains in main `seedIfEmpty` only). Capture classify and intervention brain-dump / capture-window entries call `db:add-capture`.
+
+**Why:** Merged agent work was in the codebase but invisible to the UI — two parallel data worlds (mocks vs SQLite).
+
+**Open:** Phase 4 v2 Today dogfood; optional task create from classification payload.
+
 ### 2026-05-27 — Live clock in Today toolbar (Ofer directed, AI implemented)
 - Added `LiveClock` component inline in `TodayToolbar.tsx` — no new file.
 - Ticks every second via `setInterval(1000)`.
 - Layout: absolutely centered in the toolbar (`position:absolute; left:50%; transform:translateX(-50%)`), positioned above content layers, `pointer-events:none`.
 - Typography: `var(--text-38)` + `var(--mono)` + `font-variant-numeric:tabular-nums` for hours:minutes (no layout jitter), muted `var(--text-13)` sans for AM/PM, muted `var(--text-16)` mono for seconds.
 - Rationale: ADHD users need persistent, glanceable time awareness. Centered placement makes it a passive ambient anchor without competing with the task list.
+
+### 2026-05-27 — Async UX + observability baseline (user request + AI)
+
+**Canonical doc:** `docs/decisions/2026-05-27-async-ux-and-observability.md` (implementation map, verify steps, open gaps).
+
+**What (async UX):** `usePendingOperation`, `AsyncStatusPanel`, Capture classify (30s timeout, cancel, slow hint, error screen), API key save (10s). Prior fixes: `.env` dual-path load, classify/save error handling, `needleLog` / `uiLog`.
+
+**What (observability):** `flow-health` ring buffer, `app:getFlowHealth`, `flowId` on classify in main, BuildDiagnostics last-classify line. Docs: `docs/async-ux.md`, `docs/observability.md`. Rules/skills: `async-ux.mdc`, `observability.mdc`, `needle-async-ux`, `needle-observability`, `needle-debug-app-state`. Phases 0 + 0b in `docs/next-integration-steps.md`.
+
+**Why:** Endless “classifying” dots and silent failures are unacceptable for a companion app; need reproducible debug path and agent governance.
+
+**Open (see decision doc P0–P2):** hydrate pending UI, silent DB persist, fire-and-forget `addCapture`, packaged main logs, pass `flowId` to renderer.

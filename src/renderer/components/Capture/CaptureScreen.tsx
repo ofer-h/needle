@@ -1,9 +1,13 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import FxWindow from '../Window/FxWindow';
-import type { ClassificationResult } from '../../../shared/types';
-import { Button, Divider, Icon, Pill } from '../primitives';
+import type { ClassificationResult, ClassifyResponse } from '../../../shared/types';
+import { AsyncStatusPanel, Button, Divider, Icon, Pill } from '../primitives';
 import ApiKeySettings from './ApiKeySettings';
+import { usePendingOperation } from '../../hooks/usePendingOperation';
+import { uiLog } from '../../utils/ui-log';
 import './CaptureScreen.css';
+
+const CLASSIFY_TIMEOUT_MS = 30_000;
 
 type CaptureState = 'empty' | 'typing' | 'classifying' | 'classified' | 'classify-error' | 'voice';
 
@@ -168,7 +172,17 @@ function CaptureTyping({
   );
 }
 
-function CaptureClassifying({ rawInput }: { rawInput: string }) {
+function CaptureClassifying({
+  rawInput,
+  elapsedMs,
+  isSlow,
+  onCancel,
+}: {
+  rawInput: string;
+  elapsedMs: number;
+  isSlow: boolean;
+  onCancel: () => void;
+}) {
   return (
     <div className="capture-panel-enter">
       <Prompt>Reading your capture…</Prompt>
@@ -176,18 +190,16 @@ function CaptureClassifying({ rawInput }: { rawInput: string }) {
         <div className="composer capture-composer--compact">
           <div className="input-text capture-composer__recap">{rawInput}</div>
         </div>
-        <div className="composer capture-composer--compact">
-          <div className="capture-classifying" aria-live="polite" aria-busy="true">
-            <div className="thinking capture-classifying__status">
-              <i />
-              <i />
-              <i />
-              <span className="capture-classifying__status-label">classifying</span>
-            </div>
-            <p className="capture-classifying__body">
-              Matching to your calendar and today&apos;s plan…
-            </p>
-          </div>
+        <div className="composer capture-composer--compact capture-classifying">
+          <AsyncStatusPanel
+            label="classifying"
+            detail="Matching to your calendar and today's plan…"
+            elapsedMs={elapsedMs}
+            isSlow={isSlow}
+            slowMessage="Still working — or cancel and save without AI."
+            onCancel={onCancel}
+            cancelLabel="Cancel"
+          />
         </div>
       </div>
     </div>
@@ -376,6 +388,7 @@ export default function CaptureScreen({ onBack }: Props) {
   const [classifyError, setClassifyError] = useState<string | null>(null);
   const [latencyMs, setLatencyMs] = useState(0);
   const [apiKeyOpen, setApiKeyOpen] = useState(false);
+  const classifyOp = usePendingOperation<ClassifyResponse>();
 
   const footer: Record<CaptureState, string> = {
     empty: '⌘ K captures from anywhere on your Mac',
@@ -386,28 +399,70 @@ export default function CaptureScreen({ onBack }: Props) {
     voice: 'tap to stop · auto-stops on silence',
   };
 
-  const runClassify = useCallback(async (text: string) => {
-    const trimmed = text.trim();
-    if (!trimmed) return;
+  const handleClassifyCancel = useCallback(() => {
+    classifyOp.cancel();
+    uiLog('capture', 'classify cancelled by user');
+    setState('typing');
+  }, [classifyOp]);
 
-    setClassifyError(null);
-    setClassification(null);
-    setState('classifying');
+  const runClassify = useCallback(
+    async (text: string) => {
+      const trimmed = text.trim();
+      if (!trimmed) return;
 
-    const started = performance.now();
-    const response = await window.api.ai.classify(trimmed);
-    const elapsed = performance.now() - started;
-    setLatencyMs(elapsed);
+      if (!window.api?.ai) {
+        uiLog('capture', 'classify aborted — window.api.ai missing');
+        setClassifyError('App bridge not ready — restart the app');
+        setState('classify-error');
+        return;
+      }
 
-    if ('error' in response) {
-      setClassifyError(response.error);
-      setState('classify-error');
-      return;
-    }
+      setClassifyError(null);
+      setClassification(null);
+      setState('classifying');
+      uiLog('capture', 'classify start', { textLen: trimmed.length });
 
-    setClassification(response);
-    setState('classified');
-  }, []);
+      const started = performance.now();
+      const result = await classifyOp.run(
+        () => window.api.ai.classify(trimmed),
+        { timeoutMs: CLASSIFY_TIMEOUT_MS },
+      );
+      const elapsed = performance.now() - started;
+      setLatencyMs(elapsed);
+
+      if (result.outcome === 'cancelled') {
+        uiLog('capture', 'classify abandoned after cancel');
+        return;
+      }
+
+      if (result.outcome === 'error') {
+        uiLog('capture', 'classify failed', { error: result.message, ms: Math.round(elapsed) });
+        setClassifyError(result.message);
+        setState('classify-error');
+        return;
+      }
+
+      const response: ClassifyResponse = result.value;
+      if ('error' in response) {
+        uiLog('capture', 'classify error', { error: response.error, ms: Math.round(elapsed) });
+        setClassifyError(response.error);
+        setState('classify-error');
+        return;
+      }
+
+      uiLog('capture', 'classify ok', { bucket: response.bucket, ms: Math.round(elapsed) });
+      setClassification(response);
+      setState('classified');
+      if (window.api.db) {
+        void window.api.db.addCapture(trimmed).catch((err: unknown) => {
+          uiLog('capture', 'db:addCapture failed', {
+            error: err instanceof Error ? err.message : String(err),
+          });
+        });
+      }
+    },
+    [classifyOp],
+  );
 
   const handleStartTyping = (v: string) => {
     setInputValue(v);
@@ -444,7 +499,14 @@ export default function CaptureScreen({ onBack }: Props) {
             onStartVoice={() => setState('voice')}
           />
         )}
-        {state === 'classifying' && <CaptureClassifying rawInput={inputValue} />}
+        {state === 'classifying' && (
+          <CaptureClassifying
+            rawInput={inputValue}
+            elapsedMs={classifyOp.elapsedMs}
+            isSlow={classifyOp.isSlow}
+            onCancel={handleClassifyCancel}
+          />
+        )}
         {state === 'classify-error' && classifyError !== null && (
           <CaptureClassifyError
             rawInput={inputValue}

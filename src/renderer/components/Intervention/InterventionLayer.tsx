@@ -132,6 +132,7 @@ export default function InterventionLayer() {
         // If the user left a brain dump, save it as a capture entry.
         if (typeof payload.brainDumpText === 'string' && payload.brainDumpText.length > 0) {
           addCaptureEntry({ body: payload.brainDumpText });
+          void window.api.db.addCapture(payload.brainDumpText);
         }
         resolveIntervention(id, 'acknowledged', nowIso());
       } else {
@@ -151,6 +152,7 @@ export default function InterventionLayer() {
         ...(flowSessionId !== undefined ? { flowSessionId } : {}),
       });
       entryIdMap.current.set(payload.entryId, storeEntryId);
+      void window.api.db.addCapture(payload.body);
     });
     const offPromoted = window.api.capture.onEntryPromoted((payload) => {
       const storeEntryId = entryIdMap.current.get(payload.entryId);

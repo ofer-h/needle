@@ -1,0 +1,44 @@
+---
+description: Async UI — no infinite loading; timeouts, errors, cancel, logging
+globs: src/renderer/**/*
+alwaysApply: false
+---
+
+# Async UX (renderer + IPC flows)
+
+Applies when adding or changing **user-triggered async work**: classify, save settings, DB/IPC calls that block UI, brain-dump submit, etc.
+
+Read `docs/async-ux.md` for rationale and QA script.
+
+## Forbidden
+
+- `setLoading(true)` (or dedicated `classifying` state) **without** guaranteed exit via success, error, timeout, or cancel
+- Spinner/dots **only** — no elapsed time, no slow hint after 3s, no cancel for ops >3s
+- `await window.api.*` in UI **without** try/catch or `usePendingOperation`
+- Swallowing errors (empty catch, no user-visible message)
+- Leaving pending UI when IPC throws or `window.api` is missing
+
+## Required
+
+1. **`usePendingOperation`** (`src/renderer/hooks/usePendingOperation.ts`) or an explicit state machine — never `isLoading` + `isError` booleans alone
+2. **Timeout** — default 30s (10s for fast local writes); mirror timeout in main for network IPC
+3. **UI** — `AsyncStatusPanel` for pending: dots + label + **elapsed** + slow message after 3s + **Cancel** when appropriate
+4. **Error screen** — human message + **Try again** + contextual action (API key, etc.)
+5. **Logging** — `uiLog(scope, message, meta)` at start / success / error / cancel; main uses `needleLog`
+6. **IPC contract** — handlers return `{ error: string }`; they must not hang without a timeout
+
+## Example (classify)
+
+```tsx
+const op = usePendingOperation<ClassifyResponse>();
+
+const result = await op.run(() => window.api.ai.classify(text), { timeoutMs: 30_000 });
+if (result.outcome === 'cancelled') return;
+if (result.outcome === 'error') { showError(result.message); return; }
+if ('error' in result.value) { showError(result.value.error); return; }
+showSuccess(result.value);
+```
+
+## Agent workflow
+
+Implementing async UI → invoke skill **`needle-async-ux`** before shipping.

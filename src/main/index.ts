@@ -1,4 +1,6 @@
 import { loadLocalEnv } from './load-env';
+import { needleLog } from './log';
+import { getAppDiagnostics } from './diagnostics';
 import { app, BrowserWindow, globalShortcut, session } from 'electron';
 
 loadLocalEnv();
@@ -16,6 +18,14 @@ function bootstrap(): void {
 
   buildMenu();
   registerIpcHandlers();
+
+  const diag = getAppDiagnostics();
+  needleLog('boot', 'ready', {
+    version: diag.version,
+    gitSha: diag.gitSha,
+    apiKeySource: diag.apiKeySource,
+    envFile: diag.envFilePath,
+  });
 
   // Deny all permission requests by default
   const allowedPermissions = ['media' as const]; // allow microphone for voice capture

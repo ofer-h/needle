@@ -30,6 +30,10 @@ Trigger phrases include:
    | "Replace raw hex / inline styles" | `needle-token-migration` |
    | "Build a new component / extract a primitive" | `needle-build-component` |
    | "Just understanding the system" | Read `design/tokens.md` + `design/components.md` and explain |
+   | Stuck loading / classify / saving / async errors | `needle-async-ux` |
+   | Logging, flow health, “user said stuck” | `needle-observability` → `needle-debug-app-state` |
+   | Logging / flow health / monitoring / analytics | `needle-observability` |
+   | Stuck or broken UI (debug playbook) | `needle-debug-app-state` |
 
 3. **Hand off**. Tell the user which skill you're using and why, then invoke it. Example: *"Invoking `needle-ui-audit` because you asked to review the Today screen."*
 

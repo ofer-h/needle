@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useAppStore } from './state/store';
 import TodayScreen from './components/Today/TodayScreen';
 import CaptureScreen from './components/Capture/CaptureScreen';
+import BuildDiagnostics from './components/DevTools/BuildDiagnostics';
 import DevClockControl from './components/DevTools/DevClockControl';
 import InterventionLayer from './components/Intervention/InterventionLayer';
 import type { Screen } from '../shared/types';
@@ -13,6 +14,12 @@ export default function App() {
   const setTheme = useAppStore((s) => s.setTheme);
   const expandedItemId = useAppStore((s) => s.expandedItemId);
   const expandItem = useAppStore((s) => s.expandItem);
+  const hydrateFromDb = useAppStore((s) => s.hydrateFromDb);
+
+  useEffect(() => {
+    if (!window.api?.db) return;
+    void hydrateFromDb();
+  }, [hydrateFromDb]);
 
   // Apply theme to <html> for CSS custom properties
   useEffect(() => {
@@ -71,6 +78,7 @@ export default function App() {
       )}
       <InterventionLayer />
       <DevClockControl />
+      <BuildDiagnostics />
     </>
   );
 }

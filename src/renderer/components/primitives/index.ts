@@ -11,3 +11,4 @@ export { Kbd } from './Kbd';
 export { Pill } from './Pill';
 export type { PillSize, PillVariant } from './Pill';
 export { ProgressBar } from './ProgressBar';
+export { AsyncStatusPanel } from './AsyncStatusPanel';

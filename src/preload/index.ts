@@ -24,6 +24,8 @@ import type {
 const api = {
   app: {
     getTheme: (): Promise<Theme> => ipcRenderer.invoke('app:getTheme'),
+    getDiagnostics: () => ipcRenderer.invoke('app:getDiagnostics'),
+    getFlowHealth: () => ipcRenderer.invoke('app:getFlowHealth'),
     onNavigate: (cb: (screen: Screen) => void) => {
       const handler = (_event: Electron.IpcRendererEvent, screen: Screen) => cb(screen);
       ipcRenderer.on('navigate', handler);

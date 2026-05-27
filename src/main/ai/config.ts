@@ -41,6 +41,13 @@ export function hasApiKey(): boolean {
   return getApiKey() !== null;
 }
 
+export function getApiKeySource(): 'env' | 'config' | 'none' {
+  const fromEnv = process.env.ANTHROPIC_API_KEY?.trim();
+  if (fromEnv) return 'env';
+  const fromFile = readUserConfig().anthropicApiKey;
+  return fromFile ? 'config' : 'none';
+}
+
 export function saveApiKey(apiKey: string): { ok: true } | { error: string } {
   const trimmed = apiKey.trim();
   if (!trimmed) {

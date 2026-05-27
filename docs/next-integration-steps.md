@@ -2,6 +2,48 @@
 
 Ordered phases after `needle-ai-orchestration`. Each phase lists files, acceptance criteria, and verification.
 
+**Decision record (async UX + observability, 2026-05-27):** [docs/decisions/2026-05-27-async-ux-and-observability.md](./decisions/2026-05-27-async-ux-and-observability.md) — full file map, verify steps, known gaps.
+
+**Async UX (all phases):** Any user-facing await must follow `docs/async-ux.md` and `.cursor/rules/async-ux.mdc` — no infinite classifying/saving states.
+
+---
+
+## Phase 0b — Observability baseline
+
+**Goal:** Correlatable dev logs, flow health snapshot, and a stuck-user debug playbook — no new npm deps.
+
+| Area | Files |
+|------|--------|
+| Reference | `docs/observability.md`, `.cursor/rules/observability.mdc` |
+| Skills | `.cursor/skills/needle-observability/`, `.cursor/skills/needle-debug-app-state/` |
+| Flow health | `src/shared/flow-health.ts`, `src/main/services/flow-health.ts`, `app:getFlowHealth` |
+| Dev strip | `BuildDiagnostics.tsx` — last classify outcome + ms |
+
+**Acceptance**
+
+- Classify records `flowId` + ring-buffer events; terminal shows `[needle] [flow]`.
+- Dev BuildDiagnostics shows last classify latency/outcome after one run.
+- Agents can follow `docs/observability.md` manual playbook without inventing paths.
+
+---
+
+## Phase 0 — Async UX baseline (ongoing)
+
+**Goal:** No flow leaves the user on endless spinners; failures are visible and recoverable.
+
+| Area | Files |
+|------|--------|
+| Hook + UI | `usePendingOperation.ts`, `AsyncStatusPanel.tsx` |
+| Capture | `CaptureScreen.tsx`, `ApiKeySettings.tsx` |
+| Main | `classify.ts` (timeout), `log.ts`, `ai-handlers.ts` |
+| Docs / rules | `docs/async-ux.md`, `.cursor/rules/async-ux.mdc`, `.cursor/skills/needle-async-ux/` |
+
+**Acceptance**
+
+- Classify shows elapsed time, slow hint after 3s, Cancel, and errors within 30s.
+- API key save never sticks on “Saving…” beyond 10s.
+- `[needle]` / `[needle-ui]` logs correlate with UI outcome.
+
 ---
 
 ## Phase 1 — Local dev ergonomics
@@ -35,11 +77,15 @@ npm run lint
 
 **Goal:** Today/Capture read durable data; Zustand is a cache, not the source of truth.
 
+Migrations run automatically in main bootstrap (`open()` → `migrate()`); developers never run SQL manually.
+
 | Area | Files |
 |------|--------|
 | IPC (existing) | `src/shared/ipc-contracts.ts`, `src/main/ipc/db-handlers.ts`, `src/preload/index.ts` |
 | Hydrate | `src/renderer/App.tsx` or `src/renderer/state/store.ts` — `useEffect` on mount |
 | Types | `src/shared/types.ts` |
+
+**Status:** Done — `hydrateFromDb()` on mount; Today mutations persist via `window.api.db.*`; renderer mocks removed.
 
 **Acceptance**
 
@@ -61,6 +107,8 @@ npm run typecheck
 ## Phase 3 — Classify persists
 
 **Goal:** Capture flow writes to SQLite, not only in-memory.
+
+**Status:** Done — `db:add-capture` on successful Capture classify, torch brain-dump, and capture-window entry events.
 
 | Area | Files |
 |------|--------|

@@ -14,10 +14,9 @@
 
 | Gap | Detail |
 |-----|--------|
-| Today → v2 store | Today screen still uses v1 Zustand mock store; v2 adapter exists but is not the app data source. |
-| Renderer → db hydrate | `window.api.db.*` is exposed; renderer does not load tasks/events from SQLite on startup. |
-| Classify → persist | Successful classification does not call `db:add-capture` or create tasks in SQLite. |
-| API key in production | Key stored via main-process config; user must set key in Capture UI before classify works. |
+| Today → v2 store | Today uses v1 store + SQLite; v2 adapter exists for optional Phase 4 dogfood. |
+| Classify → task create | Capture rows land in `capture_entries`; classification does not yet create/update tasks. |
+| API key in production | Packaged app skips dotenv; use env var or Capture API key UI. |
 
 ## Human actions
 

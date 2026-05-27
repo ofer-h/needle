@@ -1,0 +1,38 @@
+---
+description: Observability — flow logging, flowId, no secrets, debug via BuildDiagnostics
+globs: src/**/*
+alwaysApply: false
+---
+
+# Observability
+
+Applies when adding **logging**, **multi-step IPC flows**, or debugging **stuck / silent** UI.
+
+Read `docs/observability.md` for the full reference and stuck-user playbook.
+
+## Required
+
+1. **Async flows** — Log **start** and **end** (or error/cancel) in main (`needleLog`) and renderer (`uiLog`) with the same **`flowId`** when the flow spans both processes.
+2. **Main flow health** — Call `recordFlowEvent` from `src/main/services/flow-health.ts` for user-visible main-side flows (see `classify.ts`).
+3. **Pending UI** — Use `usePendingOperation`; never raw loading flags without timeout (see `async-ux.mdc`).
+4. **Secrets** — Never log API keys, tokens, `.env` values, or full user text. Use `textLen`, `keySource`, `bucket`, safe `error` strings only.
+5. **IPC errors** — Return `{ error: string }`; log outcome in the handler.
+
+## Debugging order (agents)
+
+1. **BuildDiagnostics** (dev) — version, SHA, key source, last classify ms/outcome.
+2. Terminal `[needle]` / `[flow]` lines for the same `flowId`.
+3. DevTools `[needle-ui]` for the renderer scope.
+4. `await window.api.app.getFlowHealth()` if classify/flow health is relevant.
+5. userData paths and `config.json` only when persistence/key issues are suspected.
+
+## Forbidden
+
+- Logging `apiKey`, `ANTHROPIC_API_KEY`, or full capture/brain-dump bodies.
+- Shipping new async UI without `uiLog` start/end (or equivalent).
+- Adding npm analytics/crash SDKs without an explicit product decision.
+
+## Agent workflow
+
+- Instrumenting or reviewing logs → **`needle-observability`**
+- User reports stuck/broken UI → **`needle-debug-app-state`**
