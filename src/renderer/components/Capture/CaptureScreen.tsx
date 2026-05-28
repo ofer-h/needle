@@ -1,9 +1,16 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import FxWindow from '../Window/FxWindow';
-import type { ClassificationResult, ClassifyResponse } from '../../../shared/types';
+import type {
+  ClassificationBucket,
+  ClassificationResult,
+  ClassifyResponse,
+  ParsedPlanningItem,
+} from '../../../shared/types';
 import { AsyncStatusPanel, Button, Divider, Icon, Pill } from '../primitives';
 import ApiKeySettings from './ApiKeySettings';
 import { usePendingOperation } from '../../hooks/usePendingOperation';
+import { useAppStore } from '../../state/store';
+import { addDaysISO, toISODate } from '../../utils/date';
 import { uiLog } from '../../utils/ui-log';
 import './CaptureScreen.css';
 
@@ -36,7 +43,50 @@ type Props = {
   onBack: () => void;
 };
 
-const TIME_CHIPS = ['Today', 'Tomorrow', 'In a few days', 'Next Sun', 'Next week', 'Someday', 'Pick date…'];
+type DraftPlanningItem = ParsedPlanningItem & {
+  localId: string;
+};
+
+type DraftPlanningPatch = Partial<Omit<DraftPlanningItem, 'suggestedDate' | 'suggestedTime'>> & {
+  suggestedDate?: string | undefined;
+  suggestedTime?: string | undefined;
+};
+
+function normalizePlanningItems(result: ClassificationResult): DraftPlanningItem[] {
+  const items = result.items ?? [
+    {
+      id: 'parsed-1',
+      itemType: 'task' as const,
+      scheduleMode: result.suggestedTime === undefined ? 'flexible' as const : 'fixed' as const,
+      title: result.title,
+      bucket: result.bucket,
+      ...(result.suggestedDate !== undefined ? { suggestedDate: result.suggestedDate } : {}),
+      ...(result.suggestedTime !== undefined ? { suggestedTime: result.suggestedTime } : {}),
+      reasoning: result.reasoning,
+      confidence: result.confidence,
+    },
+  ];
+
+  return items.map((item, index) => ({
+    ...item,
+    localId: `${item.id}-${index}`,
+  }));
+}
+
+function dateForBucket(bucket: ClassificationBucket): string | null {
+  const today = toISODate();
+  if (bucket === 'today') return today;
+  if (bucket === 'tomorrow') return addDaysISO(today, 1);
+  if (bucket === 'later') return addDaysISO(today, 3);
+  return null;
+}
+
+function isDraftReady(item: DraftPlanningItem): boolean {
+  if (item.title.trim().length === 0) return false;
+  if (item.itemType === 'event') return item.suggestedTime?.trim().length === 5;
+  if (item.scheduleMode === 'fixed') return item.suggestedTime?.trim().length === 5;
+  return true;
+}
 
 function BackNav({ onBack }: { onBack: () => void }) {
   return (
@@ -72,36 +122,10 @@ function Prompt({
   );
 }
 
-function ModeButtons({ onVoice }: { onVoice?: () => void }) {
-  return (
-    <div className="capture-mode-row">
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        leadingIcon={<Icon name="mic" size={13} tone="muted" />}
-        onClick={onVoice}
-      >
-        Voice
-      </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        leadingIcon={<Icon name="paperclip" size={13} tone="muted" />}
-      >
-        Drop / paste a file
-      </Button>
-    </div>
-  );
-}
-
 function CaptureEmpty({
   onStartTyping,
-  onStartVoice,
 }: {
   onStartTyping: (v: string) => void;
-  onStartVoice: () => void;
 }) {
   return (
     <div className="capture-panel-enter">
@@ -123,7 +147,6 @@ function CaptureEmpty({
             Type, paste, drop, or hit voice…<span className="caret-bar" />
           </div>
         </div>
-        <ModeButtons onVoice={onStartVoice} />
       </div>
     </div>
   );
@@ -133,12 +156,10 @@ function CaptureTyping({
   value,
   onChange,
   onSubmit,
-  onStartVoice,
 }: {
   value: string;
   onChange: (v: string) => void;
   onSubmit: () => void;
-  onStartVoice: () => void;
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -166,7 +187,6 @@ function CaptureTyping({
             aria-label="Capture text"
           />
         </div>
-        <ModeButtons onVoice={onStartVoice} />
       </div>
     </div>
   );
@@ -252,18 +272,81 @@ function CaptureClassified({
   result,
   latencyMs,
   onAddAnother,
+  onConfirm,
   onBack,
 }: {
   rawInput: string;
   result: ClassificationResult;
   latencyMs: number;
   onAddAnother: () => void;
+  onConfirm: (items: DraftPlanningItem[]) => void;
   onBack: () => void;
 }) {
-  const chipIndex = TIME_CHIPS.findIndex(
-    (c) => c.toLowerCase() === bucketLabel(result.bucket).toLowerCase(),
+  const [draftItems, setDraftItems] = useState<DraftPlanningItem[]>(() =>
+    normalizePlanningItems(result),
   );
-  const [selectedChip, setSelectedChip] = useState(chipIndex >= 0 ? chipIndex : 0);
+
+  useEffect(() => {
+    setDraftItems(normalizePlanningItems(result));
+  }, [result]);
+
+  const updateDraft = (localId: string, patch: DraftPlanningPatch) => {
+    setDraftItems((items) =>
+      items.map((item) => {
+        if (item.localId !== localId) return item;
+        const next = { ...item, ...patch };
+        if (Object.prototype.hasOwnProperty.call(patch, 'suggestedDate') && patch.suggestedDate === undefined) {
+          delete next.suggestedDate;
+        }
+        if (Object.prototype.hasOwnProperty.call(patch, 'suggestedTime') && patch.suggestedTime === undefined) {
+          delete next.suggestedTime;
+        }
+        return next as DraftPlanningItem;
+      }),
+    );
+  };
+
+  const removeDraft = (localId: string) => {
+    setDraftItems((items) => items.filter((item) => item.localId !== localId));
+  };
+
+  const splitDraft = (item: DraftPlanningItem) => {
+    const parts = item.title
+      .split(/\s+(?:and|then)\s+/i)
+      .map((part) => part.trim())
+      .filter(Boolean);
+    if (parts.length < 2) return;
+    const replacements = parts.map((title, index) => ({
+      ...item,
+      id: `${item.id}-split-${index + 1}`,
+      localId: `${item.localId}-split-${index + 1}`,
+      title,
+    }));
+    setDraftItems((items) =>
+      items.flatMap((current) => (current.localId === item.localId ? replacements : [current])),
+    );
+  };
+
+  const mergeWithNext = (index: number) => {
+    setDraftItems((items) => {
+      const next = items[index + 1];
+      const current = items[index];
+      if (current === undefined || next === undefined) return items;
+      return items.flatMap((item, i) => {
+        if (i === index) {
+          return [{ ...current, title: `${current.title}; ${next.title}` }];
+        }
+        if (i === index + 1) return [];
+        return [item];
+      });
+    });
+  };
+
+  const canSplitDraft = (item: DraftPlanningItem) =>
+    item.title
+      .split(/\s+(?:and|then)\s+/i)
+      .map((part) => part.trim())
+      .filter(Boolean).length > 1;
 
   return (
     <div className="capture-panel-enter">
@@ -286,19 +369,104 @@ function CaptureClassified({
           <h2 className="capture-result__title">{result.title}</h2>
           <p className="capture-result__subtitle">{result.reasoning}</p>
 
-          <div className="capture-time-chips" role="listbox" aria-label="Schedule">
-            {TIME_CHIPS.map((chip, i) => (
-              <button
-                key={chip}
-                type="button"
-                role="option"
-                aria-selected={i === selectedChip}
-                className={`capture-time-chip${i === selectedChip ? ' capture-time-chip--selected' : ''}`}
-                onClick={() => setSelectedChip(i)}
-              >
-                {i === selectedChip && <Icon name="check" size={11} tone="inherit" />}
-                {chip}
-              </button>
+          <div className="capture-generated-list" aria-label="Generated planning items">
+            {draftItems.map((item, index) => (
+              <div className="capture-generated-item" key={item.localId}>
+                <div className="capture-generated-item__main">
+                  <input
+                    className="capture-generated-item__title"
+                    value={item.title}
+                    onChange={(e) => updateDraft(item.localId, { title: e.target.value })}
+                    aria-label={`Generated item ${index + 1} title`}
+                  />
+                  <div className="capture-generated-item__reason">{item.reasoning}</div>
+                </div>
+
+                <div className="capture-generated-item__controls">
+                  <select
+                    value={item.itemType}
+                    onChange={(e) =>
+                      updateDraft(item.localId, {
+                        itemType: e.target.value as DraftPlanningItem['itemType'],
+                        scheduleMode: e.target.value === 'event' ? 'fixed' : item.scheduleMode,
+                      })
+                    }
+                    aria-label={`Generated item ${index + 1} type`}
+                  >
+                    <option value="task">Task</option>
+                    <option value="event">Event</option>
+                  </select>
+                  <select
+                    value={item.bucket}
+                    onChange={(e) =>
+                      updateDraft(item.localId, {
+                        bucket: e.target.value as DraftPlanningItem['bucket'],
+                        suggestedDate: dateForBucket(e.target.value as ClassificationBucket) ?? undefined,
+                      })
+                    }
+                    aria-label={`Generated item ${index + 1} day`}
+                  >
+                    <option value="today">Today</option>
+                    <option value="tomorrow">Tomorrow</option>
+                    <option value="later">Later</option>
+                    <option value="someday">Someday</option>
+                  </select>
+                  <select
+                    value={item.scheduleMode}
+                    onChange={(e) =>
+                      updateDraft(item.localId, {
+                        scheduleMode: e.target.value as DraftPlanningItem['scheduleMode'],
+                      })
+                    }
+                    aria-label={`Generated item ${index + 1} schedule mode`}
+                  >
+                    <option value="flexible">Flexible</option>
+                    <option value="fixed">Fixed time</option>
+                  </select>
+                  <input
+                    className="capture-generated-item__time"
+                    type="time"
+                    value={item.suggestedTime ?? ''}
+                    disabled={item.scheduleMode === 'flexible'}
+                    onChange={(e) =>
+                      updateDraft(item.localId, {
+                        suggestedTime: e.target.value === '' ? undefined : e.target.value,
+                      })
+                    }
+                    aria-label={`Generated item ${index + 1} time`}
+                  />
+                </div>
+
+                <div className="capture-generated-item__actions">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    disabled={!canSplitDraft(item)}
+                    onClick={() => splitDraft(item)}
+                  >
+                    Split
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    disabled={index === draftItems.length - 1}
+                    onClick={() => mergeWithNext(index)}
+                  >
+                    Merge
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    disabled={draftItems.length === 1}
+                    onClick={() => removeDraft(item.localId)}
+                  >
+                    Remove
+                  </Button>
+                </div>
+              </div>
             ))}
           </div>
 
@@ -313,17 +481,19 @@ function CaptureClassified({
               size="sm"
               className="capture-btn-positive"
               leadingIcon={<Icon name="thumbs-up" size={13} tone="inherit" />}
-              onClick={onBack}
+              disabled={!draftItems.some(isDraftReady)}
+              onClick={() => onConfirm(draftItems)}
             >
-              Looks right
+              Confirm blocks
             </Button>
             <Button
               type="button"
               variant="ghost"
               size="sm"
               leadingIcon={<Icon name="thumbs-down" size={13} tone="muted" />}
+              onClick={onBack}
             >
-              Change this
+              Cancel
             </Button>
             <span className="capture-feedback__spacer" />
             <Button
@@ -388,13 +558,14 @@ export default function CaptureScreen({ onBack }: Props) {
   const [classifyError, setClassifyError] = useState<string | null>(null);
   const [latencyMs, setLatencyMs] = useState(0);
   const [apiKeyOpen, setApiKeyOpen] = useState(false);
+  const createPlanningItems = useAppStore((s) => s.createPlanningItems);
   const classifyOp = usePendingOperation<ClassifyResponse>();
 
   const footer: Record<CaptureState, string> = {
     empty: '⌘ K captures from anywhere on your Mac',
     typing: '⏎ to confirm · ⎋ to dismiss',
     classifying: 'classifying with Claude…',
-    classified: 'thumbs up to save · ↩ or wait 3s to return',
+    classified: 'review each block, then confirm or cancel',
     'classify-error': 'fix the issue or save without classification',
     voice: 'tap to stop · auto-stops on silence',
   };
@@ -480,23 +651,32 @@ export default function CaptureScreen({ onBack }: Props) {
     setState('empty');
   };
 
+  const handleConfirmDrafts = (items: DraftPlanningItem[]) => {
+    const validItems = items.filter(isDraftReady);
+    uiLog('capture', 'confirm parsed items', { count: validItems.length });
+
+    const parsedItems: ParsedPlanningItem[] = validItems.map(({ localId: _localId, ...item }) => item);
+    void createPlanningItems({
+      rawInput: inputValue.trim(),
+      items: parsedItems,
+    }).then(() => {
+      onBack();
+    });
+  };
+
   return (
     <FxWindow title="Capture">
       <div className="capture-shell">
         <BackNav onBack={onBack} />
 
         {state === 'empty' && (
-          <CaptureEmpty
-            onStartTyping={handleStartTyping}
-            onStartVoice={() => setState('voice')}
-          />
+          <CaptureEmpty onStartTyping={handleStartTyping} />
         )}
         {state === 'typing' && (
           <CaptureTyping
             value={inputValue}
             onChange={setInputValue}
             onSubmit={handleSubmit}
-            onStartVoice={() => setState('voice')}
           />
         )}
         {state === 'classifying' && (
@@ -522,6 +702,7 @@ export default function CaptureScreen({ onBack }: Props) {
             result={classification}
             latencyMs={latencyMs}
             onAddAnother={handleAddAnother}
+            onConfirm={handleConfirmDrafts}
             onBack={onBack}
           />
         )}

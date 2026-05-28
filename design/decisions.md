@@ -50,3 +50,19 @@ Format per entry:
 - Three add-task affordances on the Today screen (sub-toolbar Add task + quick-add row + FAB). PRD says one. Which stays?
 - "NOW" / "COMING UP" serif eyebrow labels + inline expansion + completion animation — confirm priority vs. shipping the v1 shell as-is.
 - Color signaling per task (priority dot + checkbox border + pill) is louder than PRD's "warm, copy-only" direction. Worth a design call.
+
+---
+
+## 2026-05-27 — Calm Breathing Helper "Hearth Pomodoro" Integration
+
+**Decided by:** Ofer approved AI recommendation
+
+**Context:**
+- Locked the decision to include the "BREATH Calm breathing helper" (visually represented as a breathing, pulsing Hearth circle Pomodoro timer) as a core cognitive UX mechanism on the active Focus card.
+- User feedback was extremely enthusiastic ("I love this... super simple UI, very nice idea").
+- Animation guide: The circle core slowly pulses using a gentle 5-second CSS expand/contract keyframe animation. Cued with clear instruction: "Inhale as the circle expands, exhale as it contracts."
+- Purpose: Serves as a soothing, non-anxiety visual anchor to regulate breathing, manage time blindness, and defend against sensory overload or task-switching friction.
+
+**Open questions:**
+- How do we smoothly transition the timer UI from a focused 25-minute Pomodoro block to a 5-minute deep-breathing rest period upon task completion?
+

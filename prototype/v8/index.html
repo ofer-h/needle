@@ -1,0 +1,2575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Needle v8 — 10 Design Explorations</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..600&family=Inter:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    /* ═══════════════════════════════════════════════════════════════
+       FOUNDATION — Design Tokens
+       ═══════════════════════════════════════════════════════════════ */
+    
+    :root {
+      /* Typography */
+      --serif: 'Fraunces', Georgia, serif;
+      --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --mono: 'Geist Mono', 'SF Mono', monospace;
+      
+      /* Light Theme — Warm Parchment (PRD Option A) */
+      --bg: #F6F1EB;
+      --bg-elevated: #FDFBF8;
+      --surface: #FFFFFF;
+      --surface-hover: #FAF7F3;
+      --surface-active: #F4EFE6;
+      
+      --ink: #1F1A14;
+      --ink-2: #6B6259;
+      --ink-3: #9A918A;
+      --ink-4: #C5BDB5;
+      
+      --hairline: rgba(31, 26, 20, 0.08);
+      --hairline-2: rgba(31, 26, 20, 0.14);
+      
+      --urgent: #C4622D;
+      --urgent-soft: #FBF0EA;
+      --upcoming: #6F9272;
+      --upcoming-soft: #EDF5EE;
+      --calendar: #2C2C3A;
+      --remember: #6B7FA3;
+      --accent: #D4A847;
+      --accent-soft: #FCF5E8;
+      
+      /* Spacing (4-based scale) */
+      --sp-1: 4px;
+      --sp-2: 8px;
+      --sp-3: 12px;
+      --sp-4: 16px;
+      --sp-5: 20px;
+      --sp-6: 24px;
+      --sp-8: 32px;
+      --sp-10: 40px;
+      --sp-14: 56px;
+      
+      /* Radius */
+      --r-xs: 4px;
+      --r-sm: 6px;
+      --r-md: 8px;
+      --r-lg: 12px;
+      --r-xl: 16px;
+      --r-pill: 999px;
+      
+      /* Motion */
+      --ease: cubic-bezier(0.25, 1, 0.5, 1);
+      --dur-fast: 100ms;
+      --dur-base: 150ms;
+      --dur-slow: 250ms;
+      --dur-gentle: 500ms;
+      
+      /* Shadows */
+      --shadow-sm: 0 1px 3px rgba(31, 26, 20, 0.04), 0 1px 2px rgba(31, 26, 20, 0.02);
+      --shadow-md: 0 4px 12px rgba(31, 26, 20, 0.05), 0 1px 3px rgba(31, 26, 20, 0.03);
+      --shadow-lg: 0 12px 40px rgba(31, 26, 20, 0.08), 0 4px 12px rgba(31, 26, 20, 0.04);
+      --shadow-xl: 0 24px 64px rgba(31, 26, 20, 0.10), 0 8px 20px rgba(31, 26, 20, 0.05);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       RESET & BASE
+       ═══════════════════════════════════════════════════════════════ */
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    html { 
+      font-size: 16px; 
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    
+    body {
+      font-family: var(--sans);
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.5;
+      letter-spacing: -0.005em;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    button {
+      font: inherit;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: inherit;
+    }
+
+    input {
+      font: inherit;
+      border: none;
+      background: none;
+      outline: none;
+      color: inherit;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       NAVIGATION — Minimal Design Switcher
+       ═══════════════════════════════════════════════════════════════ */
+
+    .nav-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border-top: 1px solid var(--hairline);
+      padding: var(--sp-2) var(--sp-4);
+      display: flex;
+      align-items: center;
+      gap: var(--sp-1);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .nav-bar::-webkit-scrollbar { display: none; }
+
+    .nav-bar .label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--ink-3);
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      padding: 0 var(--sp-2);
+      flex-shrink: 0;
+    }
+
+    .nav-btn {
+      flex-shrink: 0;
+      padding: 6px 14px;
+      border-radius: var(--r-pill);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--ink-2);
+      transition: all var(--dur-base) var(--ease);
+      white-space: nowrap;
+    }
+    .nav-btn:hover { 
+      background: var(--surface-active); 
+      color: var(--ink); 
+    }
+    .nav-btn.active {
+      background: var(--ink);
+      color: var(--bg-elevated);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       DESIGN CONTAINER
+       ═══════════════════════════════════════════════════════════════ */
+
+    .design-view {
+      display: none;
+      height: 100vh;
+      padding-bottom: 52px; /* nav bar space */
+    }
+    .design-view.active { display: flex; }
+
+    /* ═══════════════════════════════════════════════════════════════
+       SHARED COMPONENTS
+       ═══════════════════════════════════════════════════════════════ */
+
+    .checkbox {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 1.5px solid var(--ink-4);
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: all var(--dur-base) var(--ease);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .checkbox:hover { border-color: var(--ink-3); transform: scale(1.1); }
+    .checkbox.checked {
+      border-color: var(--upcoming);
+      background: var(--upcoming);
+    }
+    .checkbox.checked::after {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: white;
+      border-radius: 50%;
+    }
+
+    .task-done .task-title { 
+      text-decoration: line-through; 
+      color: var(--ink-4); 
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 10px;
+      border-radius: var(--r-pill);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+    }
+    .pill.urgent { background: var(--urgent-soft); color: var(--urgent); }
+    .pill.upcoming { background: var(--upcoming-soft); color: var(--upcoming); }
+    .pill.neutral { background: var(--surface-active); color: var(--ink-3); }
+
+    /* ═══════════════════════════════════════════════════════════════
+       
+       DESIGN 1 — "The Journal"
+       Single-column editorial. Like opening a beautiful daily planner.
+       Maximum whitespace, serif anchors, progressive disclosure.
+       
+       ═══════════════════════════════════════════════════════════════ */
+
+    .d1 {
+      flex-direction: column;
+      align-items: center;
+      overflow-y: auto;
+      background: var(--bg);
+    }
+
+    .d1-container {
+      width: 100%;
+      max-width: 520px;
+      padding: var(--sp-14) var(--sp-6) 120px;
+    }
+
+    .d1-date {
+      font-family: var(--serif);
+      font-size: 32px;
+      font-weight: 400;
+      color: var(--ink);
+      margin-bottom: var(--sp-1);
+      letter-spacing: -0.02em;
+      font-optical-sizing: auto;
+    }
+
+    .d1-meta {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+      margin-bottom: var(--sp-10);
+    }
+
+    .d1-counter {
+      font-size: 13px;
+      color: var(--ink-3);
+      font-weight: 400;
+    }
+    .d1-counter span { 
+      color: var(--upcoming); 
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .d1-progress {
+      flex: 1;
+      max-width: 80px;
+      height: 3px;
+      background: var(--hairline);
+      border-radius: var(--r-pill);
+      overflow: hidden;
+    }
+    .d1-progress-fill {
+      height: 100%;
+      background: var(--upcoming);
+      border-radius: var(--r-pill);
+      transition: width var(--dur-slow) var(--ease);
+    }
+
+    .d1-section-label {
+      font-family: var(--serif);
+      font-size: 14px;
+      font-weight: 400;
+      font-style: italic;
+      color: var(--ink-3);
+      margin-bottom: var(--sp-4);
+      margin-top: var(--sp-8);
+    }
+    .d1-section-label:first-of-type { margin-top: 0; }
+
+    .d1-item {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--sp-3);
+      padding: var(--sp-3) 0;
+      border-bottom: 1px solid var(--hairline);
+      cursor: pointer;
+      transition: background var(--dur-fast) ease;
+      border-radius: var(--r-sm);
+      padding-left: var(--sp-2);
+      padding-right: var(--sp-2);
+    }
+    .d1-item:hover { background: var(--surface-hover); }
+    .d1-item:last-child { border-bottom: none; }
+
+    .d1-item-content { flex: 1; min-width: 0; }
+    
+    .d1-item-title {
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--ink);
+      line-height: 1.4;
+    }
+    .d1-item.overdue .d1-item-title { font-weight: 500; }
+
+    .d1-item-sub {
+      font-size: 12px;
+      color: var(--ink-3);
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+    }
+
+    .d1-accent-bar {
+      width: 3px;
+      height: 20px;
+      border-radius: var(--r-pill);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .d1-accent-bar.urgent { background: var(--urgent); }
+    .d1-accent-bar.upcoming { background: var(--upcoming); }
+    .d1-accent-bar.calendar { background: var(--calendar); }
+
+    .d1-event {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+      padding: var(--sp-3) var(--sp-2);
+      color: var(--ink-2);
+      font-size: 14px;
+      border-bottom: 1px solid var(--hairline);
+    }
+    .d1-event-time {
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+      color: var(--ink-3);
+      font-weight: 500;
+      min-width: 52px;
+    }
+    .d1-event-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--calendar);
+      flex-shrink: 0;
+    }
+
+    .d1-capture-prompt {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+      margin-top: var(--sp-8);
+      padding: var(--sp-4) var(--sp-5);
+      background: var(--surface);
+      border-radius: var(--r-lg);
+      border: 1px solid var(--hairline);
+      cursor: text;
+      transition: all var(--dur-base) var(--ease);
+    }
+    .d1-capture-prompt:hover { 
+      border-color: var(--hairline-2); 
+      box-shadow: var(--shadow-sm);
+    }
+    .d1-capture-prompt input {
+      flex: 1;
+      font-size: 14px;
+      color: var(--ink);
+    }
+    .d1-capture-prompt input::placeholder { color: var(--ink-4); }
+    .d1-capture-prompt .kbd {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--ink-4);
+      background: var(--surface-active);
+      padding: 2px 6px;
+      border-radius: var(--r-xs);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       
+       DESIGN 2 — "The Companion"
+       Single focus card. Shows ONE thing at a time.
+       Full-screen breathing room. 
+       Below: a tiny stack of what's next.
+       
+       ═══════════════════════════════════════════════════════════════ */
+
+    .d2 {
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+      position: relative;
+    }
+
+    .d2-greeting {
+      position: absolute;
+      top: var(--sp-10);
+      left: 0;
+      right: 0;
+      text-align: center;
+    }
+    .d2-greeting-text {
+      font-family: var(--serif);
+      font-size: 18px;
+      font-weight: 300;
+      color: var(--ink-3);
+      font-style: italic;
+    }
+
+    .d2-focus-card {
+      text-align: center;
+      max-width: 440px;
+      padding: 0 var(--sp-6);
+    }
+
+    .d2-focus-eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--urgent);
+      margin-bottom: var(--sp-4);
+    }
+
+    .d2-focus-title {
+      font-family: var(--serif);
+      font-size: 36px;
+      font-weight: 400;
+      line-height: 1.2;
+      color: var(--ink);
+      margin-bottom: var(--sp-4);
+      letter-spacing: -0.02em;
+    }
+
+    .d2-focus-context {
+      font-size: 14px;
+      color: var(--ink-3);
+      margin-bottom: var(--sp-8);
+    }
+
+    .d2-focus-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--sp-3);
+    }
+
+    .d2-btn {
+      padding: var(--sp-3) var(--sp-6);
+      border-radius: var(--r-pill);
+      font-size: 13px;
+      font-weight: 500;
+      transition: all var(--dur-base) var(--ease);
+    }
+    .d2-btn.primary {
+      background: var(--ink);
+      color: var(--bg-elevated);
+    }
+    .d2-btn.primary:hover { transform: scale(1.02); box-shadow: var(--shadow-md); }
+    .d2-btn.ghost {
+      color: var(--ink-3);
+      border: 1px solid var(--hairline-2);
+    }
+    .d2-btn.ghost:hover { background: var(--surface); }
+
+    .d2-subtasks {
+      margin-top: var(--sp-8);
+      text-align: left;
+      max-width: 320px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .d2-subtask {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+      padding: var(--sp-2) 0;
+      font-size: 14px;
+      color: var(--ink-2);
+      cursor: pointer;
+    }
+    .d2-subtask:hover { color: var(--ink); }
+    .d2-subtask .checkbox { width: 16px; height: 16px; }
+
+    .d2-queue {
+      position: absolute;
+      bottom: 72px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+    }
+    .d2-queue-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--ink-4);
+      transition: all var(--dur-base) var(--ease);
+      cursor: pointer;
+    }
+    .d2-queue-dot:first-child { background: var(--urgent); width: 24px; border-radius: var(--r-pill); }
+    .d2-queue-dot:hover { transform: scale(1.3); }
+
+    .d2-queue-label {
+      font-size: 11px;
+      color: var(--ink-4);
+      margin-left: var(--sp-2);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       
+       DESIGN 3 — "The Stream"
+       Top-to-bottom flowing river. Time moves down.
+       Minimal chrome. Large generous spacing.
+       Events and tasks are one continuous flow.
+       
+       ═══════════════════════════════════════════════════════════════ */
+
+    .d3 {
+      flex-direction: column;
+      align-items: center;
+      overflow-y: auto;
+      background: var(--bg-elevated);
+    }
+
+    .d3-container {
+      width: 100%;
+      max-width: 480px;
+      padding: var(--sp-10) var(--sp-4) 120px;
+    }
+
+    .d3-header {
+      text-align: center;
+      margin-bottom: var(--sp-14);
+    }
+    .d3-day {
+      font-family: var(--serif);
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--ink-3);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: var(--sp-1);
+    }
+    .d3-date-big {
+      font-family: var(--serif);
+      font-size: 64px;
+      font-weight: 300;
+      color: var(--ink);
+      line-height: 1;
+      letter-spacing: -0.04em;
+    }
+    .d3-month {
+      font-family: var(--serif);
+      font-size: 18px;
+      font-weight: 300;
+      color: var(--ink-2);
+      margin-top: var(--sp-1);
+    }
+
+    .d3-timeline {
+      position: relative;
+      padding-left: var(--sp-8);
+    }
+    .d3-timeline::before {
+      content: '';
+      position: absolute;
+      left: 7px;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: var(--hairline-2);
+    }
+
+    .d3-node {
+      position: relative;
+      margin-bottom: var(--sp-6);
+    }
+    .d3-node::before {
+      content: '';
+      position: absolute;
+      left: calc(-25px);
+      top: 8px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--ink-4);
+      border: 2px solid var(--bg-elevated);
+    }
+    .d3-node.now::before { background: var(--urgent); }
+    .d3-node.event-node::before { background: var(--calendar); }
+
+    .d3-node-time {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--ink-3);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: var(--sp-1);
+    }
+
+    .d3-node-card {
+      background: var(--surface);
+      border-radius: var(--r-lg);
+      padding: var(--sp-4) var(--sp-5);
+      box-shadow: var(--shadow-sm);
+      transition: all var(--dur-base) var(--ease);
+      cursor: pointer;
+    }
+    .d3-node-card:hover { 
+      box-shadow: var(--shadow-md); 
+      transform: translateY(-1px);
+    }
+
+    .d3-node-title {
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+    }
+
+    .d3-node-desc {
+      font-size: 13px;
+      color: var(--ink-3);
+      margin-top: var(--sp-1);
+    }
+
+    .d3-event-card {
+      padding: var(--sp-3) var(--sp-5);
+      border-left: 3px solid var(--calendar);
+      background: transparent;
+      box-shadow: none;
+    }
+    .d3-event-card:hover { background: var(--surface-hover); }
+
+    /* ═══════════════════════════════════════════════════════════════
+       
+       DESIGN 4 — "The Horizon"
+       Ultra-minimal. Just text on a warm canvas.
+       No cards, no borders, no boxes.
+       Pure typographic hierarchy.
+       
+       ═══════════════════════════════════════════════════════════════ */
+
+    .d4 {
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: #F8F3ED;
+      overflow-y: auto;
+    }
+
+    .d4-container {
+      max-width: 560px;
+      padding: var(--sp-14) var(--sp-8) 120px;
+      width: 100%;
+    }
+
+    .d4-greeting {
+      font-family: var(--serif);
+      font-size: 28px;
+      font-weight: 300;
+      color: var(--ink-2);
+      margin-bottom: var(--sp-14);
+      line-height: 1.3;
+    }
+    .d4-greeting strong {
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    .d4-now {
+      margin-bottom: var(--sp-10);
+    }
+    .d4-now-label {
+      font-family: var(--serif);
+      font-size: 12px;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--urgent);
+      margin-bottom: var(--sp-4);
+    }
+
+    .d4-task {
+      padding: var(--sp-3) 0;
+      display: flex;
+      align-items: baseline;
+      gap: var(--sp-4);
+      cursor: pointer;
+      transition: opacity var(--dur-fast) ease;
+    }
+    .d4-task:hover { opacity: 0.7; }
+
+    .d4-task-bullet {
+      font-family: var(--serif);
+      font-size: 20px;
+      color: var(--ink-4);
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .d4-task-text {
+      font-size: 18px;
+      font-weight: 400;
+      color: var(--ink);
+      line-height: 1.4;
+    }
+    .d4-task-text .time {
+      color: var(--ink-3);
+      font-size: 14px;
+      font-weight: 400;
+      margin-left: var(--sp-2);
+    }
+
+    .d4-later {
+      margin-top: var(--sp-10);
+      padding-top: var(--sp-6);
+      border-top: 1px solid var(--hairline);
+    }
+    .d4-later-label {
+      font-family: var(--serif);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--ink-4);
+      margin-bottom: var(--sp-4);
+    }
+    .d4-later .d4-task-text {
+      font-size: 15px;
+      color: var(--ink-2);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       
+       DESIGN 5 — "The Card Stack"
+       Stacked cards with depth. Top card is the active task.
+       Cards behind peek out. Swipe/click to cycle.
+       Shadcn-inspired clean components.
+       
+       ═══════════════════════════════════════════════════════════════ */
+
+    .d5 {
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #F4F0EB;
+      position: relative;
+    }
+
+    .d5-header {
+      position: absolute;
+      top: var(--sp-10);
+      left: 0;
+      right: 0;
+      text-align: center;
+    }
+    .d5-date {
+      font-family: var(--serif);
+      font-size: 14px;
+      color: var(--ink-3);
+      font-weight: 400;
+    }
+    .d5-progress-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--sp-2);
+      margin-top: var(--sp-2);
+    }
+    .d5-progress-pip {
+      width: 20px;
+      height: 3px;
+      border-radius: var(--r-pill);
+      background: var(--hairline-2);
+      transition: all var(--dur-base) var(--ease);
+    }
+    .d5-progress-pip.done { background: var(--upcoming); }
+    .d5-progress-pip.current { background: var(--urgent); width: 32px; }
+
+    .d5-stack {
+      position: relative;
+      width: 380px;
+      height: 360px;
+    }
+
+    .d5-card {
+      position: absolute;
+      inset: 0;
+      background: var(--surface);
+      border-radius: var(--r-xl);
+      box-shadow: var(--shadow-lg);
+      padding: var(--sp-8);
+      display: flex;
+      flex-direction: column;
+      transition: all 0.4s var(--ease);
+    }
+    .d5-card:nth-child(2) {
+      transform: scale(0.95) translateY(12px);
+      opacity: 0.7;
+      z-index: 1;
+    }
+    .d5-card:nth-child(3) {
+      transform: scale(0.9) translateY(24px);
+      opacity: 0.4;
+      z-index: 0;
+    }
+    .d5-card:first-child { z-index: 2; }
+
+    .d5-card-eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--urgent);
+      margin-bottom: var(--sp-2);
+    }
+    .d5-card-title {
+      font-family: var(--serif);
+      font-size: 24px;
+      font-weight: 400;
+      color: var(--ink);
+      line-height: 1.25;
+      margin-bottom: var(--sp-3);
+      letter-spacing: -0.01em;
+    }
+    .d5-card-meta {
+      font-size: 13px;
+      color: var(--ink-3);
+      margin-bottom: var(--sp-6);
+    }
+
+    .d5-card-subtasks {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-2);
+    }
+    .d5-subtask {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+      padding: var(--sp-2) 0;
+      font-size: 14px;
+      color: var(--ink-2);
+      cursor: pointer;
+    }
+    .d5-subtask:hover { color: var(--ink); }
+    .d5-subtask .checkbox { width: 16px; height: 16px; border-width: 1.5px; }
+
+    .d5-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: auto;
+      padding-top: var(--sp-4);
+      border-top: 1px solid var(--hairline);
+    }
+    .d5-done-btn {
+      padding: var(--sp-2) var(--sp-5);
+      background: var(--ink);
+      color: var(--bg-elevated);
+      border-radius: var(--r-pill);
+      font-size: 13px;
+      font-weight: 500;
+      transition: all var(--dur-base) var(--ease);
+    }
+    .d5-done-btn:hover { transform: scale(1.03); box-shadow: var(--shadow-md); }
+    .d5-skip-btn {
+      font-size: 13px;
+      color: var(--ink-3);
+    }
+    .d5-skip-btn:hover { color: var(--ink); }
+
+    .d5-queue-count {
+      position: absolute;
+      bottom: 72px;
+      font-size: 12px;
+      color: var(--ink-4);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       
+       DESIGN 6 — "The Split"
+       Two columns: Brain Dump (left) → Structured (right).
+       The messy mind meets organized output.
+       Editorial left, clean cards right.
+       
+       ═══════════════════════════════════════════════════════════════ */
+
+    .d6 {
+      flex-direction: row;
+      background: var(--bg);
+    }
+
+    .d6-left {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: var(--sp-10) var(--sp-8);
+      border-right: 1px solid var(--hairline);
+      overflow-y: auto;
+    }
+
+    .d6-left-title {
+      font-family: var(--serif);
+      font-size: 20px;
+      font-weight: 300;
+      color: var(--ink-2);
+      margin-bottom: var(--sp-6);
+      font-style: italic;
+    }
+
+    .d6-dump-area {
+      flex: 1;
+      width: 100%;
+      resize: none;
+      border: none;
+      background: none;
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.8;
+      color: var(--ink);
+      outline: none;
+    }
+    .d6-dump-area::placeholder { 
+      color: var(--ink-4); 
+      font-style: italic;
+    }
+
+    .d6-right {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: var(--sp-10) var(--sp-8);
+      background: var(--bg-elevated);
+      overflow-y: auto;
+    }
+
+    .d6-right-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--sp-6);
+    }
+    .d6-right-title {
+      font-family: var(--serif);
+      font-size: 20px;
+      font-weight: 400;
+      color: var(--ink);
+    }
+    .d6-right-count {
+      font-size: 12px;
+      color: var(--ink-3);
+    }
+
+    .d6-card {
+      background: var(--surface);
+      border-radius: var(--r-lg);
+      padding: var(--sp-4) var(--sp-5);
+      margin-bottom: var(--sp-3);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: flex-start;
+      gap: var(--sp-3);
+      transition: all var(--dur-base) var(--ease);
+      cursor: pointer;
+    }
+    .d6-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+
+    .d6-card-content { flex: 1; }
+    .d6-card-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ink);
+    }
+    .d6-card-time {
+      font-size: 12px;
+      color: var(--ink-3);
+      margin-top: 2px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       
+       DESIGN 7 — "The Kanban Zen"
+       Horizontal swim lanes: Now | Next | Later
+       Clean, spacious. Not Trello — more Apple Reminders.
+       
+       ═══════════════════════════════════════════════════════════════ */
+
+    .d7 {
+      flex-direction: column;
+      background: var(--bg);
+    }
+
+    .d7-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--sp-6) var(--sp-8);
+      flex-shrink: 0;
+    }
+    .d7-title {
+      font-family: var(--serif);
+      font-size: 24px;
+      font-weight: 400;
+      color: var(--ink);
+    }
+    .d7-date {
+      font-size: 13px;
+      color: var(--ink-3);
+    }
+
+    .d7-lanes {
+      display: flex;
+      flex: 1;
+      gap: var(--sp-4);
+      padding: 0 var(--sp-8) var(--sp-8);
+      overflow-x: auto;
+    }
+
+    .d7-lane {
+      flex: 1;
+      min-width: 240px;
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-3);
+    }
+
+    .d7-lane-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--sp-2) var(--sp-3);
+    }
+    .d7-lane-title {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink-3);
+    }
+    .d7-lane-count {
+      font-size: 11px;
+      color: var(--ink-4);
+      background: var(--surface-active);
+      padding: 1px 8px;
+      border-radius: var(--r-pill);
+    }
+
+    .d7-lane-card {
+      background: var(--surface);
+      border-radius: var(--r-lg);
+      padding: var(--sp-4);
+      box-shadow: var(--shadow-sm);
+      transition: all var(--dur-base) var(--ease);
+      cursor: pointer;
+    }
+    .d7-lane-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+
+    .d7-card-row {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--sp-3);
+    }
+    .d7-card-title {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--ink);
+      flex: 1;
+    }
+    .d7-card-meta {
+      font-size: 12px;
+      color: var(--ink-3);
+      margin-top: var(--sp-1);
+      margin-left: 32px;
+    }
+    .d7-card-bar {
+      width: 3px;
+      height: 18px;
+      border-radius: var(--r-pill);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       
+       DESIGN 8 — "The Breathing Room"
+       Centered. One section at a time with page transitions.
+       Like a guided meditation for your tasks.
+       Spacious, slow, intentional.
+       
+       ═══════════════════════════════════════════════════════════════ */
+
+    .d8 {
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(180deg, #F8F4EF 0%, #F2EDE5 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .d8-ambient {
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(212, 168, 71, 0.06) 0%, transparent 70%);
+      animation: d8-breathe 8s ease-in-out infinite;
+    }
+    @keyframes d8-breathe {
+      0%, 100% { transform: scale(1); opacity: 0.6; }
+      50% { transform: scale(1.15); opacity: 1; }
+    }
+
+    .d8-content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      max-width: 420px;
+      padding: 0 var(--sp-6);
+    }
+
+    .d8-page-indicator {
+      display: flex;
+      gap: var(--sp-2);
+      justify-content: center;
+      margin-bottom: var(--sp-10);
+    }
+    .d8-pip {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--ink-4);
+      transition: all var(--dur-base) var(--ease);
+    }
+    .d8-pip.active { background: var(--accent); width: 24px; border-radius: var(--r-pill); }
+
+    .d8-section-title {
+      font-family: var(--serif);
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--ink-3);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: var(--sp-6);
+    }
+
+    .d8-task-list {
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-3);
+    }
+    .d8-task {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-4);
+      padding: var(--sp-4) var(--sp-5);
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
+      border-radius: var(--r-lg);
+      transition: all var(--dur-base) var(--ease);
+      cursor: pointer;
+    }
+    .d8-task:hover { 
+      background: rgba(255, 255, 255, 0.9); 
+      transform: translateX(4px);
+    }
+    .d8-task-title {
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--ink);
+      flex: 1;
+    }
+    .d8-task-time {
+      font-size: 12px;
+      color: var(--ink-3);
+    }
+
+    .d8-nav-arrows {
+      display: flex;
+      gap: var(--sp-4);
+      margin-top: var(--sp-10);
+    }
+    .d8-arrow {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid var(--hairline-2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: var(--ink-3);
+      transition: all var(--dur-base) var(--ease);
+    }
+    .d8-arrow:hover { background: var(--surface); color: var(--ink); }
+
+    /* ═══════════════════════════════════════════════════════════════
+       
+       DESIGN 9 — "The Dock"
+       macOS-inspired. Floating window aesthetic.
+       Compact, glass-morphism, feels native.
+       
+       ═══════════════════════════════════════════════════════════════ */
+
+    .d9 {
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      background: #EDEAE5;
+      padding-top: var(--sp-10);
+      overflow-y: auto;
+    }
+
+    .d9-window {
+      width: 440px;
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border-radius: var(--r-xl);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      box-shadow: 
+        0 0 0 0.5px rgba(0,0,0,0.05),
+        0 8px 40px rgba(0,0,0,0.08),
+        0 20px 60px rgba(0,0,0,0.05);
+      overflow: hidden;
+      margin-bottom: 100px;
+    }
+
+    .d9-titlebar {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+      padding: var(--sp-3) var(--sp-4);
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    .d9-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .d9-dot.red { background: #FF5F57; }
+    .d9-dot.yellow { background: #FEBD2F; }
+    .d9-dot.green { background: #28C840; }
+    .d9-titlebar-text {
+      flex: 1;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--ink-3);
+    }
+
+    .d9-body {
+      padding: var(--sp-5);
+    }
+
+    .d9-date-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: var(--sp-5);
+    }
+    .d9-date {
+      font-family: var(--serif);
+      font-size: 22px;
+      font-weight: 400;
+      color: var(--ink);
+    }
+    .d9-stats {
+      font-size: 12px;
+      color: var(--ink-3);
+    }
+    .d9-stats strong {
+      color: var(--upcoming);
+      font-weight: 600;
+    }
+
+    .d9-section {
+      margin-bottom: var(--sp-5);
+    }
+    .d9-section-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink-3);
+      margin-bottom: var(--sp-2);
+      padding-left: var(--sp-1);
+    }
+
+    .d9-task {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+      padding: var(--sp-3) var(--sp-3);
+      border-radius: var(--r-md);
+      transition: background var(--dur-fast) ease;
+      cursor: pointer;
+    }
+    .d9-task:hover { background: rgba(0,0,0,0.03); }
+
+    .d9-task-left {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+      flex: 1;
+      min-width: 0;
+    }
+    .d9-task-title {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .d9-task-badge {
+      font-size: 10px;
+      padding: 1px 7px;
+      border-radius: var(--r-pill);
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+
+    .d9-event {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+      padding: var(--sp-2) var(--sp-3);
+      font-size: 13px;
+      color: var(--ink-2);
+    }
+    .d9-event-time {
+      font-size: 11px;
+      color: var(--ink-3);
+      font-weight: 500;
+      min-width: 48px;
+      font-variant-numeric: tabular-nums;
+    }
+    .d9-event-indicator {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--calendar);
+    }
+
+    .d9-capture {
+      margin-top: var(--sp-3);
+      padding: var(--sp-3) var(--sp-4);
+      background: rgba(0,0,0,0.02);
+      border-radius: var(--r-md);
+      border: 1px solid rgba(0,0,0,0.04);
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+      cursor: text;
+      transition: all var(--dur-base) var(--ease);
+    }
+    .d9-capture:hover { border-color: rgba(0,0,0,0.08); background: rgba(0,0,0,0.03); }
+    .d9-capture-icon { font-size: 14px; color: var(--ink-4); }
+    .d9-capture input {
+      flex: 1;
+      font-size: 13px;
+    }
+    .d9-capture input::placeholder { color: var(--ink-4); }
+
+    /* ═══════════════════════════════════════════════════════════════
+       
+       DESIGN 10 — "The Ritual"
+       Morning ritual experience. Starts with a question.
+       "What matters today?" → User types → AI structures.
+       Then reveals the day as a gentle progression.
+       
+       ═══════════════════════════════════════════════════════════════ */
+
+    .d10 {
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(160deg, #FAF7F2 0%, #F0EBE2 100%);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .d10-state { display: none; }
+    .d10-state.active { display: flex; flex-direction: column; align-items: center; }
+
+    /* State 1: Morning prompt */
+    .d10-prompt-container {
+      text-align: center;
+      max-width: 480px;
+      padding: 0 var(--sp-6);
+    }
+    .d10-time-greeting {
+      font-family: var(--serif);
+      font-size: 42px;
+      font-weight: 300;
+      color: var(--ink);
+      line-height: 1.15;
+      margin-bottom: var(--sp-8);
+      letter-spacing: -0.02em;
+    }
+    .d10-time-greeting em {
+      font-style: italic;
+      color: var(--ink-2);
+    }
+
+    .d10-input-wrap {
+      width: 100%;
+      max-width: 400px;
+      position: relative;
+    }
+    .d10-input {
+      width: 100%;
+      padding: var(--sp-4) var(--sp-5);
+      background: var(--surface);
+      border: 1px solid var(--hairline-2);
+      border-radius: var(--r-lg);
+      font-size: 15px;
+      color: var(--ink);
+      transition: all var(--dur-base) var(--ease);
+      box-shadow: var(--shadow-sm);
+    }
+    .d10-input:focus { 
+      border-color: var(--accent); 
+      box-shadow: var(--shadow-md), 0 0 0 3px var(--accent-soft);
+    }
+    .d10-input::placeholder { color: var(--ink-4); font-style: italic; }
+
+    .d10-hint {
+      font-size: 12px;
+      color: var(--ink-4);
+      margin-top: var(--sp-3);
+      font-style: italic;
+    }
+
+    /* State 2: Day revealed */
+    .d10-revealed {
+      width: 100%;
+      max-width: 480px;
+      padding: 0 var(--sp-6);
+    }
+    .d10-revealed-header {
+      text-align: center;
+      margin-bottom: var(--sp-10);
+    }
+    .d10-day-title {
+      font-family: var(--serif);
+      font-size: 28px;
+      font-weight: 300;
+      color: var(--ink);
+      margin-bottom: var(--sp-1);
+    }
+    .d10-day-sub {
+      font-size: 13px;
+      color: var(--ink-3);
+    }
+
+    .d10-task-group {
+      margin-bottom: var(--sp-6);
+    }
+    .d10-group-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink-3);
+      margin-bottom: var(--sp-3);
+    }
+
+    .d10-task {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+      padding: var(--sp-3) var(--sp-4);
+      background: var(--surface);
+      border-radius: var(--r-md);
+      margin-bottom: var(--sp-2);
+      box-shadow: var(--shadow-sm);
+      transition: all var(--dur-base) var(--ease);
+      cursor: pointer;
+    }
+    .d10-task:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+    .d10-task-title {
+      flex: 1;
+      font-size: 14px;
+      color: var(--ink);
+    }
+    .d10-task-tag {
+      font-size: 11px;
+      color: var(--ink-3);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       EXPANDED TASK DETAIL (shared overlay)
+       ═══════════════════════════════════════════════════════════════ */
+
+    .task-detail-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 900;
+      background: rgba(31, 26, 20, 0.2);
+      backdrop-filter: blur(4px);
+      align-items: center;
+      justify-content: center;
+    }
+    .task-detail-overlay.active { display: flex; }
+    
+    .task-detail-panel {
+      background: var(--surface);
+      border-radius: var(--r-xl);
+      box-shadow: var(--shadow-xl);
+      width: 420px;
+      max-height: 80vh;
+      overflow-y: auto;
+      padding: var(--sp-8);
+      animation: slideUp 0.3s var(--ease);
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .detail-title {
+      font-family: var(--serif);
+      font-size: 22px;
+      font-weight: 400;
+      color: var(--ink);
+      margin-bottom: var(--sp-4);
+      line-height: 1.25;
+    }
+    .detail-meta {
+      font-size: 13px;
+      color: var(--ink-3);
+      margin-bottom: var(--sp-6);
+      display: flex;
+      gap: var(--sp-2);
+      flex-wrap: wrap;
+    }
+    .detail-section-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--ink-3);
+      margin-bottom: var(--sp-3);
+      margin-top: var(--sp-5);
+    }
+    .detail-subtask {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+      padding: var(--sp-2) 0;
+      font-size: 14px;
+      color: var(--ink-2);
+      cursor: pointer;
+    }
+    .detail-subtask:hover { color: var(--ink); }
+    .detail-subtask .checkbox { width: 16px; height: 16px; }
+
+    .detail-notes {
+      font-size: 13px;
+      color: var(--ink-2);
+      line-height: 1.6;
+      padding: var(--sp-3);
+      background: var(--surface-active);
+      border-radius: var(--r-md);
+      margin-top: var(--sp-2);
+    }
+
+    .detail-actions {
+      display: flex;
+      gap: var(--sp-2);
+      margin-top: var(--sp-6);
+      padding-top: var(--sp-4);
+      border-top: 1px solid var(--hairline);
+    }
+    .detail-action-btn {
+      padding: var(--sp-2) var(--sp-4);
+      border-radius: var(--r-pill);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--ink-2);
+      border: 1px solid var(--hairline-2);
+      transition: all var(--dur-base) var(--ease);
+    }
+    .detail-action-btn:hover { background: var(--surface-hover); color: var(--ink); }
+    .detail-action-btn.primary {
+      background: var(--ink);
+      color: var(--bg-elevated);
+      border-color: var(--ink);
+    }
+    .detail-action-btn.primary:hover { opacity: 0.9; }
+
+    /* ═══════════════════════════════════════════════════════════════
+       ANIMATIONS
+       ═══════════════════════════════════════════════════════════════ */
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-in { animation: fadeInUp 0.4s var(--ease) forwards; }
+    .animate-in-1 { animation-delay: 0.05s; opacity: 0; }
+    .animate-in-2 { animation-delay: 0.1s; opacity: 0; }
+    .animate-in-3 { animation-delay: 0.15s; opacity: 0; }
+    .animate-in-4 { animation-delay: 0.2s; opacity: 0; }
+    .animate-in-5 { animation-delay: 0.25s; opacity: 0; }
+    .animate-in-6 { animation-delay: 0.3s; opacity: 0; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       RESPONSIVE — Smaller windows
+       ═══════════════════════════════════════════════════════════════ */
+
+    @media (max-width: 640px) {
+      .d6 { flex-direction: column; }
+      .d6-left { border-right: none; border-bottom: 1px solid var(--hairline); }
+      .d7-lanes { flex-direction: column; }
+      .d5-stack { width: 320px; height: 300px; }
+      .d9-window { width: calc(100% - 32px); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       DESIGN 1 — "The Journal"
+       ═══════════════════════════════════════════════════════════════ -->
+  <div class="design-view active" id="design-1">
+    <div class="d1 design-view active" style="display: flex;">
+      <div class="d1-container">
+        <div class="d1-date animate-in animate-in-1">Tuesday, May 27</div>
+        <div class="d1-meta animate-in animate-in-2">
+          <div class="d1-counter"><span>3</span> of 6 done</div>
+          <div class="d1-progress"><div class="d1-progress-fill" style="width: 50%"></div></div>
+        </div>
+
+        <div class="d1-section-label animate-in animate-in-2">Now</div>
+        
+        <div class="d1-item overdue animate-in animate-in-3" onclick="openDetail(this)">
+          <div class="d1-accent-bar urgent"></div>
+          <div class="checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+          <div class="d1-item-content">
+            <div class="d1-item-title task-title">Call back Dana about the contract</div>
+            <div class="d1-item-sub">
+              <span class="pill urgent">Overdue · yesterday</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="d1-item animate-in animate-in-3" onclick="openDetail(this)">
+          <div class="d1-accent-bar urgent"></div>
+          <div class="checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+          <div class="d1-item-content">
+            <div class="d1-item-title task-title">Prep for manager 1:1</div>
+            <div class="d1-item-sub">
+              <span>Today · linked to 3:00 PM meeting</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="d1-event animate-in animate-in-4">
+          <div class="d1-event-time">3:00 PM</div>
+          <div class="d1-accent-bar calendar"></div>
+          <div>Manager 1:1</div>
+        </div>
+
+        <div class="d1-item animate-in animate-in-4" onclick="openDetail(this)">
+          <div class="d1-accent-bar upcoming"></div>
+          <div class="checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+          <div class="d1-item-content">
+            <div class="d1-item-title task-title">Review PR from Tal</div>
+            <div class="d1-item-sub"><span>Today</span></div>
+          </div>
+        </div>
+
+        <div class="d1-section-label animate-in animate-in-5">Coming up</div>
+        
+        <div class="d1-item animate-in animate-in-5" onclick="openDetail(this)">
+          <div class="d1-accent-bar upcoming"></div>
+          <div class="checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+          <div class="d1-item-content">
+            <div class="d1-item-title task-title" style="font-size: 14px; color: var(--ink-2);">Fix kitchen light switch</div>
+            <div class="d1-item-sub"><span class="pill neutral">Tomorrow</span></div>
+          </div>
+        </div>
+
+        <div class="d1-item animate-in animate-in-6" onclick="openDetail(this)">
+          <div class="d1-accent-bar upcoming"></div>
+          <div class="checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+          <div class="d1-item-content">
+            <div class="d1-item-title task-title" style="font-size: 14px; color: var(--ink-2);">Write quarterly review draft</div>
+            <div class="d1-item-sub"><span class="pill neutral">Next Monday</span></div>
+          </div>
+        </div>
+
+        <div class="d1-capture-prompt animate-in animate-in-6">
+          <span style="font-size: 16px; color: var(--ink-4);">+</span>
+          <input type="text" placeholder="What's on your mind?" id="d1-capture-input">
+          <span class="kbd">⌘K</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       DESIGN 2 — "The Companion"
+       ═══════════════════════════════════════════════════════════════ -->
+  <div class="design-view" id="design-2">
+    <div class="d2 design-view" style="display: flex;">
+      <div class="d2-greeting">
+        <div class="d2-greeting-text">Good afternoon, Ofer</div>
+      </div>
+
+      <div class="d2-focus-card">
+        <div class="d2-focus-eyebrow">Focus on this</div>
+        <div class="d2-focus-title">Prep for manager 1:1</div>
+        <div class="d2-focus-context">Linked to your 3:00 PM meeting · 1h 45m away</div>
+        
+        <div class="d2-subtasks">
+          <div class="d2-subtask" onclick="toggleCheck(this.querySelector('.checkbox'))">
+            <div class="checkbox" style="width:16px;height:16px;"></div>
+            <span>Review last week's action items</span>
+          </div>
+          <div class="d2-subtask" onclick="toggleCheck(this.querySelector('.checkbox'))">
+            <div class="checkbox" style="width:16px;height:16px;"></div>
+            <span>Draft talking points for roadmap discussion</span>
+          </div>
+          <div class="d2-subtask" onclick="toggleCheck(this.querySelector('.checkbox'))">
+            <div class="checkbox" style="width:16px;height:16px;" ></div>
+            <span>Note: Ask about team offsite dates</span>
+          </div>
+        </div>
+
+        <div class="d2-focus-actions" style="margin-top: 32px;">
+          <button class="d2-btn primary" onclick="completeD2()">Done</button>
+          <button class="d2-btn ghost">Skip for now</button>
+        </div>
+      </div>
+
+      <div class="d2-queue">
+        <div class="d2-queue-dot" title="Current"></div>
+        <div class="d2-queue-dot" title="Call back Dana"></div>
+        <div class="d2-queue-dot" title="Review PR"></div>
+        <div class="d2-queue-dot" title="Fix kitchen light"></div>
+        <span class="d2-queue-label">4 remaining</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       DESIGN 3 — "The Stream"
+       ═══════════════════════════════════════════════════════════════ -->
+  <div class="design-view" id="design-3">
+    <div class="d3 design-view" style="display: flex;">
+      <div class="d3-container">
+        <div class="d3-header">
+          <div class="d3-day animate-in animate-in-1">Tuesday</div>
+          <div class="d3-date-big animate-in animate-in-1">27</div>
+          <div class="d3-month animate-in animate-in-2">May 2026</div>
+        </div>
+
+        <div class="d3-timeline">
+          <div class="d3-node now animate-in animate-in-2">
+            <div class="d3-node-time">Overdue</div>
+            <div class="d3-node-card" onclick="openDetail(this)">
+              <div class="d3-node-title">
+                <div class="checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+                Call back Dana about the contract
+              </div>
+              <div class="d3-node-desc">Was due yesterday</div>
+            </div>
+          </div>
+
+          <div class="d3-node now animate-in animate-in-3">
+            <div class="d3-node-time">Now</div>
+            <div class="d3-node-card" onclick="openDetail(this)">
+              <div class="d3-node-title">
+                <div class="checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+                Prep for manager 1:1
+              </div>
+              <div class="d3-node-desc">Before your 3:00 PM meeting</div>
+            </div>
+          </div>
+
+          <div class="d3-node event-node animate-in animate-in-4">
+            <div class="d3-node-time">3:00 PM</div>
+            <div class="d3-node-card d3-event-card">
+              <div class="d3-node-title" style="color: var(--ink-2);">
+                <span style="font-size: 13px;">📅</span>
+                Manager 1:1
+              </div>
+            </div>
+          </div>
+
+          <div class="d3-node animate-in animate-in-5">
+            <div class="d3-node-time">Today</div>
+            <div class="d3-node-card" onclick="openDetail(this)">
+              <div class="d3-node-title">
+                <div class="checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+                Review PR from Tal
+              </div>
+              <div class="d3-node-desc">No specific time</div>
+            </div>
+          </div>
+
+          <div class="d3-node animate-in animate-in-6">
+            <div class="d3-node-time">Tomorrow</div>
+            <div class="d3-node-card" onclick="openDetail(this)" style="opacity: 0.7;">
+              <div class="d3-node-title">
+                <div class="checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+                Fix kitchen light switch
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       DESIGN 4 — "The Horizon"
+       ═══════════════════════════════════════════════════════════════ -->
+  <div class="design-view" id="design-4">
+    <div class="d4 design-view" style="display: flex;">
+      <div class="d4-container">
+        <div class="d4-greeting animate-in animate-in-1">
+          It's <strong>Tuesday afternoon</strong>.<br>
+          You have <strong>3 things</strong> left today.
+        </div>
+
+        <div class="d4-now animate-in animate-in-2">
+          <div class="d4-now-label">Now</div>
+          
+          <div class="d4-task" onclick="openDetail(this)">
+            <span class="d4-task-bullet">·</span>
+            <span class="d4-task-text">Call back Dana about the contract <span class="time">overdue</span></span>
+          </div>
+          <div class="d4-task" onclick="openDetail(this)">
+            <span class="d4-task-bullet">·</span>
+            <span class="d4-task-text">Prep for manager 1:1 <span class="time">before 3pm</span></span>
+          </div>
+          <div class="d4-task" onclick="openDetail(this)">
+            <span class="d4-task-bullet">·</span>
+            <span class="d4-task-text">Review PR from Tal</span>
+          </div>
+        </div>
+
+        <div class="d4-later animate-in animate-in-3">
+          <div class="d4-later-label">Later</div>
+          
+          <div class="d4-task" onclick="openDetail(this)">
+            <span class="d4-task-bullet" style="color: var(--ink-4);">·</span>
+            <span class="d4-task-text">Fix kitchen light switch <span class="time">tomorrow</span></span>
+          </div>
+          <div class="d4-task" onclick="openDetail(this)">
+            <span class="d4-task-bullet" style="color: var(--ink-4);">·</span>
+            <span class="d4-task-text">Write quarterly review draft <span class="time">next monday</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       DESIGN 5 — "The Card Stack"
+       ═══════════════════════════════════════════════════════════════ -->
+  <div class="design-view" id="design-5">
+    <div class="d5 design-view" style="display: flex;">
+      <div class="d5-header">
+        <div class="d5-date">Tuesday, May 27</div>
+        <div class="d5-progress-row">
+          <div class="d5-progress-pip done"></div>
+          <div class="d5-progress-pip done"></div>
+          <div class="d5-progress-pip done"></div>
+          <div class="d5-progress-pip current"></div>
+          <div class="d5-progress-pip"></div>
+          <div class="d5-progress-pip"></div>
+        </div>
+      </div>
+
+      <div class="d5-stack">
+        <div class="d5-card">
+          <div class="d5-card-eyebrow">Focus Now</div>
+          <div class="d5-card-title">Prep for manager 1:1</div>
+          <div class="d5-card-meta">Linked to 3:00 PM meeting · 1h 45m away</div>
+          
+          <div class="d5-card-subtasks">
+            <div class="d5-subtask" onclick="toggleCheck(this.querySelector('.checkbox'))">
+              <div class="checkbox" style="width:16px;height:16px;"></div>
+              <span>Review last week's action items</span>
+            </div>
+            <div class="d5-subtask" onclick="toggleCheck(this.querySelector('.checkbox'))">
+              <div class="checkbox" style="width:16px;height:16px;"></div>
+              <span>Draft roadmap talking points</span>
+            </div>
+            <div class="d5-subtask" onclick="toggleCheck(this.querySelector('.checkbox'))">
+              <div class="checkbox" style="width:16px;height:16px;"></div>
+              <span>Ask about team offsite dates</span>
+            </div>
+          </div>
+
+          <div class="d5-card-footer">
+            <button class="d5-done-btn" onclick="swipeCard()">Done ✓</button>
+            <button class="d5-skip-btn" onclick="swipeCard()">Skip →</button>
+          </div>
+        </div>
+
+        <div class="d5-card">
+          <div class="d5-card-eyebrow" style="color: var(--urgent);">Overdue</div>
+          <div class="d5-card-title">Call back Dana</div>
+          <div class="d5-card-meta">About the contract · was due yesterday</div>
+        </div>
+
+        <div class="d5-card">
+          <div class="d5-card-eyebrow" style="color: var(--upcoming);">Today</div>
+          <div class="d5-card-title">Review PR from Tal</div>
+        </div>
+      </div>
+
+      <div class="d5-queue-count">3 more after this</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       DESIGN 6 — "The Split"
+       ═══════════════════════════════════════════════════════════════ -->
+  <div class="design-view" id="design-6">
+    <div class="d6 design-view" style="display: flex;">
+      <div class="d6-left">
+        <div class="d6-left-title">Brain dump</div>
+        <textarea class="d6-dump-area" placeholder="Just start typing... messy is fine. I'll sort it out.
+
+Example:
+need to call dana back about the contract
+prep for 1:1 with manager at 3pm
+review tal's PR when I get a chance
+kitchen light broken, buy new switch
+quarterly review due next monday"></textarea>
+      </div>
+      <div class="d6-right">
+        <div class="d6-right-header">
+          <div class="d6-right-title">Today's Plan</div>
+          <div class="d6-right-count">5 items</div>
+        </div>
+
+        <div class="d6-card" onclick="openDetail(this)">
+          <div class="d1-accent-bar urgent"></div>
+          <div class="checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+          <div class="d6-card-content">
+            <div class="d6-card-title">Call back Dana about the contract</div>
+            <div class="d6-card-time">Overdue · yesterday</div>
+          </div>
+        </div>
+
+        <div class="d6-card" onclick="openDetail(this)">
+          <div class="d1-accent-bar urgent"></div>
+          <div class="checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+          <div class="d6-card-content">
+            <div class="d6-card-title">Prep for manager 1:1</div>
+            <div class="d6-card-time">Before 3:00 PM · 3 subtasks</div>
+          </div>
+        </div>
+
+        <div class="d6-card" onclick="openDetail(this)">
+          <div class="d1-accent-bar upcoming"></div>
+          <div class="checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+          <div class="d6-card-content">
+            <div class="d6-card-title">Review PR from Tal</div>
+            <div class="d6-card-time">Today · no specific time</div>
+          </div>
+        </div>
+
+        <div class="d6-card" onclick="openDetail(this)" style="opacity: 0.6;">
+          <div class="d1-accent-bar upcoming"></div>
+          <div class="checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+          <div class="d6-card-content">
+            <div class="d6-card-title">Fix kitchen light switch</div>
+            <div class="d6-card-time">Tomorrow</div>
+          </div>
+        </div>
+
+        <div class="d6-card" onclick="openDetail(this)" style="opacity: 0.4;">
+          <div class="d1-accent-bar upcoming"></div>
+          <div class="checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+          <div class="d6-card-content">
+            <div class="d6-card-title">Write quarterly review draft</div>
+            <div class="d6-card-time">Next Monday</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       DESIGN 7 — "The Kanban Zen"
+       ═══════════════════════════════════════════════════════════════ -->
+  <div class="design-view" id="design-7">
+    <div class="d7 design-view" style="display: flex;">
+      <div class="d7-topbar">
+        <div class="d7-title">Tuesday, May 27</div>
+        <div class="d7-date">3 of 6 done</div>
+      </div>
+      
+      <div class="d7-lanes">
+        <div class="d7-lane">
+          <div class="d7-lane-header">
+            <span class="d7-lane-title">Now</span>
+            <span class="d7-lane-count">3</span>
+          </div>
+          <div class="d7-lane-card" onclick="openDetail(this)">
+            <div class="d7-card-row">
+              <div class="d7-card-bar" style="background: var(--urgent);"></div>
+              <div class="checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+              <div class="d7-card-title">Call back Dana about the contract</div>
+            </div>
+            <div class="d7-card-meta">Overdue · yesterday</div>
+          </div>
+          <div class="d7-lane-card" onclick="openDetail(this)">
+            <div class="d7-card-row">
+              <div class="d7-card-bar" style="background: var(--urgent);"></div>
+              <div class="checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+              <div class="d7-card-title">Prep for manager 1:1</div>
+            </div>
+            <div class="d7-card-meta">Before 3:00 PM · 3 subtasks</div>
+          </div>
+          <div class="d7-lane-card" onclick="openDetail(this)">
+            <div class="d7-card-row">
+              <div class="d7-card-bar" style="background: var(--upcoming);"></div>
+              <div class="checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+              <div class="d7-card-title">Review PR from Tal</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="d7-lane">
+          <div class="d7-lane-header">
+            <span class="d7-lane-title">Tomorrow</span>
+            <span class="d7-lane-count">1</span>
+          </div>
+          <div class="d7-lane-card" onclick="openDetail(this)">
+            <div class="d7-card-row">
+              <div class="d7-card-bar" style="background: var(--upcoming);"></div>
+              <div class="checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+              <div class="d7-card-title">Fix kitchen light switch</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="d7-lane">
+          <div class="d7-lane-header">
+            <span class="d7-lane-title">Next week</span>
+            <span class="d7-lane-count">2</span>
+          </div>
+          <div class="d7-lane-card" onclick="openDetail(this)">
+            <div class="d7-card-row">
+              <div class="d7-card-bar" style="background: var(--upcoming);"></div>
+              <div class="checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+              <div class="d7-card-title">Write quarterly review draft</div>
+            </div>
+            <div class="d7-card-meta">Next Monday</div>
+          </div>
+          <div class="d7-lane-card" onclick="openDetail(this)">
+            <div class="d7-card-row">
+              <div class="d7-card-bar" style="background: var(--remember);"></div>
+              <div class="checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+              <div class="d7-card-title">Plan team offsite activities</div>
+            </div>
+            <div class="d7-card-meta">Next Thursday</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       DESIGN 8 — "The Breathing Room"
+       ═══════════════════════════════════════════════════════════════ -->
+  <div class="design-view" id="design-8">
+    <div class="d8 design-view" style="display: flex;">
+      <div class="d8-ambient"></div>
+      
+      <div class="d8-content">
+        <div class="d8-page-indicator">
+          <div class="d8-pip active"></div>
+          <div class="d8-pip"></div>
+          <div class="d8-pip"></div>
+        </div>
+
+        <div class="d8-section-title">Right now</div>
+
+        <div class="d8-task-list">
+          <div class="d8-task" onclick="openDetail(this)">
+            <div class="checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+            <span class="d8-task-title">Call back Dana about the contract</span>
+            <span class="d8-task-time">overdue</span>
+          </div>
+          <div class="d8-task" onclick="openDetail(this)">
+            <div class="checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+            <span class="d8-task-title">Prep for manager 1:1</span>
+            <span class="d8-task-time">before 3pm</span>
+          </div>
+          <div class="d8-task" onclick="openDetail(this)">
+            <div class="checkbox" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+            <span class="d8-task-title">Review PR from Tal</span>
+            <span class="d8-task-time">today</span>
+          </div>
+        </div>
+
+        <div class="d8-nav-arrows">
+          <button class="d8-arrow">←</button>
+          <button class="d8-arrow">→</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       DESIGN 9 — "The Dock"
+       ═══════════════════════════════════════════════════════════════ -->
+  <div class="design-view" id="design-9">
+    <div class="d9 design-view" style="display: flex;">
+      <div class="d9-window">
+        <div class="d9-titlebar">
+          <div class="d9-dot red"></div>
+          <div class="d9-dot yellow"></div>
+          <div class="d9-dot green"></div>
+          <span class="d9-titlebar-text">Needle</span>
+          <div style="width: 36px;"></div>
+        </div>
+        <div class="d9-body">
+          <div class="d9-date-row">
+            <div class="d9-date">Tue, May 27</div>
+            <div class="d9-stats"><strong>3</strong>/6 done</div>
+          </div>
+
+          <div class="d9-section">
+            <div class="d9-section-label">Overdue</div>
+            <div class="d9-task" onclick="openDetail(this)">
+              <div class="d9-task-left">
+                <div class="checkbox" onclick="event.stopPropagation(); toggleCheck(this)" style="width:16px;height:16px;border-color:var(--urgent);"></div>
+                <span class="d9-task-title task-title">Call back Dana about the contract</span>
+              </div>
+              <span class="d9-task-badge" style="background:var(--urgent-soft);color:var(--urgent);">yesterday</span>
+            </div>
+          </div>
+
+          <div class="d9-section">
+            <div class="d9-section-label">Today</div>
+            <div class="d9-task" onclick="openDetail(this)">
+              <div class="d9-task-left">
+                <div class="checkbox" onclick="event.stopPropagation(); toggleCheck(this)" style="width:16px;height:16px;"></div>
+                <span class="d9-task-title task-title">Prep for manager 1:1</span>
+              </div>
+              <span class="d9-task-badge" style="background:var(--accent-soft);color:var(--urgent);">3 sub</span>
+            </div>
+            
+            <div class="d9-event">
+              <span class="d9-event-time">3:00 PM</span>
+              <div class="d9-event-indicator"></div>
+              <span>Manager 1:1</span>
+            </div>
+
+            <div class="d9-task" onclick="openDetail(this)">
+              <div class="d9-task-left">
+                <div class="checkbox" onclick="event.stopPropagation(); toggleCheck(this)" style="width:16px;height:16px;"></div>
+                <span class="d9-task-title task-title">Review PR from Tal</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="d9-section">
+            <div class="d9-section-label">Coming up</div>
+            <div class="d9-task" onclick="openDetail(this)" style="opacity: 0.6;">
+              <div class="d9-task-left">
+                <div class="checkbox" onclick="event.stopPropagation(); toggleCheck(this)" style="width:16px;height:16px;"></div>
+                <span class="d9-task-title task-title">Fix kitchen light switch</span>
+              </div>
+              <span class="d9-task-badge" style="background:var(--surface-active);color:var(--ink-3);">tomorrow</span>
+            </div>
+          </div>
+
+          <div class="d9-capture">
+            <span class="d9-capture-icon">+</span>
+            <input type="text" placeholder="What's on your mind?" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       DESIGN 10 — "The Ritual"
+       ═══════════════════════════════════════════════════════════════ -->
+  <div class="design-view" id="design-10">
+    <div class="d10 design-view" style="display: flex;">
+      
+      <!-- State 1: Morning Prompt -->
+      <div class="d10-state active" id="d10-prompt">
+        <div class="d10-prompt-container">
+          <div class="d10-time-greeting">
+            Good afternoon.<br>
+            <em>What matters most?</em>
+          </div>
+          <div class="d10-input-wrap">
+            <input class="d10-input" type="text" placeholder="Just start typing..." id="d10-input" onkeydown="if(event.key==='Enter') revealDay()">
+          </div>
+          <div class="d10-hint">Press Enter to see your day · or just open your tasks</div>
+          <button class="d2-btn ghost" style="margin-top: 24px;" onclick="revealDay()">Show me my day →</button>
+        </div>
+      </div>
+
+      <!-- State 2: Day Revealed -->
+      <div class="d10-state" id="d10-day">
+        <div class="d10-revealed">
+          <div class="d10-revealed-header">
+            <div class="d10-day-title">Your Tuesday</div>
+            <div class="d10-day-sub">3 things to focus on · 2 more later</div>
+          </div>
+
+          <div class="d10-task-group">
+            <div class="d10-group-label">Focus on these</div>
+            <div class="d10-task" onclick="openDetail(this)">
+              <div class="checkbox" onclick="event.stopPropagation(); toggleCheck(this)" style="width:16px;height:16px;border-color:var(--urgent);"></div>
+              <span class="d10-task-title task-title">Call back Dana about the contract</span>
+              <span class="d10-task-tag" style="color:var(--urgent);">overdue</span>
+            </div>
+            <div class="d10-task" onclick="openDetail(this)">
+              <div class="checkbox" onclick="event.stopPropagation(); toggleCheck(this)" style="width:16px;height:16px;"></div>
+              <span class="d10-task-title task-title">Prep for manager 1:1</span>
+              <span class="d10-task-tag">before 3pm</span>
+            </div>
+            <div class="d10-task" onclick="openDetail(this)">
+              <div class="checkbox" onclick="event.stopPropagation(); toggleCheck(this)" style="width:16px;height:16px;"></div>
+              <span class="d10-task-title task-title">Review PR from Tal</span>
+              <span class="d10-task-tag">today</span>
+            </div>
+          </div>
+
+          <div class="d10-task-group" style="opacity: 0.5;">
+            <div class="d10-group-label">Later</div>
+            <div class="d10-task" onclick="openDetail(this)">
+              <div class="checkbox" onclick="event.stopPropagation(); toggleCheck(this)" style="width:16px;height:16px;"></div>
+              <span class="d10-task-title task-title">Fix kitchen light switch</span>
+              <span class="d10-task-tag">tomorrow</span>
+            </div>
+            <div class="d10-task" onclick="openDetail(this)">
+              <div class="checkbox" onclick="event.stopPropagation(); toggleCheck(this)" style="width:16px;height:16px;"></div>
+              <span class="d10-task-title task-title">Write quarterly review draft</span>
+              <span class="d10-task-tag">next monday</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       TASK DETAIL OVERLAY (shared)
+       ═══════════════════════════════════════════════════════════════ -->
+  <div class="task-detail-overlay" id="detail-overlay" onclick="if(event.target===this) closeDetail()">
+    <div class="task-detail-panel">
+      <div class="detail-title" id="detail-title">Prep for manager 1:1</div>
+      <div class="detail-meta">
+        <span class="pill urgent">Today</span>
+        <span style="color: var(--ink-3); font-size: 13px;">Linked to 3:00 PM meeting</span>
+      </div>
+
+      <div class="detail-section-label">Subtasks</div>
+      <div class="detail-subtask" onclick="toggleCheck(this.querySelector('.checkbox'))">
+        <div class="checkbox" style="width:16px;height:16px;"></div>
+        <span>Review last week's action items</span>
+      </div>
+      <div class="detail-subtask" onclick="toggleCheck(this.querySelector('.checkbox'))">
+        <div class="checkbox" style="width:16px;height:16px;"></div>
+        <span>Draft talking points for roadmap discussion</span>
+      </div>
+      <div class="detail-subtask" onclick="toggleCheck(this.querySelector('.checkbox'))">
+        <div class="checkbox" style="width:16px;height:16px;"></div>
+        <span>Ask about team offsite dates</span>
+      </div>
+
+      <div class="detail-section-label">Notes</div>
+      <div class="detail-notes">
+        AI reasoning: Scheduled for today because your calendar shows a 1:1 at 3:00 PM. 
+        Created 2 hours of prep time based on your usual pattern.
+      </div>
+
+      <div class="detail-actions">
+        <button class="detail-action-btn primary">Done ✓</button>
+        <button class="detail-action-btn">Reschedule</button>
+        <button class="detail-action-btn">Move to Remember</button>
+        <button class="detail-action-btn" onclick="closeDetail()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       NAVIGATION BAR
+       ═══════════════════════════════════════════════════════════════ -->
+  <nav class="nav-bar">
+    <span class="label">v8</span>
+    <button class="nav-btn active" onclick="switchDesign(1, this)">1 Journal</button>
+    <button class="nav-btn" onclick="switchDesign(2, this)">2 Companion</button>
+    <button class="nav-btn" onclick="switchDesign(3, this)">3 Stream</button>
+    <button class="nav-btn" onclick="switchDesign(4, this)">4 Horizon</button>
+    <button class="nav-btn" onclick="switchDesign(5, this)">5 Cards</button>
+    <button class="nav-btn" onclick="switchDesign(6, this)">6 Split</button>
+    <button class="nav-btn" onclick="switchDesign(7, this)">7 Kanban</button>
+    <button class="nav-btn" onclick="switchDesign(8, this)">8 Breathe</button>
+    <button class="nav-btn" onclick="switchDesign(9, this)">9 Dock</button>
+    <button class="nav-btn" onclick="switchDesign(10, this)">10 Ritual</button>
+  </nav>
+
+  <script>
+    // ═══════════════════════════════════════════════════════════════
+    // Design Switcher
+    // ═══════════════════════════════════════════════════════════════
+
+    function switchDesign(num, btn) {
+      // Hide all designs
+      document.querySelectorAll('.design-view').forEach(v => {
+        v.classList.remove('active');
+        v.style.display = '';
+      });
+      
+      // Show selected
+      const target = document.getElementById('design-' + num);
+      if (target) {
+        target.classList.add('active');
+        // Also activate inner view
+        const inner = target.querySelector('.design-view');
+        if (inner) inner.style.display = 'flex';
+      }
+
+      // Update nav
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+
+      // Re-trigger animations
+      target.querySelectorAll('.animate-in').forEach(el => {
+        el.style.animation = 'none';
+        el.offsetHeight; // reflow
+        el.style.animation = '';
+      });
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // Checkbox Toggle
+    // ═══════════════════════════════════════════════════════════════
+
+    function toggleCheck(checkbox) {
+      if (!checkbox) return;
+      checkbox.classList.toggle('checked');
+      
+      // Find parent task and toggle done state
+      const taskRow = checkbox.closest('.d1-item, .d9-task, .d10-task, .d6-card, .d7-lane-card, .d3-node-card, .d8-task, .d2-subtask, .d5-subtask, .detail-subtask');
+      if (taskRow) {
+        taskRow.classList.toggle('task-done');
+        
+        // Animate completion
+        if (checkbox.classList.contains('checked')) {
+          taskRow.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+          taskRow.style.opacity = '0.5';
+          
+          // Optional: dissolve animation for d1 items
+          if (taskRow.classList.contains('d1-item')) {
+            setTimeout(() => {
+              taskRow.style.maxHeight = taskRow.scrollHeight + 'px';
+              requestAnimationFrame(() => {
+                taskRow.style.maxHeight = '0';
+                taskRow.style.padding = '0';
+                taskRow.style.margin = '0';
+                taskRow.style.overflow = 'hidden';
+                taskRow.style.borderBottom = 'none';
+              });
+            }, 600);
+          }
+        } else {
+          taskRow.style.opacity = '';
+          taskRow.style.transform = '';
+          taskRow.style.maxHeight = '';
+          taskRow.style.padding = '';
+          taskRow.style.margin = '';
+          taskRow.style.overflow = '';
+          taskRow.style.borderBottom = '';
+        }
+      }
+
+      // Update progress counters
+      updateProgress();
+    }
+
+    function updateProgress() {
+      const checked = document.querySelectorAll('.design-view.active .checkbox.checked').length;
+      const total = document.querySelectorAll('.design-view.active .checkbox').length;
+      
+      // Update D1 progress
+      const fill = document.querySelector('.d1-progress-fill');
+      if (fill) fill.style.width = (checked / Math.max(total, 1) * 100) + '%';
+      
+      const counter = document.querySelector('.d1-counter span');
+      if (counter) counter.textContent = checked;
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // Task Detail Overlay
+    // ═══════════════════════════════════════════════════════════════
+
+    function openDetail(el) {
+      const titleEl = el.querySelector('.task-title, .d1-item-title, .d3-node-title, .d4-task-text, .d7-card-title, .d8-task-title, .d10-task-title, .d6-card-title');
+      const title = titleEl ? titleEl.textContent.trim() : 'Task';
+      
+      document.getElementById('detail-title').textContent = title;
+      document.getElementById('detail-overlay').classList.add('active');
+    }
+
+    function closeDetail() {
+      document.getElementById('detail-overlay').classList.remove('active');
+    }
+
+    // Close on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeDetail();
+    });
+
+    // ═══════════════════════════════════════════════════════════════
+    // Design 2 — Companion Complete
+    // ═══════════════════════════════════════════════════════════════
+
+    function completeD2() {
+      const card = document.querySelector('.d2-focus-card');
+      card.style.transition = 'all 0.5s var(--ease)';
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(-20px)';
+      
+      setTimeout(() => {
+        card.querySelector('.d2-focus-title').textContent = 'Call back Dana';
+        card.querySelector('.d2-focus-context').textContent = 'About the contract · overdue since yesterday';
+        card.querySelector('.d2-focus-eyebrow').textContent = 'Overdue';
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+      }, 500);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // Design 5 — Card Stack Swipe
+    // ═══════════════════════════════════════════════════════════════
+
+    function swipeCard() {
+      const stack = document.querySelector('.d5-stack');
+      const topCard = stack.querySelector('.d5-card:first-child');
+      
+      topCard.style.transition = 'all 0.4s var(--ease)';
+      topCard.style.transform = 'translateX(-120%) rotate(-5deg)';
+      topCard.style.opacity = '0';
+      
+      setTimeout(() => {
+        stack.appendChild(topCard);
+        topCard.style.transition = 'none';
+        topCard.style.transform = '';
+        topCard.style.opacity = '';
+        
+        // Re-apply stack positions
+        requestAnimationFrame(() => {
+          const cards = stack.querySelectorAll('.d5-card');
+          cards.forEach((card, i) => {
+            card.style.transition = 'all 0.3s var(--ease)';
+            if (i === 0) {
+              card.style.transform = 'scale(1) translateY(0)';
+              card.style.opacity = '1';
+              card.style.zIndex = '2';
+            } else if (i === 1) {
+              card.style.transform = 'scale(0.95) translateY(12px)';
+              card.style.opacity = '0.7';
+              card.style.zIndex = '1';
+            } else {
+              card.style.transform = 'scale(0.9) translateY(24px)';
+              card.style.opacity = '0.4';
+              card.style.zIndex = '0';
+            }
+          });
+        });
+      }, 400);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // Design 10 — Ritual Day Reveal
+    // ═══════════════════════════════════════════════════════════════
+
+    function revealDay() {
+      document.getElementById('d10-prompt').classList.remove('active');
+      const dayView = document.getElementById('d10-day');
+      dayView.classList.add('active');
+      
+      // Stagger animate tasks
+      const tasks = dayView.querySelectorAll('.d10-task');
+      tasks.forEach((task, i) => {
+        task.style.opacity = '0';
+        task.style.transform = 'translateY(12px)';
+        setTimeout(() => {
+          task.style.transition = 'all 0.4s var(--ease)';
+          task.style.opacity = '';
+          task.style.transform = '';
+        }, 100 + i * 80);
+      });
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // Keyboard Navigation (1-0 keys switch designs)
+    // ═══════════════════════════════════════════════════════════════
+
+    document.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      
+      const num = parseInt(e.key);
+      if (num >= 1 && num <= 9) {
+        const btn = document.querySelectorAll('.nav-btn')[num - 1];
+        switchDesign(num, btn);
+      }
+      if (e.key === '0') {
+        const btn = document.querySelectorAll('.nav-btn')[9];
+        switchDesign(10, btn);
+      }
+    });
+
+    // Initialize — show design 1
+    switchDesign(1, document.querySelector('.nav-btn'));
+  </script>
+</body>
+</html>

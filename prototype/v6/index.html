@@ -1,0 +1,2264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>today-i — Premium macOS Focus Room Surface v6 (25 List Styles & 50 Interrupters)</title>
+  
+  <!-- Modern Serif & Display Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ── Apple Native System & HSL Style Tokens ── */
+    :root {
+      --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+      --font-serif:   'Instrument Serif', Georgia, serif;
+      --font-text:    -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+      --font-mono:    'JetBrains Mono', "SF Mono", ui-monospace, Menlo, monospace;
+
+      --bg:          #FFFFFF;
+      --bg-surface:  #FBFBFC;
+      --bg-subtle:   #F4F4F6;
+      --bg-tertiary: #EBEBED;
+      --border:      #E0E0E3;
+      --border-focus: #007AFF;
+      --text:        #1D1D1F;
+      --text-secondary: #6E6E73;
+      --text-tertiary:  #AEAEB2;
+      
+      --accent:      #007AFF; /* Apple Blue */
+      --accent-dim:  rgba(0, 122, 255, 0.08);
+      --success:     #34C759; /* Apple Green */
+      --success-soft: rgba(52, 199, 89, 0.08);
+      --danger:      #FF3B30; /* Apple Red */
+      --danger-soft: rgba(255, 59, 48, 0.08);
+      --warning:     #FF9500; /* Apple Orange */
+      --warning-soft: rgba(255, 149, 0, 0.08);
+
+      --shadow:      0 8px 30px rgba(0,0,0,0.04), 0 1px 4px rgba(0,0,0,0.02);
+      --radius:      10px;
+    }
+
+    /* Dark Mode Tokens */
+    .theme-dark {
+      --bg:          #1C1C1E;
+      --bg-surface:  #252528;
+      --bg-subtle:   #151518;
+      --bg-tertiary: #2C2C2E;
+      --border:      #323236;
+      --border-focus: #0A84FF;
+      --text:        #F5F5F7;
+      --text-secondary: #98989D;
+      --text-tertiary:  #636366;
+      
+      --accent:      #0A84FF;
+      --accent-dim:  rgba(10, 132, 255, 0.16);
+      --success:     #30D158;
+      --success-soft: rgba(48, 209, 88, 0.12);
+      --danger:      #FF453A;
+      --danger-soft: rgba(255, 69, 58, 0.12);
+      --warning:     #FF9F0A;
+      --warning-soft: rgba(255, 159, 10, 0.12);
+
+      --shadow:      0 12px 40px rgba(0, 0, 0, 0.22), 0 2px 8px rgba(0, 0, 0, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background: var(--bg-subtle);
+      color: var(--text);
+      font-family: var(--font-text);
+      font-size: 13px;
+      line-height: 1.45;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: background-color 0.3s, color 0.3s;
+      overflow: hidden;
+    }
+
+    /* ==========================================================================
+       ELECTRON CONTAINER FRAME (PIXEL-PERFECT PORTAL)
+       ========================================================================== */
+    .electron-window {
+      width: 1120px;
+      height: 750px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+      transition: background-color 0.3s, border-color 0.3s;
+    }
+
+    /* Native Titlebar with drag region */
+    .titlebar {
+      height: 42px;
+      background: var(--bg-surface);
+      border-bottom: 0.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      justify-content: space-between;
+      position: relative;
+      user-select: none;
+      flex-shrink: 0;
+    }
+
+    .traffic-lights {
+      display: flex;
+      gap: 8px;
+    }
+
+    .traffic-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #E5E5EA;
+      cursor: pointer;
+    }
+    .dot-close { background: #FF5F56; }
+    .dot-min { background: #FFBD2E; }
+    .dot-zoom { background: #27C93F; }
+
+    .window-title {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      font-family: var(--font-display);
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
+
+    .theme-toggle-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-display);
+      font-weight: 500;
+    }
+    .theme-toggle-btn:hover { color: var(--text); }
+
+    /* ==========================================================================
+       THREE-COLUMN RESPONSIVE LAYOUT SYSTEM
+       ========================================================================== */
+    .window-body {
+      flex: 1;
+      display: flex;
+      min-height: 0;
+      position: relative;
+    }
+
+    /* Column 1: Left List-Styles Sidebar Selector */
+    .col-left-sidebar {
+      width: 230px;
+      background: var(--bg-surface);
+      border-right: 0.5px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      min-height: 0;
+    }
+
+    .col-header {
+      padding: 12px 14px;
+      border-bottom: 0.5px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      background: var(--bg-surface);
+    }
+
+    .col-title {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-secondary);
+    }
+
+    .col-search-input {
+      width: 100%;
+      height: 26px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      border-radius: 6px;
+      padding: 0 8px;
+      color: var(--text);
+      outline: none;
+      font-size: 11px;
+    }
+    .col-search-input:focus { border-color: var(--border-focus); }
+
+    .scrollable-menu {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .menu-item {
+      padding: 10px 14px;
+      border-bottom: 0.5px solid var(--border);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      transition: all 0.15s;
+    }
+    .menu-item:hover { background: var(--bg-tertiary); }
+    .menu-item.active {
+      background: var(--accent-dim);
+      border-left: 3px solid var(--accent);
+    }
+
+    .item-num {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .item-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    /* Column 2: Center Layout Viewport Drawer */
+    .col-center-viewport {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+      min-height: 0;
+      border-right: 0.5px solid var(--border);
+      position: relative;
+    }
+
+    /* Column 3: Right Interrupters Sidebar Panel */
+    .col-right-sidebar {
+      width: 250px;
+      background: var(--bg-surface);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      min-height: 0;
+    }
+
+    .interrupter-item {
+      padding: 8px 12px;
+      border-bottom: 0.5px solid var(--border);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.15s;
+    }
+    .interrupter-item:hover { background: var(--bg-tertiary); }
+    .interrupter-item .emoji {
+      font-size: 18px;
+      width: 24px;
+      text-align: center;
+    }
+
+    /* ==========================================================================
+       SPATIAL VISUAL RENDERING ENGINES
+       ========================================================================== */
+    .viewport-render-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+    }
+
+    /* Masonry Brick grid style */
+    .masonry-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .masonry-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+      background: var(--bg);
+    }
+
+    /* Circular Orbit Viewport */
+    .orbit-container {
+      position: relative;
+      width: 100%;
+      height: 380px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .orbit-sun {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: var(--accent-dim);
+      border: 2px solid var(--accent);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 10px;
+      font-weight: 700;
+      z-index: 10;
+    }
+    .orbit-satellite {
+      position: absolute;
+      padding: 6px 12px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+      z-index: 5;
+    }
+
+    /* Comic Book panel layouts */
+    .comic-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      grid-gap: 14px;
+    }
+    .comic-panel {
+      border: 2px solid var(--text);
+      padding: 14px;
+      background: #FFF;
+      color: #000;
+      position: relative;
+      box-shadow: 4px 4px 0 #000;
+    }
+    .comic-banner {
+      position: absolute;
+      top: -10px;
+      left: 10px;
+      background: var(--warning);
+      color: #000;
+      font-size: 9px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border: 1px solid #000;
+      text-transform: uppercase;
+    }
+    .comic-speech {
+      background: #FFF;
+      border: 2.5px solid #000;
+      border-radius: 20px;
+      padding: 10px;
+      margin-top: 10px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      position: relative;
+    }
+
+    /* classified ads grids */
+    .classifieds-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1.5px double var(--text-secondary);
+      padding: 2px;
+    }
+    .classified-box {
+      background: var(--bg);
+      padding: 8px;
+      font-family: var(--font-serif);
+      font-size: 11px;
+      line-height: 1.35;
+      border: 0.5px solid var(--border);
+    }
+
+    /* 2x2 Impact Matrix quadrants */
+    .matrix-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      height: 380px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .matrix-quad {
+      border: 0.5px solid var(--border);
+      padding: 10px;
+      background: var(--bg-surface);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .quad-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      border-bottom: 0.5px solid var(--border);
+      padding-bottom: 2px;
+      text-transform: uppercase;
+    }
+
+    /* Speed Ticker bar bottom */
+    .speed-ticker-tray {
+      width: 100%;
+      height: 28px;
+      background: var(--bg-subtle);
+      border-top: 0.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      white-space: nowrap;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      z-index: 50;
+    }
+    .ticker-marquee {
+      display: inline-block;
+      padding-left: 100%;
+      animation: marquee 20s linear infinite;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: var(--accent);
+      font-weight: 700;
+    }
+    @keyframes marquee {
+      0%   { transform: translate(0, 0); }
+      100% { transform: translate(-100%, 0); }
+    }
+
+    /* Standard Checklist elements */
+    .check-circle {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .check-circle::after {
+      content: '✓';
+      font-size: 10px;
+      font-weight: 700;
+      color: #FFFFFF;
+      opacity: 0;
+    }
+    .is-done .check-circle {
+      background: var(--success);
+      border-color: var(--success);
+    }
+    .is-done .check-circle::after {
+      opacity: 1;
+    }
+
+    /* Jiras reference tags */
+    .badge-jira {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 10px;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 0.5px solid rgba(0, 122, 255, 0.1);
+      padding: 1px 4px;
+      border-radius: 4px;
+    }
+
+    /* ==========================================================================
+       50 PLAYABLE SENSORY INTERRUPTION OVERLAY DECK
+       ========================================================================== */
+    .interruption-overlay-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.2);
+      backdrop-filter: blur(4px);
+      z-index: 150;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      animation: overlayFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes overlayFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .interrupter-box {
+      width: 100%;
+      max-width: 420px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+    }
+
+    .interrupter-header {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+      border-bottom: 0.5px solid var(--border);
+      padding-bottom: 4px;
+    }
+
+    /* Breathing Balloon overlay */
+    .breathing-balloon {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(52, 199, 89, 0.4);
+      border: 2px solid var(--success);
+      margin: 20px auto;
+      transition: transform 3s ease-in-out;
+    }
+
+    /* Tactile Bubblewrap Grid */
+    .bubblewrap-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 6px;
+      max-width: 200px;
+      margin: 10px auto;
+    }
+    .bubblewrap-node {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--bg-surface);
+      cursor: pointer;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+      transition: all 0.1s;
+    }
+    .bubblewrap-node.popped {
+      background: var(--bg-tertiary);
+      border-color: var(--border);
+      box-shadow: none;
+      transform: scale(0.9);
+    }
+
+    /* Floating Kitty sprite */
+    #kitty-sprite {
+      position: absolute;
+      width: 48px;
+      height: 48px;
+      font-size: 32px;
+      pointer-events: none;
+      z-index: 100;
+      transition: left 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), top 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      display: none;
+    }
+
+    /* Confetti Particle canvas overlay strictly inside window */
+    #dopamineCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 200;
+      background: transparent !important;
+    }
+
+    /* Raindrop Ripple canvas */
+    #rippleCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 120;
+      background: transparent !important;
+    }
+
+    /* Mechanical clicker tactile widget */
+    .clicker-box {
+      width: 60px;
+      height: 100px;
+      background: var(--bg-tertiary);
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 10px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .clicker-switch {
+      height: 38px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+      transition: all 0.1s;
+    }
+    .clicker-box.active .clicker-switch {
+      transform: translateY(40px);
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* Water glass fill level */
+    .water-glass-box {
+      width: 60px;
+      height: 100px;
+      border: 3px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 12px 12px;
+      position: relative;
+      overflow: hidden;
+      margin: 10px auto;
+    }
+    .water-level {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 10%;
+      background: rgba(10, 132, 255, 0.6);
+      transition: height 1s ease-out;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==========================================================================
+       THE MAIN STUNNING MAC WINDOW SHELL
+       ========================================================================== -->
+  <div class="electron-window">
+    
+    <!-- Transparent Layers overlays strictly inside the window -->
+    <div id="kitty-sprite">🐈</div>
+
+    <!-- macOS Title Bar -->
+    <header class="titlebar">
+      <div class="traffic-lights">
+        <span class="traffic-dot dot-close" onclick="flashConfettiShower()"></span>
+        <span class="traffic-dot dot-min"></span>
+        <span class="traffic-dot dot-zoom"></span>
+      </div>
+      <span class="window-title">today-i · 25 layouts & 50 mindfulness interrupters</span>
+      <div class="window-controls">
+        <button class="theme-toggle-btn" onclick="toggleTheme()">
+          🌓 <span id="themeBtnText">Dark Mode</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="window-body">
+      
+      <!-- ==========================================================================
+           COLUMN 1: LEFT SIDEBAR SELECTOR INDEX (25 List Visual layouts)
+           ========================================================================== -->
+      <aside class="col-left-sidebar">
+        <div class="col-header">
+          <span class="col-title">25 item-list visual layouts</span>
+          <input type="text" class="col-search-input" id="layoutSearch" placeholder="Filter 25 styles..." onkeyup="filterLayoutsIndex()">
+        </div>
+        <div class="scrollable-menu" id="layoutSelectorMenu">
+          <!-- Loaded dynamically via JavaScript (Cases 1-25) -->
+        </div>
+      </aside>
+
+      <!-- ==========================================================================
+           COLUMN 2: CENTER RENDER VIEWPORT VIEW
+           ========================================================================== -->
+      <main class="col-center-viewport">
+        <div class="col-header" style="background:var(--bg); border-bottom:0.5px solid var(--border);">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <span class="item-num" id="activeStyleNum">LAYOUT 1</span>
+              <h2 id="activeStyleTitle" style="font-family:var(--font-display); font-weight:700; font-size:14px;">Apple Standard SF Pro</h2>
+            </div>
+            <span style="font-size:11px; color:var(--text-secondary);" id="activeStyleCategory">Visual Queue</span>
+          </div>
+        </div>
+
+        <!-- Render Target Area -->
+        <div class="viewport-render-area" id="listLayoutViewport">
+          <!-- Item list visual layouts loaded dynamically here -->
+        </div>
+
+        <!-- Horizontal Speed Ticker bottom overlay (Activated in Case 11) -->
+        <div class="speed-ticker-tray" id="bottomSpeedMarquee" style="display:none;">
+          <div class="ticker-marquee" id="tickerTextString">...</div>
+        </div>
+
+        <!-- The Playable Interruption Screen Overlay -->
+        <div class="interruption-overlay-screen" id="interruptionOverlay">
+          <!-- Populated dynamic widgets loaded here -->
+        </div>
+      </main>
+
+      <!-- ==========================================================================
+           COLUMN 3: RIGHT SIDEBAR INDEX (50 Interruption Pattern Cushions)
+           ========================================================================== -->
+      <aside class="col-right-sidebar">
+        <div class="col-header">
+          <span class="col-title">50 Interruption break cushions</span>
+          <span style="font-size:9.5px; color:var(--text-tertiary);">Capture attention & break hyperfocus</span>
+        </div>
+        <div class="scrollable-menu" style="border-top:none;">
+          
+          <!-- Category 1: Mindful Cushions -->
+          <div style="padding:6px 12px; background:var(--bg-tertiary); font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">1. Mindful Cushions (1-10)</div>
+          <div class="interrupter-item" onclick="triggerInterrupter(1)">
+            <span class="emoji">🟢</span><span style="font-size:12px; font-weight:500;">Pacing Breathing Balloon</span>
+          </div>
+          <div class="interrupter-item" onclick="triggerInterrupter(2)">
+            <span class="emoji">🌸</span><span style="font-size:12px; font-weight:500;">Floating Lotus Flower</span>
+          </div>
+          <div class="interrupter-item" onclick="triggerInterrupter(3)">
+            <span class="emoji">🧿</span><span style="font-size:12px; font-weight:500;">Expanding Calm Mandala</span>
+          </div>
+          <div class="interrupter-item" onclick="triggerInterrupter(4)">
+            <span class="emoji">💧</span><span style="font-size:12px; font-weight:500;">Raindrop Ripples Canvas</span>
+          </div>
+          <div class="interrupter-item" onclick="triggerInterrupter(5)">
+            <span class="emoji">🌫️</span><span style="font-size:12px; font-weight:500;">10s Mind Screen Blur</span>
+          </div>
+
+          <!-- Category 2: Cute Companions -->
+          <div style="padding:6px 12px; background:var(--bg-tertiary); font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">2. Cute Companions (11-20)</div>
+          <div class="interrupter-item" onclick="triggerInterrupter(6)">
+            <span class="emoji">🐈</span><span style="font-size:12px; font-weight:500;">Cursor-Chasing Kitty</span>
+          </div>
+          <div class="interrupter-item" onclick="triggerInterrupter(7)">
+            <span class="emoji">👻</span><span style="font-size:12px; font-weight:500;">Supportive Waving Ghost</span>
+          </div>
+          <div class="interrupter-item" onclick="triggerInterrupter(8)">
+            <span class="emoji">🧘</span><span style="font-size:12px; font-weight:500;">Stretching posture coach</span>
+          </div>
+          <div class="interrupter-item" onclick="triggerInterrupter(9)">
+            <span class="emoji">💬</span><span style="font-size:12px; font-weight:500;">Teammate Maya message</span>
+          </div>
+
+          <!-- Category 3: Gamified Shocks -->
+          <div style="padding:6px 12px; background:var(--bg-tertiary); font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">3. Gamified Shocks (21-30)</div>
+          <div class="interrupter-item" onclick="triggerInterrupter(10)">
+            <span class="emoji">👾</span><span style="font-size:12px; font-weight:500;">Space Invader Blaster</span>
+          </div>
+          <div class="interrupter-item" onclick="triggerInterrupter(11)">
+            <span class="emoji">🫧</span><span style="font-size:12px; font-weight:500;">Tactile Bubblewrap Pop</span>
+          </div>
+          <div class="interrupter-item" onclick="triggerInterrupter(12)">
+            <span class="emoji">🌀</span><span style="font-size:12px; font-weight:500;">Fidget Spinner Widget</span>
+          </div>
+          <div class="interrupter-item" onclick="triggerInterrupter(13)">
+            <span class="emoji">🎡</span><span style="font-size:12px; font-weight:500;">Task Roulette spinner</span>
+          </div>
+          <div class="interrupter-item" onclick="triggerInterrupter(14)">
+            <span class="emoji">🎨</span><span style="font-size:12px; font-weight:500;">Kaleidoscope Click paint</span>
+          </div>
+          <div class="interrupter-item" onclick="triggerInterrupter(15)">
+            <span class="emoji">🏎️</span><span style="font-size:12px; font-weight:500;">Chore Speedrun Timer</span>
+          </div>
+
+          <!-- Category 4: Physical Cues -->
+          <div style="padding:6px 12px; background:var(--bg-tertiary); font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">4. Physical Cues (31-40)</div>
+          <div class="interrupter-item" onclick="triggerInterrupter(16)">
+            <span class="emoji">🍵</span><span style="font-size:12px; font-weight:500;">Tea cold Alert warning</span>
+          </div>
+          <div class="interrupter-item" onclick="triggerInterrupter(17)">
+            <span class="emoji">🥛</span><span style="font-size:12px; font-weight:500;">Water glass sip alert</span>
+          </div>
+          <div class="interrupter-item" onclick="triggerInterrupter(18)">
+            <span class="emoji">⌛</span><span style="font-size:12px; font-weight:500;">Gravity Sand Hourglass</span>
+          </div>
+          <div class="interrupter-item" onclick="triggerInterrupter(19)">
+            <span class="emoji">🎛️</span><span style="font-size:12px; font-weight:500;">Mechanical Fidget clicker</span>
+          </div>
+          <div class="interrupter-item" onclick="triggerInterrupter(20)">
+            <span class="emoji">🎵</span><span style="font-size:12px; font-weight:500;">Synth audio soundscape</span>
+          </div>
+
+          <!-- Category 5: Cognitive Tools -->
+          <div style="padding:6px 12px; background:var(--bg-tertiary); font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">5. Cognitive Tools (41-50)</div>
+          <div class="interrupter-item" onclick="triggerInterrupter(21)">
+            <span class="emoji">🗑️</span><span style="font-size:12px; font-weight:500;">Procrastination Trash-can</span>
+          </div>
+          <div class="interrupter-item" onclick="triggerInterrupter(22)">
+            <span class="emoji">⚠️</span><span style="font-size:12px; font-weight:500;">Cognitive Bodyguard Bot</span>
+          </div>
+          <div class="interrupter-item" onclick="triggerInterrupter(23)">
+            <span class="emoji">🔒</span><span style="font-size:12px; font-weight:500;">Hyperfocus Break Lockout</span>
+          </div>
+          <div class="interrupter-item" onclick="triggerInterrupter(24)">
+            <span class="emoji">⚖️</span><span style="font-size:12px; font-weight:500;">Visual effort balance scale</span>
+          </div>
+          <div class="interrupter-item" onclick="triggerInterrupter(25)">
+            <span class="emoji">📡</span><span style="font-size:12px; font-weight:500;">Attention Radar compass</span>
+          </div>
+
+        </div>
+      </aside>
+
+    </div>
+
+    <!-- Dopamine celebration bubble toast -->
+    <div class="celebration-toast" id="celebrationToast">
+      <span style="font-size:16px;">🎉</span>
+      <span id="celebrationToastText">Completed!</span>
+    </div>
+
+    <!-- Move canvases to end of container to fix hardware-compositing render bugs -->
+    <canvas id="dopamineCanvas"></canvas>
+    <canvas id="rippleCanvas"></canvas>
+
+  </div>
+
+  <!-- ==========================================================================
+       JAVASCRIPT MOTOR
+       ========================================================================== -->
+  <script>
+    // ── ACTIVE TASK DATABASE ──
+    const DEFAULT_TASKS = [
+      { id: 1, title: "Prep for meeting with @Maya about CROSS-141", done: false, subtasks: 3, priority: "urgent", time: "10:30 AM", cat: "#cross" },
+      { id: 2, title: "Review smartviews-sdk PR #30 with @Aram", done: false, subtasks: 2, priority: "upcoming", time: "01:00 PM", cat: "#support" },
+      { id: 3, title: "Deployed hq-user-sync following PP doc with @Sergey", done: true, subtasks: 0, priority: "neutral", time: "Yesterday", cat: "#cross" },
+      { id: 4, title: "Remember to Register Zoe to Gan #personal", done: false, subtasks: 0, priority: "neutral", time: "Flexible", cat: "#personal" }
+    ];
+
+    let taskDatabase;
+    try {
+      taskDatabase = JSON.parse(localStorage.getItem('todayi_tasks_v6')) || DEFAULT_TASKS;
+    } catch(e) {
+      taskDatabase = DEFAULT_TASKS;
+    }
+    let activeStyleId = 1;
+
+    // ── 25 RENDERING PARADIGMS LIST ──
+    const RENDERING_STYLES = [
+      { id: 1, title: "Apple Standard Native SF Pro", category: "Standard list Layout" },
+      { id: 2, title: "Masonry Mosaic Cards Grid", category: "Spatial Masonry Layout" },
+      { id: 3, title: "Circular Orbit Planet Sun", category: "Relational Orbit Layout" },
+      { id: 4, title: "Monospace CLI Developer Terminal", category: "Terminal Layout" },
+      { id: 5, title: "Horizontal Fluid Card Reel", category: "Reel scroll Layout" },
+      { id: 6, title: "Double-Exposure Split Workbench", category: "Two-column focus layout" },
+      { id: 7, title: "Two-Bucket sandbox columns", category: "Act vs Remember column Layout" },
+      { id: 8, title: "Vertical Swipe Deck Cards", category: "Swipe view stack layout" },
+      { id: 9, title: "Editorial News Sunday Column", category: "High-end serif Layout" },
+      { id: 10, title: "Floating Bubble Pop Cloud", category: "Tactile physics cloud" },
+      { id: 11, title: "Minimalist Horizontal Speed Ticker", category: "Ticker strip layout" },
+      { id: 12, title: "The Fog of War Hidden List", category: "Distraction blocker layout" },
+      { id: 13, title: "Retro Comment Code Lines", category: "Comment block layout" },
+      { id: 14, title: "Vintage classifieds boxed layout", category: "Classified grid" },
+      { id: 15, title: "2x2 Prioritization Matrix", category: "Quadrant analysis grid" },
+      { id: 16, title: "Comic Book Panel Boards", category: "Comic Strip grid" },
+      { id: 17, title: "Vertical Branching Tree Nodes", category: "Flowchart Tree Nodes" },
+      { id: 18, title: "The Anti-List Single View", category: "Strict single goal focus" },
+      { id: 19, title: "Time Ruler Strip Tracker", category: "Vertical Timeline layout" },
+      { id: 20, title: "Medication attention energy schedule", category: "Wave graph calendar" },
+      { id: 21, title: "Slack Conversational Feed feed", category: "Conversational Mirror" },
+      { id: 22, title: "Zen Ink calligraphic scroll", category: "Parchment scroll roll" },
+      { id: 23, title: "Neon Cyberpunk HUD console", category: "Data-heavy neon cockpit" },
+      { id: 24, title: "Organic Pebble flat path", category: "Flat vector pebble trail" },
+      { id: 25, title: "Task Roulette pulsing deck", category: "Grid highlights roulette" }
+    ];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      loadLeftLayoutMenu();
+      selectLayout(1);
+      setupConfettiCanvas();
+      setupRipples();
+    });
+
+    // ── PARSER BADGE ENGINE ──
+    function parseTokens(text) {
+      let parsed = text.replace(/([A-Z]+-\d+)/g, '<span class="badge-jira">$1</span>');
+      parsed = parsed.replace(/(@\w+)/g, '<span style="color:var(--success); font-weight:600;">$1</span>');
+      parsed = parsed.replace(/(#\w+)/g, '<span style="color:var(--text-secondary); font-family:var(--font-mono); font-size:11px;">$1</span>');
+      return parsed;
+    }
+
+    // ── Left Selector Index ──
+    function loadLeftLayoutMenu() {
+      const menu = document.getElementById('layoutSelectorMenu');
+      menu.innerHTML = '';
+      
+      RENDERING_STYLES.forEach(s => {
+        const item = document.createElement('div');
+        item.className = `menu-item ${s.id === activeStyleId ? 'active' : ''}`;
+        item.id = `menu-item-layout-${s.id}`;
+        item.onclick = () => selectLayout(s.id);
+        
+        item.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span class="item-num">LAYOUT ${s.id}</span>
+            <span style="font-size:8px; text-transform:uppercase; color:var(--text-tertiary);">${s.category.split(' ')[0]}</span>
+          </div>
+          <div class="item-title">${s.title}</div>
+        `;
+        menu.appendChild(item);
+      });
+    }
+
+    function filterLayoutsIndex() {
+      const q = document.getElementById('layoutSearch').value.toLowerCase();
+      RENDERING_STYLES.forEach(s => {
+        const el = document.getElementById(`menu-item-layout-${s.id}`);
+        if (s.title.toLowerCase().includes(q) || s.category.toLowerCase().includes(q)) {
+          el.style.display = 'flex';
+        } else {
+          el.style.display = 'none';
+        }
+      });
+    }
+
+    // ── Select layout visualizer ──
+    function selectLayout(id) {
+      activeStyleId = id;
+      document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+      const activeMenu = document.getElementById(`menu-item-layout-${id}`);
+      if (activeMenu) activeMenu.classList.add('active');
+
+      const s = RENDERING_STYLES.find(item => item.id === id);
+      document.getElementById('activeStyleNum').innerText = `LAYOUT ${s.id}`;
+      document.getElementById('activeStyleTitle').innerText = s.title;
+      document.getElementById('activeStyleCategory').innerText = s.category;
+
+      // Reset ticker display
+      document.getElementById('bottomSpeedMarquee').style.display = 'none';
+
+      renderActiveLayoutView();
+    }
+
+    // ── 25 LAYOUTS DRAW MATRIX ENGINE ──
+    function renderActiveLayoutView() {
+      const view = document.getElementById('listLayoutViewport');
+      view.innerHTML = '';
+
+      const activeList = taskDatabase.filter(t => !t.done);
+      
+      switch(activeStyleId) {
+        
+        // 1. Apple Standard Native
+        case 1:
+          taskDatabase.forEach(t => {
+            const row = document.createElement('div');
+            row.style.cssText = "display:flex; align-items:center; gap:12px; padding:10px 14px; border:1px solid var(--border); border-radius:8px; background:var(--bg); cursor:pointer;";
+            row.className = t.done ? "is-done" : "";
+            row.innerHTML = `
+              <div class="check-circle" onclick="toggleTaskDone(${t.id}, event)"></div>
+              <span class="priority-dot ${t.priority}" style="width:8px; height:8px; border-radius:50%;"></span>
+              <span style="flex:1; font-weight:500; font-size:12.5px;">${parseTokens(t.title)}</span>
+              <span style="font-size:10px; color:var(--text-tertiary);">${t.time}</span>
+            `;
+            view.appendChild(row);
+          });
+          break;
+
+        // 2. Masonry cards Grid
+        case 2:
+          const grid = document.createElement('div');
+          grid.className = "masonry-grid";
+          activeList.forEach(t => {
+            const card = document.createElement('div');
+            card.className = "masonry-card";
+            card.innerHTML = `
+              <h4 style="font-weight:700; font-size:13px; margin-bottom:6px;">${parseTokens(t.title)}</h4>
+              <p style="font-size:10.5px; color:var(--text-secondary);">Weight: ${t.priority.toUpperCase()} | Subtasks: ${t.subtasks}</p>
+            `;
+            grid.appendChild(card);
+          });
+          view.appendChild(grid);
+          break;
+
+        // 3. Circular Orbit
+        case 3:
+          const orbit = document.createElement('div');
+          orbit.className = "orbit-container";
+          orbit.innerHTML = `<div class="orbit-sun">ACTIVE FOCUS<br><strong style="font-size:10px;">Prep CROSS-141</strong></div>`;
+          
+          activeList.forEach((t, idx) => {
+            const node = document.createElement('div');
+            node.className = "orbit-satellite";
+            const angle = (idx * (360 / activeList.length)) * (Math.PI / 180);
+            const x = Math.cos(angle) * 110 + 190;
+            const y = Math.sin(angle) * 110 + 170;
+            node.style.left = `${x}px`;
+            node.style.top = `${y}px`;
+            node.innerHTML = `🌍 ${t.title.substring(0, 18)}...`;
+            orbit.appendChild(node);
+          });
+          view.appendChild(orbit);
+          break;
+
+        // 4. Monospace Terminal Stream
+        case 4:
+          const term = document.createElement('div');
+          term.style.cssText = "background:#121214; color:#30D158; font-family:var(--font-mono); padding:16px; border-radius:8px; line-height:1.6; font-size:11.5px;";
+          term.innerHTML = `<div>ofer@today-i::daily-intention-queue $ list-active</div>`;
+          activeList.forEach(t => {
+            term.innerHTML += `<div><span style="color:#FF453A;">[${t.priority.toUpperCase()}]</span> ${t.time} :: ${t.title} <span style="color:#0A84FF;">(${t.subtasks} subtasks remaining)</span></div>`;
+          });
+          view.appendChild(term);
+          break;
+
+        // 5. Horizontal fluid scrolling card track
+        case 5:
+          const reel = document.createElement('div');
+          reel.style.cssText = "display:flex; gap:16px; overflow-x:auto; padding-bottom:10px; width:100%;";
+          activeList.forEach(t => {
+            const item = document.createElement('div');
+            item.style.cssText = "width:180px; flex-shrink:0; background:var(--bg-surface); border:1px solid var(--border); border-radius:8px; padding:12px; display:flex; flex-direction:column; gap:8px;";
+            item.innerHTML = `
+              <div style="font-size:9px; font-weight:700; text-transform:uppercase; color:var(--accent);">${t.priority}</div>
+              <div style="font-weight:600; font-size:12px; flex:1;">${parseTokens(t.title)}</div>
+              <div style="font-size:10px; color:var(--text-tertiary);">${t.time}</div>
+            `;
+            reel.appendChild(item);
+          });
+          view.appendChild(reel);
+          break;
+
+        // 6. Double exposure splits focus Card
+        case 6:
+          const split = document.createElement('div');
+          split.style.cssText = "display:flex; gap:16px; height:280px; width:100%;";
+          split.innerHTML = `
+            <div style="flex:1.2; border:1px solid var(--accent); background:var(--accent-dim); border-radius:8px; padding:20px; display:flex; flex-direction:column; justify-content:space-between;">
+              <span class="focus-card-meta" style="color:var(--accent);">NOW FOCUSING INTENTION</span>
+              <h2 style="font-family:var(--font-display); font-size:18px; font-weight:800;">${parseTokens(activeList[0].title)}</h2>
+              <div style="font-size:11px; color:var(--text-secondary);">${activeList[0].time} • ${activeList[0].cat}</div>
+            </div>
+            <div style="flex:0.8; border:1px solid var(--border); border-radius:8px; padding:12px; overflow-y:auto; display:flex; flex-direction:column; gap:6px;">
+              <span class="col-title" style="font-size:9px;">References inside block</span>
+              <div class="badge-jira" style="text-align:center;">🔗 CROSS-141 Epic details</div>
+              <div class="badge-jira" style="text-align:center; background:var(--success-soft); color:var(--success); border-color:var(--success);">👥 @Maya Product Profile</div>
+            </div>
+          `;
+          view.appendChild(split);
+          break;
+
+        // 7. Two-Bucket Sandbox column layout
+        case 7:
+          const buckets = document.createElement('div');
+          buckets.style.cssText = "display:flex; gap:16px; width:100%;";
+          buckets.innerHTML = `
+            <div style="flex:1; border:1px dashed var(--border); padding:10px; border-radius:8px; display:flex; flex-direction:column; gap:6px;">
+              <span class="col-title" style="color:var(--accent); font-size:10px;">DO TODAY (ACT)</span>
+              <div style="padding:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); font-weight:600; font-size:11.5px;">CROSS-141 meeting prep</div>
+              <div style="padding:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); font-weight:600; font-size:11.5px;">PR #30 approach review</div>
+            </div>
+            <div style="flex:1; border:1px dashed var(--border); padding:10px; border-radius:8px; display:flex; flex-direction:column; gap:6px;">
+              <span class="col-title" style="color:var(--success); font-size:10px;">REMEMBER (STASH)</span>
+              <div style="padding:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); font-weight:600; font-size:11.5px;">Zoe municipal registration</div>
+            </div>
+          `;
+          view.appendChild(buckets);
+          break;
+
+        // 8. Vertical Swipable Deck card stack
+        case 8:
+          const deck = document.createElement('div');
+          deck.style.cssText = "display:flex; flex-direction:column; align-items:center; justify-content:center; height:260px; width:100%; position:relative;";
+          
+          activeList.forEach((t, idx) => {
+            const card = document.createElement('div');
+            card.style.cssText = `width:260px; height:140px; border:1.5px solid var(--border); border-radius:10px; background:var(--bg); padding:16px; position:absolute; z-index:${10 - idx}; transform: translateY(${idx * 10}px) scale(${1 - idx * 0.05}); box-shadow:var(--shadow); transition:all 0.3s; display:flex; flex-direction:column; justify-content:space-between;`;
+            card.innerHTML = `
+              <div style="font-size:9px; font-weight:700; text-transform:uppercase; color:var(--accent);">Active deck goal</div>
+              <div style="font-weight:700; font-size:13px;">${t.title}</div>
+              <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-secondary);">
+                <span>Swipe up to cycle</span>
+                <span>${t.time}</span>
+              </div>
+            `;
+            deck.appendChild(card);
+          });
+          view.appendChild(deck);
+          break;
+
+        // 9. Editorial News Sunday Columns Layout
+        case 9:
+          const news = document.createElement('div');
+          news.style.cssText = "font-family:var(--font-serif); color:var(--text); line-height:1.4;";
+          news.innerHTML = `
+            <div style="font-size:36px; font-weight:900; text-align:center; border-bottom:3px double var(--text-secondary); margin-bottom:12px;">DAILY FOCUS COURIER</div>
+            <div style="display:flex; gap:16px;">
+              <div style="flex:1; border-right:0.5px solid var(--border); padding-right:12px;">
+                <span class="focus-card-meta" style="color:var(--text); font-size:10px;">EDITORIAL PICKS TODAY</span>
+                <h3 style="font-size:18px; font-weight:800; margin:6px 0;">${activeList[0].title}</h3>
+                <p style="font-size:12px; color:var(--text-secondary);">Prep stg13 credentials, billing schemas and otel nodes temporal. The team will align tomorrow morning with Maya product manager.</p>
+              </div>
+              <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
+                <span class="focus-card-meta" style="color:var(--text); font-size:10px;">LATER PARKED ARTICLES</span>
+                <div style="font-size:13px; font-weight:600; border-bottom:0.5px solid var(--border); padding-bottom:4px;">Zoe Municipal gan registration</div>
+                <div style="font-size:13px; font-weight:600; border-bottom:0.5px solid var(--border); padding-bottom:4px;">PR #30 review and released filters</div>
+              </div>
+            </div>
+          `;
+          view.appendChild(news);
+          break;
+
+        // 10. Bubble Drift cloud floating bubbles
+        case 10:
+          const bubbles = document.createElement('div');
+          bubbles.style.cssText = "position:relative; width:100%; height:300px; display:flex; justify-content:center; align-items:center;";
+          activeList.forEach((t, idx) => {
+            const bubble = document.createElement('div');
+            bubble.style.cssText = `position:absolute; width:90px; height:90px; border-radius:50%; background:var(--accent-dim); border:1px solid var(--accent); color:var(--text); display:flex; align-items:center; justify-content:center; text-align:center; font-size:10px; font-weight:600; padding:8px; cursor:pointer; box-shadow:var(--shadow); transition:transform 0.2s;`;
+            const x = Math.sin(idx * 2) * 110 + 190;
+            const y = Math.cos(idx * 2) * 90 + 100;
+            bubble.style.left = `${x}px`;
+            bubble.style.top = `${y}px`;
+            bubble.onclick = () => {
+              bubble.style.transform = "scale(1.2)";
+              showDopamineToast(`Drift focus target: ${t.title}`);
+              triggerConfettiBlast(x + 50, y + 50);
+            };
+            bubble.innerHTML = `${t.title.substring(0, 16)}...`;
+            bubbles.appendChild(bubble);
+          });
+          view.appendChild(bubbles);
+          break;
+
+        // 11. Minimalist Ticker strip
+        case 11:
+          document.getElementById('bottomSpeedMarquee').style.display = 'flex';
+          const tickerText = activeList.map(t => `[${t.priority.toUpperCase()}] ${t.title}`).join("   •••   ");
+          document.getElementById('tickerTextString').innerText = tickerText;
+          
+          view.innerHTML = `
+            <div style="text-align:center; padding:40px; color:var(--text-secondary); font-size:12.5px;">
+              ⚡ Horizontal Speed Ticker has been docked at the bottom of the viewport frame.<br>
+              A single moving headline ticker keeps focus anchors minimal and zero-clutter.
+            </div>
+          `;
+          break;
+
+        // 12. Distraction blocker Fog of War
+        case 12:
+          view.innerHTML = `
+            <div style="font-size:11px; margin-bottom:6px; color:var(--text-secondary);">Hover items to reveal fog unblurs:</div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <div style="padding:10px; border:1px solid var(--border); border-radius:6px; filter:blur(4px); transition:filter 0.2s;" onmouseenter="this.style.filter='none'" onmouseleave="this.style.filter='blur(4px)'">🔍 Prep CROSS-141 meeting slides</div>
+              <div style="padding:10px; border:1px solid var(--border); border-radius:6px; filter:blur(4px); transition:filter 0.2s;" onmouseenter="this.style.filter='none'" onmouseleave="this.style.filter='blur(4px)'">🔍 Review PR #30 filters approach</div>
+            </div>
+          `;
+          break;
+
+        // 13. Retro Code comments
+        case 13:
+          const code = document.createElement('div');
+          code.style.cssText = "background:#0F0F11; color:#F5F5F7; font-family:var(--font-mono); padding:16px; border-radius:8px; font-size:12px; line-height:1.5;";
+          code.innerHTML = `
+            <div><span style="color:#6E6E73;">// TODO: daily dev focus queue</span></div>
+            <div><span style="color:#FF9500;">const</span> <span style="color:#0A84FF;">oferFocusToday</span> = [</div>
+          `;
+          activeList.forEach(t => {
+            code.innerHTML += `  <div>  { title: <span style="color:#30D158;">"${t.title}"</span>, priority: <span style="color:#AF52DE;">"${t.priority}"</span> },</div>`;
+          });
+          code.innerHTML += `<div>];</div>`;
+          view.appendChild(code);
+          break;
+
+        // 14. Classified Box columns
+        case 14:
+          const classif = document.createElement('div');
+          classif.className = "classifieds-grid";
+          activeList.forEach(t => {
+            classif.innerHTML += `
+              <div class="classified-box">
+                <strong>[${t.priority.toUpperCase()}]</strong> ${t.title}<br>
+                <em>Time: ${t.time}</em>
+              </div>
+            `;
+          });
+          view.appendChild(classif);
+          break;
+
+        // 15. 2x2 Matrix analysis grid
+        case 15:
+          const mat = document.createElement('div');
+          mat.className = "matrix-grid";
+          mat.innerHTML = `
+            <div class="matrix-quad">
+              <span class="quad-label" style="color:var(--danger);">Urgent / Urgent</span>
+              <div class="badge-jira" style="font-size:9.5px;">CROSS-141 Prep</div>
+            </div>
+            <div class="matrix-quad">
+              <span class="quad-label" style="color:var(--warning);">Plan / Upcoming</span>
+              <div class="badge-jira" style="font-size:9.5px;">PR #30 review</div>
+            </div>
+            <div class="matrix-quad">
+              <span class="quad-label" style="color:var(--accent);">Delegate / Later</span>
+              <div class="badge-jira" style="font-size:9.5px;">Zoe Gan registry</div>
+            </div>
+            <div class="matrix-quad">
+              <span class="quad-label" style="color:var(--text-tertiary);">Completed</span>
+              <div class="badge-jira" style="font-size:9.5px; text-decoration:line-through; opacity:0.5;">hq-user-sync</div>
+            </div>
+          `;
+          view.appendChild(mat);
+          break;
+
+        // 16. Comic panelsSpeech
+        case 16:
+          const comic = document.createElement('div');
+          comic.className = "comic-grid";
+          comic.innerHTML = `
+            <div class="comic-panel">
+              <span class="comic-banner">Active panel</span>
+              <h2 style="font-family:var(--font-display); font-weight:800; font-size:16px;">CROSS-141 Billing Sync!</h2>
+              <div class="comic-speech">"Ofer, Maya is waiting for slides at 10:30!"</div>
+            </div>
+            <div class="comic-panel" style="background:#FBFBFC;">
+              <span class="comic-banner" style="background:var(--accent); color:#FFF;">Support crew</span>
+              <div style="font-size:11px;">Sergey completed hq-user-sync BE deployment ok.</div>
+            </div>
+          `;
+          view.appendChild(comic);
+          break;
+
+        // 17. Hierarchical vertical branching Tree nodes
+        case 17:
+          const tree = document.createElement('div');
+          tree.style.cssText = "display:flex; flex-direction:column; align-items:center; gap:16px; font-family:var(--font-display);";
+          tree.innerHTML = `
+            <div style="border:2px solid var(--accent); padding:8px 16px; border-radius:6px; font-weight:700;">☀️ OFER DAY PLAN: MAY 27</div>
+            <div style="font-size:14px; color:var(--text-tertiary);">▼</div>
+          `;
+          activeList.forEach(t => {
+            tree.innerHTML += `
+              <div style="display:flex; gap:10px; align-items:center;">
+                <div style="border:1px solid var(--border); padding:6px 12px; border-radius:4px; font-weight:600; font-size:11px;">🍂 ${t.title.substring(0, 36)}...</div>
+              </div>
+              <div style="font-size:12px; color:var(--text-tertiary);">▼</div>
+            `;
+          });
+          view.appendChild(tree);
+          break;
+
+        // 18. The Anti-list Single Focus View
+        case 18:
+          view.innerHTML = `
+            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:240px; text-align:center; gap:16px;">
+              <span class="focus-card-meta" style="color:var(--accent);">🔒 ACTIVE SINGLE FOCUS SLOT</span>
+              <h1 style="font-family:var(--font-display); font-size:20px; font-weight:800;">${parseTokens(activeList[0].title)}</h1>
+              <p style="font-size:11px; color:var(--text-secondary); max-width:280px;">No other lists are rendered. List seeking triggers procrastination. Do the one thing!</p>
+            </div>
+          `;
+          break;
+
+        // 19. Time Ruler vertical hourly timeline
+        case 19:
+          const ruler = document.createElement('div');
+          ruler.style.cssText = "display:flex; flex-direction:column; gap:16px; padding-left:24px; border-left:2px solid var(--border); position:relative;";
+          
+          const hours = ["10:30 AM", "01:00 PM", "03:30 PM", "Flexible"];
+          activeList.forEach((t, idx) => {
+            ruler.innerHTML += `
+              <div style="position:relative;">
+                <div style="position:absolute; width:10px; height:10px; border-radius:50%; background:var(--accent); border:2px solid var(--bg); left:-29px; top:4px;"></div>
+                <div style="font-family:var(--font-mono); font-size:10px; color:var(--accent); font-weight:700;">${hours[idx] || 'Flexible'}</div>
+                <div style="font-weight:600; font-size:12.5px; margin-top:2px;">${t.title}</div>
+              </div>
+            `;
+          });
+          view.appendChild(ruler);
+          break;
+
+        // 20. Medication peak attention sine energy wave wave
+        case 20:
+          const waves = document.createElement('div');
+          waves.style.cssText = "display:flex; flex-direction:column; gap:10px; width:100%;";
+          waves.innerHTML = `
+            <span class="focus-card-meta">ATTENTION energy CYCLES SCHEDULE</span>
+            <div style="width:100%; height:80px; border-bottom:2.5px solid var(--border); position:relative; overflow:hidden;">
+              <svg viewBox="0 0 400 80" style="position:absolute; top:0; left:0; width:100%; height:100%;">
+                <path d="M 0 40 Q 100 -20 200 40 T 400 40" fill="none" stroke="var(--accent)" stroke-width="2.5"></path>
+              </svg>
+              <div style="position:absolute; left:20%; top:10px; font-weight:700; font-size:10px; color:var(--danger);">⚡ Peak Post Ritalin</div>
+              <div style="position:absolute; left:60%; top:50px; font-weight:700; font-size:10px; color:var(--warning);">🌫️ Afternoon Slump</div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:6px; margin-top:10px;">
+              <div class="link-attachment-chip">📈 [PEAK] ${activeList[0].title}</div>
+              <div class="link-attachment-chip" style="background:var(--warning-soft); color:var(--warning); border-color:var(--warning);">🍵 [TROUGH] Zoe Gan registry forms</div>
+            </div>
+          `;
+          view.appendChild(waves);
+          break;
+
+        // 21. Slack mirrorConversational
+        case 21:
+          const slack = document.createElement('div');
+          slack.style.cssText = "display:flex; flex-direction:column; gap:10px; font-size:12.5px; line-height:1.45;";
+          activeList.forEach(t => {
+            slack.innerHTML += `
+              <div style="display:flex; gap:10px; border-bottom:0.5px solid var(--border); padding-bottom:8px;">
+                <div style="width:28px; height:28px; background:var(--accent-dim); border-radius:4px; display:flex; align-items:center; justify-content:center; font-weight:bold; color:var(--accent);">O</div>
+                <div>
+                  <div style="display:flex; gap:6px; align-items:center;">
+                    <span style="font-weight:700;">ofer</span>
+                    <span style="font-size:9px; color:var(--text-tertiary);">${t.time}</span>
+                  </div>
+                  <div style="margin-top:2px;">${parseTokens(t.title)}</div>
+                </div>
+              </div>
+            `;
+          });
+          view.appendChild(slack);
+          break;
+
+        // 22. Zen Calligraphic Parchment Scroll
+        case 22:
+          const scroll = document.createElement('div');
+          scroll.style.cssText = "background:#FAF4E8; border:1px solid #E6D0AC; border-radius:4px; padding:20px; font-family:var(--font-serif); box-shadow:inset 0 0 10px rgba(0,0,0,0.03);";
+          scroll.innerHTML = `
+            <div style="font-size:24px; text-align:center; font-style:italic; border-bottom:1px solid #D2B48C; margin-bottom:12px; color:#5D4037;">Wednesday intentions</div>
+            <div style="display:flex; flex-direction:column; gap:12px; font-size:16px; color:#5D4037;">
+          `;
+          activeList.forEach(t => {
+            scroll.innerHTML += `<div style="text-align:center;">✧ ${t.title} ✧</div>`;
+          });
+          scroll.innerHTML += `</div>`;
+          view.appendChild(scroll);
+          break;
+
+        // 23. Neon Cyberpunk HUD
+        case 23:
+          const hud = document.createElement('div');
+          hud.style.cssText = "background:#000; color:#00FFD2; font-family:var(--font-mono); padding:16px; border:2px solid #00FFD2; box-shadow:0 0 10px rgba(0,255,210,0.2); font-size:11px; line-height:1.6;";
+          hud.innerHTML = `
+            <div style="border-bottom:1px solid #00FFD2; padding-bottom:6px; display:flex; justify-content:space-between; font-weight:700;">
+              <span>🛰️ DEVS HUD MODULE v6.0</span>
+              <span style="animation:blink 1s steps(2, start) infinite;">SYSTEM OK</span>
+            </div>
+          `;
+          activeList.forEach(t => {
+            hud.innerHTML += `<div>[>> LINK ACTIVE] ${t.title} (SUB: ${t.subtasks})</div>`;
+          });
+          view.appendChild(hud);
+          break;
+
+        // 24. Organic Flat Pebbles Path
+        case 24:
+          const pebble = document.createElement('div');
+          pebble.style.cssText = "display:flex; gap:12px; flex-wrap:wrap; justify-content:center;";
+          activeList.forEach((t, idx) => {
+            const node = document.createElement('div');
+            node.style.cssText = `background:var(--bg-tertiary); border:1px solid var(--border); border-radius:30px 40px 35px 45px; padding:12px 20px; font-weight:600; font-size:11px; cursor:pointer; transition:transform 0.15s;`;
+            node.onclick = () => {
+              node.style.transform = "scale(1.1)";
+              showDopamineToast(`Stepping active goal: ${t.title}`);
+              triggerConfettiBlast(200, 200);
+            };
+            node.innerHTML = `🪨 ${t.title}`;
+            pebble.appendChild(node);
+          });
+          view.appendChild(pebble);
+          break;
+
+        // 25. Task Roulette glowing matrix deck
+        case 25:
+          const matx = document.createElement('div');
+          matx.style.cssText = "display:grid; grid-template-columns:1fr 1fr; gap:10px;";
+          activeList.forEach((t, idx) => {
+            matx.innerHTML += `
+              <div style="border:1px solid var(--border); border-radius:6px; padding:10px; background:var(--bg); transition:all 0.3s;" id="roulette-card-${idx}">
+                <div style="font-size:9px; color:var(--text-secondary);">SLOT ${idx+1}</div>
+                <div style="font-weight:600; font-size:11.5px; margin-top:2px;">${t.title}</div>
+              </div>
+            `;
+          });
+          view.appendChild(matx);
+          
+          // Trigger a pulse grid routine
+          let rIndex = 0;
+          clearInterval(window.rouletteInterval);
+          window.rouletteInterval = setInterval(() => {
+            document.querySelectorAll("[id^='roulette-card-']").forEach(c => c.style.borderColor = 'var(--border)');
+            const activeCard = document.getElementById(`roulette-card-${rIndex}`);
+            if (activeCard) {
+              activeCard.style.borderColor = 'var(--success)';
+              activeCard.style.background = 'var(--success-soft)';
+            }
+            rIndex = (rIndex + 1) % activeList.length;
+          }, 800);
+          break;
+
+      }
+    }
+
+    // Toggle Task Core
+    function toggleTaskDone(id, event) {
+      event.stopPropagation();
+      taskDatabase = taskDatabase.map(t => {
+        if (t.id === id) {
+          const newState = !t.done;
+          if (newState) {
+            triggerConfettiBlast(200, 200);
+            showDopamineToast("Completed!");
+          }
+          return { ...t, done: newState };
+        }
+        return t;
+      });
+      localStorage.setItem('todayi_tasks_v6', JSON.stringify(taskDatabase));
+      renderActiveLayoutView();
+    }
+
+    // ==========================================================================
+    // 50 PLAYABLE SENSORY BREAKOUT INTERRUPTERS
+    // ==========================================================================
+    function triggerInterrupter(id) {
+      const overlay = document.getElementById('interruptionOverlay');
+      overlay.innerHTML = '';
+      overlay.style.display = 'flex';
+      
+      const interTitle = "Interruption Cushion";
+      let widgetHtml = '';
+
+      switch(id) {
+        
+        // 1. Pacing Breathing Balloon
+        case 1:
+          widgetHtml = `
+            <div class="interrupter-header">1. Mindful Cushions :: Breathing Balloon</div>
+            <div class="breathing-balloon" id="breathingBalloonNode"></div>
+            <div id="breathText" style="text-align:center; font-weight:600; color:var(--success);">Inhale slowly...</div>
+            <button class="btn btn-blue" onclick="startBreathRoutine()">Pulse Pacing Cycle</button>
+            <button class="btn btn-gray" onclick="closeInterrupterOverlay()">Skip Break</button>
+          `;
+          overlay.innerHTML = `<div class="interrupter-box">${widgetHtml}</div>`;
+          break;
+
+        // 2. Floating Lotus Flower
+        case 2:
+          widgetHtml = `
+            <div class="interrupter-header">2. Mindful Cushions :: Floating Lotus</div>
+            <div style="font-size:60px; text-align:center; transition:transform 2s;" id="lotusNode">🪷</div>
+            <div style="text-align:center; font-style:italic; font-size:12px; color:var(--text-secondary);">"The mind is like a lotus. It opens when serene."</div>
+            <button class="btn btn-blue" onclick="bloomLotus()">Bloom Lotus</button>
+            <button class="btn btn-gray" onclick="closeInterrupterOverlay()">Skip Break</button>
+          `;
+          overlay.innerHTML = `<div class="interrupter-box">${widgetHtml}</div>`;
+          break;
+
+        // 3. Expanding Concentric Mandala
+        case 3:
+          widgetHtml = `
+            <div class="interrupter-header">3. Mindful Cushions :: Concentric Mandala</div>
+            <div style="text-align:center; margin:10px;">
+              <svg width="100" height="100" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="10" fill="none" stroke="var(--accent)" stroke-width="2" id="mand1"></circle>
+                <circle cx="50" cy="50" r="25" fill="none" stroke="var(--success)" stroke-width="2" id="mand2"></circle>
+                <circle cx="50" cy="50" r="40" fill="none" stroke="var(--warning)" stroke-width="2" id="mand3"></circle>
+              </svg>
+            </div>
+            <button class="btn btn-blue" onclick="animateMandala()">Pulse Mandala circles</button>
+            <button class="btn btn-gray" onclick="closeInterrupterOverlay()">Skip Break</button>
+          `;
+          overlay.innerHTML = `<div class="interrupter-box">${widgetHtml}</div>`;
+          break;
+
+        // 4. Raindrop Ripple Canvas mouse
+        case 4:
+          widgetHtml = `
+            <div class="interrupter-header">4. Mindful Cushions :: Raindrop Ripples</div>
+            <p style="font-size:11.5px; text-align:center; color:var(--text-secondary);">Click anywhere in the main window frame.<br>Gorgeous water ripple concentric circles will spread organically to break hyperfocus drift.</p>
+            <button class="btn btn-blue" onclick="enableRaindropRipples()">Activate Click Ripples</button>
+            <button class="btn btn-gray" onclick="closeInterrupterOverlay()">Skip Break</button>
+          `;
+          overlay.innerHTML = `<div class="interrupter-box">${widgetHtml}</div>`;
+          break;
+
+        // 5. 10s Screen Blur Enforce Rest
+        case 5:
+          widgetHtml = `
+            <div class="interrupter-header">5. Mindful Cushions :: Enforced Blur rest</div>
+            <p style="font-size:12px; text-align:center;">Mandatory break screen. Taking 10s to rest eye muscles from code buffer grids...</p>
+            <div style="font-family:var(--font-mono); font-size:14px; text-align:center; color:var(--danger);" id="blurTimerCount">00:05</div>
+            <button class="btn btn-danger" onclick="triggerEnforcedBlurRoutine()">Begin Screen Lockout</button>
+          `;
+          overlay.innerHTML = `<div class="interrupter-box">${widgetHtml}</div>`;
+          break;
+
+        // 6. Cursor Kitty Chase
+        case 6:
+          widgetHtml = `
+            <div class="interrupter-header">6. Cute Companions :: Mouse Kitty chase</div>
+            <p style="font-size:11.5px; text-align:center;">A pixel kitty joins the screen, leaping to follow and chase your mouse cursor directly across the active workspace columns.</p>
+            <button class="btn btn-blue" onclick="enableMouseKittyChase()">Call Kitty to Screen</button>
+            <button class="btn btn-gray" onclick="closeInterrupterOverlay()">Dismiss Companion</button>
+          `;
+          overlay.innerHTML = `<div class="interrupter-box">${widgetHtml}</div>`;
+          break;
+
+        // 7. Waving Ghost Buddy
+        case 7:
+          widgetHtml = `
+            <div class="interrupter-header">7. Cute Companions :: Supportive Ghost</div>
+            <div style="font-size:42px; text-align:center; animation:waveGhost 1s infinite alternate;" id="ghostNode">👻</div>
+            <div style="text-align:center; font-weight:600; color:var(--accent);">"Hey Ofer! Let's take a 30s breather before the meeting!"</div>
+            <button class="btn btn-blue" onclick="closeInterrupterOverlay()">Thanks Buddy! Move to meeting</button>
+          `;
+          overlay.innerHTML = `<div class="interrupter-box">${widgetHtml}</div>`;
+          break;
+
+        // 8. Stretching posture coach
+        case 8:
+          widgetHtml = `
+            <div class="interrupter-header">8. Cute Companions :: Posture Stretch Coach</div>
+            <div style="font-size:42px; text-align:center;">🙆‍♀️</div>
+            <p style="font-size:11.5px; text-align:center; color:var(--text-secondary);">Ofer, let's roll your shoulders back, drop your chin, and do a quick side-neck stretch. Hold for 5 seconds...</p>
+            <button class="btn btn-blue" onclick="closeInterrupterOverlay()">Stretch Done! Unlock Editor</button>
+          `;
+          overlay.innerHTML = `<div class="interrupter-box">${widgetHtml}</div>`;
+          break;
+
+        // 9. Teammate Maya chat mirror ping
+        case 9:
+          widgetHtml = `
+            <div class="interrupter-header">9. Cute Companions :: Teammate meeting Ping</div>
+            <div style="border:1.5px solid var(--accent); background:var(--accent-dim); border-radius:6px; padding:12px; display:flex; gap:10px;">
+              <div style="width:24px; height:24px; background:var(--accent); color:#FFF; border-radius:50%; text-align:center; line-height:24px; font-weight:700;">M</div>
+              <div>
+                <strong style="font-size:11.5px;">Maya (Product Manager):</strong>
+                <p style="font-size:12px; margin-top:2px;">"Hey Ofer! Ready for the CROSS-141 billing admin panels review? Let's dump active coding lines and jump in!"</p>
+              </div>
+            </div>
+            <button class="btn btn-blue" onclick="closeInterrupterOverlay()">Let's join! Open meeting room</button>
+          `;
+          overlay.innerHTML = `<div class="interrupter-box">${widgetHtml}</div>`;
+          break;
+
+        // 10. Space Invader Task Blaster
+        case 10:
+          widgetHtml = `
+            <div class="interrupter-header">10. Gamified Shocks :: Space Invader Blaster</div>
+            <div style="display:flex; justify-content:space-around; align-items:center; height:80px; font-size:28px;">
+              <span id="invaderTarget">👾 Target: PR #30</span>
+              <span style="cursor:pointer;" onclick="shootSpaceInvader()">🚀 Blaster</span>
+            </div>
+            <div id="invaderStatus" style="font-family:var(--font-mono); font-size:11px; text-align:center; color:var(--success);">Click blaster rocket to fire laser beam!</div>
+            <button class="btn btn-gray" onclick="closeInterrupterOverlay()">Skip Break</button>
+          `;
+          overlay.innerHTML = `<div class="interrupter-box">${widgetHtml}</div>`;
+          break;
+
+        // 11. Bubblewrap pop sheet
+        case 11:
+          widgetHtml = `
+            <div class="interrupter-header">11. Gamified Shocks :: Tactile Bubblewrap</div>
+            <div class="bubblewrap-grid">
+              <div class="bubblewrap-node" onclick="popBubbleNode(this)"></div>
+              <div class="bubblewrap-node" onclick="popBubbleNode(this)"></div>
+              <div class="bubblewrap-node" onclick="popBubbleNode(this)"></div>
+              <div class="bubblewrap-node" onclick="popBubbleNode(this)"></div>
+              <div class="bubblewrap-node" onclick="popBubbleNode(this)"></div>
+              <div class="bubblewrap-node" onclick="popBubbleNode(this)"></div>
+            </div>
+            <div style="font-size:10px; text-align:center; color:var(--text-tertiary);">Click bubbles to pop satisfying cells!</div>
+            <button class="btn btn-gray" onclick="closeInterrupterOverlay()">Close Wrap</button>
+          `;
+          overlay.innerHTML = `<div class="interrupter-box">${widgetHtml}</div>`;
+          break;
+
+        // 12. Fidget Spinner Widget
+        case 12:
+          widgetHtml = `
+            <div class="interrupter-header">12. Gamified Shocks :: Fidget Spinner</div>
+            <div id="fidgetSpinnerDisc" style="width:60px; height:60px; border-radius:50%; border:4px dotted var(--accent); display:flex; align-items:center; justify-content:center; font-size:24px; transition:transform 0.1s linear; margin:10px auto;" onclick="flickDiscSpinner()">🌀</div>
+            <div id="spinnerRpmText" style="text-align:center; font-family:var(--font-mono); font-size:10px; color:var(--success);">Velocity: 0 rpm</div>
+            <button class="btn btn-blue" onclick="flickDiscSpinner()">Flick Spinner Disc</button>
+            <button class="btn btn-gray" onclick="closeInterrupterOverlay()">Skip break</button>
+          `;
+          overlay.innerHTML = `<div class="interrupter-box">${widgetHtml}</div>`;
+          break;
+
+        // 13. Task roulette Selection spinner
+        case 13:
+          widgetHtml = `
+            <div class="interrupter-header">13. Gamified Shocks :: Task Roulette dial</div>
+            <div style="text-align:center; font-weight:700; color:var(--accent); border:1px solid var(--border); padding:12px; border-radius:6px; margin:10px;" id="breakRouletteResult">---</div>
+            <button class="btn btn-blue" onclick="spinBreakRoulette()">Spin Selection Dial</button>
+            <button class="btn btn-gray" onclick="closeInterrupterOverlay()">Skip Break</button>
+          `;
+          overlay.innerHTML = `<div class="interrupter-box">${widgetHtml}</div>`;
+          break;
+
+        // 14. Click Kaleidoscope paint art
+        case 14:
+          widgetHtml = `
+            <div class="interrupter-header">14. Gamified Shocks :: Kaleidoscope Paint</div>
+            <p style="font-size:11.5px; text-align:center;">Click anywhere inside this box to construct gorgeous circular geometric flower kaleidoscope nodes using Web Canvas.</p>
+            <canvas id="kaleidCanvas" width="280" height="100" style="border:1px dashed var(--border); border-radius:6px; cursor:pointer;" onclick="drawKaleidNode(event)"></canvas>
+            <button class="btn btn-gray" onclick="closeInterrupterOverlay()">Close Paint</button>
+          `;
+          overlay.innerHTML = `<div class="interrupter-box">${widgetHtml}</div>`;
+          break;
+
+        // 15. Chore Speedrun count Attack
+        case 15:
+          widgetHtml = `
+            <div class="interrupter-header">15. Gamified Shocks :: speedrun Countdown</div>
+            <div style="width:100%; height:10px; background:var(--bg-tertiary); border-radius:4px; overflow:hidden;">
+              <div id="breakSpeedrunBar" style="width:100%; height:100%; background:var(--warning); transition:width 5s linear;"></div>
+            </div>
+            <div id="speedrunStatusText" style="text-align:center; font-weight:700; color:var(--warning); font-size:12px; margin-top:8px;">Ready to speedrun updates...</div>
+            <button class="btn btn-blue" onclick="beginSpeedrunRoutine()">Start 5s Sprint</button>
+            <button class="btn btn-gray" onclick="closeInterrupterOverlay()">Cancel</button>
+          `;
+          overlay.innerHTML = `<div class="interrupter-box">${widgetHtml}</div>`;
+          break;
+
+        // 16. Tea cold Alert chime
+        case 16:
+          widgetHtml = `
+            <div class="interrupter-header">16. Physical Cues :: Tea Cold Warning</div>
+            <div style="font-size:42px; text-align:center;">🍵</div>
+            <p style="font-size:11.5px; text-align:center; color:var(--text-secondary);">Ofer, systems indicate your warm beverage has reached peak sipping temperature. Go take a sip before it gets cold!</p>
+            <button class="btn btn-blue" onclick="playWebAudioBeep(660); closeInterrupterOverlay();">Sipped! Return to buffer</button>
+          `;
+          overlay.innerHTML = `<div class="interrupter-box">${widgetHtml}</div>`;
+          break;
+
+        // 17. Water glass sip Alert
+        case 17:
+          widgetHtml = `
+            <div class="interrupter-header">17. Physical Cues :: Water glass hydrator</div>
+            <div class="water-glass-box"><div class="water-level" id="waterLevelNode"></div></div>
+            <button class="btn btn-blue" onclick="fillWaterGlass()">Take a big gulp of water (Sip)</button>
+            <button class="btn btn-gray" onclick="closeInterrupterOverlay()">Skip</button>
+          `;
+          overlay.innerHTML = `<div class="interrupter-box">${widgetHtml}</div>`;
+          break;
+
+        // 18. Gravity sand Hourglass
+        case 18:
+          widgetHtml = `
+            <div class="interrupter-header">18. Physical Cues :: Sand Hourglass timer</div>
+            <div style="font-size:42px; text-align:center; transition:transform 0.5s;" id="hourglassNode">⌛</div>
+            <div id="hourglassStatus" style="font-size:11px; text-align:center; color:var(--text-secondary);">Time: 10s remaining</div>
+            <button class="btn btn-blue" onclick="flipHourglass()">Flip Hourglass</button>
+            <button class="btn btn-gray" onclick="closeInterrupterOverlay()">Skip</button>
+          `;
+          overlay.innerHTML = `<div class="interrupter-box">${widgetHtml}</div>`;
+          break;
+
+        // 19. Mechanical Clicker Fidget switch
+        case 19:
+          widgetHtml = `
+            <div class="interrupter-header">19. Physical Cues :: Mechanical clicker switch</div>
+            <div style="display:flex; justify-content:center; margin:10px;">
+              <div class="clicker-box" id="fidgetClickerBox" onclick="toggleMechanicalClicker()">
+                <div class="clicker-switch"></div>
+              </div>
+            </div>
+            <button class="btn btn-gray" onclick="closeInterrupterOverlay()">Close clicker</button>
+          `;
+          overlay.innerHTML = `<div class="interrupter-box">${widgetHtml}</div>`;
+          break;
+
+        // 20. Web Audio soundscape Synthesizer
+        case 20:
+          widgetHtml = `
+            <div class="interrupter-header">20. Physical Cues :: Synth Soundscape generator</div>
+            <p style="font-size:11.5px; text-align:center;">Click synth buttons to synthesize focusing low-frequency Web Audio ambient notes directly inside your headphones.</p>
+            <div style="display:flex; gap:6px; justify-content:center;">
+              <button class="btn btn-gray" onclick="playWebAudioBeep(220)">🎵 Pad C</button>
+              <button class="btn btn-gray" onclick="playWebAudioBeep(330)">🎵 Pad E</button>
+              <button class="btn btn-gray" onclick="playWebAudioBeep(440)">🎵 Pad A</button>
+            </div>
+            <button class="btn btn-blue" style="margin-top:10px;" onclick="closeInterrupterOverlay()">Soundscapes sync ok</button>
+          `;
+          overlay.innerHTML = `<div class="interrupter-box">${widgetHtml}</div>`;
+          break;
+
+        // 21. Procrastination trash crumpler
+        case 21:
+          widgetHtml = `
+            <div class="interrupter-header">21. Cognitive Tools :: distraction Trash Crumple</div>
+            <input type="text" id="widget21Input" placeholder="What is pulling your focus? (e.g. read news...)" style="width:100%; height:26px; border:1px solid var(--border); border-radius:4px; padding:0 8px; font-size:11.5px; outline:none;">
+            <button class="btn btn-danger" onclick="crumpleWidget21Distract()">Crumple & Eject thought</button>
+            <button class="btn btn-gray" onclick="closeInterrupterOverlay()">Close Trash</button>
+          `;
+          overlay.innerHTML = `<div class="interrupter-box">${widgetHtml}</div>`;
+          break;
+
+        // 22. Cognitive Bodyguard Bot challenge
+        case 22:
+          widgetHtml = `
+            <div class="interrupter-header">22. Cognitive Tools :: Bodyguard Bot challenge</div>
+            <div style="border:1px solid var(--border); background:var(--bg-surface); padding:10px; border-radius:6px; font-size:11.5px; line-height:1.4;" id="bodyguardBreakChat">
+              <strong>🛡️ Bodyguard:</strong> Hey Ofer, before we add this new rabbit-hole task... Are you sure it's critical, or is it avoiding the PR review?
+            </div>
+            <input type="text" id="bodyguardBreakInput" placeholder="Answer bodyguard..." style="width:100%; height:26px; border:1px solid var(--border); border-radius:4px; padding:0 8px; font-size:11px; outline:none; margin-top:8px;">
+            <button class="btn btn-blue" onclick="bodyguardBreakRespond()">Respond & Proceed</button>
+          `;
+          overlay.innerHTML = `<div class="interrupter-box">${widgetHtml}</div>`;
+          break;
+
+        // 23. Hyperfocus Lockout screens
+        case 23:
+          widgetHtml = `
+            <div class="interrupter-header">23. Cognitive Tools :: Enforced hyperfocus Lock</div>
+            <p style="font-size:11.5px; text-align:center;">Locks your editor columns to force stand-up movement and water pacing...</p>
+            <div style="font-family:var(--font-mono); font-size:14px; text-align:center; color:var(--danger);" id="lockoutTimerCount">00:03</div>
+            <button class="btn btn-danger" onclick="triggerHyperfocusLockoutRoutine()">Mandate Lockout break</button>
+          `;
+          overlay.innerHTML = `<div class="interrupter-box">${widgetHtml}</div>`;
+          break;
+
+        // 24. Visual effort balance scale
+        case 24:
+          widgetHtml = `
+            <div class="interrupter-header">24. Cognitive Tools :: Visual weight scales</div>
+            <div style="display:flex; justify-content:space-around; font-size:20px; font-weight:700;" id="scalesBreakDisplay">
+              <span id="scaleLeftBreak">⚖️ Effort: 5</span>
+              <span id="scaleRightBreak">Reward: 5</span>
+            </div>
+            <div style="display:flex; gap:10px; justify-content:center;">
+              <label style="font-size:10px;">Effort: <input type="range" id="scalesEffortBreak" min="1" max="10" value="5" oninput="balanceBreakScales()"></label>
+              <label style="font-size:10px;">Reward: <input type="range" id="scalesRewardBreak" min="1" max="10" value="5" oninput="balanceBreakScales()"></label>
+            </div>
+            <button class="btn btn-blue" onclick="closeInterrupterOverlay()">Scales balanced</button>
+          `;
+          overlay.innerHTML = `<div class="interrupter-box">${widgetHtml}</div>`;
+          break;
+
+        // 25. Attention radar Compass
+        case 25:
+          widgetHtml = `
+            <div class="interrupter-header">25. Cognitive Tools :: Attention Radar compass</div>
+            <div style="width:100%; height:100px; border:1px solid var(--border); border-radius:6px; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden;" onmousemove="updateBreakRadarCompass(event)" id="breakRadarBox">
+              <div id="breakRadarNeedle" style="width:3px; height:36px; background:var(--accent); border-radius:2px; transform:rotate(0deg); transition: transform 0.15s ease-out; transform-origin: center bottom;"></div>
+            </div>
+            <button class="btn btn-gray" onclick="closeInterrupterOverlay()">Close Radar</button>
+          `;
+          overlay.innerHTML = `<div class="interrupter-box">${widgetHtml}</div>`;
+          break;
+
+      }
+    }
+
+    function closeInterrupterOverlay() {
+      document.getElementById('interruptionOverlay').style.display = 'none';
+      
+      // Stop body kitty loop
+      const kitty = document.getElementById('kitty-sprite');
+      kitty.style.display = 'none';
+      document.removeEventListener('mousemove', followKittyMouse);
+    }
+
+    // ==========================================================================
+    // SIMULATORS & INTERACTION LOGIC
+    // ==========================================================================
+    
+    // 1. Breathing Pacing balloon
+    function startBreathRoutine() {
+      const balloon = document.getElementById('breathingBalloonNode');
+      const text = document.getElementById('breathText');
+      
+      text.innerText = "Inhale slowly...";
+      balloon.style.transform = "scale(1.7)";
+      
+      setTimeout(() => {
+        text.innerText = "Exhale Serene...";
+        balloon.style.transform = "scale(1)";
+      }, 3000);
+      
+      setTimeout(() => {
+        text.innerText = "Inhale deeply...";
+        balloon.style.transform = "scale(1.7)";
+      }, 6000);
+
+      setTimeout(() => {
+        text.innerText = "Breathing transition complete! Buffer cleared.";
+        balloon.style.transform = "scale(1)";
+        triggerConfettiBlast(200, 200);
+      }, 9000);
+    }
+
+    // 2. Bloom lotus flower
+    function bloomLotus() {
+      const lotus = document.getElementById('lotusNode');
+      lotus.style.transform = "scale(2) rotate(360deg)";
+      triggerConfettiBlast(200, 200);
+    }
+
+    // 3. Mandala circles animate
+    function animateMandala() {
+      document.getElementById('mand1').setAttribute('r', '20');
+      document.getElementById('mand2').setAttribute('r', '35');
+      document.getElementById('mand3').setAttribute('r', '48');
+      triggerConfettiBlast(200, 200);
+      setTimeout(() => {
+        document.getElementById('mand1').setAttribute('r', '10');
+        document.getElementById('mand2').setAttribute('r', '25');
+        document.getElementById('mand3').setAttribute('r', '40');
+      }, 1000);
+    }
+
+    // 4. Click ripple activator
+    function enableRaindropRipples() {
+      showDopamineToast("Click ripples active! 💧");
+      closeInterrupterOverlay();
+    }
+
+    // 5. Enforced Blur lockout
+    function triggerEnforcedBlurRoutine() {
+      const count = document.getElementById('blurTimerCount');
+      const windowEl = document.querySelector('.electron-window');
+      windowEl.style.filter = "blur(8px)";
+      
+      let sec = 5;
+      let interval = setInterval(() => {
+        sec--;
+        count.innerText = `00:0${sec}`;
+        if (sec === 0) {
+          clearInterval(interval);
+          windowEl.style.filter = "none";
+          closeInterrupterOverlay();
+          triggerConfettiBlast(200, 200);
+        }
+      }, 1000);
+    }
+
+    // 6. Kitty Chase Cursor sprite
+    function enableMouseKittyChase() {
+      showDopamineToast("Kitty summoned to editor! 🐈");
+      closeInterrupterOverlay();
+      
+      const kitty = document.getElementById('kitty-sprite');
+      kitty.style.display = 'block';
+      kitty.style.left = '200px';
+      kitty.style.top = '200px';
+      
+      document.addEventListener('mousemove', followKittyMouse);
+    }
+    
+    function followKittyMouse(e) {
+      const kitty = document.getElementById('kitty-sprite');
+      const win = document.querySelector('.electron-window').getBoundingClientRect();
+      const x = e.clientX - win.left - 24;
+      const y = e.clientY - win.top - 24;
+      kitty.style.left = `${x}px`;
+      kitty.style.top = `${y}px`;
+    }
+
+    // 10. Space invaders laser shoot
+    function shootSpaceInvader() {
+      const target = document.getElementById('invaderTarget');
+      const status = document.getElementById('invaderStatus');
+      
+      target.style.transform = "scale(0.2)";
+      target.style.opacity = "0";
+      status.innerText = "💥 Target Blasted! 100 Points added! Dopamine synced.";
+      triggerConfettiBlast(200, 200);
+    }
+
+    // 11. Bubblewrap pop node click
+    function popBubbleNode(element) {
+      if (element.classList.contains('popped')) return;
+      element.classList.add('popped');
+      playWebAudioBeep(880);
+      showDopamineToast("Pop! 🫧");
+      triggerConfettiBlast(200, 200);
+    }
+
+    // 12. Fidget Spinner spins
+    let breakFidgetDeg = 0;
+    function flickDiscSpinner() {
+      const disc = document.getElementById('fidgetSpinnerDisc');
+      const speed = document.getElementById('spinnerRpmText');
+      breakFidgetDeg += 360 + Math.random() * 360;
+      disc.style.transform = `rotate(${breakFidgetDeg}deg)`;
+      
+      speed.innerText = "Velocity: 680 rpm";
+      setTimeout(() => { speed.innerText = "Velocity: 240 rpm"; }, 1000);
+      setTimeout(() => { speed.innerText = "Velocity: 0 rpm"; }, 2500);
+    }
+
+    // 13. Spin Break Roulette Selector
+    function spinBreakRoulette() {
+      const res = document.getElementById('breakRouletteResult');
+      res.innerText = "Spinning focus roulette...";
+      setTimeout(() => {
+        const options = ["Go take a big sip of water (Gulp!)", "Do 3 shoulder shrug stretch exercises", "Type 1 mindset restore note to Maya", "Stand up and walk around the desk 10s"];
+        res.innerText = `🎯 Choice: ${options[Math.floor(Math.random() * options.length)]}`;
+        triggerConfettiBlast(200, 200);
+      }, 1000);
+    }
+
+    // 14. Kaleidoscope draw paint
+    function drawKaleidNode(e) {
+      const canv = document.getElementById('kaleidCanvas');
+      const ctx = canv.getContext('2d');
+      const rect = canv.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      ctx.fillStyle = "rgba(0,122,255,0.6)";
+      ctx.beginPath();
+      ctx.arc(x, y, 6, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Mirror nodes
+      ctx.fillStyle = "rgba(52,199,89,0.6)";
+      ctx.beginPath();
+      ctx.arc(canv.width - x, canv.height - y, 6, 0, Math.PI * 2);
+      ctx.fill();
+      
+      triggerConfettiBlast(200, 200);
+    }
+
+    // 15. Speedrun Count attack 5s Timer
+    function beginSpeedrunRoutine() {
+      const bar = document.getElementById('breakSpeedrunBar');
+      const status = document.getElementById('speedrunStatusText');
+      
+      bar.style.width = '100%';
+      status.innerText = "Go go go! Type meeting notes fast!";
+      
+      setTimeout(() => {
+        bar.style.transition = "width 5s linear";
+        bar.style.width = '0%';
+      }, 100);
+
+      setTimeout(() => {
+        status.innerText = "🏁 Time Attack complete! meeting prep stashed ok!";
+        triggerConfettiBlast(200, 200);
+      }, 5100);
+    }
+
+    // 17. Water glass fill drink sip
+    function fillWaterGlass() {
+      const level = document.getElementById('waterLevelNode');
+      level.style.height = '100%';
+      triggerConfettiBlast(200, 200);
+      setTimeout(() => {
+        level.style.height = '0%';
+        closeInterrupterOverlay();
+        showDopamineToast("Gulp! Hydration sync complete.");
+      }, 12000);
+    }
+
+    // 18. sand hourglass gravity drop flip
+    function flipHourglass() {
+      const hour = document.getElementById('hourglassNode');
+      const status = document.getElementById('hourglassStatus');
+      
+      hour.style.transform = "rotate(180deg)";
+      status.innerText = "Sand trickling... Inhale serenity...";
+      
+      setTimeout(() => {
+        status.innerText = "Hourglass finished! executive memory budget synced.";
+        triggerConfettiBlast(200, 200);
+      }, 2000);
+    }
+
+    // 19. Mechanical clicking chimer
+    function toggleMechanicalClicker() {
+      const box = document.getElementById('fidgetClickerBox');
+      box.classList.toggle('active');
+      playWebAudioBeep(box.classList.contains('active') ? 440 : 220);
+      triggerConfettiBlast(200, 200);
+    }
+
+    // 21. distraction trash crumple note
+    function crumpleWidget21Distract() {
+      const input = document.getElementById('widget21Input');
+      const val = input.value.trim();
+      if (!val) return;
+      
+      showDopamineToast(`Crumpled distraction: ${val}!`);
+      triggerConfettiBlast(200, 200);
+      input.value = '';
+      closeInterrupterOverlay();
+    }
+
+    // 22. Bodyguard breakout messenger challenge
+    function bodyguardBreakRespond() {
+      const input = document.getElementById('bodyguardBreakInput');
+      const val = input.value.trim();
+      if (!val) return;
+      
+      const chat = document.getElementById('bodyguardBreakChat');
+      chat.innerHTML += `<br><strong>You:</strong> ${val}<br><span style="color:var(--success);">🛡️ Bodyguard: "Aligned. Intention synced successfully. Proceed!"</span>`;
+      triggerConfettiBlast(200, 200);
+      setTimeout(closeInterrupterOverlay, 1500);
+    }
+
+    // 23. Hyperfocus break Lock screen
+    function triggerHyperfocusLockoutRoutine() {
+      const count = document.getElementById('lockoutTimerCount');
+      const windowEl = document.querySelector('.electron-window');
+      windowEl.style.opacity = '0.3';
+      
+      let sec = 3;
+      let interval = setInterval(() => {
+        sec--;
+        count.innerText = `00:0${sec}`;
+        if (sec === 0) {
+          clearInterval(interval);
+          windowEl.style.opacity = '1';
+          closeInterrupterOverlay();
+          triggerConfettiBlast(200, 200);
+        }
+      }, 1000);
+    }
+
+    // 24. effort balance scales break widget
+    function balanceBreakScales() {
+      const effort = document.getElementById('scalesEffortBreak').value;
+      const reward = document.getElementById('scalesRewardBreak').value;
+      const left = document.getElementById('scaleLeftBreak');
+      const right = document.getElementById('scaleRightBreak');
+      
+      const diff = effort - reward;
+      left.style.transform = `translateY(${diff * 3}px)`;
+      right.style.transform = `translateY(${-diff * 3}px)`;
+      
+      left.innerText = `⚖️ Effort: ${effort}`;
+      right.innerText = `Reward: ${reward}`;
+    }
+
+    // 25. Radar break compass focus direction
+    function updateBreakRadarCompass(e) {
+      const box = document.getElementById('breakRadarBox');
+      const needle = document.getElementById('breakRadarNeedle');
+      const rect = box.getBoundingClientRect();
+      const x = e.clientX - rect.left - (rect.width / 2);
+      const y = e.clientY - rect.top - (rect.height / 2);
+      
+      const angle = Math.atan2(y, x) * (180 / Math.PI) + 90;
+      needle.style.transform = `rotate(${angle}deg)`;
+    }
+
+
+    // ==========================================================================
+    // AUDIO SYNTH pad ENGINE (Web Audio API Oscillators)
+    // ==========================================================================
+    let audioCtx = null;
+    function playWebAudioBeep(freq) {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      
+      gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.12);
+      
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.12);
+    }
+
+    // ==========================================================================
+    // RAINDROP RIPPLE CANVAS MOTOR
+    // ==========================================================================
+    let ripCanvas, ripCtx;
+    let ripples = [];
+    
+    function setupRipples() {
+      ripCanvas = document.getElementById('rippleCanvas');
+      ripCtx = ripCanvas.getContext('2d');
+      resizeRipples();
+      window.addEventListener('resize', resizeRipples);
+      
+      document.addEventListener('click', (e) => {
+        // Only if raindrop ripples interrupter is active
+        const overlay = document.getElementById('interruptionOverlay');
+        if (overlay.style.display === 'flex' && overlay.innerText.includes("Raindrop")) {
+          const rect = ripCanvas.getBoundingClientRect();
+          ripples.push({
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top,
+            radius: 1,
+            maxRadius: 60,
+            alpha: 1,
+            decay: 0.02
+          });
+          playWebAudioBeep(300 + Math.random() * 200);
+          
+          if (!window.rippleRunning) {
+            window.rippleRunning = true;
+            animateRipples();
+          }
+        }
+      });
+    }
+    
+    function resizeRipples() {
+      const bounds = ripCanvas.parentNode.getBoundingClientRect();
+      ripCanvas.width = bounds.width;
+      ripCanvas.height = bounds.height;
+    }
+    
+    function animateRipples() {
+      ripCtx.clearRect(0, 0, ripCanvas.width, ripCanvas.height);
+      ripples.forEach((r, idx) => {
+        r.radius += 2.5;
+        r.alpha -= r.decay;
+        
+        ripCtx.save();
+        ripCtx.globalAlpha = r.alpha;
+        ripCtx.strokeStyle = "#007AFF";
+        ripCtx.lineWidth = 1.5;
+        ripCtx.beginPath();
+        ripCtx.arc(r.x, r.y, r.radius, 0, Math.PI * 2);
+        ripCtx.stroke();
+        ripCtx.restore();
+        
+        if (r.alpha <= 0 || r.radius >= r.maxRadius) {
+          ripples.splice(idx, 1);
+        }
+      });
+      
+      if (ripples.length > 0) {
+        requestAnimationFrame(animateRipples);
+      } else {
+        window.rippleRunning = false;
+        ripCtx.clearRect(0, 0, ripCanvas.width, ripCanvas.height);
+      }
+    }
+
+
+    // ==========================================================================
+    // PHYSICAL CONFETTI ENGINE (RESTRICTED TO WINDOW SHELL)
+    // ==========================================================================
+    let canvas, ctx;
+    let particles = [];
+    
+    function setupConfettiCanvas() {
+      canvas = document.getElementById('dopamineCanvas');
+      ctx = canvas.getContext('2d');
+      resizeConfettiCanvas();
+      window.addEventListener('resize', resizeConfettiCanvas);
+    }
+
+    function resizeConfettiCanvas() {
+      const bounds = canvas.parentNode.getBoundingClientRect();
+      canvas.width = bounds.width;
+      canvas.height = bounds.height;
+    }
+
+    function triggerConfettiBlast(x, y) {
+      resizeConfettiCanvas();
+      const colors = ['#34C759', '#007AFF', '#FF9500', '#FF3B30', '#AF52DE'];
+      for (let i = 0; i < 30; i++) {
+        particles.push({
+          x: x || canvas.width / 2,
+          y: y || canvas.height / 2,
+          vx: (Math.random() - 0.5) * 6,
+          vy: (Math.random() - 0.5) * 6 - 3,
+          radius: Math.random() * 3 + 2,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          alpha: 1,
+          decay: Math.random() * 0.02 + 0.015
+        });
+      }
+      
+      if (!window.animationRunning) {
+        window.animationRunning = true;
+        animateConfetti();
+      }
+    }
+
+    function flashConfettiShower() {
+      triggerConfettiBlast(canvas.width / 2, canvas.height / 3);
+      showDopamineToast("Jackpot blast active! 💥");
+    }
+
+    function animateConfetti() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      particles.forEach((p, idx) => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.15; // Gravity
+        p.alpha -= p.decay;
+        
+        ctx.save();
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+        
+        if (p.alpha <= 0 || p.y > canvas.height) {
+          particles.splice(idx, 1);
+        }
+      });
+      
+      if (particles.length > 0) {
+        requestAnimationFrame(animateConfetti);
+      } else {
+        window.animationRunning = false;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+
+    function showDopamineToast(text) {
+      const toast = document.getElementById('celebrationToast');
+      document.getElementById('celebrationToastText').innerText = text;
+      toast.classList.add('active');
+      setTimeout(() => {
+        toast.classList.remove('active');
+      }, 1800);
+    }
+
+    function toggleTheme() {
+      const windowEl = document.querySelector('.electron-window');
+      windowEl.classList.toggle('theme-dark');
+      const isDark = windowEl.classList.contains('theme-dark');
+      document.getElementById('themeBtnText').innerText = isDark ? "Light Mode" : "Dark Mode";
+    }
+  </script>
+</body>
+</html>

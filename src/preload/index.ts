@@ -6,12 +6,19 @@ import type {
   CapturePromotePayload,
   CaptureShowPayload,
   DbAddCapturePayload,
-  DbCreateEventPayload,
-  DbCreateTaskPayload,
+  DbAddSubtaskPayload,
+  DbConvertEventPayload,
+  DbCreatePlanningItemsPayload,
+  DbDeleteEventPayload,
   DbDeleteTaskPayload,
   DbGetCapturePayload,
-  DbGetTasksByDatePayload,
+  DbMoveSubtaskPayload,
+  DbNestTaskPayload,
+  DbReorderSubtaskPayload,
+  DbSubtaskPayload,
   DbUpdateTaskPayload,
+  DbUpdateEventPayload,
+  DbUpdateSubtaskPayload,
   TorchBrainDumpSubmitPayload,
   TorchClosePayload,
   TorchHeroPayload,
@@ -95,17 +102,44 @@ const api = {
   },
   db: {
     getTasks: (): Promise<Task[]> => ipcRenderer.invoke('db:get-tasks'),
-    getTasksByDate: (date: string): Promise<Task[]> =>
-      ipcRenderer.invoke('db:get-tasks-by-date', { date } satisfies DbGetTasksByDatePayload),
-    createTask: (payload: DbCreateTaskPayload): Promise<Task> =>
-      ipcRenderer.invoke('db:create-task', payload),
     updateTask: (id: string, patch: Partial<Task>): Promise<Task> =>
       ipcRenderer.invoke('db:update-task', { id, patch } satisfies DbUpdateTaskPayload),
     deleteTask: (id: string): Promise<void> =>
       ipcRenderer.invoke('db:delete-task', { id } satisfies DbDeleteTaskPayload),
+    addSubtask: (taskId: string, title: string): Promise<Task> =>
+      ipcRenderer.invoke('db:add-subtask', { taskId, title } satisfies DbAddSubtaskPayload),
+    toggleSubtask: (taskId: string, subtaskId: string): Promise<Task> =>
+      ipcRenderer.invoke('db:toggle-subtask', { taskId, subtaskId } satisfies DbSubtaskPayload),
+    removeSubtask: (taskId: string, subtaskId: string): Promise<Task> =>
+      ipcRenderer.invoke('db:remove-subtask', { taskId, subtaskId } satisfies DbSubtaskPayload),
+    updateSubtask: (taskId: string, subtaskId: string, patch: { title?: string; notes?: string }): Promise<Task> =>
+      ipcRenderer.invoke(
+        'db:update-subtask',
+        { taskId, subtaskId, patch } satisfies DbUpdateSubtaskPayload,
+      ),
+    reorderSubtask: (taskId: string, subtaskId: string, toIndex: number): Promise<void> =>
+      ipcRenderer.invoke(
+        'db:reorder-subtask',
+        { taskId, subtaskId, toIndex } satisfies DbReorderSubtaskPayload,
+      ),
+    moveSubtask: (taskId: string, subtaskId: string, targetTaskId: string): Promise<void> =>
+      ipcRenderer.invoke(
+        'db:move-subtask',
+        { taskId, subtaskId, targetTaskId } satisfies DbMoveSubtaskPayload,
+      ),
+    promoteSubtask: (taskId: string, subtaskId: string): Promise<void> =>
+      ipcRenderer.invoke('db:promote-subtask', { taskId, subtaskId } satisfies DbSubtaskPayload),
+    nestTask: (taskId: string, targetTaskId: string): Promise<void> =>
+      ipcRenderer.invoke('db:nest-task', { taskId, targetTaskId } satisfies DbNestTaskPayload),
     getEvents: (): Promise<CalendarEvent[]> => ipcRenderer.invoke('db:get-events'),
-    createEvent: (payload: DbCreateEventPayload): Promise<CalendarEvent> =>
-      ipcRenderer.invoke('db:create-event', payload),
+    updateEvent: (id: string, patch: Partial<CalendarEvent>): Promise<CalendarEvent> =>
+      ipcRenderer.invoke('db:update-event', { id, patch } satisfies DbUpdateEventPayload),
+    deleteEvent: (id: string): Promise<void> =>
+      ipcRenderer.invoke('db:delete-event', { id } satisfies DbDeleteEventPayload),
+    convertEventToTask: (id: string): Promise<void> =>
+      ipcRenderer.invoke('db:convert-event-to-task', { id } satisfies DbConvertEventPayload),
+    createPlanningItems: (payload: DbCreatePlanningItemsPayload): Promise<{ tasks: Task[]; events: CalendarEvent[] }> =>
+      ipcRenderer.invoke('db:create-planning-items', payload),
     addCapture: (body: string): Promise<CaptureEntry> =>
       ipcRenderer.invoke('db:add-capture', { body } satisfies DbAddCapturePayload),
     getCaptureEntries: (limit?: number): Promise<CaptureEntry[]> =>

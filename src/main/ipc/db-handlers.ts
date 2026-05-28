@@ -1,31 +1,24 @@
 import { ipcMain } from 'electron';
 import type {
   DbAddCapturePayload,
-  DbCreateEventPayload,
-  DbCreateTaskPayload,
+  DbAddSubtaskPayload,
+  DbConvertEventPayload,
+  DbCreatePlanningItemsPayload,
+  DbDeleteEventPayload,
   DbDeleteTaskPayload,
   DbGetCapturePayload,
-  DbGetTasksByDatePayload,
+  DbMoveSubtaskPayload,
+  DbNestTaskPayload,
+  DbReorderSubtaskPayload,
+  DbSubtaskPayload,
   DbUpdateTaskPayload,
+  DbUpdateEventPayload,
+  DbUpdateSubtaskPayload,
 } from '../../shared/ipc-contracts';
 import * as repo from '../db/repository';
 
 export function registerDbHandlers(): void {
   ipcMain.handle('db:get-tasks', () => repo.getAllTasks());
-
-  ipcMain.handle('db:get-tasks-by-date', (_event, payload: DbGetTasksByDatePayload) => {
-    if (typeof payload?.date !== 'string' || payload.date.length === 0) {
-      throw new Error('db:get-tasks-by-date requires a non-empty date string');
-    }
-    return repo.getTasksByDate(payload.date);
-  });
-
-  ipcMain.handle('db:create-task', (_event, payload: DbCreateTaskPayload) => {
-    if (!payload || typeof payload.title !== 'string' || payload.title.trim().length === 0) {
-      throw new Error('db:create-task requires a title');
-    }
-    return repo.createTask(payload);
-  });
 
   ipcMain.handle('db:update-task', (_event, payload: DbUpdateTaskPayload) => {
     if (!payload?.id || typeof payload.id !== 'string') {
@@ -41,13 +34,99 @@ export function registerDbHandlers(): void {
     repo.deleteTask(payload.id);
   });
 
+  ipcMain.handle('db:add-subtask', (_event, payload: DbAddSubtaskPayload) => {
+    if (!payload?.taskId || typeof payload.taskId !== 'string') {
+      throw new Error('db:add-subtask requires taskId');
+    }
+    if (!payload.title || typeof payload.title !== 'string' || payload.title.trim().length === 0) {
+      throw new Error('db:add-subtask requires title');
+    }
+    return repo.addSubtask(payload.taskId, payload.title);
+  });
+
+  ipcMain.handle('db:toggle-subtask', (_event, payload: DbSubtaskPayload) => {
+    if (!payload?.taskId || typeof payload.taskId !== 'string' || !payload.subtaskId || typeof payload.subtaskId !== 'string') {
+      throw new Error('db:toggle-subtask requires taskId and subtaskId');
+    }
+    return repo.toggleSubtask(payload.taskId, payload.subtaskId);
+  });
+
+  ipcMain.handle('db:remove-subtask', (_event, payload: DbSubtaskPayload) => {
+    if (!payload?.taskId || typeof payload.taskId !== 'string' || !payload.subtaskId || typeof payload.subtaskId !== 'string') {
+      throw new Error('db:remove-subtask requires taskId and subtaskId');
+    }
+    return repo.removeSubtask(payload.taskId, payload.subtaskId);
+  });
+
+  ipcMain.handle('db:update-subtask', (_event, payload: DbUpdateSubtaskPayload) => {
+    if (!payload?.taskId || typeof payload.taskId !== 'string' || !payload.subtaskId || typeof payload.subtaskId !== 'string') {
+      throw new Error('db:update-subtask requires taskId and subtaskId');
+    }
+    return repo.updateSubtask(payload.taskId, payload.subtaskId, payload.patch ?? {});
+  });
+
+  ipcMain.handle('db:reorder-subtask', (_event, payload: DbReorderSubtaskPayload) => {
+    if (!payload?.taskId || typeof payload.taskId !== 'string' || !payload.subtaskId || typeof payload.subtaskId !== 'string') {
+      throw new Error('db:reorder-subtask requires taskId and subtaskId');
+    }
+    if (typeof payload.toIndex !== 'number' || payload.toIndex < 0) {
+      throw new Error('db:reorder-subtask requires a non-negative toIndex');
+    }
+    repo.reorderSubtask(payload.taskId, payload.subtaskId, payload.toIndex);
+  });
+
+  ipcMain.handle('db:move-subtask', (_event, payload: DbMoveSubtaskPayload) => {
+    if (!payload?.taskId || typeof payload.taskId !== 'string' || !payload.subtaskId || typeof payload.subtaskId !== 'string' || !payload.targetTaskId || typeof payload.targetTaskId !== 'string') {
+      throw new Error('db:move-subtask requires taskId, subtaskId, and targetTaskId');
+    }
+    repo.moveSubtask(payload.taskId, payload.subtaskId, payload.targetTaskId);
+  });
+
+  ipcMain.handle('db:promote-subtask', (_event, payload: DbSubtaskPayload) => {
+    if (!payload?.taskId || typeof payload.taskId !== 'string' || !payload.subtaskId || typeof payload.subtaskId !== 'string') {
+      throw new Error('db:promote-subtask requires taskId and subtaskId');
+    }
+    repo.promoteSubtask(payload.taskId, payload.subtaskId);
+  });
+
+  ipcMain.handle('db:nest-task', (_event, payload: DbNestTaskPayload) => {
+    if (!payload?.taskId || typeof payload.taskId !== 'string' || !payload.targetTaskId || typeof payload.targetTaskId !== 'string') {
+      throw new Error('db:nest-task requires taskId and targetTaskId');
+    }
+    repo.nestTask(payload.taskId, payload.targetTaskId);
+  });
+
   ipcMain.handle('db:get-events', () => repo.getAllEvents());
 
-  ipcMain.handle('db:create-event', (_event, payload: DbCreateEventPayload) => {
-    if (!payload || typeof payload.label !== 'string' || payload.label.trim().length === 0) {
-      throw new Error('db:create-event requires a label');
+  ipcMain.handle('db:update-event', (_event, payload: DbUpdateEventPayload) => {
+    if (!payload?.id || typeof payload.id !== 'string') {
+      throw new Error('db:update-event requires id');
     }
-    return repo.createEvent(payload);
+    return repo.updateEvent(payload.id, payload.patch ?? {});
+  });
+
+  ipcMain.handle('db:delete-event', (_event, payload: DbDeleteEventPayload) => {
+    if (!payload?.id || typeof payload.id !== 'string') {
+      throw new Error('db:delete-event requires id');
+    }
+    repo.deleteEvent(payload.id);
+  });
+
+  ipcMain.handle('db:convert-event-to-task', (_event, payload: DbConvertEventPayload) => {
+    if (!payload?.id || typeof payload.id !== 'string') {
+      throw new Error('db:convert-event-to-task requires id');
+    }
+    repo.convertEventToTask(payload.id);
+  });
+
+  ipcMain.handle('db:create-planning-items', (_event, payload: DbCreatePlanningItemsPayload) => {
+    if (!payload || typeof payload.rawInput !== 'string' || !Array.isArray(payload.items)) {
+      throw new Error('db:create-planning-items requires rawInput and items');
+    }
+    return repo.createPlanningItemsFromCapture({
+      rawInput: payload.rawInput.trim(),
+      items: payload.items,
+    });
   });
 
   ipcMain.handle('db:add-capture', (_event, payload: DbAddCapturePayload) => {

@@ -50,13 +50,13 @@ export default function ItemMenu({ taskId }: Props) {
   }
 
   function handleExpand() {
-    expandItem(taskId);
+    expandItem(`task:${taskId}`);
     close();
   }
 
   function handleAddSubtask() {
     addSubtask(taskId, 'New subtask');
-    expandItem(taskId);
+    expandItem(`task:${taskId}`);
     close();
   }
 

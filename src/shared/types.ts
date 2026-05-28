@@ -23,6 +23,9 @@ export type Subtask = {
   id: string;
   title: string;
   done: boolean;
+  notes?: string;
+  source?: SourceId;
+  sortOrder?: number;
 };
 
 export type Task = {
@@ -58,6 +61,7 @@ export type CalendarEvent = {
   endTime?: string;   // 'HH:MM' — later used to derive in-progress/past state
   label: string;
   sublabel?: string;
+  notes?: string;
   source?: SourceId;
   relations?: Relation[];
 };
@@ -84,6 +88,20 @@ export type CaptureEntry = {
 };
 
 export type ClassificationBucket = 'today' | 'tomorrow' | 'later' | 'someday';
+export type ParsedPlanningItemType = 'task' | 'event';
+export type ParsedPlanningScheduleMode = 'flexible' | 'fixed';
+
+export type ParsedPlanningItem = {
+  id: string;
+  itemType: ParsedPlanningItemType;
+  scheduleMode: ParsedPlanningScheduleMode;
+  title: string;
+  bucket: ClassificationBucket;
+  suggestedDate?: string;
+  suggestedTime?: string;
+  reasoning: string;
+  confidence: number;
+};
 
 export type ClassificationResult = {
   bucket: ClassificationBucket;
@@ -92,6 +110,8 @@ export type ClassificationResult = {
   suggestedTime?: string;
   reasoning: string;
   confidence: number;
+  rawText?: string;
+  items?: ParsedPlanningItem[];
 };
 
 export type ClassifyResponse = ClassificationResult | { error: string };

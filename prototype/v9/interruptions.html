@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Needle — 50 Attention Interruption Mechanisms</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..600&family=Inter:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #F6F1EB;
+      --bg-dark: #16161a;
+      --surface: #FFFFFF;
+      --ink: #1F1A14;
+      --ink-2: #6B6259;
+      --ink-3: #9A918A;
+      --ink-4: #C5BDB5;
+      --hairline: rgba(31,26,20,0.08);
+      --hairline-2: rgba(31,26,20,0.14);
+      --accent: #D4A847;
+      --accent-soft: #FCF5E8;
+      --urgent: #C4622D;
+      --urgent-soft: #FBF0EA;
+      --upcoming: #6F9272;
+      --upcoming-soft: #EDF5EE;
+      --calendar: #2C2C3A;
+      --serif: 'Fraunces', Georgia, serif;
+      --sans: 'Inter', -apple-system, sans-serif;
+      --mono: 'Geist Mono', monospace;
+      --ease: cubic-bezier(0.25, 1, 0.5, 1);
+      --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+    body {
+      font-family: var(--sans);
+      color: var(--ink);
+      background: var(--bg);
+      min-height: 100vh;
+    }
+
+    /* ══════════════════════════════════════
+       CATALOG LAYOUT
+       ══════════════════════════════════════ */
+
+    .catalog-header {
+      padding: 48px 32px 32px;
+      text-align: center;
+      border-bottom: 1px solid var(--hairline);
+    }
+    .catalog-title {
+      font-family: var(--serif);
+      font-size: 32px;
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+    .catalog-sub {
+      font-size: 15px;
+      color: var(--ink-2);
+      max-width: 600px;
+      margin: 0 auto 20px;
+      line-height: 1.5;
+    }
+    .catalog-back {
+      font-size: 13px;
+      color: var(--ink-3);
+      text-decoration: none;
+    }
+    .catalog-back:hover { color: var(--ink); }
+
+    .category-nav {
+      display: flex;
+      gap: 4px;
+      padding: 12px 32px;
+      background: rgba(255,255,255,0.6);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid var(--hairline);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .category-nav::-webkit-scrollbar { display: none; }
+    .cat-btn {
+      flex-shrink: 0;
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--ink-2);
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-family: var(--sans);
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .cat-btn:hover { background: var(--surface); color: var(--ink); }
+    .cat-btn.active { background: var(--ink); color: var(--bg); }
+
+    .catalog-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+      padding: 24px 32px 100px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .mech-card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(31,26,20,0.04);
+      transition: all 0.2s var(--ease);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    .mech-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+    .mech-card[data-cat="visual"]::before { background: var(--urgent); }
+    .mech-card[data-cat="character"]::before { background: var(--accent); }
+    .mech-card[data-cat="physics"]::before { background: var(--upcoming); }
+    .mech-card[data-cat="ambient"]::before { background: #6B7FA3; }
+    .mech-card[data-cat="sound"]::before { background: #9B8EC4; }
+    .mech-card[data-cat="gamified"]::before { background: var(--calendar); }
+
+    .mech-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(31,26,20,0.08);
+    }
+
+    .mech-num {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--ink-4);
+      margin-bottom: 8px;
+    }
+    .mech-name {
+      font-family: var(--serif);
+      font-size: 18px;
+      font-weight: 400;
+      margin-bottom: 6px;
+      line-height: 1.25;
+    }
+    .mech-desc {
+      font-size: 13px;
+      color: var(--ink-2);
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+    .mech-tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .mech-tag {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .mech-tag.low { background: var(--upcoming-soft); color: var(--upcoming); }
+    .mech-tag.med { background: var(--accent-soft); color: var(--accent); }
+    .mech-tag.high { background: var(--urgent-soft); color: var(--urgent); }
+    .mech-tag.cat {
+      background: rgba(31,26,20,0.05);
+      color: var(--ink-3);
+    }
+
+    .try-btn {
+      position: absolute;
+      bottom: 16px;
+      right: 16px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--ink);
+      color: var(--bg);
+      opacity: 0;
+      transform: translateY(4px);
+      transition: all 0.2s var(--ease);
+      cursor: pointer;
+      border: none;
+      font-family: var(--sans);
+    }
+    .mech-card:hover .try-btn { opacity: 1; transform: translateY(0); }
+
+    /* ══════════════════════════════════════
+       DEMO OVERLAY
+       ══════════════════════════════════════ */
+
+    .demo-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+    }
+    .demo-overlay.active { display: block; }
+
+    .demo-dismiss {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1100;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .demo-btn {
+      padding: 10px 24px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      font-family: var(--sans);
+      transition: all 0.15s ease;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+    .demo-btn.primary {
+      background: var(--surface);
+      color: var(--ink);
+    }
+    .demo-btn.secondary {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      backdrop-filter: blur(8px);
+    }
+    .demo-btn:hover { transform: scale(1.04); }
+
+    .demo-label {
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1100;
+      font-size: 12px;
+      font-weight: 600;
+      color: white;
+      background: rgba(0,0,0,0.5);
+      padding: 6px 16px;
+      border-radius: 999px;
+      backdrop-filter: blur(8px);
+    }
+
+    /* ══════════════════════════════════════
+       INDIVIDUAL MECHANISM STYLES
+       ══════════════════════════════════════ */
+
+    /* 1. Torch / Flashlight */
+    .torch-overlay {
+      background: rgba(0,0,0,0.95);
+      cursor: none;
+    }
+    .torch-spotlight {
+      position: fixed;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      pointer-events: none;
+      background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.4) 30%, transparent 70%);
+      transform: translate(-50%, -50%);
+      z-index: 1050;
+      mix-blend-mode: screen;
+    }
+    .torch-message {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1040;
+      text-align: center;
+      color: rgba(255,255,255,0.3);
+      font-family: var(--serif);
+      font-size: 28px;
+      font-weight: 300;
+      max-width: 400px;
+      line-height: 1.3;
+      pointer-events: none;
+    }
+
+    /* 2. Screen Frost */
+    .frost-overlay {
+      backdrop-filter: blur(0px);
+      transition: backdrop-filter 3s ease;
+      background: transparent;
+    }
+    .frost-overlay.active-anim {
+      backdrop-filter: blur(12px);
+    }
+    .frost-center {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1050;
+      text-align: center;
+      opacity: 0;
+      transition: opacity 2s ease 1s;
+    }
+    .frost-overlay.active-anim .frost-center { opacity: 1; }
+    .frost-icon { font-size: 48px; margin-bottom: 16px; }
+    .frost-text {
+      font-family: var(--serif);
+      font-size: 24px;
+      color: var(--ink);
+      font-weight: 300;
+    }
+    .frost-sub {
+      font-size: 14px;
+      color: var(--ink-2);
+      margin-top: 8px;
+    }
+
+    /* 3. Gravity Drop */
+    .gravity-overlay {
+      background: transparent;
+      pointer-events: none;
+    }
+    .gravity-overlay .demo-dismiss { pointer-events: all; }
+    .falling-char {
+      position: fixed;
+      font-size: 32px;
+      z-index: 1050;
+      animation: fall linear forwards;
+      pointer-events: none;
+    }
+    @keyframes fall {
+      0% { transform: translateY(-60px) rotate(0deg); opacity: 1; }
+      70% { opacity: 1; }
+      100% { transform: translateY(calc(100vh + 60px)) rotate(720deg); opacity: 0; }
+    }
+
+    /* 4. Vignette Pulse */
+    .vignette-overlay {
+      background: transparent;
+      pointer-events: none;
+      box-shadow: inset 0 0 100px 40px rgba(196, 98, 45, 0);
+      animation: vigPulse 2s ease-in-out infinite;
+    }
+    .vignette-overlay .demo-dismiss { pointer-events: all; }
+    @keyframes vigPulse {
+      0%, 100% { box-shadow: inset 0 0 80px 20px rgba(196, 98, 45, 0.08); }
+      50% { box-shadow: inset 0 0 120px 60px rgba(196, 98, 45, 0.18); }
+    }
+    .vig-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 12px 24px;
+      background: var(--urgent);
+      color: white;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 500;
+      z-index: 1050;
+      animation: slideDown 0.4s var(--ease);
+      pointer-events: all;
+    }
+    @keyframes slideDown {
+      from { transform: translateY(-100%); }
+      to { transform: translateY(0); }
+    }
+
+    /* 5. Kitty Visitor */
+    .kitty-overlay {
+      background: transparent;
+      pointer-events: none;
+    }
+    .kitty-overlay .demo-dismiss { pointer-events: all; }
+    .kitty {
+      position: fixed;
+      z-index: 1050;
+      font-size: 48px;
+      pointer-events: all;
+      cursor: pointer;
+      transition: transform 0.3s var(--ease-bounce);
+    }
+    .kitty:hover { transform: scale(1.2) rotate(-10deg) !important; }
+    .kitty-speech {
+      position: fixed;
+      z-index: 1050;
+      background: var(--surface);
+      padding: 8px 16px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    .kitty-speech::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: 20px;
+      width: 12px;
+      height: 12px;
+      background: var(--surface);
+      transform: rotate(45deg);
+      box-shadow: 2px 2px 4px rgba(0,0,0,0.05);
+    }
+
+    /* 6. Rain Effect */
+    .rain-overlay {
+      background: transparent;
+      pointer-events: none;
+    }
+    .rain-overlay .demo-dismiss { pointer-events: all; }
+    .raindrop {
+      position: fixed;
+      width: 2px;
+      background: linear-gradient(to bottom, transparent, rgba(107, 146, 114, 0.4));
+      z-index: 1050;
+      animation: rainFall linear infinite;
+      pointer-events: none;
+    }
+    @keyframes rainFall {
+      0% { transform: translateY(-20px); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateY(100vh); opacity: 0; }
+    }
+    .rain-message {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1060;
+      text-align: center;
+      color: var(--ink);
+      pointer-events: all;
+    }
+    .rain-msg-text {
+      font-family: var(--serif);
+      font-size: 24px;
+      font-weight: 300;
+      background: rgba(255,255,255,0.8);
+      backdrop-filter: blur(12px);
+      padding: 24px 40px;
+      border-radius: 16px;
+    }
+
+    /* 7. Breathing Circle */
+    .breathe-overlay {
+      background: rgba(0,0,0,0.7);
+    }
+    .breathe-circle {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+      z-index: 1050;
+      animation: breatheAnim 6s ease-in-out infinite;
+    }
+    @keyframes breatheAnim {
+      0%, 100% { transform: translate(-50%, -50%) scale(0.6); opacity: 0.4; }
+      50% { transform: translate(-50%, -50%) scale(1.4); opacity: 0.8; }
+    }
+    .breathe-text {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1060;
+      font-family: var(--serif);
+      font-size: 20px;
+      color: white;
+      text-align: center;
+      animation: breatheTextAnim 6s ease-in-out infinite;
+    }
+    @keyframes breatheTextAnim {
+      0%, 45% { content: 'Breathe in...'; opacity: 1; }
+      50%, 95% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+    .breathe-sub {
+      position: fixed;
+      top: calc(50% + 100px);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1060;
+      font-size: 14px;
+      color: rgba(255,255,255,0.6);
+      text-align: center;
+    }
+
+    /* 8. Color Drain */
+    .drain-filter {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      pointer-events: none;
+      backdrop-filter: saturate(100%);
+      transition: backdrop-filter 4s ease;
+    }
+    .drain-filter.active-anim {
+      backdrop-filter: saturate(0%) brightness(0.9);
+    }
+
+    /* 9. Floating Bubble */
+    .bubble {
+      position: fixed;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, rgba(212,168,71,0.15), rgba(212,168,71,0.05));
+      border: 1px solid rgba(212,168,71,0.2);
+      z-index: 1050;
+      pointer-events: all;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: float 4s ease-in-out infinite;
+      transition: transform 0.3s var(--ease-bounce);
+    }
+    .bubble:hover { transform: scale(1.1); }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+    .bubble-inner {
+      text-align: center;
+      pointer-events: none;
+    }
+    .bubble-icon { font-size: 24px; }
+    .bubble-text { font-size: 11px; font-weight: 600; color: var(--ink-2); margin-top: 4px; }
+
+    /* 10. Screen Shake */
+    @keyframes screenShake {
+      0%, 100% { transform: translate(0); }
+      10% { transform: translate(-2px, 1px); }
+      20% { transform: translate(2px, -1px); }
+      30% { transform: translate(-1px, 2px); }
+      40% { transform: translate(1px, -1px); }
+      50% { transform: translate(-1px, 1px); }
+      60% { transform: translate(2px, 0); }
+      70% { transform: translate(-2px, 1px); }
+      80% { transform: translate(1px, -2px); }
+      90% { transform: translate(-1px, 0); }
+    }
+
+    /* 11. Countdown Timer Bar */
+    .timer-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      z-index: 1100;
+      background: var(--urgent);
+      transform-origin: left;
+      animation: timerShrink 30s linear forwards;
+    }
+    @keyframes timerShrink {
+      from { transform: scaleX(1); }
+      to { transform: scaleX(0); }
+    }
+
+    /* 12. Particle Swarm */
+    .particle {
+      position: fixed;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      z-index: 1050;
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    /* 13. Wave Effect */
+    .wave-overlay {
+      background: transparent;
+      pointer-events: none;
+    }
+    .wave-overlay .demo-dismiss { pointer-events: all; }
+    .wave-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 1050;
+      pointer-events: none;
+    }
+    .wave-bar svg {
+      width: 100%;
+      display: block;
+    }
+
+    /* 14. Progress Ring */
+    .progress-ring-container {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1050;
+    }
+    .progress-ring-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+    .ring-time { font-family: var(--serif); font-size: 32px; color: white; }
+    .ring-label { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 4px; }
+
+    /* 15. Emoji March */
+    .marcher {
+      position: fixed;
+      font-size: 28px;
+      z-index: 1050;
+      pointer-events: none;
+      animation: march linear forwards;
+    }
+    @keyframes march {
+      0% { transform: translateX(-60px); }
+      100% { transform: translateX(calc(100vw + 60px)); }
+    }
+
+    /* Notification Toast */
+    .notif-toast {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 1100;
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 16px 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      max-width: 340px;
+      animation: toastIn 0.4s var(--ease);
+      pointer-events: all;
+    }
+    @keyframes toastIn {
+      from { transform: translateX(120%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    .notif-icon { font-size: 24px; flex-shrink: 0; }
+    .notif-content {}
+    .notif-title { font-size: 13px; font-weight: 600; color: var(--ink); }
+    .notif-body { font-size: 12px; color: var(--ink-2); margin-top: 2px; }
+
+    /* Island banner (Dynamic Island style) */
+    .island-banner {
+      position: fixed;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1100;
+      background: var(--ink);
+      color: white;
+      border-radius: 24px;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: islandExpand 0.5s var(--ease-bounce);
+      pointer-events: all;
+      cursor: pointer;
+    }
+    @keyframes islandExpand {
+      0% { transform: translateX(-50%) scaleX(0.3); opacity: 0; border-radius: 50px; }
+      100% { transform: translateX(-50%) scaleX(1); opacity: 1; border-radius: 24px; }
+    }
+    .island-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--urgent);
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.3); }
+    }
+    .island-text { font-size: 13px; font-weight: 500; }
+    .island-time { font-size: 11px; opacity: 0.6; font-family: var(--mono); }
+
+    /* Split reveal */
+    .split-overlay {
+      display: flex;
+    }
+    .split-half {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.8s var(--ease);
+    }
+    .split-left {
+      background: var(--ink);
+      color: white;
+      transform: translateX(-100%);
+    }
+    .split-right {
+      background: var(--accent);
+      color: var(--ink);
+      transform: translateX(100%);
+    }
+    .split-overlay.active-anim .split-left,
+    .split-overlay.active-anim .split-right {
+      transform: translateX(0);
+    }
+    .split-content {
+      text-align: center;
+      padding: 32px;
+    }
+    .split-content h2 {
+      font-family: var(--serif);
+      font-size: 28px;
+      font-weight: 300;
+      margin-bottom: 8px;
+    }
+    .split-content p { font-size: 14px; opacity: 0.7; }
+
+    /* Spotlight search */
+    .spotlight-overlay {
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(8px);
+    }
+    .spotlight-box {
+      position: fixed;
+      top: 30%;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1050;
+      width: 480px;
+      background: var(--surface);
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      padding: 24px;
+      animation: spotlightIn 0.3s var(--ease);
+    }
+    @keyframes spotlightIn {
+      from { transform: translateX(-50%) scale(0.95) translateY(-10px); opacity: 0; }
+      to { transform: translateX(-50%) scale(1) translateY(0); opacity: 1; }
+    }
+    .spotlight-prompt {
+      font-family: var(--serif);
+      font-size: 20px;
+      font-weight: 300;
+      color: var(--ink);
+      margin-bottom: 16px;
+      line-height: 1.3;
+    }
+    .spotlight-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .spotlight-opt {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      background: var(--bg);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      border: none;
+      font-family: var(--sans);
+      font-size: 14px;
+      color: var(--ink);
+      text-align: left;
+      width: 100%;
+    }
+    .spotlight-opt:hover { background: var(--accent-soft); }
+    .spotlight-opt-icon { font-size: 18px; }
+    .spotlight-opt-text { flex: 1; }
+    .spotlight-opt-kbd {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--ink-4);
+      background: var(--surface);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="catalog-header">
+    <a href="index.html" class="catalog-back">← Back to Hub</a>
+    <h1 class="catalog-title">50 Attention Mechanisms</h1>
+    <p class="catalog-sub">Creative ways to grab an ADHD user's attention when it's time to transition. Click "Try it" on any card to see it in action.</p>
+  </div>
+
+  <div class="category-nav">
+    <button class="cat-btn active" onclick="filterCat('all', this)">All (50)</button>
+    <button class="cat-btn" onclick="filterCat('visual', this)">🔦 Visual Takeovers</button>
+    <button class="cat-btn" onclick="filterCat('character', this)">🐱 Character Visitors</button>
+    <button class="cat-btn" onclick="filterCat('physics', this)">⚡ Physics & Play</button>
+    <button class="cat-btn" onclick="filterCat('ambient', this)">🌊 Ambient</button>
+    <button class="cat-btn" onclick="filterCat('sound', this)">🔔 Sound & Haptic</button>
+    <button class="cat-btn" onclick="filterCat('gamified', this)">🎮 Gamified</button>
+  </div>
+
+  <div class="catalog-grid" id="catalog">
+    <!-- Cards will be generated by JS -->
+  </div>
+
+  <!-- DEMO OVERLAY CONTAINER -->
+  <div class="demo-overlay" id="demo-overlay">
+    <div id="demo-content"></div>
+    <div class="demo-dismiss">
+      <button class="demo-btn primary" onclick="dismissDemo()">Got it — I'll transition ✓</button>
+      <button class="demo-btn secondary" onclick="dismissDemo()">5 more minutes</button>
+    </div>
+  </div>
+
+  <script>
+    // ══════════════════════════════════════════════════════════════
+    // MECHANISM DATA — 50 Creative Attention Grabbers
+    // ══════════════════════════════════════════════════════════════
+
+    const mechanisms = [
+      // ── VISUAL TAKEOVERS ──
+      { id:1, cat:'visual', name:'The Torch', desc:'Screen goes dark. A flashlight follows your cursor, revealing a message underneath: "Time to switch — your 3:00 PM meeting starts in 5 min."', complexity:'medium', escalation:'Circle shrinks over time until only a tiny pinhole of light remains.' },
+      { id:2, cat:'visual', name:'Frost Glass', desc:'Screen gradually frosts over like a cold window. Content becomes blurry and unreadable. A gentle message fades in at center.', complexity:'low', escalation:'Frost deepens. After 2min, crystals form. After 5min, fully opaque.' },
+      { id:3, cat:'visual', name:'Vignette Pulse', desc:'Warm terracotta vignette pulses at the edges of the screen, like a heartbeat. A slim banner slides down from top.', complexity:'low', escalation:'Vignette darkens and pulses faster. Banner becomes more prominent.' },
+      { id:4, cat:'visual', name:'Color Drain', desc:'Screen slowly loses color saturation over 30 seconds, going fully grayscale. The only color remaining is the transition CTA button.', complexity:'low', escalation:'After grayscale: brightness dims. The CTA button glows brighter.' },
+      { id:5, cat:'visual', name:'Split Reveal', desc:'Screen splits in half — left side goes dark with "Current Task: Done?", right side shows gold with "Next: Manager 1:1 in 5 min".', complexity:'medium', escalation:'Halves start sliding further apart, revealing blur underneath.' },
+      { id:6, cat:'visual', name:'Spotlight Sweep', desc:'A spotlight slowly sweeps across the screen like a searchlight, revealing a notification wherever it passes.', complexity:'medium', escalation:'Multiple spotlights. Speed increases. Becomes impossible to ignore.' },
+      { id:7, cat:'visual', name:'Screen Curtain', desc:'A velvet curtain descends from the top of the screen, covering content slowly. Shows "Intermission" in theater-style typography.', complexity:'medium', escalation:'Curtain speed increases. Theater lights dim.' },
+      { id:8, cat:'visual', name:'Pixel Dissolve', desc:'Screen content starts dissolving into pixels from the edges inward. Like sand being blown away.', complexity:'high', escalation:'Dissolution speeds up. Content becomes unreadable.' },
+      { id:9, cat:'visual', name:'Dynamic Island Alert', desc:'A pill-shaped banner appears at top center (like iPhone Dynamic Island). Shows task name, countdown, and a pulsing dot.', complexity:'low', escalation:'Island expands to show full meeting details and action buttons.' },
+      { id:10, cat:'visual', name:'Countdown Timer Bar', desc:'A thin colored bar at the top of the screen slowly shrinks from right to left, showing remaining time visually.', complexity:'low', escalation:'Bar color shifts from green→amber→urgent terracotta as time decreases.' },
+
+      // ── CHARACTER VISITORS ──
+      { id:11, cat:'character', name:'The Kitty', desc:'A curious cat emoji walks in from the side of the screen, sits down, and looks up at you with a speech bubble: "Hey, don\'t you have somewhere to be? 🐱"', complexity:'medium', escalation:'Cat starts batting at your cursor. Then brings friends. Then naps on your work.' },
+      { id:12, cat:'character', name:'The Puppy', desc:'A bouncing puppy runs across the bottom of the screen with a leash emoji, tugging you toward the next task. Speech: "Walk time! (I mean, meeting time!)"', complexity:'medium', escalation:'Puppy sits and whimpers. Then howls. Then brings your shoe.' },
+      { id:13, cat:'character', name:'The Robot Butler', desc:'A little robot emoji slides in from the corner with a silver tray: "Your next appointment is served, sir."', complexity:'medium', escalation:'Robot starts tidying your screen — minimizing windows, organizing.' },
+      { id:14, cat:'character', name:'The Owl', desc:'A wise owl perches at the top of your screen: "Hoo-hoo! Wise people know when to stop. Your meeting starts in 5 minutes."', complexity:'low', escalation:'Owl starts hooting (subtle animation). Eyes follow cursor.' },
+      { id:15, cat:'character', name:'The Ghost', desc:'A friendly ghost slowly fades into view behind your content, waving. Gets more visible over time. "Don\'t ghost your meeting! 👻"', complexity:'medium', escalation:'Ghost becomes more solid. Starts floating through your work.' },
+      { id:16, cat:'character', name:'The Penguin Parade', desc:'A line of tiny penguins marches across the bottom of the screen, carrying a banner with your next task.', complexity:'medium', escalation:'More penguins join. They start building an igloo that blocks content.' },
+      { id:17, cat:'character', name:'Clippy Returns', desc:'A nostalgic paper clip character pops up: "It looks like you\'re trying to miss a meeting. Would you like help with that?"', complexity:'low', escalation:'Clippy gets increasingly sarcastic and starts rearranging things.' },
+      { id:18, cat:'character', name:'The Plant', desc:'A small plant in the corner grows taller over time. When it\'s time, it blooms with a flower containing your next task name.', complexity:'medium', escalation:'Plant wilts if ignored, guilt-tripping gently.' },
+      { id:19, cat:'character', name:'The Duckling Line', desc:'Baby ducklings follow your cursor around the screen. The mama duck holds a sign with your next task.', complexity:'high', escalation:'More ducklings appear. They start quacking (visual bouncing).' },
+      { id:20, cat:'character', name:'The Sloth', desc:'A sloth slowly climbs down from the top of screen. Takes 60 seconds. When it arrives: "Even I know it\'s time to move."', complexity:'medium', escalation:'Sloth falls asleep on your work, blocking the view.' },
+
+      // ── PHYSICS & INTERACTIVE PLAY ──
+      { id:21, cat:'physics', name:'Gravity Drop', desc:'Letters and emojis start falling from the top of the screen like rain, accumulating at the bottom. They spell out your next task.', complexity:'medium', escalation:'Objects fall faster. Screen fills up. Content gets buried.' },
+      { id:22, cat:'physics', name:'Cursor Magnet', desc:'A glowing orb appears at the edge of the screen. Your cursor is gently pulled toward it. The orb contains your next task info.', complexity:'high', escalation:'Magnetic pull strengthens. More orbs appear. Cursor becomes hard to control.' },
+      { id:23, cat:'physics', name:'Bubble Pop', desc:'Translucent bubbles slowly rise from the bottom of the screen. Each contains a word from your next task name. Pop them to dismiss.', complexity:'medium', escalation:'More bubbles, faster. They start blocking content.' },
+      { id:24, cat:'physics', name:'Screen Shake', desc:'Screen does a very subtle shake — like a phone vibration. Just enough to break focus without being aggressive.', complexity:'low', escalation:'Shake intensity and frequency increase gradually.' },
+      { id:25, cat:'physics', name:'Particle Swarm', desc:'Tiny golden particles gather around your cursor, forming a swirling galaxy. If you stop moving, they form words: "Time to move."', complexity:'high', escalation:'Particle count increases. They start trailing behind cursor everywhere.' },
+      { id:26, cat:'physics', name:'The Elastic Band', desc:'A rubber band appears connecting your cursor to a pin showing your next task. Stretches as you move away, pulls back.', complexity:'medium', escalation:'Band gets tighter. Snapping sound effect. Multiple bands.' },
+      { id:27, cat:'physics', name:'Snow Globe', desc:'Screen turns into a snow globe. Shake (scroll) to reveal the message inside: your next meeting info.', complexity:'medium', escalation:'Snow gets heavier, obscuring content.' },
+      { id:28, cat:'physics', name:'Ripple Touch', desc:'Every click creates a water ripple that expands across the screen. Ripples carry fragments of your next task name.', complexity:'medium', escalation:'Ripples persist longer, overlap, make screen wavy.' },
+      { id:29, cat:'physics', name:'Magnetic Letters', desc:'Letters of your next task float around the screen like fridge magnets. Drag them into order to acknowledge.', complexity:'high', escalation:'Letters multiply. Some are wrong. Increasingly playful chaos.' },
+      { id:30, cat:'physics', name:'The Black Hole', desc:'A small black hole appears in the corner of the screen. It slowly sucks in nearby content, leaving a void.', complexity:'high', escalation:'Black hole grows. More content gets pulled in. Only the CTA remains.' },
+
+      // ── AMBIENT & SUBTLE ──
+      { id:31, cat:'ambient', name:'Sunset Gradient', desc:'Background color slowly shifts from your current theme to a warm sunset gradient, signaling "end of this task\'s day."', complexity:'low', escalation:'Colors become more vivid. Eventually shifts to night sky.' },
+      { id:32, cat:'ambient', name:'Breathing Glow', desc:'A soft ambient circle breathes (expands and contracts) at center of screen. Calming, meditative. Guides breath.', complexity:'low', escalation:'Circle size increases. Pulsing pace slows down, demanding attention.' },
+      { id:33, cat:'ambient', name:'Rain on Window', desc:'Subtle raindrops start falling across the screen. A message appears through the rain: "Storm\'s coming — better head to your meeting."', complexity:'medium', escalation:'Rain intensifies. Lightning flash reveals the full message.' },
+      { id:34, cat:'ambient', name:'Fog Roll', desc:'A gentle fog rolls in from the bottom of the screen, obscuring content softly. Dreamlike. Message floats above the fog.', complexity:'medium', escalation:'Fog thickens. Content becomes invisible. Only message visible.' },
+      { id:35, cat:'ambient', name:'Heartbeat Pulse', desc:'Subtle pulse animation on the entire screen — like a gentle heartbeat. Rhythm matches a calm resting heart rate.', complexity:'low', escalation:'Heartbeat speeds up. Color tints toward urgent.' },
+      { id:36, cat:'ambient', name:'Northern Lights', desc:'Subtle aurora borealis waves appear at the top of the screen. Beautiful, calming, but noticeable.', complexity:'medium', escalation:'Aurora intensifies. Colors become more vivid and active.' },
+      { id:37, cat:'ambient', name:'Tide Rising', desc:'A waterline slowly rises from the bottom of the screen. Your content "floods" gradually. A lifebuoy shows your next task.', complexity:'medium', escalation:'Water rises faster. Urgency increases as content submerges.' },
+      { id:38, cat:'ambient', name:'Day/Night Cycle', desc:'The background undergoes a miniature day-night cycle. Sun sets, moon rises. "Your day on this task is ending."', complexity:'medium', escalation:'Night gets darker. Stars appear. Then: "A new task dawns."' },
+      { id:39, cat:'ambient', name:'Candle Flicker', desc:'A small animated candle appears in the corner. Its flame flickers gently. When time\'s up, it goes out with a wisp of smoke.', complexity:'low', escalation:'Multiple candles. They go out one by one. Last one flickers urgently.' },
+      { id:40, cat:'ambient', name:'Seasonal Shift', desc:'Screen gently transitions through seasons — leaves fall (autumn), snow drifts (winter) — marking time passage.', complexity:'medium', escalation:'Season changes accelerate. Time is visibly passing.' },
+
+      // ── SOUND & HAPTIC ──
+      { id:41, cat:'sound', name:'Wind Chimes', desc:'Gentle wind chime sounds play periodically, increasing in frequency. Each chime is a soft, pleasant tone.', complexity:'low', escalation:'More frequent chimes. Deeper tones. Eventually a gentle melody.' },
+      { id:42, cat:'sound', name:'Heartbeat Audio', desc:'A subtle heartbeat sound plays through speakers/headphones. Calm and rhythmic, then gradually speeds up.', complexity:'low', escalation:'Heart rate increases from resting to active, creating subconscious urgency.' },
+      { id:43, cat:'sound', name:'Spatial Whisper', desc:'A whispered "hey..." comes from the left speaker. Then "your meeting..." from the right. Spatial audio immersion.', complexity:'medium', escalation:'Whisper becomes normal speaking volume. Spatial movement increases.' },
+      { id:44, cat:'sound', name:'Nature Transition', desc:'Forest sounds (birds, stream) slowly shift to urban sounds (footsteps, doors), signaling it\'s time to "leave" this task.', complexity:'medium', escalation:'Urban sounds intensify. Door closing sound. Meeting room ambiance.' },
+      { id:45, cat:'sound', name:'Musical Countdown', desc:'A gentle musical phrase plays. Each repeat drops a note, like a musical countdown. When the melody resolves — time\'s up.', complexity:'medium', escalation:'Tempo increases. Melody becomes more insistent. Final chord resolution.' },
+
+      // ── GAMIFIED ──
+      { id:46, cat:'gamified', name:'XP Reward Toast', desc:'A game-style notification: "+50 XP for completing this task! 🎮 Level up your productivity streak."', complexity:'low', escalation:'XP multiplier decreases if delayed. "Hurry — 2x bonus expires in 3 min!"' },
+      { id:47, cat:'gamified', name:'Streak Shield', desc:'"Your 5-day transition streak is at risk! Transition now to keep it alive. 🛡️" Shows streak counter with flame.', complexity:'low', escalation:'Shield starts cracking. Flame flickers. Countdown to streak break.' },
+      { id:48, cat:'gamified', name:'Boss Battle', desc:'"A wild Meeting approaches! You have 5 minutes to prepare your talking points. ⚔️" RPG-style encounter.', complexity:'medium', escalation:'Boss gets angrier. HP bar appears. Time pressure increases.' },
+      { id:49, cat:'gamified', name:'Daily Challenge', desc:'"Today\'s challenge: Transition to your meeting 2 minutes early. Reward: ✨ Golden Brain Badge." Achievement unlocked!', complexity:'low', escalation:'Challenge timer counts down. "Challenge almost failed..." warning.' },
+      { id:50, cat:'gamified', name:'The Spotlight Command', desc:'A macOS Spotlight-style dialog appears: "What do you want to do?" Options: Brain Dump → Transition → 5 More Min → Dismiss.', complexity:'low', escalation:'Options narrow down. "5 More Min" disappears. Only transition remains.' },
+    ];
+
+    // ══════════════════════════════════════════════════════════════
+    // RENDER CARDS
+    // ══════════════════════════════════════════════════════════════
+
+    function renderCards(filter = 'all') {
+      const grid = document.getElementById('catalog');
+      const filtered = filter === 'all' ? mechanisms : mechanisms.filter(m => m.cat === filter);
+      
+      grid.innerHTML = filtered.map(m => `
+        <div class="mech-card" data-cat="${m.cat}" data-id="${m.id}">
+          <div class="mech-num">#${String(m.id).padStart(2,'0')}</div>
+          <div class="mech-name">${m.name}</div>
+          <div class="mech-desc">${m.desc}</div>
+          <div class="mech-tags">
+            <span class="mech-tag cat">${m.cat}</span>
+            <span class="mech-tag ${m.complexity}">${m.complexity}</span>
+          </div>
+          <button class="try-btn" onclick="event.stopPropagation(); tryMechanism(${m.id})">Try it →</button>
+        </div>
+      `).join('');
+    }
+
+    function filterCat(cat, btn) {
+      document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderCards(cat);
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // DEMO MECHANISMS
+    // ══════════════════════════════════════════════════════════════
+
+    let activeDemo = null;
+    let demoCleanup = null;
+
+    function tryMechanism(id) {
+      const overlay = document.getElementById('demo-overlay');
+      const content = document.getElementById('demo-content');
+      content.innerHTML = '';
+      overlay.className = 'demo-overlay active';
+      
+      // Add demo label
+      const label = document.createElement('div');
+      label.className = 'demo-label';
+      label.textContent = `Demo: ${mechanisms[id-1].name} (#${id})`;
+      content.appendChild(label);
+
+      activeDemo = id;
+
+      switch(id) {
+        case 1: demoTorch(content, overlay); break;
+        case 2: demoFrost(content, overlay); break;
+        case 3: demoVignette(content, overlay); break;
+        case 4: demoDrain(content, overlay); break;
+        case 5: demoSplit(content, overlay); break;
+        case 9: demoIsland(content, overlay); break;
+        case 10: demoTimerBar(content, overlay); break;
+        case 11: demoKitty(content, overlay); break;
+        case 14: demoOwl(content, overlay); break;
+        case 17: demoClippy(content, overlay); break;
+        case 21: demoGravity(content, overlay); break;
+        case 24: demoShake(content, overlay); break;
+        case 25: demoParticles(content, overlay); break;
+        case 32: demoBreathe(content, overlay); break;
+        case 33: demoRain(content, overlay); break;
+        case 35: demoHeartbeat(content, overlay); break;
+        case 39: demoCandle(content, overlay); break;
+        case 46: demoXP(content, overlay); break;
+        case 47: demoStreak(content, overlay); break;
+        case 50: demoSpotlight(content, overlay); break;
+        default: demoGeneric(content, overlay, id); break;
+      }
+    }
+
+    function dismissDemo() {
+      const overlay = document.getElementById('demo-overlay');
+      overlay.className = 'demo-overlay';
+      document.getElementById('demo-content').innerHTML = '';
+      if (demoCleanup) { demoCleanup(); demoCleanup = null; }
+      document.body.style.animation = '';
+      document.body.style.filter = '';
+      activeDemo = null;
+    }
+
+    // ── Individual Demo Implementations ──
+
+    function demoTorch(content, overlay) {
+      overlay.classList.add('torch-overlay');
+      const spot = document.createElement('div');
+      spot.className = 'torch-spotlight';
+      content.appendChild(spot);
+      
+      const msg = document.createElement('div');
+      msg.className = 'torch-message';
+      msg.innerHTML = 'Time to switch.<br><span style="font-size:16px;opacity:0.5;">Manager 1:1 in 5 minutes</span>';
+      content.appendChild(msg);
+
+      const handler = (e) => {
+        spot.style.left = e.clientX + 'px';
+        spot.style.top = e.clientY + 'px';
+      };
+      document.addEventListener('mousemove', handler);
+      demoCleanup = () => {
+        document.removeEventListener('mousemove', handler);
+        overlay.classList.remove('torch-overlay');
+      };
+    }
+
+    function demoFrost(content, overlay) {
+      overlay.classList.add('frost-overlay');
+      const center = document.createElement('div');
+      center.className = 'frost-center';
+      center.innerHTML = '<div class="frost-icon">❄️</div><div class="frost-text">Time to cool down</div><div class="frost-sub">Manager 1:1 starts in 5 minutes</div>';
+      content.appendChild(center);
+      requestAnimationFrame(() => overlay.classList.add('active-anim'));
+      demoCleanup = () => { overlay.classList.remove('frost-overlay', 'active-anim'); };
+    }
+
+    function demoVignette(content, overlay) {
+      overlay.classList.add('vignette-overlay');
+      const banner = document.createElement('div');
+      banner.className = 'vig-banner';
+      banner.textContent = '⏰ Manager 1:1 in 5 minutes — time to wrap up';
+      content.appendChild(banner);
+      demoCleanup = () => overlay.classList.remove('vignette-overlay');
+    }
+
+    function demoDrain(content, overlay) {
+      overlay.style.background = 'transparent';
+      overlay.style.pointerEvents = 'none';
+      document.querySelector('.demo-dismiss').style.pointerEvents = 'all';
+      document.body.style.filter = 'saturate(0%) brightness(0.9)';
+      
+      const btn = document.createElement('button');
+      btn.className = 'demo-btn primary';
+      btn.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1050;pointer-events:all;';
+      btn.textContent = 'Transition to Manager 1:1 →';
+      btn.onclick = dismissDemo;
+      content.appendChild(btn);
+      
+      demoCleanup = () => { 
+        document.body.style.filter = '';
+        overlay.style.pointerEvents = '';
+      };
+    }
+
+    function demoSplit(content, overlay) {
+      overlay.classList.add('split-overlay');
+      overlay.innerHTML = `
+        <div class="split-half split-left"><div class="split-content"><h2>Current task</h2><p>JIRA-543 Account Onboarding</p></div></div>
+        <div class="split-half split-right"><div class="split-content"><h2>Coming up</h2><p>Manager 1:1 in 5 min</p></div></div>
+      `;
+      // Re-add dismiss and label
+      const dismiss = document.createElement('div');
+      dismiss.className = 'demo-dismiss';
+      dismiss.innerHTML = '<button class="demo-btn primary" onclick="dismissDemo()">Brain Dump & Transition</button><button class="demo-btn secondary" onclick="dismissDemo()">5 more min</button>';
+      overlay.appendChild(dismiss);
+      const label = document.createElement('div');
+      label.className = 'demo-label';
+      label.textContent = 'Demo: Split Reveal (#5)';
+      overlay.appendChild(label);
+      requestAnimationFrame(() => overlay.classList.add('active-anim'));
+      demoCleanup = () => { overlay.classList.remove('split-overlay', 'active-anim'); };
+    }
+
+    function demoIsland(content, overlay) {
+      overlay.style.background = 'transparent';
+      overlay.style.pointerEvents = 'none';
+      document.querySelector('.demo-dismiss').style.pointerEvents = 'all';
+      const island = document.createElement('div');
+      island.className = 'island-banner';
+      island.innerHTML = '<div class="island-dot"></div><span class="island-text">Manager 1:1</span><span class="island-time">4:55</span>';
+      island.style.pointerEvents = 'all';
+      content.appendChild(island);
+      demoCleanup = () => overlay.style.pointerEvents = '';
+    }
+
+    function demoTimerBar(content, overlay) {
+      overlay.style.background = 'transparent';
+      overlay.style.pointerEvents = 'none';
+      document.querySelector('.demo-dismiss').style.pointerEvents = 'all';
+      const bar = document.createElement('div');
+      bar.className = 'timer-bar';
+      bar.style.animationDuration = '10s';
+      content.appendChild(bar);
+      demoCleanup = () => overlay.style.pointerEvents = '';
+    }
+
+    function demoKitty(content, overlay) {
+      overlay.classList.add('kitty-overlay');
+      const kitty = document.createElement('div');
+      kitty.className = 'kitty';
+      kitty.textContent = '🐱';
+      kitty.style.bottom = '80px';
+      kitty.style.left = '-50px';
+      content.appendChild(kitty);
+
+      const speech = document.createElement('div');
+      speech.className = 'kitty-speech';
+      speech.textContent = "Hey! Don't you have somewhere to be? 😸";
+      speech.style.bottom = '140px';
+      speech.style.left = '20px';
+      speech.style.opacity = '0';
+      content.appendChild(speech);
+
+      // Animate kitty walking in
+      let pos = -50;
+      const walk = setInterval(() => {
+        pos += 3;
+        kitty.style.left = pos + 'px';
+        kitty.style.transform = `scaleX(1) rotate(${Math.sin(pos/10)*5}deg)`;
+        if (pos > 60) {
+          clearInterval(walk);
+          speech.style.transition = 'opacity 0.3s ease';
+          speech.style.opacity = '1';
+        }
+      }, 30);
+      
+      demoCleanup = () => { clearInterval(walk); overlay.classList.remove('kitty-overlay'); };
+    }
+
+    function demoOwl(content, overlay) {
+      overlay.style.background = 'transparent';
+      overlay.style.pointerEvents = 'none';
+      document.querySelector('.demo-dismiss').style.pointerEvents = 'all';
+      
+      const owl = document.createElement('div');
+      owl.style.cssText = 'position:fixed;top:10px;right:80px;font-size:48px;z-index:1050;pointer-events:all;cursor:pointer;animation:float 3s ease-in-out infinite;';
+      owl.textContent = '🦉';
+      content.appendChild(owl);
+      
+      const speech = document.createElement('div');
+      speech.className = 'kitty-speech';
+      speech.textContent = 'Hoo-hoo! Wise people know when to stop. Meeting in 5 min.';
+      speech.style.cssText = 'top:70px;right:40px;';
+      content.appendChild(speech);
+      
+      demoCleanup = () => overlay.style.pointerEvents = '';
+    }
+
+    function demoClippy(content, overlay) {
+      overlay.style.background = 'transparent';
+      overlay.style.pointerEvents = 'none';
+      document.querySelector('.demo-dismiss').style.pointerEvents = 'all';
+      
+      const clippy = document.createElement('div');
+      clippy.style.cssText = 'position:fixed;bottom:100px;right:40px;z-index:1050;pointer-events:all;';
+      clippy.innerHTML = `
+        <div style="font-size:48px;text-align:center;margin-bottom:8px;animation:float 2s ease-in-out infinite;">📎</div>
+        <div style="background:var(--surface);padding:16px 20px;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.12);max-width:260px;font-size:13px;color:var(--ink);line-height:1.5;">
+          <strong>It looks like you're trying to miss a meeting.</strong><br><br>
+          Would you like help with that?<br><br>
+          <button onclick="dismissDemo()" style="padding:6px 16px;border-radius:999px;background:var(--ink);color:white;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--sans);">Take me there →</button>
+        </div>
+      `;
+      content.appendChild(clippy);
+      demoCleanup = () => overlay.style.pointerEvents = '';
+    }
+
+    function demoGravity(content, overlay) {
+      overlay.classList.add('gravity-overlay');
+      const chars = '📋✏️⏰🎯💡📌🗓️⚡📎🔔'.split('');
+      let count = 0;
+      const interval = setInterval(() => {
+        const char = document.createElement('div');
+        char.className = 'falling-char';
+        char.textContent = chars[count % chars.length];
+        char.style.left = (Math.random() * (window.innerWidth - 40)) + 'px';
+        char.style.animationDuration = (2 + Math.random() * 2) + 's';
+        content.appendChild(char);
+        count++;
+        if (count > 30) clearInterval(interval);
+        setTimeout(() => char.remove(), 4000);
+      }, 200);
+      demoCleanup = () => { clearInterval(interval); overlay.classList.remove('gravity-overlay'); };
+    }
+
+    function demoShake(content, overlay) {
+      overlay.style.background = 'transparent';
+      overlay.style.pointerEvents = 'none';
+      document.querySelector('.demo-dismiss').style.pointerEvents = 'all';
+      document.body.style.animation = 'screenShake 0.5s ease-in-out';
+      setTimeout(() => document.body.style.animation = 'screenShake 0.3s ease-in-out', 2000);
+      setTimeout(() => document.body.style.animation = 'screenShake 0.2s ease-in-out 3', 4000);
+      
+      const toast = document.createElement('div');
+      toast.className = 'notif-toast';
+      toast.innerHTML = '<div class="notif-icon">📳</div><div class="notif-content"><div class="notif-title">Gentle nudge</div><div class="notif-body">Manager 1:1 in 5 minutes</div></div>';
+      toast.style.pointerEvents = 'all';
+      content.appendChild(toast);
+      
+      demoCleanup = () => { document.body.style.animation = ''; overlay.style.pointerEvents = ''; };
+    }
+
+    function demoParticles(content, overlay) {
+      overlay.style.background = 'rgba(0,0,0,0.3)';
+      const particles = [];
+      const canvas = document.createElement('canvas');
+      canvas.style.cssText = 'position:fixed;inset:0;z-index:1050;pointer-events:none;';
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      content.appendChild(canvas);
+      const ctx = canvas.getContext('2d');
+      
+      let mouseX = window.innerWidth/2, mouseY = window.innerHeight/2;
+      document.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
+      
+      for (let i = 0; i < 60; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          vx: 0, vy: 0,
+          size: 2 + Math.random() * 3,
+          color: `hsla(${40 + Math.random()*20}, 70%, 60%, 0.7)`
+        });
+      }
+      
+      let animId;
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+          const dx = mouseX - p.x, dy = mouseY - p.y;
+          const dist = Math.sqrt(dx*dx + dy*dy);
+          const force = Math.min(3, 200 / (dist + 1));
+          p.vx += (dx / dist) * force * 0.02;
+          p.vy += (dy / dist) * force * 0.02;
+          p.vx *= 0.96; p.vy *= 0.96;
+          p.x += p.vx; p.y += p.vy;
+          
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+          ctx.fillStyle = p.color;
+          ctx.fill();
+        });
+        animId = requestAnimationFrame(animate);
+      }
+      animate();
+      demoCleanup = () => { cancelAnimationFrame(animId); };
+    }
+
+    function demoBreathe(content, overlay) {
+      overlay.classList.add('breathe-overlay');
+      const circle = document.createElement('div');
+      circle.className = 'breathe-circle';
+      content.appendChild(circle);
+      
+      const text = document.createElement('div');
+      text.className = 'breathe-text';
+      content.appendChild(text);
+      
+      const sub = document.createElement('div');
+      sub.className = 'breathe-sub';
+      sub.textContent = 'Take a moment. Your meeting starts in 5 minutes.';
+      content.appendChild(sub);
+      
+      // Cycle breathe text
+      const phrases = ['Breathe in...', 'Hold...', 'Breathe out...', 'Hold...'];
+      let pi = 0;
+      text.textContent = phrases[0];
+      const interval = setInterval(() => {
+        pi = (pi + 1) % phrases.length;
+        text.style.opacity = '0';
+        setTimeout(() => { text.textContent = phrases[pi]; text.style.opacity = '1'; }, 300);
+      }, 3000);
+      
+      demoCleanup = () => { clearInterval(interval); overlay.classList.remove('breathe-overlay'); };
+    }
+
+    function demoRain(content, overlay) {
+      overlay.classList.add('rain-overlay');
+      
+      // Create raindrops
+      for (let i = 0; i < 80; i++) {
+        const drop = document.createElement('div');
+        drop.className = 'raindrop';
+        drop.style.left = (Math.random() * 100) + '%';
+        drop.style.height = (20 + Math.random() * 30) + 'px';
+        drop.style.animationDuration = (0.5 + Math.random() * 0.5) + 's';
+        drop.style.animationDelay = (Math.random() * 2) + 's';
+        content.appendChild(drop);
+      }
+      
+      const msg = document.createElement('div');
+      msg.className = 'rain-message';
+      msg.innerHTML = '<div class="rain-msg-text">Storm\'s coming.<br>Better head to your meeting. ⛈️</div>';
+      content.appendChild(msg);
+      
+      demoCleanup = () => overlay.classList.remove('rain-overlay');
+    }
+
+    function demoHeartbeat(content, overlay) {
+      overlay.style.background = 'transparent';
+      overlay.style.pointerEvents = 'none';
+      document.querySelector('.demo-dismiss').style.pointerEvents = 'all';
+      
+      const heart = document.createElement('div');
+      heart.style.cssText = `
+        position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+        font-size:64px;z-index:1050;pointer-events:none;
+        animation: heartPulse 1s ease-in-out infinite;
+      `;
+      heart.textContent = '💗';
+      content.appendChild(heart);
+      
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes heartPulse {
+          0%, 100% { transform: translate(-50%,-50%) scale(1); }
+          15% { transform: translate(-50%,-50%) scale(1.15); }
+          30% { transform: translate(-50%,-50%) scale(1); }
+          45% { transform: translate(-50%,-50%) scale(1.1); }
+        }
+      `;
+      document.head.appendChild(style);
+      
+      const text = document.createElement('div');
+      text.style.cssText = 'position:fixed;top:calc(50% + 60px);left:50%;transform:translateX(-50%);z-index:1050;font-family:var(--serif);font-size:18px;color:var(--ink-2);text-align:center;pointer-events:none;';
+      text.textContent = 'Your heart knows it\'s time to move.';
+      content.appendChild(text);
+      
+      demoCleanup = () => { style.remove(); overlay.style.pointerEvents = ''; };
+    }
+
+    function demoCandle(content, overlay) {
+      overlay.style.background = 'rgba(0,0,0,0.8)';
+      
+      const candles = ['🕯️','🕯️','🕯️','🕯️','🕯️'];
+      const container = document.createElement('div');
+      container.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;gap:32px;z-index:1050;';
+      
+      candles.forEach((c, i) => {
+        const div = document.createElement('div');
+        div.style.cssText = `font-size:48px;animation:float ${2+i*0.3}s ease-in-out infinite;opacity:1;transition:opacity 1s ease;`;
+        div.textContent = c;
+        div.id = `candle-${i}`;
+        container.appendChild(div);
+      });
+      content.appendChild(container);
+      
+      const text = document.createElement('div');
+      text.style.cssText = 'position:fixed;top:calc(50% + 60px);left:50%;transform:translateX(-50%);z-index:1050;font-family:var(--serif);font-size:18px;color:rgba(255,255,255,0.6);text-align:center;';
+      text.textContent = 'Time is passing... Meeting in 5 minutes.';
+      content.appendChild(text);
+      
+      // Blow out candles one by one
+      let ci = candles.length - 1;
+      const interval = setInterval(() => {
+        const candle = document.getElementById(`candle-${ci}`);
+        if (candle) { candle.style.opacity = '0.15'; candle.textContent = '💨'; }
+        ci--;
+        if (ci < 0) clearInterval(interval);
+      }, 1500);
+      
+      demoCleanup = () => clearInterval(interval);
+    }
+
+    function demoXP(content, overlay) {
+      overlay.style.background = 'transparent';
+      overlay.style.pointerEvents = 'none';
+      document.querySelector('.demo-dismiss').style.pointerEvents = 'all';
+      
+      const toast = document.createElement('div');
+      toast.className = 'notif-toast';
+      toast.style.pointerEvents = 'all';
+      toast.innerHTML = `
+        <div class="notif-icon">🎮</div>
+        <div class="notif-content">
+          <div class="notif-title" style="color:var(--upcoming);">+50 XP Earned!</div>
+          <div class="notif-body">Transition now for 2x bonus. Manager 1:1 in 5 min.</div>
+        </div>
+      `;
+      content.appendChild(toast);
+      demoCleanup = () => overlay.style.pointerEvents = '';
+    }
+
+    function demoStreak(content, overlay) {
+      overlay.style.background = 'transparent';
+      overlay.style.pointerEvents = 'none';
+      document.querySelector('.demo-dismiss').style.pointerEvents = 'all';
+      
+      const toast = document.createElement('div');
+      toast.className = 'notif-toast';
+      toast.style.pointerEvents = 'all';
+      toast.innerHTML = `
+        <div class="notif-icon">🔥</div>
+        <div class="notif-content">
+          <div class="notif-title">5-day streak at risk!</div>
+          <div class="notif-body">Transition to keep your on-time streak alive. 🛡️</div>
+        </div>
+      `;
+      content.appendChild(toast);
+      demoCleanup = () => overlay.style.pointerEvents = '';
+    }
+
+    function demoSpotlight(content, overlay) {
+      overlay.classList.add('spotlight-overlay');
+      const box = document.createElement('div');
+      box.className = 'spotlight-box';
+      box.innerHTML = `
+        <div class="spotlight-prompt">Time to transition.<br>What would you like to do?</div>
+        <div class="spotlight-options">
+          <button class="spotlight-opt" onclick="dismissDemo()">
+            <span class="spotlight-opt-icon">🧠</span>
+            <span class="spotlight-opt-text">Brain Dump & Transition</span>
+            <span class="spotlight-opt-kbd">⌘D</span>
+          </button>
+          <button class="spotlight-opt" onclick="dismissDemo()">
+            <span class="spotlight-opt-icon">➡️</span>
+            <span class="spotlight-opt-text">Skip to next task</span>
+            <span class="spotlight-opt-kbd">⌘→</span>
+          </button>
+          <button class="spotlight-opt" onclick="dismissDemo()">
+            <span class="spotlight-opt-icon">⏰</span>
+            <span class="spotlight-opt-text">5 more minutes</span>
+            <span class="spotlight-opt-kbd">⌘5</span>
+          </button>
+          <button class="spotlight-opt" onclick="dismissDemo()">
+            <span class="spotlight-opt-icon">✕</span>
+            <span class="spotlight-opt-text">Dismiss for now</span>
+            <span class="spotlight-opt-kbd">Esc</span>
+          </button>
+        </div>
+      `;
+      content.appendChild(box);
+      demoCleanup = () => overlay.classList.remove('spotlight-overlay');
+    }
+
+    function demoGeneric(content, overlay, id) {
+      const m = mechanisms[id-1];
+      overlay.style.background = 'rgba(0,0,0,0.6)';
+      overlay.style.backdropFilter = 'blur(8px)';
+      
+      const card = document.createElement('div');
+      card.style.cssText = `
+        position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+        background:var(--surface);border-radius:16px;padding:40px;max-width:420px;
+        box-shadow:0 20px 60px rgba(0,0,0,0.2);z-index:1050;text-align:center;
+        animation: spotlightIn 0.3s var(--ease);
+      `;
+      card.innerHTML = `
+        <div style="font-size:48px;margin-bottom:16px;">
+          ${m.cat === 'visual' ? '🔦' : m.cat === 'character' ? '🐾' : m.cat === 'physics' ? '⚡' : m.cat === 'ambient' ? '🌊' : m.cat === 'sound' ? '🔔' : '🎮'}
+        </div>
+        <div style="font-family:var(--serif);font-size:22px;margin-bottom:8px;">${m.name}</div>
+        <div style="font-size:14px;color:var(--ink-2);line-height:1.5;margin-bottom:16px;">${m.desc}</div>
+        <div style="font-size:12px;color:var(--ink-3);font-style:italic;margin-bottom:24px;"><strong>Escalation:</strong> ${m.escalation}</div>
+        <div style="font-size:11px;color:var(--ink-4);">Full interactive demo coming soon</div>
+      `;
+      content.appendChild(card);
+      demoCleanup = () => { overlay.style.backdropFilter = ''; };
+    }
+
+    // ── Keyboard shortcut ──
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && activeDemo) dismissDemo();
+    });
+
+    // ── Initial render ──
+    renderCards();
+  </script>
+</body>
+</html>

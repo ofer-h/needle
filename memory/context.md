@@ -25,6 +25,7 @@ Intelligent second brain: capture anything, AI classifies it, surfaces the right
 ## Current state (as of 2026-05-27)
 - **`master`** includes orchestration merge: SQLite `db:*`, Anthropic classify, Today hydration, async UX, dev diagnostics, `.env` key loading (Electron 41.7.1 pin).
 - **Active branch:** `needle-integration-followup` — P0 gaps from async/observability decision doc (hydrate pending UI, DB persist feedback, intervention logging); optional Phase 4 v2 Today adapter.
+- **Today planning behavior reset landed 2026-05-27:** child work now behaves more like first-class items in the renderer. Today uses one DnD context so overdue tasks can be moved back into Today, task detail can nest a standalone task under another task, subtask detail rows support edit/reorder/move/promote actions, and event rows now open an editable detail surface with time/title/notes plus "remove time" conversion to task. Renderer still uses projected `Task.subtasks` and explicit buttons for child-item moves; gesture drag in/out of parent is not implemented yet.
 - **Local Anthropic key:** repo-root `.env` (`ANTHROPIC_API_KEY`) loaded in main on dev `npm start` via `dotenv`; `.env.example` committed, `.env` gitignored. Precedence: env → userData `config.json`. Forward plan: `docs/next-integration-steps.md`.
 - **Async UX + observability (2026-05-27):** Capture classify uses `usePendingOperation` + `AsyncStatusPanel` (timeout, cancel, errors). Dev strip: `BuildDiagnostics` (version, SHA, key source, last classify ms). Logging: `[needle]` terminal, `[needle-ui]` DevTools. Flow health: `app:getFlowHealth`. **Revisit:** `docs/decisions/2026-05-27-async-ux-and-observability.md`. Skills: `needle-async-ux`, `needle-observability`, `needle-debug-app-state`. **Still open:** Today hydrate pending UI, silent task persist, intervention logging.
 - Capture screen: token-based `CaptureScreen.css`, primitives, live Claude classify (needs API key in UI or `.env` in dev).
@@ -49,6 +50,7 @@ Intelligent second brain: capture anything, AI classifies it, surfaces the right
 - Fixed anchors divide the day into numbered slots (0 = before all anchors, 1 = after first anchor, etc.).
 - `buildTimeline()` in `src/renderer/utils/timeline.ts` merges both kinds into one ordered array.
 - Drag-and-drop uses gap zones (`useDroppable` between every item) + `DragOverlay` clone. NOT SortableContext.
+- Today and Overdue now share one DnD context so unfinished overdue work can be dragged directly back into Today's timeline; the drop updates planning fields instead of being visual-only.
 - Adjacent gaps around the dragging item are disabled (not removed from DOM) to prevent layout shifts.
 - `reorderTask(id, newSlotIndex, newSlotOrder)` in Zustand store handles all reordering; uses fractional indexing.
 - Today screen shows only `timeSlot === 'today'` tasks + a collapsed "Upcoming" footer for future items.

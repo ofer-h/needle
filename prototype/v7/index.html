@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>today-i — Flagship ADHD Focus Room Surface v7</title>
+  
+  <!-- Premium Google Fonts: Fraunces (ADHD calming serif) & Outfit (Modern geometry) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,400&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ── SHADCN-INSPIRED ALABASTER & OBSIDIAN DESIGN SYSTEM ── */
+    :root {
+      --font-display: 'Fraunces', Georgia, serif;
+      --font-text:    'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono:    'JetBrains Mono', monospace;
+
+      /* Alabaster Light Plaster Theme */
+      --bg:           #FDFCFA; 
+      --bg-surface:   #FAF7F2;
+      --bg-subtle:    #F2ECE4;
+      --border:       rgba(28, 32, 30, 0.08);
+      --border-focus: #4E6E58; /* Earthy Sage Green */
+      --text:         #1C201E; /* Deep Charcoal Slate */
+      --text-muted:   #626A66;
+      --text-tertiary: #A5AFA9;
+      
+      --accent:       #4E6E58;
+      --accent-dim:   rgba(78, 110, 88, 0.08);
+      --success:      #557A60;
+      --success-soft: rgba(85, 122, 96, 0.08);
+      --danger:       #A75D5D;
+      --danger-soft:  rgba(167, 93, 93, 0.08);
+      --warning:      #C69B56;
+      --warning-soft: rgba(198, 155, 86, 0.08);
+
+      --shadow:       0 4px 20px rgba(28, 32, 30, 0.02), 0 1px 4px rgba(28, 32, 30, 0.01);
+      --radius:       12px;
+      --transition:   all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Obsidian Dark Slate Theme */
+    .theme-dark {
+      --bg:           #0A0C0B; 
+      --bg-surface:   #141715;
+      --bg-subtle:    #1C211E;
+      --border:       rgba(232, 236, 233, 0.08);
+      --border-focus: #8CB897; /* Neon Sage */
+      --text:         #E8ECE9; /* Bone White */
+      --text-muted:   #9AB0A2;
+      --text-tertiary: #5A6A5E;
+      
+      --accent:       #8CB897;
+      --accent-dim:   rgba(140, 184, 151, 0.12);
+      --success:      #8CB897;
+      --success-soft: rgba(140, 184, 151, 0.08);
+      --danger:       #D88585;
+      --danger-soft:  rgba(216, 133, 133, 0.12);
+      --warning:      #E5C583;
+      --warning-soft: rgba(229, 197, 131, 0.12);
+
+      --shadow:       0 8px 30px rgba(0, 0, 0, 0.3), 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background: var(--bg-subtle);
+      color: var(--text);
+      font-family: var(--font-text);
+      font-size: 13px;
+      line-height: 1.5;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: background-color 0.4s, color 0.4s;
+      overflow: hidden;
+    }
+
+    /* ── PREMIUM macOS GLASS SHELL ── */
+    .mac-shell {
+      width: 1120px;
+      height: 750px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+      transition: background-color 0.4s, border-color 0.4s;
+    }
+
+    /* macOS Elegant Titlebar */
+    .titlebar {
+      height: 48px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      justify-content: space-between;
+      user-select: none;
+      flex-shrink: 0;
+      z-index: 100;
+    }
+
+    .traffic-lights {
+      display: flex;
+      gap: 8px;
+    }
+
+    .traffic-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #E5E5EA;
+      cursor: pointer;
+    }
+    .dot-close { background: #FF5F56; }
+    .dot-min { background: #FFBD2E; }
+    .dot-zoom { background: #27C93F; }
+
+    /* SHADCN-STYLE TAB CONTROLS (ADHD Zoning) */
+    .zone-selectors {
+      display: flex;
+      background: var(--bg-subtle);
+      border-radius: 8px;
+      padding: 3px;
+      gap: 2px;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .zone-btn {
+      border: none;
+      background: transparent;
+      padding: 6px 16px;
+      font-size: 12px;
+      font-weight: 500;
+      border-radius: 6px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-family: var(--font-text);
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .zone-btn:hover {
+      color: var(--text);
+    }
+    .zone-btn.active {
+      background: var(--bg);
+      color: var(--text);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .theme-toggle-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 500;
+      font-family: var(--font-text);
+      transition: var(--transition);
+    }
+    .theme-toggle-btn:hover {
+      color: var(--text);
+    }
+
+    /* ── DYNAMIC DIGITAL ZONING PANELS ── */
+    .shell-body {
+      flex: 1;
+      display: flex;
+      min-height: 0;
+      position: relative;
+    }
+
+    .zone-panel {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      flex-direction: column;
+      padding: 40px;
+      overflow-y: auto;
+      background: var(--bg);
+    }
+
+    .zone-panel.active {
+      display: flex;
+      animation: panelFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes panelFadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── DISPLAY ELEMENTS & BADGES ── */
+    .serif-title {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 38px;
+      color: var(--text);
+      margin-bottom: 6px;
+      letter-spacing: -0.01em;
+    }
+
+    .subtitle-muted {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-bottom: 30px;
+    }
+
+    /* ── SHADCN CARDS ── */
+    .card-elevated {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      transition: var(--transition);
+    }
+    .card-elevated:hover {
+      border-color: var(--border-focus);
+    }
+
+    .tag-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 10.5px;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+    .tag-jira {
+      color: var(--border-focus);
+      background: var(--accent-dim);
+      border: 1px solid rgba(78, 110, 88, 0.15);
+    }
+    .tag-user {
+      color: var(--success);
+      background: var(--success-soft);
+      border: 1px solid rgba(85, 122, 96, 0.15);
+    }
+    .tag-cat {
+      color: var(--warning);
+      background: var(--warning-soft);
+      border: 1px solid rgba(198, 155, 86, 0.15);
+    }
+
+    /* Checkbox Styles */
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      user-select: none;
+      padding: 6px 0;
+    }
+
+    .checkbox-indicator {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      border: 1.5px solid var(--border);
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+    .checkbox-container:hover .checkbox-indicator {
+      border-color: var(--border-focus);
+    }
+    .checkbox-input {
+      display: none;
+    }
+    .checkbox-input:checked + .checkbox-indicator {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .checkbox-indicator::after {
+      content: '✓';
+      color: var(--bg);
+      font-size: 11px;
+      font-weight: 700;
+      opacity: 0;
+      transform: scale(0.6);
+      transition: var(--transition);
+    }
+    .checkbox-input:checked + .checkbox-indicator::after {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .task-title-text {
+      font-size: 13.5px;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+    .checkbox-input:checked ~ .task-title-text {
+      color: var(--text-tertiary);
+      text-decoration: line-through;
+    }
+
+    /* ── ZONE 1: THE MINDFUL HEARTH ── */
+    .hearth-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 30px;
+    }
+
+    .breath-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .breath-bubble-outer {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: var(--accent-dim);
+      border: 1px solid rgba(78, 110, 88, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: transform 4s ease-in-out;
+    }
+    .breath-bubble-inner {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: rgba(78, 110, 88, 0.2);
+      transition: transform 4s ease-in-out;
+    }
+
+    /* ── ZONE 2: THE BRAIN-DUMP SCRATCHPAD ── */
+    .scratchpad-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .notion-textarea {
+      flex: 1;
+      width: 100%;
+      border: none;
+      background: transparent;
+      outline: none;
+      font-family: var(--font-text);
+      font-size: 15px;
+      color: var(--text);
+      resize: none;
+      line-height: 1.6;
+    }
+
+    .format-btn {
+      align-self: flex-end;
+      background: var(--accent);
+      color: var(--bg);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 600;
+      font-family: var(--font-text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      transition: var(--transition);
+    }
+    .format-btn:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    /* ── ZONE 3: SENSORY LOUNGE ── */
+    .lounge-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      flex: 1;
+    }
+
+    .toy-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      position: relative;
+      min-height: 280px;
+    }
+
+    .toy-title {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .toy-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .canvas-wrapper {
+      flex: 1;
+      position: relative;
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--bg);
+      border: 1px solid var(--border);
+    }
+
+    .toy-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: crosshair;
+    }
+
+    /* Bubblewrap Grid */
+    .bubblewrap-matrix {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      padding: 10px;
+      background: var(--bg);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      flex: 1;
+      align-content: center;
+    }
+    .bubble-dot {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      background: var(--bg-surface);
+      cursor: pointer;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+      transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .bubble-dot:hover {
+      transform: scale(0.95);
+      border-color: var(--border-focus);
+    }
+    .bubble-dot.popped {
+      background: var(--accent-dim);
+      border-color: var(--border);
+      box-shadow: none;
+      transform: scale(0.85);
+    }
+
+    /* Confetti Particle canvas strictly overlaid inside window */
+    #dopamineCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 200;
+      background: transparent !important;
+    }
+
+    /* Celebration Toast Notification */
+    .celebration-toast {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translate(-50%, 40px);
+      background: var(--bg-surface);
+      border: 1px solid var(--accent);
+      border-radius: 20px;
+      padding: 8px 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 300;
+    }
+    .celebration-toast.active {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    /* Custom scrollbars matching Shadcn aesthetics */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-tertiary);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── FLAGSHIP SHADCN GLASS WINDOW SHELL ── -->
+  <div class="mac-shell">
+    
+    <!-- macOS Native Title Bar -->
+    <header class="titlebar">
+      <div class="traffic-lights">
+        <span class="traffic-dot dot-close" onclick="flashConfettiShower()"></span>
+        <span class="traffic-dot dot-min"></span>
+        <span class="traffic-dot dot-zoom"></span>
+      </div>
+
+      <!-- Segment Tab Zone Controllers (ADHD Spatial Zoning) -->
+      <nav class="zone-selectors">
+        <button class="zone-btn active" onclick="switchZone('focus')">
+          <span>🕯️</span> Focus Hearth
+        </button>
+        <button class="zone-btn" onclick="switchZone('capture')">
+          <span>✍️</span> Brain Dump
+        </button>
+        <button class="zone-btn" onclick="switchZone('lounge')">
+          <span>🍃</span> Sensory Lounge
+        </button>
+      </nav>
+
+      <div class="header-actions">
+        <button class="theme-toggle-btn" onclick="toggleTheme()">
+          🌓 <span id="themeBtnText">Dark Mode</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Shell Body hosting Spatial Zones -->
+    <div class="shell-body">
+
+      <!-- ==========================================
+           ZONE 1: FOCUS HEARTH (THE INTENTION SPOT)
+           ========================================== -->
+      <section class="zone-panel active" id="panel-focus">
+        <h1 class="serif-title" id="focusDateString">Wednesday, May 27</h1>
+        <p class="subtitle-muted">Your quiet digital hearth. One single focus, clear and absolute.</p>
+
+        <div class="hearth-grid">
+          <!-- Left: Single Focus Intention Spot -->
+          <div class="card-elevated" style="gap: 20px;">
+            <div style="display:flex; flex-direction:column; gap:6px;">
+              <span class="tag-badge tag-jira" style="align-self: flex-start;" id="focusTagJira">CROSS-141</span>
+              <h2 class="serif-title" style="font-size: 26px; line-height: 1.25; margin-bottom: 0;" id="focusMainTitle">
+                Prep for meeting with @Maya about billing admin panels
+              </h2>
+              <div style="display:flex; gap:8px; margin-top:6px;" id="focusSubBadges">
+                <span class="tag-badge tag-user">@Maya</span>
+                <span class="tag-badge tag-cat">#cross</span>
+              </div>
+            </div>
+
+            <!-- Staged Subtask Checklist Drawer (Progressive Disclosure) -->
+            <div style="border-top: 1px solid var(--border); padding-top: 16px; display:flex; flex-direction:column; gap:10px;">
+              <span style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted);">
+                Milestones & subtasks
+              </span>
+              <div id="focusSubtasksQueue" style="display:flex; flex-direction:column; gap:6px;">
+                <!-- Loaded dynamically -->
+              </div>
+              
+              <!-- Simple subtask adder -->
+              <div style="display:flex; gap:10px; margin-top:10px; border-top: 1px solid var(--border); padding-top: 12px;">
+                <input type="text" id="newSubtaskInput" placeholder="Add milestone..." style="flex:1; border: 1px solid var(--border); background:var(--bg); border-radius:6px; padding:6px 12px; font-size:12px; color:var(--text); outline:none;" onkeydown="handleSubtaskKey(event)">
+                <button class="format-btn" style="padding: 6px 12px; font-size: 11px;" onclick="addNewSubtask()">Add</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Paced Breathing Balloon (Transition Coach) -->
+          <div class="breath-box">
+            <h3 class="toy-title">Breathing Hearth</h3>
+            <p class="toy-desc">Let's ease the mental friction. Inhale as the circle expands, hold, exhale as it contracts.</p>
+            
+            <div class="breath-bubble-outer" id="breathBubbleNode">
+              <div class="breath-bubble-inner"></div>
+            </div>
+            
+            <strong id="breathInstructionsText" style="font-family: var(--font-display); font-size: 16px; color: var(--accent);">
+              Click Start to Breathe
+            </strong>
+            <button class="format-btn" id="breathToggleBtn" onclick="toggleBreathingSession()">Start Paced Breathing</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           ZONE 2: BRAIN-DUMP (CAPTURE AREA)
+           ========================================== -->
+      <section class="zone-panel" id="panel-capture">
+        <h1 class="serif-title">Frictionless Capture</h1>
+        <p class="subtitle-muted">Dump raw, messy thoughts without any pressure or sorting. We'll handle the structure.</p>
+
+        <div class="card-elevated" style="flex: 1; display:flex; flex-direction:column; min-height: 0;">
+          <div class="scratchpad-container">
+            <textarea class="notion-textarea" id="brainDumpArea" placeholder="Type whatever is in your head... e.g. Review smartviews-sdk PR #30 with @Aram at 1pm, then remember to register Zoe to Gan #personal..."></textarea>
+            <button class="format-btn" onclick="structureBrainMess()">
+              ✨ Structure My Mind
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           ZONE 3: SENSORY LOUNGE (DECOMPRESSION HUB)
+           ========================================== -->
+      <section class="zone-panel" id="panel-lounge">
+        <h1 class="serif-title">Decompression Lounge</h1>
+        <p class="subtitle-muted">Satisfy physical fidgeting urges and regulate focus levels through kinetic art toys.</p>
+
+        <div class="lounge-grid">
+          <!-- Kinetic Sandbox (Sand gravity physics) -->
+          <div class="toy-card">
+            <div>
+              <h3 class="toy-title">Kinetic Sandbox</h3>
+              <p class="toy-desc">Click/drag inside to drop sand grains. Shake window to shift sandbox gravity.</p>
+            </div>
+            <div class="canvas-wrapper">
+              <canvas class="toy-canvas" id="sandboxCanvas" onclick="dropSand(event)" onmousemove="dropSandDrag(event)"></canvas>
+            </div>
+            <!-- Shake Controller slider -->
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size: 9px; text-transform:uppercase; font-weight:700; color:var(--text-muted);">Gravity Angle</span>
+              <input type="range" id="gravityAngleSlider" min="-180" max="180" value="90" style="width: 100px; accent-color: var(--accent);" oninput="shiftSandboxGravity(this.value)">
+            </div>
+          </div>
+
+          <!-- Calm concentric raindrop ripples -->
+          <div class="toy-card">
+            <div>
+              <h3 class="toy-title">Concentric Ripples</h3>
+              <p class="toy-desc">Tap anywhere to spread soothing, organic rain circles. Sound pads harmonize on click.</p>
+            </div>
+            <div class="canvas-wrapper">
+              <canvas class="toy-canvas" id="ripplesCanvas"></canvas>
+            </div>
+            <button class="format-btn" style="padding: 6px 12px; font-size:11px; align-self:center;" onclick="clearRipples()">Clear Screen</button>
+          </div>
+
+          <!-- Glass Bubblewrap Popping Mat -->
+          <div class="toy-card">
+            <div>
+              <h3 class="toy-title">Glass Bubble Mat</h3>
+              <p class="toy-desc">Roll cursor or click bubble cells to pop glass nodes with relaxing audio synth drops.</p>
+            </div>
+            <div class="bubblewrap-matrix" id="bubbleMatMatrix">
+              <!-- Loaded dynamically -->
+            </div>
+            <button class="format-btn" style="padding: 6px 12px; font-size:11px; align-self:center;" onclick="resetBubbleMat()">Reset Mat</button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Transparent canvases inside shell for celebrating completions -->
+    <canvas id="dopamineCanvas"></canvas>
+
+    <!-- Celebration Toast -->
+    <div class="celebration-toast" id="celebrationToast">
+      <span style="font-size:16px;">🌱</span>
+      <span id="toastMsg">Intention Complete!</span>
+    </div>
+
+  </div>
+
+  <!-- ── JAVASCRIPT CORE MOTOR ── -->
+  <script>
+    // ── DATABASE SEED STATE ──
+    const DEFAULT_TASK = {
+      title: "Prep for meeting with @Maya about billing admin panels and CROSS-141",
+      subtasks: [
+        { id: 1, text: "Draft stg13 credential billing specs", done: false },
+        { id: 2, text: "Sync with @Sergey on user-sync PP document", done: true },
+        { id: 3, text: "Review smartviews-sdk filters approach", done: false }
+      ]
+    };
+
+    let activeData;
+    try {
+      activeData = JSON.parse(localStorage.getItem('todayi_v7_data')) || DEFAULT_TASK;
+    } catch(e) {
+      activeData = DEFAULT_TASK;
+    }
+
+    let activeZone = 'focus';
+    let isBreathing = false;
+    let breathInterval = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      // Set Calming Serif Date String
+      updateDateHeader();
+      
+      // Load current focus card
+      renderFocusZoneItems();
+      
+      // Initialize Bubble wrap Mat
+      buildBubblewrapMat();
+
+      // Start kinetic systems
+      initSandboxPhysics();
+      initRipplesEngine();
+      setupConfettiCanvas();
+
+      // Restore states
+      restoreSavedTheme();
+      restoreActiveZone();
+    });
+
+    // ── DATE BUILDER ──
+    function updateDateHeader() {
+      const options = { weekday: 'long', month: 'long', day: 'numeric' };
+      const dateStr = new Date().toLocaleDateString('en-US', options);
+      const el = document.getElementById('focusDateString');
+      if (el) el.innerText = dateStr;
+    }
+
+    // ── DIGITAL CLOSED STORAGE: BADGE PARSER ──
+    function parseBadgeTokens(text) {
+      // Find Jiras
+      let parsed = text.replace(/([A-Z]+-\d+)/g, '<span class="tag-badge tag-jira">$1</span>');
+      // Find handles
+      parsed = parsed.replace(/(@\w+)/g, '<span class="tag-badge tag-user">$1</span>');
+      // Find hashtags
+      parsed = parsed.replace(/(#\w+)/g, '<span class="tag-badge tag-cat">$1</span>');
+      return parsed;
+    }
+
+    // ── RENDER ZONE 1: FOCUS ZONE ──
+    function renderFocusZoneItems() {
+      const titleEl = document.getElementById('focusMainTitle');
+      const tagJiraEl = document.getElementById('focusTagJira');
+      const subBadgesEl = document.getElementById('focusSubBadges');
+      const queueEl = document.getElementById('focusSubtasksQueue');
+
+      // Set Title
+      titleEl.innerHTML = parseBadgeTokens(activeData.title);
+
+      // Extract Jira key and badges for closed storage metadata anchors
+      const jiraMatch = activeData.title.match(/([A-Z]+-\d+)/);
+      if (jiraMatch) {
+        tagJiraEl.innerText = jiraMatch[0];
+        tagJiraEl.style.display = 'inline-flex';
+      } else {
+        tagJiraEl.style.display = 'none';
+      }
+
+      // Extract extra handles & categories
+      const handles = activeData.title.match(/@\w+/g) || [];
+      const cats = activeData.title.match(/#\w+/g) || [];
+      subBadgesEl.innerHTML = '';
+      handles.forEach(h => {
+        subBadgesEl.innerHTML += `<span class="tag-badge tag-user">${h}</span>`;
+      });
+      cats.forEach(c => {
+        subBadgesEl.innerHTML += `<span class="tag-badge tag-cat">${c}</span>`;
+      });
+
+      // RENDER SUBTASKS LIST
+      queueEl.innerHTML = '';
+      if (activeData.subtasks.length === 0) {
+        queueEl.innerHTML = `<span style="font-size:11px; color:var(--text-tertiary); font-style:italic;">No milestones stashed. Add one below!</span>`;
+      } else {
+        activeData.subtasks.forEach(s => {
+          const row = document.createElement('label');
+          row.className = 'checkbox-container';
+          row.innerHTML = `
+            <input type="checkbox" class="checkbox-input" ${s.done ? 'checked' : ''} onchange="toggleSubtaskNode(${s.id})">
+            <span class="checkbox-indicator"></span>
+            <span class="task-title-text">${s.text}</span>
+            <span style="margin-left:auto; cursor:pointer; color:var(--text-tertiary);" onclick="deleteSubtaskNode(${s.id}, event)">✕</span>
+          `;
+          queueEl.appendChild(row);
+        });
+      }
+    }
+
+    // Toggle Subtask
+    function toggleSubtaskNode(id) {
+      activeData.subtasks = activeData.subtasks.map(s => {
+        if (s.id === id) {
+          const newState = !s.done;
+          if (newState) {
+            // Dopamine cue - trigger soft Web Audio chime + confetti burst
+            playSynthNotes(880); 
+            triggerConfettiBlast(200, 200);
+            showDopamineToast("Milestone achieved!");
+          } else {
+            playSynthNotes(440);
+          }
+          return { ...s, done: newState };
+        }
+        return s;
+      });
+      saveFocusData();
+      renderFocusZoneItems();
+    }
+
+    // Delete subtask
+    function deleteSubtaskNode(id, event) {
+      event.preventDefault();
+      event.stopPropagation();
+      activeData.subtasks = activeData.subtasks.filter(s => s.id !== id);
+      saveFocusData();
+      renderFocusZoneItems();
+      playSynthNotes(330);
+    }
+
+    // Key handlers for subtasks input
+    function handleSubtaskKey(event) {
+      if (event.key === 'Enter') {
+        addNewSubtask();
+      }
+    }
+
+    // Add new subtask
+    function addNewSubtask() {
+      const input = document.getElementById('newSubtaskInput');
+      const val = input.value.trim();
+      if (!val) return;
+
+      const newId = activeData.subtasks.length > 0 ? Math.max(...activeData.subtasks.map(s => s.id)) + 1 : 1;
+      activeData.subtasks.push({
+        id: newId,
+        text: val,
+        done: false
+      });
+      input.value = '';
+      saveFocusData();
+      renderFocusZoneItems();
+      playSynthNotes(660);
+    }
+
+    function saveFocusData() {
+      localStorage.setItem('todayi_v7_data', JSON.stringify(activeData));
+    }
+
+    // ── SPATIAL ZONE CONSTRAINTS (ADHD Swapping) ──
+    function switchZone(zone) {
+      activeZone = zone;
+      localStorage.setItem('todayi_v7_zone', zone);
+      
+      // Update Tab CSS
+      document.querySelectorAll('.zone-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = Array.from(document.querySelectorAll('.zone-btn')).find(b => b.innerText.toLowerCase().includes(zone === 'focus' ? 'focus' : zone === 'capture' ? 'dump' : 'sensory'));
+      if (activeBtn) activeBtn.classList.add('active');
+
+      // Switch Panels
+      document.querySelectorAll('.zone-panel').forEach(panel => panel.classList.remove('active'));
+      if (zone === 'focus') document.getElementById('panel-focus').classList.add('active');
+      if (zone === 'capture') document.getElementById('panel-capture').classList.add('active');
+      if (zone === 'lounge') document.getElementById('panel-lounge').classList.add('active');
+
+      // Stop breathing if switching away
+      if (zone !== 'focus' && isBreathing) {
+        toggleBreathingSession();
+      }
+
+      playSynthNotes(523.25); // calm confirmation sound (C5 note)
+    }
+
+    function restoreActiveZone() {
+      const saved = localStorage.getItem('todayi_v7_zone');
+      if (saved) {
+        switchZone(saved);
+      }
+    }
+
+    // ── ZONE 1 BREATH MOTOR (Hearth) ──
+    function toggleBreathingSession() {
+      const bubble = document.getElementById('breathBubbleNode');
+      const text = document.getElementById('breathInstructionsText');
+      const btn = document.getElementById('breathToggleBtn');
+
+      if (isBreathing) {
+        // Stop breathing
+        clearInterval(breathInterval);
+        isBreathing = false;
+        bubble.style.transform = 'scale(1)';
+        text.innerText = 'Breathing Hearth Ready';
+        text.style.color = 'var(--accent)';
+        btn.innerText = 'Start Paced Breathing';
+      } else {
+        // Start breathing
+        isBreathing = true;
+        btn.innerText = 'Stop Breathing Helper';
+        
+        let state = 0; // 0 = Inhale, 1 = Hold, 2 = Exhale
+        const runCycle = () => {
+          if (state === 0) {
+            text.innerText = 'Inhale slowly...';
+            text.style.color = 'var(--accent)';
+            bubble.style.transform = 'scale(1.3)';
+            playSynthNotes(261.63); // C4 note (deep grounding)
+            state = 1;
+          } else if (state === 1) {
+            text.innerText = 'Hold state...';
+            text.style.color = 'var(--warning)';
+            state = 2;
+          } else {
+            text.innerText = 'Exhale serene...';
+            text.style.color = 'var(--success)';
+            bubble.style.transform = 'scale(1)';
+            playSynthNotes(329.63); // E4 note (gentle release)
+            state = 0;
+          }
+        };
+        
+        runCycle();
+        breathInterval = setInterval(runCycle, 4000);
+      }
+    }
+
+    // ── ZONE 2: SMART BADGE PARSE MOTOR ──
+    function structureBrainMess() {
+      const area = document.getElementById('brainDumpArea');
+      const val = area.value.trim();
+      if (!val) return;
+
+      // Extract messy parts into structure
+      // Take first line or first 60 chars as main title
+      const lines = val.split('\n');
+      const mainTitle = lines[0];
+
+      // Reset Active Intention database
+      activeData.title = mainTitle;
+      activeData.subtasks = [];
+
+      // Extract subsequent lines as checklists if available
+      for (let i = 1; i < lines.length; i++) {
+        const itemText = lines[i].replace(/^[-*•\s\d.]+/g, '').trim();
+        if (itemText) {
+          activeData.subtasks.push({
+            id: i,
+            text: itemText,
+            done: false
+          });
+        }
+      }
+
+      // If there were no extra lines, try splitting by punctuation or lookups
+      if (activeData.subtasks.length === 0) {
+        const matches = val.match(/(?:need to|remember to|also)\s+([^,.?!#@]+)/gi) || [];
+        matches.forEach((m, index) => {
+          const cleanText = m.replace(/^(need to|remember to|also)\s+/i, '').trim();
+          if (cleanText.length > 5) {
+            activeData.subtasks.push({
+              id: index + 1,
+              text: cleanText,
+              done: false
+            });
+          }
+        });
+      }
+
+      // Clear area
+      area.value = '';
+      
+      // Save and visual transition back to Focus Zone
+      saveFocusData();
+      renderFocusZoneItems();
+      
+      // Dopamine explosion transition
+      triggerConfettiBlast(window.innerWidth / 2, window.innerHeight / 2);
+      showDopamineToast("Structured Intentions Synced!");
+      
+      setTimeout(() => {
+        switchZone('focus');
+      }, 800);
+    }
+
+    // ==========================================================================
+    // ZONE 3: SENSORY LOUNGE KINETIC MOTOR
+    // ==========================================================================
+    
+    // ── TOY 1: GRAVITY SAND PHYSICS CANVASES ──
+    let sandCanvas, sandCtx;
+    let sandParticles = [];
+    let sandGravityAngle = 90; // Default down (90 deg)
+
+    function initSandboxPhysics() {
+      sandCanvas = document.getElementById('sandboxCanvas');
+      sandCtx = sandCanvas.getContext('2d');
+      resizeSandbox();
+      
+      window.addEventListener('resize', resizeSandbox);
+
+      // Animation motor
+      const loop = () => {
+        updateSandboxParticles();
+        drawSandboxParticles();
+        requestAnimationFrame(loop);
+      };
+      loop();
+    }
+
+    function resizeSandbox() {
+      if (!sandCanvas) return;
+      const rect = sandCanvas.parentNode.getBoundingClientRect();
+      sandCanvas.width = rect.width;
+      sandCanvas.height = rect.height;
+    }
+
+    function dropSand(e) {
+      const rect = sandCanvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      spawnGrains(x, y, 15);
+      playSynthNotes(600 + Math.random() * 400);
+    }
+
+    function dropSandDrag(e) {
+      if (e.buttons === 1) { // Left-click dragging
+        const rect = sandCanvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        spawnGrains(x, y, 3);
+      }
+    }
+
+    function spawnGrains(x, y, count) {
+      const colors = ['#4E6E58', '#8CB897', '#A5AFA9', '#C69B56', '#557A60'];
+      for (let i = 0; i < count; i++) {
+        sandParticles.push({
+          x: x + (Math.random() - 0.5) * 8,
+          y: y + (Math.random() - 0.5) * 8,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          vx: (Math.random() - 0.5) * 2,
+          vy: Math.random() * 2
+        });
+      }
+    }
+
+    function shiftSandboxGravity(value) {
+      sandGravityAngle = parseFloat(value);
+    }
+
+    function updateSandboxParticles() {
+      const rad = sandGravityAngle * (Math.PI / 180);
+      const gx = Math.cos(rad) * 0.15;
+      const gy = Math.sin(rad) * 0.15;
+
+      sandParticles.forEach(p => {
+        p.vx += gx;
+        p.vy += gy;
+        p.x += p.vx;
+        p.y += p.vy;
+
+        // Dampen velocities
+        p.vx *= 0.98;
+        p.vy *= 0.98;
+
+        // Container boundary locks
+        if (p.x < 2) { p.x = 2; p.vx *= -0.2; }
+        if (p.x > sandCanvas.width - 2) { p.x = sandCanvas.width - 2; p.vx *= -0.2; }
+        if (p.y < 2) { p.y = 2; p.vy *= -0.2; }
+        if (p.y > sandCanvas.height - 2) { p.y = sandCanvas.height - 2; p.vy *= -0.2; }
+      });
+
+      // Limit particle count to avoid cognitive/render drain
+      if (sandParticles.length > 800) {
+        sandParticles.splice(0, sandParticles.length - 800);
+      }
+    }
+
+    function drawSandboxParticles() {
+      sandCtx.clearRect(0, 0, sandCanvas.width, sandCanvas.height);
+      sandParticles.forEach(p => {
+        sandCtx.fillStyle = p.color;
+        sandCtx.beginPath();
+        sandCtx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+        sandCtx.fill();
+      });
+    }
+
+
+    // ── TOY 2: CONCENTRIC WATER RIPPLES ENGINE ──
+    let ripCanvas, ripCtx;
+    let ripplesArray = [];
+
+    function initRipplesEngine() {
+      ripCanvas = document.getElementById('ripplesCanvas');
+      ripCtx = ripCanvas.getContext('2d');
+      resizeRipples();
+      window.addEventListener('resize', resizeRipples);
+
+      ripCanvas.addEventListener('click', (e) => {
+        const rect = ripCanvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        ripplesArray.push({
+          x: x,
+          y: y,
+          radius: 1,
+          maxRadius: 80,
+          alpha: 1,
+          decay: 0.015
+        });
+        
+        // Soothing, high-end high chimes
+        playSynthNotes(523.25 * 2 + (Math.random() - 0.5) * 200); 
+      });
+
+      const tick = () => {
+        updateRipples();
+        drawRipples();
+        requestAnimationFrame(tick);
+      };
+      tick();
+    }
+
+    function resizeRipples() {
+      if (!ripCanvas) return;
+      const rect = ripCanvas.parentNode.getBoundingClientRect();
+      ripCanvas.width = rect.width;
+      ripCanvas.height = rect.height;
+    }
+
+    function clearRipples() {
+      ripplesArray = [];
+    }
+
+    function updateRipples() {
+      ripplesArray.forEach((r, idx) => {
+        r.radius += 1.8;
+        r.alpha -= r.decay;
+        if (r.alpha <= 0 || r.radius >= r.maxRadius) {
+          ripplesArray.splice(idx, 1);
+        }
+      });
+    }
+
+    function drawRipples() {
+      ripCtx.clearRect(0, 0, ripCanvas.width, ripCanvas.height);
+      ripplesArray.forEach(r => {
+        ripCtx.save();
+        ripCtx.globalAlpha = r.alpha;
+        ripCtx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+        ripCtx.lineWidth = 2;
+        ripCtx.beginPath();
+        ripCtx.arc(r.x, r.y, r.radius, 0, Math.PI * 2);
+        ripCtx.stroke();
+        ripCtx.restore();
+      });
+    }
+
+
+    // ── TOY 3: MODERN BUBBLEWRAP MAT ──
+    function buildBubblewrapMat() {
+      const mat = document.getElementById('bubbleMatMatrix');
+      mat.innerHTML = '';
+      
+      // Load 16 tactile glass bubble nodes
+      for (let i = 0; i < 16; i++) {
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble-dot';
+        
+        // Pop on hover or click
+        const triggerPop = () => {
+          if (bubble.classList.contains('popped')) return;
+          bubble.classList.add('popped');
+          
+          // Satisfying water-drop chimes
+          playSynthNotes(800 + i * 40); 
+          showDopamineToast("Pop!");
+          triggerConfettiBlast(window.innerWidth * 0.8, window.innerHeight * 0.7);
+        };
+
+        bubble.addEventListener('mouseenter', triggerPop);
+        bubble.addEventListener('click', triggerPop);
+
+        mat.appendChild(bubble);
+      }
+    }
+
+    function resetBubbleMat() {
+      document.querySelectorAll('.bubble-dot').forEach(b => b.classList.remove('popped'));
+      playSynthNotes(330);
+    }
+
+
+    // ==========================================================================
+    // AUDIO SYNTH pad ENGINE (Web Audio API Oscillators)
+    // ==========================================================================
+    let audioCtx = null;
+    function playSynthNotes(freq) {
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        // Soft, rounded triangle waves to avoid auditory overload
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        
+        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.3);
+        
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.35);
+      } catch(e) {
+        // Web audio context block safeguard
+      }
+    }
+
+
+    // ==========================================================================
+    // CONFETTI PHYSICS (RESTRICTED TO WINDOW SHELL)
+    // ==========================================================================
+    let canvas, ctx;
+    let particles = [];
+    
+    function setupConfettiCanvas() {
+      canvas = document.getElementById('dopamineCanvas');
+      ctx = canvas.getContext('2d');
+      resizeConfettiCanvas();
+      window.addEventListener('resize', resizeConfettiCanvas);
+    }
+
+    function resizeConfettiCanvas() {
+      if (!canvas) return;
+      const bounds = canvas.parentNode.getBoundingClientRect();
+      canvas.width = bounds.width;
+      canvas.height = bounds.height;
+    }
+
+    function triggerConfettiBlast(x, y) {
+      resizeConfettiCanvas();
+      const colors = ['#4E6E58', '#8CB897', '#A5AFA9', '#C69B56', '#557A60'];
+      
+      const bounds = canvas.getBoundingClientRect();
+      const localX = x - bounds.left;
+      const localY = y - bounds.top;
+
+      for (let i = 0; i < 20; i++) {
+        particles.push({
+          x: isNaN(localX) ? canvas.width / 2 : localX,
+          y: isNaN(localY) ? canvas.height / 2 : localY,
+          vx: (Math.random() - 0.5) * 5,
+          vy: (Math.random() - 0.5) * 5 - 2,
+          radius: Math.random() * 2.5 + 1.5,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          alpha: 1,
+          decay: Math.random() * 0.015 + 0.015
+        });
+      }
+      
+      if (!window.animationRunning) {
+        window.animationRunning = true;
+        animateConfetti();
+      }
+    }
+
+    function flashConfettiShower() {
+      triggerConfettiBlast(window.innerWidth / 2, window.innerHeight / 3);
+      showDopamineToast("Jackpot blast!");
+    }
+
+    function animateConfetti() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      particles.forEach((p, idx) => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.12; // Gravity
+        p.alpha -= p.decay;
+        
+        ctx.save();
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+        
+        if (p.alpha <= 0 || p.y > canvas.height) {
+          particles.splice(idx, 1);
+        }
+      });
+      
+      if (particles.length > 0) {
+        requestAnimationFrame(animateConfetti);
+      } else {
+        window.animationRunning = false;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+
+    // ── DOPAMINE NOTIFICATION SHIELD ──
+    function showDopamineToast(text) {
+      const toast = document.getElementById('celebrationToast');
+      const msg = document.getElementById('toastMsg');
+      
+      msg.innerText = text;
+      toast.classList.add('active');
+      
+      setTimeout(() => {
+        toast.classList.remove('active');
+      }, 1600);
+    }
+
+    // ── SHADCN-STYLE THEME SYSTEM ──
+    function toggleTheme() {
+      const shell = document.querySelector('.mac-shell');
+      shell.classList.toggle('theme-dark');
+      const isDark = shell.classList.contains('theme-dark');
+      
+      document.getElementById('themeBtnText').innerText = isDark ? "Light Mode" : "Dark Mode";
+      localStorage.setItem('todayi_v7_theme', isDark ? 'dark' : 'light');
+      
+      playSynthNotes(isDark ? 300 : 600);
+    }
+
+    function restoreSavedTheme() {
+      const saved = localStorage.getItem('todayi_v7_theme');
+      const shell = document.querySelector('.mac-shell');
+      if (saved === 'dark') {
+        shell.classList.add('theme-dark');
+        document.getElementById('themeBtnText').innerText = "Light Mode";
+      }
+    }
+  </script>
+</body>
+</html>

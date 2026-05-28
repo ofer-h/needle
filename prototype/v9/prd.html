@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Needle — PRD & Design Research</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..600&family=Inter:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #F6F1EB;
+      --surface: #FFFFFF;
+      --ink: #1F1A14;
+      --ink-2: #6B6259;
+      --ink-3: #9A918A;
+      --ink-4: #C5BDB5;
+      --hairline: rgba(31,26,20,0.07);
+      --accent: #D4A847;
+      --accent-soft: #FCF5E8;
+      --urgent: #C4622D;
+      --urgent-soft: #FBF0EA;
+      --upcoming: #6F9272;
+      --upcoming-soft: #EDF5EE;
+      --calendar: #2C2C3A;
+      --serif: 'Fraunces', Georgia, serif;
+      --sans: 'Inter', -apple-system, sans-serif;
+      --mono: 'Geist Mono', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+    body {
+      font-family: var(--sans);
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.7;
+    }
+    .doc {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 64px 24px 120px;
+    }
+    .doc-back {
+      font-size: 13px;
+      color: var(--ink-3);
+      text-decoration: none;
+      display: inline-block;
+      margin-bottom: 32px;
+    }
+    .doc-back:hover { color: var(--ink); }
+    h1 {
+      font-family: var(--serif);
+      font-size: 40px;
+      font-weight: 300;
+      letter-spacing: -0.03em;
+      margin-bottom: 8px;
+      line-height: 1.15;
+    }
+    .doc-meta {
+      font-size: 13px;
+      color: var(--ink-3);
+      margin-bottom: 40px;
+    }
+    h2 {
+      font-family: var(--serif);
+      font-size: 24px;
+      font-weight: 400;
+      margin-top: 48px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--hairline);
+    }
+    h3 {
+      font-family: var(--sans);
+      font-size: 16px;
+      font-weight: 600;
+      margin-top: 32px;
+      margin-bottom: 12px;
+      color: var(--ink);
+    }
+    p { margin-bottom: 16px; color: var(--ink-2); font-size: 15px; }
+    strong { color: var(--ink); font-weight: 600; }
+    ul, ol { padding-left: 20px; margin-bottom: 16px; }
+    li { margin-bottom: 6px; color: var(--ink-2); font-size: 15px; }
+    
+    .callout {
+      padding: 16px 20px;
+      border-radius: 8px;
+      margin: 16px 0;
+      font-size: 14px;
+    }
+    .callout.key { background: var(--accent-soft); border-left: 3px solid var(--accent); }
+    .callout.warn { background: var(--urgent-soft); border-left: 3px solid var(--urgent); }
+    .callout.good { background: var(--upcoming-soft); border-left: 3px solid var(--upcoming); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 14px;
+    }
+    th {
+      text-align: left;
+      padding: 8px 12px;
+      border-bottom: 2px solid var(--hairline);
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--ink-3);
+    }
+    td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--hairline);
+      color: var(--ink-2);
+    }
+    tr:hover td { background: var(--surface); }
+
+    .pillar-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+      margin: 16px 0;
+    }
+    .pillar-card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+    .pillar-icon { font-size: 28px; margin-bottom: 8px; }
+    .pillar-name { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+    .pillar-desc { font-size: 12px; color: var(--ink-3); line-height: 1.4; }
+
+    .data-struct {
+      background: var(--surface);
+      border-radius: 8px;
+      padding: 20px;
+      margin: 16px 0;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      color: var(--ink-2);
+      overflow-x: auto;
+    }
+    .data-struct .key { color: var(--upcoming); }
+    .data-struct .type { color: var(--accent); }
+    .data-struct .comment { color: var(--ink-4); }
+
+    .toc {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 40px;
+    }
+    .toc-title {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink-3);
+      margin-bottom: 12px;
+    }
+    .toc a {
+      display: block;
+      padding: 4px 0;
+      color: var(--ink-2);
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.15s ease;
+    }
+    .toc a:hover { color: var(--ink); }
+  </style>
+</head>
+<body>
+  <div class="doc">
+    <a href="index.html" class="doc-back">← Back to Hub</a>
+
+    <h1>Needle — Product Requirements & Design Research</h1>
+    <div class="doc-meta">v9 · May 2026 · Omri & Ofer · Compiled from 15+ sources</div>
+
+    <div class="toc">
+      <div class="toc-title">Contents</div>
+      <a href="#vision">1. Vision & Problem</a>
+      <a href="#pillars">2. Three Pillars</a>
+      <a href="#data">3. Data Architecture</a>
+      <a href="#templates">4. Template System</a>
+      <a href="#smart-text">5. Smart Text & Linking</a>
+      <a href="#adhd">6. ADHD Design Research</a>
+      <a href="#apps">7. Competitive Analysis</a>
+      <a href="#interruptions">8. Interruption Design</a>
+      <a href="#tokens">9. Design Tokens</a>
+      <a href="#anti">10. Anti-Patterns</a>
+    </div>
+
+    <!-- ════════════════════════ -->
+    <h2 id="vision">1. Vision & Problem</h2>
+
+    <p><strong>Needle</strong> helps you "move the needle" — it's a macOS desktop app for software engineers with ADHD that acts as an intelligent second brain. It absorbs anything thrown at it, classifies it automatically, and surfaces the right things at the right time.</p>
+
+    <div class="callout key">
+      <strong>Core Insight:</strong> People with ADHD generate high volumes of mental input but organizing that input is itself cognitively expensive. Existing tools (Notion, Todoist, Jira) require users to decide where things go. That friction causes avoidance. <strong>Needle removes that friction entirely.</strong>
+    </div>
+
+    <p>A typical day with Needle:</p>
+    <ol>
+      <li><strong>Morning:</strong> Open app, dump your day plan (tasks, meetings, ideas) in any format</li>
+      <li><strong>Work:</strong> Focus on one task at a time. Needle tracks time and context</li>
+      <li><strong>Transition:</strong> When it's time to switch, Needle grabs attention → helps brain dump → moves you forward</li>
+      <li><strong>End of day:</strong> Review what you accomplished (celebration, not guilt)</li>
+    </ol>
+
+    <!-- ════════════════════════ -->
+    <h2 id="pillars">2. Three Pillars</h2>
+
+    <div class="pillar-grid">
+      <div class="pillar-card">
+        <div class="pillar-icon">📋</div>
+        <div class="pillar-name">Today Screen</div>
+        <div class="pillar-desc">Day planning view. Timeline with tasks, calendar events, subtasks, @mentions, JIRA links. Top-to-bottom.</div>
+      </div>
+      <div class="pillar-card">
+        <div class="pillar-icon">⚡</div>
+        <div class="pillar-name">Hard Stop</div>
+        <div class="pillar-desc">Attention-grabbing interruption mechanisms. From gentle nudges to screen takeovers. Escalating. Dismissable.</div>
+      </div>
+      <div class="pillar-card">
+        <div class="pillar-icon">🧠</div>
+        <div class="pillar-name">Brain Dump</div>
+        <div class="pillar-desc">Quick capture when transitioning. ~30 seconds. Text or voice. Mentally release and move forward.</div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════ -->
+    <h2 id="data">3. Data Architecture</h2>
+
+    <h3>Task Item Structure</h3>
+    <div class="data-struct">
+<span class="comment">// Core item that represents a task, note, or event</span>
+{
+  <span class="key">"id"</span>: <span class="type">string</span>,        <span class="comment">// Unique ID</span>
+  <span class="key">"title"</span>: <span class="type">string</span>,     <span class="comment">// Raw text with @mentions and JIRA refs</span>
+  <span class="key">"type"</span>: <span class="type">"task" | "event" | "note"</span>,
+  <span class="key">"status"</span>: <span class="type">"pending" | "in_progress" | "done" | "skipped"</span>,
+  <span class="key">"priority"</span>: <span class="type">"urgent" | "normal" | "low"</span>,
+  <span class="key">"section"</span>: <span class="type">"tasks" | "other" | "meetings"</span>,
+  <span class="key">"parent_id"</span>: <span class="type">string | null</span>,  <span class="comment">// For subtasks</span>
+  <span class="key">"children"</span>: <span class="type">ItemID[]</span>,         <span class="comment">// Subtask IDs</span>
+  <span class="key">"links"</span>: [
+    { <span class="key">"type"</span>: <span class="type">"jira"</span>, <span class="key">"key"</span>: <span class="type">"JIRA-123"</span>, <span class="key">"url"</span>: <span class="type">"https://..."</span> },
+    { <span class="key">"type"</span>: <span class="type">"mention"</span>, <span class="key">"name"</span>: <span class="type">"tzipi"</span>, <span class="key">"slack_id"</span>: <span class="type">"U12345"</span> },
+    { <span class="key">"type"</span>: <span class="type">"url"</span>, <span class="key">"url"</span>: <span class="type">"https://..."</span>, <span class="key">"title"</span>: <span class="type">"..."</span> }
+  ],
+  <span class="key">"scheduled_time"</span>: <span class="type">ISO8601 | null</span>,  <span class="comment">// For time-blocked items</span>
+  <span class="key">"end_time"</span>: <span class="type">ISO8601 | null</span>,        <span class="comment">// For calendar events</span>
+  <span class="key">"order"</span>: <span class="type">number</span>,                   <span class="comment">// Sort order within section</span>
+  <span class="key">"brain_dumps"</span>: [                       <span class="comment">// Context notes from transitions</span>
+    { <span class="key">"text"</span>: <span class="type">string</span>, <span class="key">"created_at"</span>: <span class="type">ISO8601</span>, <span class="key">"type"</span>: <span class="type">"left_off" | "pending" | "other"</span> }
+  ],
+  <span class="key">"labels"</span>: <span class="type">string[]</span>,    <span class="comment">// User-defined or AI-assigned labels</span>
+  <span class="key">"created_at"</span>: <span class="type">ISO8601</span>,
+  <span class="key">"completed_at"</span>: <span class="type">ISO8601 | null</span>
+}
+    </div>
+
+    <h3>Day Plan Structure</h3>
+    <div class="data-struct">
+{
+  <span class="key">"date"</span>: <span class="type">"2026-05-28"</span>,
+  <span class="key">"template_id"</span>: <span class="type">string | null</span>,  <span class="comment">// Which template is active</span>
+  <span class="key">"sections"</span>: [
+    { <span class="key">"id"</span>: <span class="type">"tasks"</span>, <span class="key">"label"</span>: <span class="type">"Tasks"</span>, <span class="key">"items"</span>: <span class="type">ItemID[]</span>, <span class="key">"collapsed"</span>: <span class="type">false</span> },
+    { <span class="key">"id"</span>: <span class="type">"other"</span>, <span class="key">"label"</span>: <span class="type">"Other"</span>, <span class="key">"items"</span>: <span class="type">ItemID[]</span>, <span class="key">"collapsed"</span>: <span class="type">false</span> }
+  ],
+  <span class="key">"calendar_events"</span>: <span class="type">CalendarEvent[]</span>,  <span class="comment">// Synced from Google/Outlook</span>
+  <span class="key">"visibility"</span>: {
+    <span class="key">"show_completed"</span>: <span class="type">false</span>,
+    <span class="key">"show_subtasks"</span>: <span class="type">"expanded" | "collapsed" | "hidden"</span>,
+    <span class="key">"max_visible"</span>: <span class="type">7</span>  <span class="comment">// ADHD: max 7 items before collapse</span>
+  }
+}
+    </div>
+
+    <!-- ════════════════════════ -->
+    <h2 id="templates">4. Template System</h2>
+
+    <p>Templates control <strong>layout, sections, and visibility</strong> — not data. The same data can be displayed in completely different ways.</p>
+
+    <div class="data-struct">
+{
+  <span class="key">"id"</span>: <span class="type">"editorial"</span>,
+  <span class="key">"name"</span>: <span class="type">"Editorial Journal"</span>,
+  <span class="key">"layout"</span>: <span class="type">"single-column" | "timeline" | "blocks" | "kanban" | "minimal"</span>,
+  <span class="key">"sections"</span>: [
+    { <span class="key">"id"</span>: <span class="type">"now"</span>, <span class="key">"label"</span>: <span class="type">"Now"</span>, <span class="key">"filter"</span>: <span class="type">"in_progress"</span>, <span class="key">"visible"</span>: <span class="type">true</span> },
+    { <span class="key">"id"</span>: <span class="type">"coming_up"</span>, <span class="key">"label"</span>: <span class="type">"Coming Up"</span>, <span class="key">"filter"</span>: <span class="type">"pending"</span>, <span class="key">"visible"</span>: <span class="type">true</span> },
+    { <span class="key">"id"</span>: <span class="type">"other"</span>, <span class="key">"label"</span>: <span class="type">"Other"</span>, <span class="key">"filter"</span>: <span class="type">"section:other"</span>, <span class="key">"visible"</span>: <span class="type">true</span> },
+    { <span class="key">"id"</span>: <span class="type">"done"</span>, <span class="key">"label"</span>: <span class="type">"Done"</span>, <span class="key">"filter"</span>: <span class="type">"completed"</span>, <span class="key">"visible"</span>: <span class="type">false</span> }
+  ],
+  <span class="key">"calendar_integration"</span>: <span class="type">"woven" | "separate" | "hidden"</span>,
+  <span class="key">"show_progress"</span>: <span class="type">true</span>,
+  <span class="key">"show_time_markers"</span>: <span class="type">true</span>,
+  <span class="key">"show_now_indicator"</span>: <span class="type">true</span>,
+  <span class="key">"show_quick_add"</span>: <span class="type">true</span>,
+  <span class="key">"greeting"</span>: <span class="type">true</span>
+}
+    </div>
+
+    <div class="callout good">
+      <strong>Key Principle:</strong> Templates are like "views" on the same database. Users can switch between them freely, or the app can auto-select based on time of day (morning → Editorial, deep work → Minimal, evening → Kanban).
+    </div>
+
+    <!-- ════════════════════════ -->
+    <h2 id="smart-text">5. Smart Text & Linking</h2>
+
+    <h3>Supported Patterns</h3>
+    <table>
+      <tr><th>Pattern</th><th>Example</th><th>Behavior</th></tr>
+      <tr><td><strong>@mentions</strong></td><td>@tzipi</td><td>Highlighted blue pill. Links to Slack DM. Autocomplete from team list.</td></tr>
+      <tr><td><strong>Jira refs</strong></td><td>JIRA-123</td><td>Auto-linked to Jira URL. Shows status on hover. Mono font.</td></tr>
+      <tr><td><strong>URLs</strong></td><td>https://...</td><td>Auto-detected. Shows favicon + title preview. Click to open.</td></tr>
+      <tr><td><strong>Time refs</strong></td><td>"tomorrow at 3pm"</td><td>NLP parsed → creates scheduled_time. Highlighted.</td></tr>
+    </table>
+
+    <h3>Smart Text Processing Pipeline</h3>
+    <ol>
+      <li><strong>Parse:</strong> Regex scan for @mentions, JIRA-XXX, URLs, time expressions</li>
+      <li><strong>Resolve:</strong> Look up Jira URLs, Slack user IDs, URL metadata</li>
+      <li><strong>Store:</strong> Raw text + links array (keeps text editable, links separately)</li>
+      <li><strong>Render:</strong> Replace patterns with interactive chips/links at display time</li>
+    </ol>
+
+    <!-- ════════════════════════ -->
+    <h2 id="adhd">6. ADHD Design Research</h2>
+
+    <h3>Why ADHD Users Abandon Todo Apps</h3>
+    <table>
+      <tr><th>Reason</th><th>Our Solution</th></tr>
+      <tr><td>Task initiation gap</td><td>AI breaks tasks into micro-steps. "What's the first thing to do?" prompt.</td></tr>
+      <tr><td>Working memory / "object permanence"</td><td>Widget, notifications, macOS menu bar presence. Impossible to forget.</td></tr>
+      <tr><td>Time blindness</td><td>Visual timers (pie-chart style), "now" indicators, timeline view.</td></tr>
+      <tr><td>Novelty dopamine crash (3-week collapse)</td><td>Template switching, varied interruptions, "Welcome Back" flow.</td></tr>
+      <tr><td>Overwhelm from long lists</td><td>Max 7 items visible. Auto-collapse. "Focus Mode" = 1 task.</td></tr>
+      <tr><td>Shame spirals</td><td>NO red overdue indicators. No punitive language. Easy reset.</td></tr>
+    </table>
+
+    <h3>The "Interest-Based Nervous System"</h3>
+    <p>ADHD brains are NOT motivated by importance or future rewards. They're powered by <strong>novelty, urgency, and immediate gratification</strong>. Systems that force neurotypical discipline will fail.</p>
+
+    <div class="callout key">
+      <strong>The 3-Must-Dos Rule:</strong> Never list more than 3 highlighted priorities per day. Long lists trigger task paralysis. Everything else is "bonus" or hidden.
+    </div>
+
+    <h3>Attention Residue (Dr. Sophie Leroy)</h3>
+    <p>When you switch tasks, your brain continues processing "open loops" from the previous task. This residue persists throughout the subsequent task. It's <strong>thicker</strong> when the previous task was incomplete. ADHD amplifies this effect.</p>
+    <p><strong>→ This is why Brain Dump exists.</strong> Writing "where I left off" closes the loop and reduces residue.</p>
+
+    <!-- ════════════════════════ -->
+    <h2 id="apps">7. Competitive Analysis</h2>
+
+    <table>
+      <tr><th>App</th><th>What They Do Right</th><th>What We Take</th></tr>
+      <tr><td><strong>Tiimo</strong> (App of Year 2025)</td><td>Visual timeline, guilt-free design, AI task breakdown</td><td>Timeline view, no-red palette, AI assist</td></tr>
+      <tr><td><strong>Things 3</strong></td><td>Minimalism, typographic hierarchy, Magic Plus button</td><td>Editorial feel, completion animations</td></tr>
+      <tr><td><strong>Goblin Tools</strong></td><td>"Spiciness" slider for task breakdown granularity</td><td>Adjustable AI assistance level</td></tr>
+      <tr><td><strong>Linear</strong></td><td>Keyboard-first, command palette (⌘K), speed</td><td>⌘K universal action, keyboard nav</td></tr>
+      <tr><td><strong>Todoist</strong></td><td>Lightning-fast NLP capture</td><td>Natural language task input</td></tr>
+      <tr><td><strong>Leantime</strong></td><td>Emotional task tagging (😊😤😴)</td><td>Mood/energy labels on tasks</td></tr>
+    </table>
+
+    <!-- ════════════════════════ -->
+    <h2 id="interruptions">8. Interruption Design</h2>
+
+    <h3>Escalation Model</h3>
+    <p>Interventions escalate through 5 intensity levels:</p>
+    <table>
+      <tr><th>Level</th><th>Type</th><th>Examples</th><th>Timing</th></tr>
+      <tr><td>1</td><td>Ambient</td><td>Timer bar, breathing border, color shift</td><td>T-10 min</td></tr>
+      <tr><td>2</td><td>Nudge</td><td>Dynamic island, toast notification, gentle shake</td><td>T-5 min</td></tr>
+      <tr><td>3</td><td>Takeover</td><td>Torch, frost glass, vignette, split reveal</td><td>T-2 min</td></tr>
+      <tr><td>4</td><td>Character</td><td>Kitty, owl, clippy, penguin parade</td><td>T-1 min</td></tr>
+      <tr><td>5</td><td>Full Block</td><td>Spotlight command, brain dump prompt</td><td>T-0</td></tr>
+    </table>
+
+    <div class="callout warn">
+      <strong>Critical Rule:</strong> User can ALWAYS dismiss. Never lock them out. Collect the signal (they dismissed at T-2 for the 3rd time today) and learn. Always shameless — it's OK.
+    </div>
+
+    <h3>Dismissal Options</h3>
+    <ul>
+      <li><strong>"5 more minutes"</strong> — Snooze. Resets to level 1.</li>
+      <li><strong>"Brain Dump & Transition"</strong> — Opens brain dump flow, then transitions.</li>
+      <li><strong>"Skip to next"</strong> — Jump directly to next task, no dump.</li>
+      <li><strong>"Dismiss"</strong> — Cancel this interruption entirely. Optional reason.</li>
+    </ul>
+
+    <!-- ════════════════════════ -->
+    <h2 id="tokens">9. Design Tokens</h2>
+
+    <h3>Colors</h3>
+    <table>
+      <tr><th>Token</th><th>Value</th><th>Usage</th></tr>
+      <tr><td>--bg</td><td style="display:flex;gap:8px;align-items:center"><div style="width:20px;height:20px;border-radius:4px;background:#F6F1EB;border:1px solid rgba(0,0,0,0.08)"></div>#F6F1EB</td><td>Warm parchment background</td></tr>
+      <tr><td>--surface</td><td style="display:flex;gap:8px;align-items:center"><div style="width:20px;height:20px;border-radius:4px;background:#FFFFFF;border:1px solid rgba(0,0,0,0.08)"></div>#FFFFFF</td><td>Cards, inputs</td></tr>
+      <tr><td>--ink</td><td style="display:flex;gap:8px;align-items:center"><div style="width:20px;height:20px;border-radius:4px;background:#1F1A14"></div>#1F1A14</td><td>Primary text (NOT pure black)</td></tr>
+      <tr><td>--urgent</td><td style="display:flex;gap:8px;align-items:center"><div style="width:20px;height:20px;border-radius:4px;background:#C4622D"></div>#C4622D</td><td>Urgency (warm terracotta, NOT red)</td></tr>
+      <tr><td>--upcoming</td><td style="display:flex;gap:8px;align-items:center"><div style="width:20px;height:20px;border-radius:4px;background:#6F9272"></div>#6F9272</td><td>Completion, upcoming, positive</td></tr>
+      <tr><td>--accent</td><td style="display:flex;gap:8px;align-items:center"><div style="width:20px;height:20px;border-radius:4px;background:#D4A847"></div>#D4A847</td><td>Accent, highlights, gold</td></tr>
+      <tr><td>--calendar</td><td style="display:flex;gap:8px;align-items:center"><div style="width:20px;height:20px;border-radius:4px;background:#2C2C3A"></div>#2C2C3A</td><td>Calendar events (external, not owned)</td></tr>
+    </table>
+
+    <h3>Typography</h3>
+    <table>
+      <tr><th>Usage</th><th>Font</th><th>Weight</th><th>Size</th></tr>
+      <tr><td>Date header</td><td>Fraunces</td><td>300</td><td>40px</td></tr>
+      <tr><td>Section titles</td><td>Fraunces</td><td>600</td><td>14px uppercase</td></tr>
+      <tr><td>Task text</td><td>Inter</td><td>400</td><td>15px</td></tr>
+      <tr><td>Metadata</td><td>Inter</td><td>400</td><td>12px</td></tr>
+      <tr><td>Time chips</td><td>Geist Mono</td><td>500</td><td>11-12px</td></tr>
+    </table>
+
+    <!-- ════════════════════════ -->
+    <h2 id="anti">10. Anti-Patterns — What NOT To Do</h2>
+
+    <div class="callout warn">
+      <strong>Never do these:</strong>
+    </div>
+
+    <ul>
+      <li>❌ <strong>Red for urgency</strong> — Use warm terracotta (#C4622D) instead. Red triggers anxiety.</li>
+      <li>❌ <strong>Pure black on pure white</strong> — Causes eye strain (halation). Use #1F1A14 on #F6F1EB.</li>
+      <li>❌ <strong>Overdue counts</strong> — No "5 tasks overdue!" badges. No guilt.</li>
+      <li>❌ <strong>Auto-playing media</strong> — No sounds unless explicitly enabled.</li>
+      <li>❌ <strong>Modal heavy UX</strong> — Modals steal context. Use inline/overlay patterns.</li>
+      <li>❌ <strong>Dense information</strong> — Max 7 items visible. Progressive disclosure for everything else.</li>
+      <li>❌ <strong>Generic empty states</strong> — "Nothing here yet" is lazy. Use warm, encouraging copy.</li>
+      <li>❌ <strong>Punitive gamification</strong> — No losing streaks. Streaks freeze, never break.</li>
+      <li>❌ <strong>Complex onboarding</strong> — Should work immediately with minimal setup.</li>
+      <li>❌ <strong>Strict time limits</strong> — Always allow extend/pause/dismiss.</li>
+    </ul>
+
+    <div class="callout good">
+      <strong>The Needle Mantra:</strong> "A calm, warm room where everything you need is exactly where you'd expect it, nothing screams for attention, and checking something off feels like a tiny celebration."
+    </div>
+
+  </div>
+</body>
+</html>

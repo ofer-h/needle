@@ -1,0 +1,2820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>today-i — Premium macOS Focus Room Surface v5 (Upgraded & Inventions Deck)</title>
+  
+  <!-- Modern Serif & Display Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ── Apple Native System & Premium HSL Tokens ── */
+    :root {
+      --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+      --font-serif:   'Instrument Serif', Georgia, serif;
+      --font-text:    -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+      --font-mono:    'JetBrains Mono', "SF Mono", ui-monospace, Menlo, monospace;
+
+      --bg:          #FFFFFF;
+      --bg-surface:  #FBFBFC;
+      --bg-subtle:   #F4F4F6;
+      --bg-tertiary: #EBEBED;
+      --border:      #E0E0E3;
+      --border-focus: #007AFF;
+      --text:        #1D1D1F;
+      --text-secondary: #6E6E73;
+      --text-tertiary:  #AEAEB2;
+      
+      --accent:      #007AFF; /* Apple Blue */
+      --accent-dim:  rgba(0, 122, 255, 0.08);
+      --success:     #34C759; /* Apple Green */
+      --success-soft: rgba(52, 199, 89, 0.08);
+      --danger:      #FF3B30; /* Apple Red */
+      --danger-soft: rgba(255, 59, 48, 0.08);
+      --warning:     #FF9500; /* Apple Orange */
+      --warning-soft: rgba(255, 149, 0, 0.08);
+
+      --shadow:      0 8px 30px rgba(0,0,0,0.04), 0 1px 4px rgba(0,0,0,0.02);
+      --radius:      10px;
+    }
+
+    /* Native Premium Dark Mode */
+    .theme-dark {
+      --bg:          #1C1C1E;
+      --bg-surface:  #252528;
+      --bg-subtle:   #151518;
+      --bg-tertiary: #2C2C2E;
+      --border:      #323236;
+      --border-focus: #0A84FF;
+      --text:        #F5F5F7;
+      --text-secondary: #98989D;
+      --text-tertiary:  #636366;
+      
+      --accent:      #0A84FF;
+      --accent-dim:  rgba(10, 132, 255, 0.16);
+      --success:     #30D158;
+      --success-soft: rgba(48, 209, 88, 0.12);
+      --danger:      #FF453A;
+      --danger-soft: rgba(255, 69, 58, 0.12);
+      --warning:     #FF9F0A;
+      --warning-soft: rgba(255, 159, 10, 0.12);
+
+      --shadow:      0 12px 40px rgba(0, 0, 0, 0.22), 0 2px 8px rgba(0, 0, 0, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background: var(--bg-subtle);
+      color: var(--text);
+      font-family: var(--font-text);
+      font-size: 13px;
+      line-height: 1.45;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: background-color 0.3s, color 0.3s;
+      overflow: hidden;
+    }
+
+    /* ==========================================================================
+       ELECTRON CONTAINER FRAME (PIXEL-PERFECT PORTAL)
+       ========================================================================== */
+    .electron-window {
+      width: 1000px;
+      height: 720px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+      transition: background-color 0.3s, border-color 0.3s;
+    }
+
+    /* Native Titlebar with drag region */
+    .titlebar {
+      height: 42px;
+      background: var(--bg-surface);
+      border-bottom: 0.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      justify-content: space-between;
+      position: relative;
+      user-select: none;
+      flex-shrink: 0;
+    }
+
+    .traffic-lights {
+      display: flex;
+      gap: 8px;
+    }
+
+    .traffic-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #E5E5EA;
+      cursor: pointer;
+    }
+    .dot-close { background: #FF5F56; }
+    .dot-min { background: #FFBD2E; }
+    .dot-zoom { background: #27C93F; }
+
+    .window-title-bar-tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--bg-tertiary);
+      padding: 2px;
+      border-radius: 6px;
+      border: 0.5px solid var(--border);
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .title-tab-btn {
+      padding: 4px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      border-radius: 4px;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      font-family: var(--font-display);
+      transition: all 0.15s;
+    }
+    .title-tab-btn:hover { color: var(--text); }
+    .title-tab-btn.active {
+      background: var(--bg);
+      color: var(--text);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    .window-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .theme-toggle-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-display);
+      font-weight: 500;
+    }
+    .theme-toggle-btn:hover { color: var(--text); }
+
+    /* ==========================================================================
+       SIDEBAR & MAIN VIEWPORT WRAPPER
+       ========================================================================== */
+    .window-body {
+      flex: 1;
+      display: flex;
+      min-height: 0; /* Important for flex child scrolling */
+      position: relative;
+    }
+
+    /* Sidebar Navigation left */
+    .sidebar {
+      width: 230px;
+      background: var(--bg-surface);
+      border-right: 0.5px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 16px;
+      flex-shrink: 0;
+      overflow-y: auto;
+    }
+
+    .sidebar-section {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .sidebar-section-title {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-tertiary);
+      padding-left: 8px;
+      margin-bottom: 4px;
+    }
+
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 8px;
+      border-radius: 6px;
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .sidebar-link:hover {
+      background: var(--bg-tertiary);
+    }
+    .sidebar-link.active {
+      background: var(--accent-dim);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .sidebar-pill {
+      font-size: 10px;
+      font-weight: 600;
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+      padding: 1px 6px;
+      border-radius: 10px;
+    }
+
+    /* Active Focus Box inside sidebar */
+    .sidebar-focus-card {
+      margin-top: auto;
+      background: var(--accent-dim);
+      border: 1px solid rgba(0, 122, 255, 0.12);
+      border-radius: var(--radius);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .focus-card-meta {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--accent);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .focus-card-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.35;
+    }
+
+    /* main workspace center */
+    .workspace-viewport {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      background: var(--bg);
+      min-height: 0;
+      overflow: hidden;
+    }
+    .workspace-viewport.active {
+      display: flex;
+    }
+
+    .scroll-pane {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 32px;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* ==========================================================================
+       STANDARD PLANNER VIEW INTERACTIVES
+       ========================================================================== */
+    .brain-dump-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .textarea-wrapper {
+      position: relative;
+    }
+
+    .dump-textarea {
+      width: 100%;
+      height: 90px;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.5;
+      resize: none;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .btn {
+      height: 28px;
+      padding: 0 14px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-family: var(--font-display);
+      transition: all 0.15s;
+    }
+    
+    .btn-blue {
+      background: var(--accent);
+      color: #FFFFFF;
+      border: none;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    }
+    .btn-blue:hover { background: #0063D1; }
+
+    .btn-gray {
+      background: var(--bg-tertiary);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-gray:hover { background: var(--border); }
+
+    .btn-danger {
+      background: var(--danger-soft);
+      color: var(--danger);
+      border: 1px solid rgba(255, 59, 48, 0.15);
+    }
+    .btn-danger:hover {
+      background: var(--danger);
+      color: #FFFFFF;
+    }
+
+    /* Upgraded interactive Task List Rows */
+    .task-rows-container {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .task-row-outer {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: hidden;
+    }
+    .task-row-outer:hover {
+      border-color: var(--text-secondary);
+      box-shadow: var(--shadow);
+    }
+    .task-row-outer.active-focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent), var(--shadow);
+    }
+
+    .task-row-header {
+      display: flex;
+      align-items: center;
+      padding: 10px 14px;
+      cursor: pointer;
+      gap: 12px;
+      user-select: none;
+    }
+
+    /* Checked style state */
+    .task-row-outer.is-completed {
+      opacity: 0.6;
+    }
+    .task-row-outer.is-completed .task-row-title-text {
+      text-decoration: line-through;
+      color: var(--text-secondary);
+    }
+
+    /* Priority Indicator Dot */
+    .priority-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .priority-dot.urgent { background-color: var(--danger); }
+    .priority-dot.upcoming { background-color: var(--warning); }
+    .priority-dot.neutral { background-color: var(--text-tertiary); }
+
+    /* Custom check circle */
+    .check-circle {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      background: var(--bg);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .check-circle::after {
+      content: '✓';
+      font-size: 11px;
+      font-weight: 700;
+      color: #FFFFFF;
+      opacity: 0;
+      transform: scale(0.6);
+      transition: all 0.15s;
+    }
+    .is-completed .check-circle {
+      background: var(--success);
+      border-color: var(--success);
+    }
+    .is-completed .check-circle::after {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .task-row-title-text {
+      font-size: 13px;
+      color: var(--text);
+      flex: 1;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Embedded parsing tokens style */
+    .parsed-badge {
+      font-weight: 600;
+      font-size: 11px;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      display: inline-block;
+      margin: 0 2px;
+    }
+    .parsed-jira {
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid rgba(0, 122, 255, 0.12);
+    }
+    .parsed-handle {
+      color: var(--success);
+      background: var(--success-soft);
+      border: 1px solid rgba(52, 199, 89, 0.12);
+    }
+    .parsed-hashtag {
+      color: var(--text-secondary);
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+    }
+
+    /* Pill items on standard row */
+    .task-row-pills {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .row-pill {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: var(--font-display);
+    }
+    .row-pill-subtasks {
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+    }
+    .row-pill-subtasks.completed {
+      background: var(--success-soft);
+      color: var(--success);
+    }
+    .row-pill-link {
+      background: var(--accent-dim);
+      color: var(--accent);
+      border: 0.5px solid rgba(0, 122, 255, 0.1);
+    }
+    .row-pill-date {
+      background: var(--bg-surface);
+      color: var(--text-tertiary);
+      border: 0.5px solid var(--border);
+    }
+
+    /* Chevron Indicator */
+    .chevron-indicator {
+      font-size: 10px;
+      color: var(--text-tertiary);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .task-row-outer.expanded .chevron-indicator {
+      transform: rotate(90deg);
+    }
+
+    /* ==========================================================================
+       INLINE DETAILED DRAWER (EXPANSION DRAWER)
+       ========================================================================== */
+    .inline-drawer {
+      height: 0;
+      overflow: hidden;
+      background: var(--bg-surface);
+      border-top: 0px solid var(--border);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    .task-row-outer.expanded .inline-drawer {
+      height: auto;
+      border-top: 0.5px solid var(--border);
+      padding: 16px;
+    }
+
+    .drawer-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 20px;
+    }
+
+    .drawer-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .drawer-subtitle {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+      border-bottom: 0.5px solid var(--border);
+      padding-bottom: 4px;
+    }
+
+    /* Inline Checklist Step Row */
+    .inline-subtask-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 4px 6px;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+    .inline-subtask-row:hover {
+      background: var(--bg-tertiary);
+    }
+    
+    .inline-subtask-check {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      border: 1.5px solid var(--border);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .inline-subtask-check::after {
+      content: '✓';
+      font-size: 9px;
+      font-weight: 800;
+      color: #FFFFFF;
+      opacity: 0;
+    }
+    .inline-subtask-row.done .inline-subtask-check {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .inline-subtask-row.done .inline-subtask-check::after {
+      opacity: 1;
+    }
+    .inline-subtask-row.done span {
+      text-decoration: line-through;
+      color: var(--text-secondary);
+    }
+
+    .inline-subtask-input-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .inline-subtask-input-row input {
+      flex: 1;
+      height: 24px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      border-radius: 4px;
+      padding: 0 8px;
+      color: var(--text);
+      outline: none;
+      font-size: 11px;
+    }
+
+    .inline-subtask-input-row input:focus {
+      border-color: var(--border-focus);
+    }
+
+    /* Action quick buttons in Drawer */
+    .drawer-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .drawer-tag-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .drawer-select {
+      height: 24px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      border-radius: 4px;
+      font-size: 11px;
+      padding: 0 4px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .drawer-notes {
+      width: 100%;
+      height: 60px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      border-radius: var(--radius);
+      padding: 8px;
+      font-family: var(--font-text);
+      font-size: 12px;
+      resize: none;
+      outline: none;
+    }
+    .drawer-notes:focus {
+      border-color: var(--border-focus);
+    }
+
+    /* Link references list chips */
+    .drawer-link-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    
+    .link-attachment-chip {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+    .link-attachment-chip:hover {
+      background: var(--accent-dim);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* ==========================================================================
+       THE 25 WILD ADHD INVENTIONS EXPLORER
+       ========================================================================== */
+    .inventions-container {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .inventions-list-sidebar {
+      width: 250px;
+      border-right: 0.5px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 0;
+      flex-shrink: 0;
+    }
+
+    .inventions-search-bar {
+      padding: 12px;
+      border-bottom: 0.5px solid var(--border);
+    }
+    .inventions-search-bar input {
+      width: 100%;
+      height: 28px;
+      border: 1px solid var(--border);
+      background: var(--bg-surface);
+      border-radius: 6px;
+      padding: 0 8px;
+      color: var(--text);
+      outline: none;
+      font-size: 11px;
+    }
+    .inventions-search-bar input:focus {
+      border-color: var(--border-focus);
+    }
+
+    .inventions-scroll-menu {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .invention-menu-item {
+      padding: 10px 14px;
+      border-bottom: 0.5px solid var(--border);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      transition: all 0.15s;
+    }
+    .invention-menu-item:hover {
+      background: var(--bg-surface);
+    }
+    .invention-menu-item.active {
+      background: var(--accent-dim);
+      border-left: 3px solid var(--accent);
+    }
+
+    .inv-item-num {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .inv-item-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .inv-item-cat {
+      font-size: 9px;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--text-tertiary);
+    }
+
+    .invention-details-pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 24px 32px;
+      overflow-y: auto;
+      height: 100%;
+      min-height: 0;
+      gap: 20px;
+    }
+
+    .details-top-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 0.5px solid var(--border);
+      padding-bottom: 8px;
+    }
+
+    .details-cat-badge {
+      background: var(--accent-dim);
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .details-title {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text);
+      margin-top: 4px;
+    }
+
+    .details-serif-quote {
+      font-family: var(--font-serif);
+      font-size: 18px;
+      line-height: 1.4;
+      color: var(--text-secondary);
+      font-style: italic;
+      background: var(--bg-surface);
+      padding: 12px;
+      border-left: 2px solid var(--text-secondary);
+      border-radius: 4px;
+    }
+
+    .details-body {
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Sandbox Simulator Box */
+    .sandbox-widget-box {
+      border: 2px dashed var(--accent);
+      border-radius: 12px;
+      background: var(--bg-surface);
+      padding: 20px;
+      min-height: 240px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sandbox-tag {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--bg-tertiary);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* Confetti Particle canvas overlay strictly inside window */
+    #dopamineCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 200;
+    }
+
+    .celebration-toast {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      opacity: 0;
+      background: rgba(0, 0, 0, 0.9);
+      color: #FFFFFF;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: var(--shadow);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+      z-index: 210;
+    }
+    .celebration-toast.active {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Custom Sleek Scrollbar */
+    .scroll-pane::-webkit-scrollbar,
+    .inventions-scroll-menu::-webkit-scrollbar,
+    .invention-details-pane::-webkit-scrollbar,
+    .sidebar::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .scroll-pane::-webkit-scrollbar-track,
+    .inventions-scroll-menu::-webkit-scrollbar-track,
+    .invention-details-pane::-webkit-scrollbar-track,
+    .sidebar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .scroll-pane::-webkit-scrollbar-thumb,
+    .inventions-scroll-menu::-webkit-scrollbar-thumb,
+    .invention-details-pane::-webkit-scrollbar-thumb,
+    .sidebar::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 10px;
+    }
+    .scroll-pane::-webkit-scrollbar-thumb:hover,
+    .inventions-scroll-menu::-webkit-scrollbar-thumb:hover,
+    .invention-details-pane::-webkit-scrollbar-thumb:hover,
+    .sidebar::-webkit-scrollbar-thumb:hover {
+      background: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==========================================================================
+       THE MAIN STUNNING MAC WINDOW FRAME SHELL (v5)
+       ========================================================================== -->
+  <div class="electron-window">
+    
+    <!-- Confetti Canvas restricted to window frame -->
+    <canvas id="dopamineCanvas"></canvas>
+
+    <!-- macOS Title Bar Section -->
+    <header class="titlebar">
+      <div class="traffic-lights">
+        <span class="traffic-dot dot-close" onclick="triggerConfettiFlash()"></span>
+        <span class="traffic-dot dot-min"></span>
+        <span class="traffic-dot dot-zoom"></span>
+      </div>
+
+      <!-- Segmented View Toggles in Titlebar -->
+      <div class="window-title-bar-tabs">
+        <button class="title-tab-btn active" id="view-tab-planner" onclick="toggleMainView('planner')">Standard Upgraded Planner</button>
+        <button class="title-tab-btn" id="view-tab-wild" onclick="toggleMainView('wild')">25 Wild ADHD Inventions Deck</button>
+      </div>
+
+      <div class="window-controls">
+        <button class="theme-toggle-btn" onclick="toggleDarkMode()">
+          🌓 <span id="themeToggleLabel">Dark Mode</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="window-body">
+      
+      <!-- ==========================================================================
+           STANDARD PLANNER SIDEBAR LEFT
+           ========================================================================== -->
+      <aside class="sidebar" id="plannerSidebar">
+        <div class="sidebar-section">
+          <span class="sidebar-section-title">Focus Views</span>
+          <div class="sidebar-link active" onclick="filterTasks('all', this)">
+            <span>📥 All Inbox Queue</span>
+            <span class="sidebar-pill" id="badge-all">4</span>
+          </div>
+          <div class="sidebar-link" onclick="filterTasks('today', this)">
+            <span>☀️ Do Today</span>
+            <span class="sidebar-pill" id="badge-today">2</span>
+          </div>
+          <div class="sidebar-link" onclick="filterTasks('later', this)">
+            <span>⏳ Later / Stash</span>
+            <span class="sidebar-pill" id="badge-later">1</span>
+          </div>
+          <div class="sidebar-link" onclick="filterTasks('done', this)">
+            <span>✅ Completed</span>
+            <span class="sidebar-pill" id="badge-completed">1</span>
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <span class="sidebar-section-title">Categories</span>
+          <div class="sidebar-link" onclick="filterCategory('all', this)" style="font-weight: 600;">
+            <span>🔖 Show All Categories</span>
+          </div>
+          <div class="sidebar-link" onclick="filterCategory('#cross', this)">
+            <span>#cross</span>
+          </div>
+          <div class="sidebar-link" onclick="filterCategory('#personal', this)">
+            <span>#personal</span>
+          </div>
+          <div class="sidebar-link" onclick="filterCategory('#support', this)">
+            <span>#support</span>
+          </div>
+        </div>
+
+        <!-- Sticky Active Focus Card in Sidebar -->
+        <div class="sidebar-focus-card" id="sidebarActiveFocusBox">
+          <div class="focus-card-meta">
+            <span>🔥 ACTIVE FOCUS</span>
+            <span style="font-size: 16px; cursor:pointer;" onclick="triggerConfettiFlash()">⚡</span>
+          </div>
+          <div class="focus-card-title" id="sidebarActiveFocusTitle">Prep for meeting with @Maya about CROSS-141</div>
+          
+          <!-- Simple Inline Pacing breathing hearth button -->
+          <button class="btn btn-blue" style="height:22px; font-size:9px; background:var(--accent); width:100%; border:none;" onclick="triggerBreathingHearthSidebar()">
+            🧘 Pulse Mindfulness Breathing
+          </button>
+        </div>
+      </aside>
+
+      <!-- ==========================================================================
+           MAIN CONTENT AREA: VIEWPORT A: STANDARD PLANNER VIEW
+           ========================================================================== -->
+      <main class="workspace-viewport active" id="viewportPlanner">
+        <div class="scroll-pane">
+          
+          <!-- Monospace brain dump editor -->
+          <section class="brain-dump-box">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span class="sidebar-section-title" style="padding-left:0;">Dump Messy Morning Intentions</span>
+              <span style="font-size:10px; color:var(--text-tertiary); font-family:var(--font-mono);">Tokens parse automatically: CROSS-141, @Sergey, #personal</span>
+            </div>
+            <div class="textarea-wrapper">
+              <textarea class="dump-textarea" id="dumpTextEditor" placeholder="Type or paste your daily thoughts here...
+- Deployed hq-user-sync following PP doc with @Sergey tomorrow morning #cross
+- Review stg13 zendesk token changes with @Aram #support
+- Plan Zoe registration Gan session #personal"></textarea>
+            </div>
+            <div class="btn-row">
+              <span style="font-size: 11px; color: var(--text-secondary);" id="parserFeedback">Parsed 3 potential logs</span>
+              <div style="display:flex; gap:8px;">
+                <button class="btn btn-gray" onclick="clearDumpEditor()">Clear</button>
+                <button class="btn btn-blue" onclick="processDumpIntentions()">Extract & Cast tasks</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- List Section Headers -->
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2 style="font-family: var(--font-display); font-weight: 700; font-size: 16px;" id="listHeaderTitle">Daily Intention Queue</h2>
+            <button class="btn btn-gray" style="height:24px; font-size:10px;" onclick="addNewEmptyTask()">+ Quick Task</button>
+          </div>
+
+          <!-- Dynamic Tasks List Container -->
+          <div class="task-rows-container" id="tasksListRows">
+            <!-- Populated via Javascript -->
+          </div>
+
+        </div>
+      </main>
+
+      <!-- ==========================================================================
+           MAIN CONTENT AREA: VIEWPORT B: 25 WILD ADHD INVENTIONS EXPLORER
+           ========================================================================== -->
+      <main class="workspace-viewport" id="viewportWild">
+        <div class="inventions-container">
+          
+          <!-- Explorer list sidebar left -->
+          <div class="inventions-list-sidebar">
+            <div class="inventions-search-bar">
+              <input type="text" id="inventionSearchInput" placeholder="Filter 25 concepts..." onkeyup="filterInventionIndex()">
+            </div>
+            <div class="inventions-scroll-menu" id="inventionsMenuList">
+              <!-- Loaded via JavaScript (Cases 26-50) -->
+            </div>
+          </div>
+
+          <!-- Explorer details panel right -->
+          <div class="invention-details-pane" id="inventionDetailsPane">
+            <!-- Active Invention spotlight details loaded via Javascript -->
+          </div>
+
+        </div>
+      </main>
+
+    </div>
+
+    <!-- Dopamine celebration bottom toast -->
+    <div class="celebration-toast" id="celebrationToast">
+      <span style="font-size:16px;">🎉</span>
+      <span id="celebrationToastText">Item Completed!</span>
+    </div>
+
+  </div>
+
+  <!-- ==========================================================================
+       JAVASCRIPT DYNAMICS MOTOR
+       ========================================================================== -->
+  <script>
+    // ── TASK DATABASE STATE (Auto-saves to localStorage) ──
+    const DEFAULT_TASKS = [
+      {
+        id: 1,
+        title: "Prep for meeting with @Maya about CROSS-141",
+        status: "today",
+        priority: "urgent",
+        category: "#cross",
+        date: "Today",
+        isCompleted: false,
+        notes: "Review prisma migrations stg13. Connect Guesty user schemas and temporal otel integration.",
+        subtasks: [
+          { text: "Confirm Guesty schema compatibility with @Sergey", done: true },
+          { text: "Verify backwards validation tags on stg13 database", done: false },
+          { text: "Prepare admin Billing Consent panel slides", done: false }
+        ],
+        links: [
+          { name: "CROSS-141 Epic", url: "#" },
+          { name: "PR #122 Review", url: "#" }
+        ]
+      },
+      {
+        id: 2,
+        title: "Review smartviews-sdk PR #30 approach with @Aram",
+        status: "today",
+        priority: "upcoming",
+        category: "#support",
+        date: "Today",
+        isCompleted: false,
+        notes: "Align with Aram on filters assignment procedure.",
+        subtasks: [
+          { text: "Compile smartviews PR checklists docs", done: false },
+          { text: "Review temporal Otel release parameters", done: false }
+        ],
+        links: [
+          { name: "PR #30 Files", url: "#" }
+        ]
+      },
+      {
+        id: 3,
+        title: "Deployed hq-user-sync following PP doc with @Sergey",
+        status: "done",
+        priority: "neutral",
+        category: "#cross",
+        date: "Yesterday",
+        isCompleted: true,
+        notes: "Temporal configurations set up on cluster successfully.",
+        subtasks: [],
+        links: []
+      },
+      {
+        id: 4,
+        title: "Remember to Register Zoe to Gan #personal",
+        status: "later",
+        priority: "neutral",
+        category: "#personal",
+        date: "May 29",
+        isCompleted: false,
+        notes: "Call municipal administration between 10am-12pm.",
+        subtasks: [],
+        links: []
+      }
+    ];
+
+    let taskDatabase = JSON.parse(localStorage.getItem('todayi_tasks_v5')) || DEFAULT_TASKS;
+    let currentFilter = 'all';
+    let currentCategoryFilter = 'all';
+    let currentActiveFocusId = 1;
+    let openDrawerTaskId = null;
+
+    // ── 25 WILD ADHD INVENTIONS CASES MEMORY (Cases 26-50) ──
+    const WILD_CASES = [
+      {
+        id: 26,
+        title: "The Anti-List (Chaos Lock)",
+        tagline: "Lists trigger anxiety and list-building procrastination. Focus on ONE step or lock the viewport.",
+        category: "Chaos Entry",
+        adhdLogic: "The ADHD brain spends hours organizing lists instead of doing the task (activation avoidance). This mode blocks the backlog and forces action by presenting exactly one item.",
+        setupWidgetHtml: `
+          <div style="text-align: center; width: 100%;">
+            <p style="font-size:11px; margin-bottom:10px; color:var(--text-secondary);">Write your raw thoughts. The Anti-List hides lists and forces one action.</p>
+            <input type="text" id="widget-26-input" placeholder="Type a big chaotic intention..." style="width:280px; height:28px; border:1px solid var(--border); border-radius:6px; padding:0 8px; text-align:center; outline:none; background:var(--bg); color:var(--text);">
+            <button class="btn btn-blue" style="margin-left:6px;" onclick="widget26Focus()">Lock Single Goal</button>
+            
+            <div id="widget-26-display" style="margin-top:20px; display:none; flex-direction:column; align-items:center; gap:8px;">
+              <span class="focus-card-meta">🔒 ACTIVE SINGLE FOCUS</span>
+              <h2 id="widget-26-title" style="font-family:var(--font-display); font-size:18px;"></h2>
+              <button class="btn btn-gray" onclick="widget26ShowList()">Try to See Backlog List</button>
+            </div>
+            <div id="widget-26-modal" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); backdrop-filter:blur(6px); color:#FFF; display:none; flex-direction:column; justify-content:center; align-items:center; padding:20px; z-index:100;">
+              <span style="font-size:32px;">🛑</span>
+              <h3 style="margin-top:10px; font-family:var(--font-display);">List-Seeking is Procrastination!</h3>
+              <p style="font-size:12px; margin-top:6px; color:#AEAEB2; text-align:center; max-width:280px;">Your brain is seeking the dopamine of organizing. Stop. Go complete the active task!</p>
+              <button class="btn btn-blue" style="margin-top:14px;" onclick="widget26CloseModal()">Return to Work</button>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: 27,
+        title: "Cognitive Tax Blocker",
+        tagline: "Prevent morning over-planning. Plan more than 10 points and your keyboard locks.",
+        category: "Chaos Entry",
+        adhdLogic: "ADHD minds overestimate daily capacity. Setting limits physically locks the planning bounds to protect executive reserves.",
+        setupWidgetHtml: `
+          <div style="text-align: center; width: 100%; display:flex; flex-direction:column; align-items:center; gap:12px;">
+            <div style="font-size:14px; font-weight:700;">Planned Capacity: <span id="widget-27-total" style="color:var(--accent);">6</span> / 10 points</div>
+            <div style="display:flex; gap:6px;">
+              <button class="btn btn-gray" onclick="widget27Adjust(3)">+ Add PR Review (3pts)</button>
+              <button class="btn btn-gray" onclick="widget27Adjust(5)">+ Add BE Refactor (5pts)</button>
+              <button class="btn btn-danger" onclick="widget27Adjust(-4)">- Drop Task (-4pts)</button>
+            </div>
+            <div id="widget-27-warning" style="display:none; color:var(--danger); font-weight:600; font-size:11px;">
+              ⚠️ COGNITIVE OVERLOAD! KEYBOARD LOCKED! You must drop tasks to unlock the editor.
+            </div>
+            <input type="text" id="widget-27-editor" placeholder="Write logs (will lock if over 10pts)..." style="width:280px; height:28px; border:1px solid var(--border); border-radius:6px; padding:0 8px; text-align:center; outline:none; background:var(--bg); color:var(--text);">
+          </div>
+        `
+      },
+      {
+        id: 28,
+        title: "Task Roulette Wheel",
+        tagline: "Bypass activation energy paralysis. Let the dial pick your starting point.",
+        category: "Dopamine Engines",
+        adhdLogic: "Analysis paralysis keeps ADHD brains locked. A physics-spinning dial gamifies selection, breaking resistance to starting.",
+        setupWidgetHtml: `
+          <div style="text-align:center; width:100%; display:flex; flex-direction:column; align-items:center; gap:12px;">
+            <div id="roulette-wheel" style="width:120px; height:120px; border-radius:50%; border:3px solid var(--accent); position:relative; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:10px; font-family:var(--font-mono); transition: transform 2s cubic-bezier(0.1, 0.8, 0.2, 1); background: var(--bg);">
+              <div style="transform: rotate(0deg); position:absolute; top:10px;">CROSS-141</div>
+              <div style="transform: rotate(90deg); position:absolute; right:10px;">Zoe Gan</div>
+              <div style="transform: rotate(180deg); position:absolute; bottom:10px;">PR #30</div>
+              <div style="transform: rotate(270deg); position:absolute; left:10px;">Zendesk</div>
+              <div style="width:8px; height:8px; background:var(--danger); border-radius:50%;"></div>
+            </div>
+            <span style="font-size:16px; margin-top:-6px; z-index:5;">▲</span>
+            <button class="btn btn-blue" onclick="spinRoulette()">Spin Roulette!</button>
+            <div id="roulette-result" style="font-weight:700; color:var(--success); min-height:16px;"></div>
+          </div>
+        `
+      },
+      {
+        id: 29,
+        title: "The Fog of War Focus",
+        tagline: "Physical distraction shields. A visual spotlight masks off screen clutter.",
+        category: "Attention Shields",
+        adhdLogic: "The eye darts to alerts and backlogs. This mode blurs everything outside a movable radius around your active cursor.",
+        setupWidgetHtml: `
+          <div style="width:100%; height:200px; background:#111; border-radius:8px; position:relative; overflow:hidden;" onmousemove="updateFogOfWar(event)" id="fog-container">
+            <div style="position:absolute; width:100%; height:100%; background:rgba(0,0,0,0.92); z-index:2; pointer-events:none;" id="fog-overlay"></div>
+            <div style="color:#FFF; font-family:var(--font-mono); padding:16px; font-size:12px; line-height:1.6; z-index:1; position:relative;">
+              Ofer, this is the active code buffer.<br>
+              Everything else on screen is hidden by the Fog of War.<br>
+              Move your mouse to reveal this text using your focus flashlight.<br>
+              Focus on this line alone.
+            </div>
+          </div>
+          <span style="font-size:10px; color:var(--text-secondary);">Move your cursor over the box above to reveal text!</span>
+        `
+      },
+      {
+        id: 30,
+        title: "Body-Doubling AI Mirror",
+        tagline: "Succeed together. A simulated partner keeps working beside you.",
+        category: "Chaos Entry",
+        adhdLogic: "ADHD minds focus far better when someone else is physically working in the same room. The AI mirror simulates this.",
+        setupWidgetHtml: `
+          <div style="width:100%; display:flex; gap:10px; width:100%;">
+            <div style="flex:1; background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:10px; display:flex; flex-direction:column; gap:6px;">
+              <span class="focus-card-meta" style="color:var(--text-secondary);">Your Editor</span>
+              <textarea placeholder="Type code or notes..." style="width:100%; height:80px; border:none; resize:none; outline:none; background:transparent; font-family:var(--font-mono); font-size:11px;" onkeyup="triggerBodyDoubleInteraction()"></textarea>
+            </div>
+            <div style="flex:1; background:#0F0F11; border-radius:6px; padding:10px; display:flex; flex-direction:column; gap:6px; font-family:var(--font-mono); color:#30D158;">
+              <span class="focus-card-meta" style="color:#98989D;">💻 Body Double: Sergey-Bot</span>
+              <div id="double-status" style="font-size:10px; color:#A1A1A6;">Sergey is writing prisma schemas...</div>
+              <div id="double-console" style="font-size:11px; color:#0A84FF; white-space:pre-wrap;">$ npm run test
+✓ migrations sync ok</div>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: 31,
+        title: "Procrastination Trash Can",
+        tagline: "Free working memory. Crumple up distractions and throw them away.",
+        category: "Chaos Entry",
+        adhdLogic: "Distracting impulses ('Check crypto status!') clog short-term memory. Offloading them to a visual paper trash bin ejects them.",
+        setupWidgetHtml: `
+          <div style="text-align:center; width:100%; display:flex; flex-direction:column; align-items:center; gap:8px;">
+            <input type="text" id="distract-input" placeholder="What is distracting you right now? (e.g. check Slack...)" style="width:260px; height:28px; border:1px solid var(--border); border-radius:6px; padding:0 8px; outline:none; background:var(--bg); color:var(--text);">
+            <button class="btn btn-danger" onclick="crumpleDistraction()">Crumple & Throw Away</button>
+            <div style="display:flex; align-items:center; justify-content:center; gap:16px; margin-top:10px;">
+              <div id="paper-ball" style="width:24px; height:24px; background:#DDD; border-radius:50%; border:1px dashed #999; display:none; font-size:10px; line-height:22px; text-align:center; font-weight:bold; cursor:default;">📄</div>
+              <span id="trash-bin-emoji" style="font-size:32px; transition:transform 0.2s;">🗑️</span>
+            </div>
+            <div id="trash-status" style="font-size:11px; color:var(--text-secondary); min-height:16px;"></div>
+          </div>
+        `
+      },
+      {
+        id: 32,
+        title: "Reverse Focus Drift Log",
+        tagline: "Stop guilt. Track drift times instead of strict work hours.",
+        category: "Transition Cushions",
+        adhdLogic: "Instead of punishing off-task time, logging drift moments helps build awareness without initiating dopamine avoidance guilt.",
+        setupWidgetHtml: `
+          <div style="text-align:center; width:100%; display:flex; flex-direction:column; align-items:center; gap:10px;">
+            <div style="font-size:14px; font-weight:600;">Drifted Counter: <span id="drift-time" style="color:var(--danger); font-family:var(--font-mono);">00:00</span></div>
+            <div style="display:flex; gap:6px;">
+              <button class="btn btn-danger" id="drift-toggle" onclick="toggleDriftTimer()">Catch Myself Drifting</button>
+              <button class="btn btn-gray" onclick="resetDriftTimer()">Reset Log</button>
+            </div>
+            <input type="text" id="drift-cause" placeholder="Where did your mind wander?" style="display:none; width:240px; height:24px; border:1px solid var(--border); border-radius:4px; padding:0 8px; font-size:11px; outline:none;">
+            <div id="drift-list" style="font-size:10px; color:var(--text-secondary); font-family:var(--font-mono); text-align:left; width:80%; max-height:60px; overflow-y:auto; border-top:0.5px solid var(--border); padding-top:6px; display:none;"></div>
+          </div>
+        `
+      },
+      {
+        id: 33,
+        title: "The Shame-Free Rollover Vault",
+        tagline: "Forget red warnings. Old items fade into clouds to allow a fresh start.",
+        category: "Guilt-Free Zones",
+        adhdLogic: "Seeing red 'overdue' tasks triggers shame and task avoidance. Rollover tasks silently stash into clouds to clear the canvas.",
+        setupWidgetHtml: `
+          <div style="text-align:center; width:100%; display:flex; flex-direction:column; align-items:center; gap:10px;">
+            <div style="display:flex; gap:8px;">
+              <div class="link-attachment-chip" style="opacity:0.4;">❌ Task: Update OKTA redirect configs (5 days old)</div>
+              <div class="link-attachment-chip" style="opacity:0.4;">❌ Task: Register Zoe municipal gan (3 days old)</div>
+            </div>
+            <button class="btn btn-blue" onclick="simulateShameFreeRollover()">Simulate 12:00 AM Fresh Slate</button>
+            <div id="rollover-sky" style="font-size:24px; min-height:30px; margin-top:8px;"></div>
+          </div>
+        `
+      },
+      {
+        id: 34,
+        title: "Dopamine Slot Machine",
+        tagline: "Instant gratification engine. Complete a task, roll the wheels.",
+        category: "Dopamine Engines",
+        adhdLogic: "Checking a checkbox is sometimes not enough dopamine. A physical slot machine rewards completion with jackpot spins.",
+        setupWidgetHtml: `
+          <div style="text-align:center; width:100%; display:flex; flex-direction:column; align-items:center; gap:12px;">
+            <div style="display:flex; gap:10px; font-size:24px; background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:10px 20px; font-weight:800;">
+              <span id="slot-1">✅</span>
+              <span id="slot-2">✅</span>
+              <span id="slot-3">✅</span>
+            </div>
+            <button class="btn btn-blue" onclick="spinSlots()">Simulate Task Checked Spin!</button>
+            <div id="slot-status" style="font-weight:700; color:var(--accent); min-height:16px;">Matches reward double confetti!</div>
+          </div>
+        `
+      },
+      {
+        id: 35,
+        title: "Organic Rhythm Mood Matcher",
+        tagline: "Ditch calendars. Sort plans strictly by dynamic attention cycles.",
+        category: "Guilt-Free Zones",
+        adhdLogic: "Forcing deep logic tasks during afternoon cognitive slumps leads to defeat. Sort tasks by active physical state.",
+        setupWidgetHtml: `
+          <div style="text-align:center; width:100%; display:flex; flex-direction:column; align-items:center; gap:10px;">
+            <span class="focus-card-meta">How is your brain right now?</span>
+            <div style="display:flex; gap:4px; flex-wrap:wrap; justify-content:center;">
+              <button class="btn btn-gray" onclick="matchMood('Ritalin Peak', '⚡⚡⚡ Urgent Guesty BE Code')">⚡ Ritalin Peak</button>
+              <button class="btn btn-gray" onclick="matchMood('Afternoon Slump', '🍵 Review Sergys PR (Low key)')">🍵 Afternoon Slump</button>
+              <button class="btn btn-gray" onclick="matchMood('Creative Chaos', '💡 Brain dump new focus rooms')">💡 Creative Chaos</button>
+              <button class="btn btn-gray" onclick="matchMood('Brain Fog', '🚶 Rest Zoe Gan forms registration')">🌫️ Brain Fog</button>
+            </div>
+            <div id="mood-matched-task" style="border:1px solid var(--accent); background:var(--accent-dim); padding:10px; border-radius:6px; font-weight:600; display:none; margin-top:8px;"></div>
+          </div>
+        `
+      },
+      {
+        id: 36,
+        title: "Typing Hearth Momentum",
+        tagline: "Keep typing to keep the fire bright. Pause and color fades.",
+        category: "Attention Shields",
+        adhdLogic: "Maintains momentum by visually showing energy drainage if attention drifts away from the active typing board.",
+        setupWidgetHtml: `
+          <div style="text-align:center; width:100%; display:flex; flex-direction:column; align-items:center; gap:10px;">
+            <div id="fire-graphic" style="font-size:42px; transition:all 0.5s; filter:grayscale(0%);">🔥</div>
+            <div style="font-size:11px; color:var(--text-secondary);">Type fast inside the input below to fuel the Hearth bonfire!</div>
+            <input type="text" placeholder="Type here to grow the flames..." onkeydown="growFlame()" style="width:240px; height:28px; border:1px solid var(--border); border-radius:6px; padding:0 8px; text-align:center; outline:none; background:var(--bg); color:var(--text);">
+            <div id="hearth-energy" style="font-family:var(--font-mono); font-size:10px; color:var(--success);">Bonfire energy: 100%</div>
+          </div>
+        `
+      },
+      {
+        id: 37,
+        title: "The Cognitive Bodyguard",
+        tagline: "Challenge additions. Block hyperfocus rabbit-holes instantly.",
+        category: "Chaos Entry",
+        adhdLogic: "ADHD brains impulsively commit to rabbit-hole side tasks. The Bodyguard challenges every new entry to protect the main stack.",
+        setupWidgetHtml: `
+          <div style="width:100%; max-width:320px; background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:10px; display:flex; flex-direction:column; gap:8px;">
+            <div style="font-size:10px; color:var(--text-secondary); border-bottom:0.5px solid var(--border); padding-bottom:4px; display:flex; justify-content:space-between;">
+              <span>🛡️ COGNITIVE BODYGUARD</span>
+              <span style="color:var(--danger); font-weight:700;">ACTIVE</span>
+            </div>
+            <div id="bodyguard-chat" style="font-size:11px; line-height:1.4; display:flex; flex-direction:column; gap:6px; min-height:80px; max-height:80px; overflow-y:auto;">
+              <div style="color:var(--accent);"><strong>Bodyguard:</strong> Hey Ofer! Try to add a new task...</div>
+            </div>
+            <div style="display:flex; gap:4px;">
+              <input type="text" id="bodyguard-input" placeholder="Type new task idea..." style="flex:1; height:24px; border:1px solid var(--border); border-radius:4px; padding:0 6px; font-size:11px; outline:none; background:transparent; color:var(--text);">
+              <button class="btn btn-blue" style="height:24px; padding:0 8px;" onclick="bodyguardChallenge()">Add</button>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: 38,
+        title: "Guided Pacing Balloon",
+        tagline: "Pulsing mindfulness circle. Paced breaths to clear working buffer.",
+        category: "Transition Cushions",
+        adhdLogic: "Breathing targets clear the cognitive transition tax, shifting the brain gently from focus lockout to the next priority.",
+        setupWidgetHtml: `
+          <div style="text-align:center; width:100%; display:flex; flex-direction:column; align-items:center; gap:12px;">
+            <div id="guided-balloon" style="width:60px; height:60px; background:rgba(52, 199, 89, 0.4); border:2px solid var(--success); border-radius:50%; transition: transform 3s ease-in-out; transform:scale(1);"></div>
+            <div id="balloon-text" style="font-size:12px; font-weight:600; color:var(--success);">Breath Anchor</div>
+            <button class="btn btn-blue" id="breath-action-btn" onclick="startGuidedBreath()">Begin 10s Paced Cycle</button>
+          </div>
+        `
+      },
+      {
+        id: 39,
+        title: "Visual Impact Scales",
+        tagline: "Balance cognitive costs vs reward weight before starting.",
+        category: "Transition Cushions",
+        adhdLogic: "Forces awareness of task ratios (e.g. high friction with low reward) to make prioritizing visual and intuitive.",
+        setupWidgetHtml: `
+          <div style="text-align:center; width:100%; display:flex; flex-direction:column; align-items:center; gap:12px;">
+            <div style="display:flex; justify-content:space-around; width:100%; font-size:24px;">
+              <span id="scale-left" style="transition: transform 0.3s; transform:translateY(0px);">⚖️ Left: Mental effort (5)</span>
+              <span id="scale-right" style="transition: transform 0.3s; transform:translateY(0px);">Right: Reward (5)</span>
+            </div>
+            <div style="width:100%; display:flex; gap:10px; justify-content:center;">
+              <label style="font-size:10px;">Mental Effort: <input type="range" id="scale-effort" min="1" max="10" value="5" oninput="balanceScales()"></label>
+              <label style="font-size:10px;">Goal Reward: <input type="range" id="scale-reward" min="1" max="10" value="5" oninput="balanceScales()"></label>
+            </div>
+            <div id="scales-status" style="font-weight:700; color:var(--success);">Scales Balanced! Intention is realistic.</div>
+          </div>
+        `
+      },
+      {
+        id: 40,
+        title: "Soundscape Synthesizer",
+        tagline: "Realtime typing audio. Sound speeds up to match keyboard pacing.",
+        category: "Attention Shields",
+        adhdLogic: "Leverages audio sensory loops. Quick synthesizers produce a custom focusing rhythm that shifts dynamically to match fingers.",
+        setupWidgetHtml: `
+          <div style="text-align:center; width:100%; display:flex; flex-direction:column; align-items:center; gap:8px;">
+            <div style="font-size:12px; font-weight:600;">Ambient Focus Beat Generator</div>
+            <button class="btn btn-blue" onclick="playWebAudioBeep(440)">⚡ Synth Test Tone</button>
+            <input type="text" placeholder="Type here to speed beat rhythm..." onkeyup="synthAccelerate()" style="width:240px; height:28px; border:1px solid var(--border); border-radius:6px; padding:0 8px; text-align:center; outline:none; background:var(--bg); color:var(--text);">
+            <div style="font-size:10px; color:var(--text-secondary);">Generates soft high-frequency focus bleeps with modern Web Audio APIs!</div>
+          </div>
+        `
+      },
+      {
+        id: 41,
+        title: "The One-Word Beacon",
+        tagline: "A giant word sits behind the view. Eye wanders bounce back.",
+        category: "Attention Shields",
+        adhdLogic: "A massive visual compass word anchors the spatial awareness, instantly pulling drift eyes back to the active topic.",
+        setupWidgetHtml: `
+          <div style="width:100%; height:180px; background:var(--bg); border:1px solid var(--border); border-radius:8px; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center;">
+            <div id="beacon-word-bg" style="position:absolute; font-family:var(--font-display); font-size:42px; font-weight:900; opacity:0.07; color:var(--accent); text-transform:uppercase; pointer-events:none; user-select:none;">CROSS-141</div>
+            <div style="z-index:2; width:80%; display:flex; flex-direction:column; gap:6px;">
+              <span class="focus-card-meta">Change Beacon Keyword:</span>
+              <input type="text" id="beacon-keyword" value="CROSS-141" oninput="updateBeaconWord()" style="height:24px; border:1px solid var(--border); border-radius:4px; padding:0 6px; font-size:11px; outline:none; background:var(--bg); color:var(--text);">
+              <span style="font-size:10px; color:var(--text-secondary); line-height:1.2;">The keyword sits huge in the backdrop, acting as a cognitive compass to anchor your sight.</span>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: 42,
+        title: "Hyperfocus Session Lock",
+        tagline: "Block severe burnout. Automatic lockout forces stretch breaks.",
+        category: "Attention Shields",
+        adhdLogic: "Hyperfocus causes physical exhaustion and joint pain. Force-lock the view to mandate movement.",
+        setupWidgetHtml: `
+          <div style="text-align:center; width:100%; display:flex; flex-direction:column; align-items:center; gap:8px;">
+            <div style="font-size:13px; font-weight:700;">Remaining focus time: <span id="lockout-time" style="color:var(--accent); font-family:var(--font-mono);">00:05</span></div>
+            <button class="btn btn-blue" id="lockout-btn" onclick="startLockoutTimer()">Trigger 5s Hyperfocus Cycle</button>
+            <div id="lockout-overlay" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:var(--bg); color:var(--danger); display:none; flex-direction:column; justify-content:center; align-items:center; z-index:100;">
+              <span style="font-size:32px;">🧘</span>
+              <h3 style="margin-top:10px; font-family:var(--font-display);">Mandatory Break Activated</h3>
+              <p style="font-size:11px; color:var(--text-secondary); margin-top:4px;">Inhale... Stagger your shoulders... 3s remaining</p>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: 43,
+        title: "The Administrative Vault",
+        tagline: "Stash boring chores. Locked away until energy matches.",
+        category: "Guilt-Free Zones",
+        adhdLogic: "Hides boring tasks in a locked virtual box, freeing up valuable working memory and visual space during deep dev tasks.",
+        setupWidgetHtml: `
+          <div style="text-align:center; width:100%; display:flex; flex-direction:column; align-items:center; gap:10px;">
+            <div style="display:flex; gap:6px; font-size:11px;">
+              <span class="parsed-badge parsed-hashtag">📦 Submit expenses</span>
+              <span class="parsed-badge parsed-hashtag">📦 Check email replies</span>
+            </div>
+            <button class="btn btn-blue" onclick="vaultAdminTasks()">Lock Chores in Vault until 4:00 PM</button>
+            <div id="vault-vault-status" style="font-size:32px; min-height:40px; margin-top:6px;"></div>
+          </div>
+        `
+      },
+      {
+        id: 44,
+        title: "Interactive Mental Sandbox",
+        tagline: "Release fidget energy. Scribble directly in your side view.",
+        category: "Chaos Entry",
+        adhdLogic: "Kinetic tactile stimulation releases excess motor energy, raising logical focus when analyzing architecture.",
+        setupWidgetHtml: `
+          <div style="text-align:center; width:100%;">
+            <div style="font-size:10px; margin-bottom:6px; color:var(--text-secondary);">Doodle here during meetings to release kinetic energy:</div>
+            <canvas id="doodle-canvas" width="280" height="130" style="border:1px solid var(--border); border-radius:6px; background:#FFF; cursor:crosshair;"></canvas>
+            <br>
+            <button class="btn btn-gray" style="margin-top:6px; height:20px; font-size:9px;" onclick="clearDoodleCanvas()">Clear Drawing Board</button>
+          </div>
+        `
+      },
+      {
+        id: 45,
+        title: "Slack Intention Synthesizer",
+        tagline: "Mirror Slack journals. Auto-structure chaotic bullets.",
+        category: "Chaos Entry",
+        adhdLogic: "Ofer's raw Slack updates are messy. The synthesizer digests the paragraphs and spits out structured priority targets.",
+        setupWidgetHtml: `
+          <div style="width:100%; display:flex; flex-direction:column; gap:8px;">
+            <textarea id="widget-45-input" style="width:100%; height:50px; font-family:var(--font-mono); font-size:11px; border:1px solid var(--border); border-radius:4px; padding:6px; outline:none; background:var(--bg); color:var(--text);">- Deployed users with @Sergey #cross\n- Review PR #30 @Aram</textarea>
+            <button class="btn btn-blue" onclick="synthesizeSlackLogs()">Extract Priority Blocks</button>
+            <div id="widget-45-output" style="display:flex; flex-direction:column; gap:4px;"></div>
+          </div>
+        `
+      },
+      {
+        id: 46,
+        title: "Task Speedrun Mode",
+        tagline: "Gamified quick updates. A retro racing bar counts down.",
+        category: "Dopamine Engines",
+        adhdLogic: "Gamification turns boring task checking into a fast, highly rewarding race against time.",
+        setupWidgetHtml: `
+          <div style="text-align:center; width:100%; display:flex; flex-direction:column; align-items:center; gap:8px;">
+            <div style="font-size:13px; font-weight:700; color:var(--warning);">🎮 SPEEDRUN IN PROGRESS</div>
+            <div style="width:240px; height:12px; background:var(--bg-tertiary); border-radius:6px; overflow:hidden;">
+              <div id="speedrun-bar" style="width:100%; height:100%; background:var(--warning); transition:width 0.1s linear;"></div>
+            </div>
+            <button class="btn btn-blue" onclick="startSpeedrunGame()">Start 5s Update Speedrun</button>
+            <div id="speedrun-status" style="font-size:11px; min-height:16px; font-weight:600; color:var(--accent);"></div>
+          </div>
+        `
+      },
+      {
+        id: 47,
+        title: "Bubble Target Exploder",
+        tagline: "High sensory checks. Pop task bubbles with full physics.",
+        category: "Dopamine Engines",
+        adhdLogic: "Creates a strong sensory satisfaction loop when completing tasks, reinforcing task completion.",
+        setupWidgetHtml: `
+          <div style="display:flex; gap:12px; justify-content:center; align-items:center; height:120px; width:100%;" id="bubble-exploder-box">
+            <div class="check-circle" style="width:40px; height:40px; background:#A8DADC; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; border-radius:50%; transition:all 0.15s;" onclick="popBubbleTarget(this, 'CROSS-141')">💥</div>
+            <div class="check-circle" style="width:40px; height:40px; background:#F1FAEE; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; border-radius:50%; transition:all 0.15s;" onclick="popBubbleTarget(this, 'Zoe Gan')">💥</div>
+            <div class="check-circle" style="width:40px; height:40px; background:#E63946; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; border-radius:50%; transition:all 0.15s;" onclick="popBubbleTarget(this, 'PR #30')">💥</div>
+          </div>
+          <span style="font-size:10px; color:var(--text-secondary);">Click task bubbles to pop them with confetti explosions!</span>
+        `
+      },
+      {
+        id: 48,
+        title: "Breathe-to-Unlock Gate",
+        tagline: "Pause impulsivity. Inhale for 3s before task checking.",
+        category: "Transition Cushions",
+        adhdLogic: "Checks the impulse to check items. Pauses attention and brings calm focus.",
+        setupWidgetHtml: `
+          <div style="text-align:center; width:100%; display:flex; flex-direction:column; align-items:center; gap:10px;">
+            <button class="btn btn-gray" id="unlock-trigger" onmousedown="holdBreathUnlock()" onmouseup="releaseBreathUnlock()">Hold down 3s to Complete Task</button>
+            <div style="width:180px; height:6px; background:var(--bg-tertiary); border-radius:3px; overflow:hidden;">
+              <div id="unlock-progress" style="width:0%; height:100%; background:var(--success);"></div>
+            </div>
+            <div id="unlock-status" style="font-size:11px; min-height:16px;">Hold mouse button down to simulate!</div>
+          </div>
+        `
+      },
+      {
+        id: 49,
+        title: "Tactile Fidget Spinner",
+        tagline: "Kinetic spinner widget. Flick it to release tension.",
+        category: "Chaos Entry",
+        adhdLogic: "Provides a lightweight physical release widget directly inside the workspace layout, capturing kinetic energy excess.",
+        setupWidgetHtml: `
+          <div style="text-align:center; width:100%; display:flex; flex-direction:column; align-items:center; gap:8px;">
+            <div id="tactile-fidget-disc" style="width:70px; height:70px; border-radius:50%; border:6px dotted var(--accent); background:var(--bg); display:flex; align-items:center; justify-content:center; font-weight:700; transition: transform 0.1s linear;" onclick="flickFidgetSpinner()">🌀</div>
+            <button class="btn btn-gray" style="height:22px; font-size:10px;" onclick="flickFidgetSpinner()">Flick Spinner</button>
+            <div id="fidget-spin-speed" style="font-size:10px; color:var(--text-secondary);">Spin velocity: 0 rpm</div>
+          </div>
+        `
+      },
+      {
+        id: 50,
+        title: "Stare-at-Me Compass",
+        tagline: "Cursor attention magnet. Guide the eyes back.",
+        category: "Attention Shields",
+        adhdLogic: "Visually tracks system focus vectors, returning stray mouse movements back to the active focus slot.",
+        setupWidgetHtml: `
+          <div style="width:100%; height:120px; border-radius:8px; border:1px solid var(--border); display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden;" onmousemove="updateAttentionRadar(event)" id="radar-box">
+            <div id="radar-needle" style="width:4px; height:40px; background:var(--accent); border-radius:2px; transform:rotate(0deg); transition: transform 0.15s ease-out; transform-origin: center bottom;"></div>
+            <div style="position:absolute; bottom:6px; font-size:9px; font-family:var(--font-mono); color:var(--text-tertiary);">Move cursor over radar pane</div>
+          </div>
+        `
+      }
+    ];
+
+    let currentSelectedInventionId = 26;
+
+    // ── INITIALIZATION ──
+    document.addEventListener("DOMContentLoaded", () => {
+      renderStandardTasks();
+      loadInventionsIndex();
+      loadInventionDetails(26);
+      
+      // Auto-save key data
+      updateSidebarFocusItem();
+      updateCountBadges();
+      
+      // Canvas sizing
+      setupConfettiCanvas();
+    });
+
+    // ==========================================================================
+    // PARSING AND TOKEN GRAPH ENGINE
+    // ==========================================================================
+    function parseTextToTokens(text) {
+      let parsed = text.replace(/([A-Z]+-\d+)/g, '<span class="parsed-badge parsed-jira" onclick="showTicketInfo(\'$1\')">$1</span>');
+      parsed = parsed.replace(/(@\w+)/g, '<span class="parsed-badge parsed-handle" onclick="showUserInfo(\'$1\')">$1</span>');
+      parsed = parsed.replace(/(#\w+)/g, '<span class="parsed-badge parsed-hashtag">$1</span>');
+      return parsed;
+    }
+
+    // ==========================================================================
+    // THEME & CORE VIEW CONTROLLER
+    // ==========================================================================
+    function toggleDarkMode() {
+      const windowEl = document.querySelector('.electron-window');
+      windowEl.classList.toggle('theme-dark');
+      const isDark = windowEl.classList.contains('theme-dark');
+      document.getElementById('themeToggleLabel').innerText = isDark ? "Light Mode" : "Dark Mode";
+    }
+
+    function toggleMainView(mode) {
+      document.getElementById('view-tab-planner').classList.remove('active');
+      document.getElementById('view-tab-wild').classList.remove('active');
+      
+      document.getElementById('viewportPlanner').classList.remove('active');
+      document.getElementById('viewportWild').classList.remove('active');
+
+      if (mode === 'planner') {
+        document.getElementById('view-tab-planner').classList.add('active');
+        document.getElementById('viewportPlanner').classList.add('active');
+        document.getElementById('plannerSidebar').style.display = 'flex';
+        renderStandardTasks();
+      } else {
+        document.getElementById('view-tab-wild').classList.add('active');
+        document.getElementById('viewportWild').classList.add('active');
+        document.getElementById('plannerSidebar').style.display = 'none';
+        setTimeout(() => {
+          initializeFidgetDoodleCanvas();
+        }, 100);
+      }
+    }
+
+    // ==========================================================================
+    // STANDARD PLANNER VIEW FUNCTIONS
+    // ==========================================================================
+    function renderStandardTasks() {
+      const container = document.getElementById('tasksListRows');
+      container.innerHTML = '';
+
+      let filtered = taskDatabase;
+
+      // Filter by Left Sidebar state
+      if (currentFilter !== 'all') {
+        if (currentFilter === 'today') {
+          filtered = filtered.filter(t => t.status === 'today' && !t.isCompleted);
+        } else if (currentFilter === 'later') {
+          filtered = filtered.filter(t => t.status === 'later' && !t.isCompleted);
+        } else if (currentFilter === 'done') {
+          filtered = filtered.filter(t => t.isCompleted);
+        }
+      }
+
+      // Filter by Left Sidebar Category state
+      if (currentCategoryFilter !== 'all') {
+        filtered = filtered.filter(t => t.category === currentCategoryFilter);
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div style="padding:24px; border:1px dashed var(--border); border-radius:var(--radius); text-align:center; color:var(--text-tertiary); font-size:12px;">No tasks match your selected view filter.</div>`;
+        return;
+      }
+
+      filtered.forEach(task => {
+        const outer = document.createElement('div');
+        outer.className = `task-row-outer ${task.isCompleted ? 'is-completed' : ''} ${task.id === openDrawerTaskId ? 'expanded' : ''} ${task.id === currentActiveFocusId ? 'active-focus' : ''}`;
+        outer.id = `task-row-${task.id}`;
+
+        // Subtask counts
+        const doneSub = task.subtasks ? task.subtasks.filter(s => s.done).length : 0;
+        const totalSub = task.subtasks ? task.subtasks.length : 0;
+        const subtaskText = totalSub > 0 ? `${doneSub}/${totalSub}` : '';
+        const subtasksCompleted = totalSub > 0 && doneSub === totalSub;
+
+        // Bullets structure
+        outer.innerHTML = `
+          <div class="task-row-header" onclick="toggleTaskExpansion(${task.id}, event)">
+            <div class="check-circle" onclick="toggleStandardCheckbox(${task.id}, event)"></div>
+            <span class="priority-dot ${task.priority}"></span>
+            <div class="task-row-title-text">${parseTextToTokens(task.title)}</div>
+            
+            <div class="task-row-pills">
+              ${subtaskText ? `<span class="row-pill row-pill-subtasks ${subtasksCompleted ? 'completed' : ''}">📂 ${subtaskText}</span>` : ''}
+              ${task.links && task.links.length > 0 ? `<span class="row-pill row-pill-link">🔗 ${task.links.length} ref</span>` : ''}
+              <span class="row-pill row-pill-date">${task.date || 'Today'}</span>
+            </div>
+            
+            <span class="chevron-indicator">▶</span>
+          </div>
+          
+          <div class="inline-drawer" id="drawer-${task.id}">
+            <div class="drawer-grid">
+              <!-- Left side drawer: Checklist & Note -->
+              <div class="drawer-section">
+                <span class="drawer-subtitle">Nested Subtask Steps Checklist</span>
+                <div id="drawer-subtasks-list-${task.id}">
+                  ${renderDrawerSubtasksHtml(task)}
+                </div>
+                <div class="inline-subtask-input-row">
+                  <input type="text" id="new-subtask-input-${task.id}" placeholder="Add next step step-by-step..." onkeydown="handleNewSubtaskEnter(${task.id}, event)">
+                  <button class="btn btn-gray" style="height:24px; padding:0 8px;" onclick="addDrawerSubtask(${task.id})">Add Step</button>
+                </div>
+                
+                <span class="drawer-subtitle" style="margin-top:10px;">Mindset Recovery Context Notes</span>
+                <textarea class="drawer-notes" placeholder="Where are you heading? Leave a context trail..." onchange="saveDrawerNotes(${task.id}, this.value)">${task.notes || ''}</textarea>
+              </div>
+
+              <!-- Right side drawer: Ref links & parameters -->
+              <div class="drawer-section drawer-controls">
+                <span class="drawer-subtitle">Intention Parameters</span>
+                <div class="drawer-tag-row">
+                  <label style="font-size:11px; flex:1;">Category:</label>
+                  <select class="drawer-select" onchange="updateDrawerCategory(${task.id}, this.value)">
+                    <option value="#cross" ${task.category === '#cross' ? 'selected' : ''}>#cross</option>
+                    <option value="#personal" ${task.category === '#personal' ? 'selected' : ''}>#personal</option>
+                    <option value="#support" ${task.category === '#support' ? 'selected' : ''}>#support</option>
+                  </select>
+                </div>
+
+                <div class="drawer-tag-row">
+                  <label style="font-size:11px; flex:1;">Priority:</label>
+                  <select class="drawer-select" onchange="updateDrawerPriority(${task.id}, this.value)">
+                    <option value="neutral" ${task.priority === 'neutral' ? 'selected' : ''}>Neutral</option>
+                    <option value="upcoming" ${task.priority === 'upcoming' ? 'selected' : ''}>Upcoming</option>
+                    <option value="urgent" ${task.priority === 'urgent' ? 'selected' : ''}>Urgent</option>
+                  </select>
+                </div>
+
+                <span class="drawer-subtitle" style="margin-top:6px;">Web & Jira Links</span>
+                <div class="drawer-link-container" id="drawer-links-container-${task.id}">
+                  ${renderDrawerLinksHtml(task)}
+                </div>
+                <div class="inline-subtask-input-row">
+                  <input type="text" id="new-link-input-${task.id}" placeholder="Jira key or URL..." style="height:20px;">
+                  <button class="btn btn-gray" style="height:20px; padding:0 6px;" onclick="addDrawerLink(${task.id})">+ Link</button>
+                </div>
+
+                <div style="display:flex; gap:6px; margin-top:auto;">
+                  <button class="btn btn-blue" style="flex:1; height:24px;" onclick="setTaskAsFocus(${task.id})">🔥 Focus Now</button>
+                  <button class="btn btn-danger" style="height:24px; padding:0 8px;" onclick="deleteTaskItem(${task.id})">Drop</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        container.appendChild(outer);
+      });
+    }
+
+    function renderDrawerSubtasksHtml(task) {
+      if (!task.subtasks || task.subtasks.length === 0) {
+        return `<span style="font-size:11px; color:var(--text-tertiary); font-style:italic;" id="subtask-empty-${task.id}">No subtasks planned. Add one below!</span>`;
+      }
+      return task.subtasks.map((sub, idx) => `
+        <div class="inline-subtask-row ${sub.done ? 'done' : ''}" onclick="toggleDrawerSubtask(${task.id}, ${idx}, event)">
+          <div class="inline-subtask-check"></div>
+          <span style="font-size:11.5px; flex:1;">${parseTextToTokens(sub.text)}</span>
+          <span style="font-size:10px; color:var(--text-tertiary); cursor:pointer;" onclick="deleteDrawerSubtask(${task.id}, ${idx}, event)">✕</span>
+        </div>
+      `).join('');
+    }
+
+    function renderDrawerLinksHtml(task) {
+      if (!task.links || task.links.length === 0) {
+        return `<span style="font-size:10px; color:var(--text-tertiary);" id="links-empty-${task.id}">No reference links attached.</span>`;
+      }
+      return task.links.map((link, idx) => `
+        <div class="link-attachment-chip" onclick="showTicketInfo('${link.name}')">🔗 ${link.name}</div>
+      `).join('');
+    }
+
+    // Toggle row expansion (collapses other drawers)
+    function toggleTaskExpansion(id, event) {
+      // Prevent expand when checkmark is clicked
+      if (event.target.classList.contains('check-circle') || event.target.closest('.check-circle') || event.target.classList.contains('parsed-badge')) {
+        return;
+      }
+      
+      const isAlreadyExpanded = openDrawerTaskId === id;
+      openDrawerTaskId = isAlreadyExpanded ? null : id;
+      renderStandardTasks();
+    }
+
+    // Toggle core task complete
+    function toggleStandardCheckbox(id, event) {
+      event.stopPropagation();
+      taskDatabase = taskDatabase.map(t => {
+        if (t.id === id) {
+          const newState = !t.isCompleted;
+          if (newState) {
+            triggerConfettiBlast(200, 200);
+            showDopamineToast("Completed!");
+          }
+          return { ...t, isCompleted: newState, status: newState ? 'done' : 'today' };
+        }
+        return t;
+      });
+      saveTasksToStorage();
+      renderStandardTasks();
+      updateCountBadges();
+      updateSidebarFocusItem();
+    }
+
+    // Add steps checklists inside drawer
+    function addDrawerSubtask(taskId) {
+      const input = document.getElementById(`new-subtask-input-${taskId}`);
+      const val = input.value.trim();
+      if (!val) return;
+
+      taskDatabase = taskDatabase.map(t => {
+        if (t.id === taskId) {
+          const subs = t.subtasks || [];
+          return { ...t, subtasks: [...subs, { text: val, done: false }] };
+        }
+        return t;
+      });
+
+      input.value = '';
+      saveTasksToStorage();
+      renderStandardTasks();
+    }
+
+    function handleNewSubtaskEnter(taskId, event) {
+      if (event.key === 'Enter') {
+        addDrawerSubtask(taskId);
+      }
+    }
+
+    function toggleDrawerSubtask(taskId, subIdx, event) {
+      event.stopPropagation();
+      let clickX = event.clientX || 200;
+      let clickY = event.clientY || 200;
+
+      taskDatabase = taskDatabase.map(t => {
+        if (t.id === taskId) {
+          const subs = t.subtasks.map((s, idx) => {
+            if (idx === subIdx) {
+              const newState = !s.done;
+              if (newState) {
+                triggerConfettiBlast(clickX - 100, clickY - 120);
+                showDopamineToast("Step Completed!");
+              }
+              return { ...s, done: newState };
+            }
+            return s;
+          });
+          return { ...t, subtasks: subs };
+        }
+        return t;
+      });
+      saveTasksToStorage();
+      renderStandardTasks();
+    }
+
+    function deleteDrawerSubtask(taskId, subIdx, event) {
+      event.stopPropagation();
+      taskDatabase = taskDatabase.map(t => {
+        if (t.id === taskId) {
+          const subs = t.subtasks.filter((_, idx) => idx !== subIdx);
+          return { ...t, subtasks: subs };
+        }
+        return t;
+      });
+      saveTasksToStorage();
+      renderStandardTasks();
+    }
+
+    // Add ref links inside drawer
+    function addDrawerLink(taskId) {
+      const input = document.getElementById(`new-link-input-${taskId}`);
+      const val = input.value.trim();
+      if (!val) return;
+
+      taskDatabase = taskDatabase.map(t => {
+        if (t.id === taskId) {
+          const lks = t.links || [];
+          return { ...t, links: [...lks, { name: val, url: "#" }] };
+        }
+        return t;
+      });
+
+      input.value = '';
+      saveTasksToStorage();
+      renderStandardTasks();
+    }
+
+    // Parameters Updates
+    function saveDrawerNotes(taskId, text) {
+      taskDatabase = taskDatabase.map(t => (t.id === taskId ? { ...t, notes: text } : t));
+      saveTasksToStorage();
+    }
+
+    function updateDrawerCategory(taskId, cat) {
+      taskDatabase = taskDatabase.map(t => (t.id === taskId ? { ...t, category: cat } : t));
+      saveTasksToStorage();
+      renderStandardTasks();
+      updateCountBadges();
+    }
+
+    function updateDrawerPriority(taskId, pri) {
+      taskDatabase = taskDatabase.map(t => (t.id === taskId ? { ...t, priority: pri } : t));
+      saveTasksToStorage();
+      renderStandardTasks();
+    }
+
+    // Set Active Focus card
+    function setTaskAsFocus(taskId) {
+      currentActiveFocusId = taskId;
+      renderStandardTasks();
+      updateSidebarFocusItem();
+      triggerConfettiBlast(200, 400);
+      showDopamineToast("Focus Target Set!");
+    }
+
+    // Drop task row
+    function deleteTaskItem(taskId) {
+      taskDatabase = taskDatabase.filter(t => t.id !== taskId);
+      if (currentActiveFocusId === taskId) {
+        currentActiveFocusId = taskDatabase.length > 0 ? taskDatabase[0].id : null;
+      }
+      if (openDrawerTaskId === taskId) openDrawerTaskId = null;
+      
+      saveTasksToStorage();
+      renderStandardTasks();
+      updateCountBadges();
+      updateSidebarFocusItem();
+    }
+
+    // Brain dump text extraction
+    function processDumpIntentions() {
+      const area = document.getElementById('dumpTextEditor');
+      const text = area.value.trim();
+      if (!text) return;
+
+      // Extract raw bullet logs
+      const lines = text.split('\n').map(l => l.replace(/^[-*•\s]+/, '').trim()).filter(Boolean);
+      lines.forEach((line, idx) => {
+        // Simple heuristic categories and priority tags
+        let category = "#cross";
+        if (line.toLowerCase().includes("#personal")) category = "#personal";
+        else if (line.toLowerCase().includes("#support")) category = "#support";
+
+        let priority = "neutral";
+        if (line.toLowerCase().includes("urgent") || line.toLowerCase().includes("immediate")) priority = "urgent";
+        else if (line.toLowerCase().includes("plan") || line.toLowerCase().includes("later")) priority = "upcoming";
+
+        // Parse Jiras
+        let links = [];
+        const jiraMatch = line.match(/([A-Z]+-\d+)/g);
+        if (jiraMatch) {
+          jiraMatch.forEach(name => links.push({ name, url: "#" }));
+        }
+
+        const newTask = {
+          id: Date.now() + idx,
+          title: line,
+          status: "today",
+          priority,
+          category,
+          date: "Today",
+          isCompleted: false,
+          notes: "Extracted from daily messy thoughts.",
+          subtasks: [],
+          links
+        };
+
+        taskDatabase.unshift(newTask);
+      });
+
+      area.value = '';
+      saveTasksToStorage();
+      renderStandardTasks();
+      updateCountBadges();
+      
+      // Auto-set the first one as active focus!
+      if (taskDatabase.length > 0) {
+        currentActiveFocusId = taskDatabase[0].id;
+        updateSidebarFocusItem();
+      }
+
+      triggerConfettiBlast(400, 300);
+      showDopamineToast("Success! Logs extracted into block cards.");
+    }
+
+    function clearDumpEditor() {
+      document.getElementById('dumpTextEditor').value = '';
+    }
+
+    function addNewEmptyTask() {
+      const newTask = {
+        id: Date.now(),
+        title: "Write new focus intention...",
+        status: "today",
+        priority: "neutral",
+        category: "#cross",
+        date: "Today",
+        isCompleted: false,
+        notes: "",
+        subtasks: [],
+        links: []
+      };
+      taskDatabase.unshift(newTask);
+      openDrawerTaskId = newTask.id;
+      saveTasksToStorage();
+      renderStandardTasks();
+      updateCountBadges();
+    }
+
+    // Sidebar Filters
+    function filterTasks(view, element) {
+      document.querySelectorAll('#plannerSidebar .sidebar-link').forEach(l => l.classList.remove('active'));
+      element.classList.add('active');
+      currentFilter = view;
+      renderStandardTasks();
+    }
+
+    function filterCategory(cat, element) {
+      document.querySelectorAll('#plannerSidebar .sidebar-link').forEach(l => l.classList.remove('active'));
+      element.classList.add('active');
+      currentCategoryFilter = cat;
+      renderStandardTasks();
+    }
+
+    // Sticky active card sync
+    function updateSidebarFocusItem() {
+      const focusCard = document.getElementById('sidebarActiveFocusBox');
+      const focusTitle = document.getElementById('sidebarActiveFocusTitle');
+      
+      const activeTask = taskDatabase.find(t => t.id === currentActiveFocusId);
+      if (activeTask && !activeTask.isCompleted) {
+        focusCard.style.display = 'flex';
+        focusTitle.innerText = activeTask.title.replace(/^[-*•\s]+/, '');
+      } else {
+        // Fallback to first active today task
+        const todayActive = taskDatabase.find(t => t.status === 'today' && !t.isCompleted);
+        if (todayActive) {
+          currentActiveFocusId = todayActive.id;
+          focusCard.style.display = 'flex';
+          focusTitle.innerText = todayActive.title.replace(/^[-*•\s]+/, '');
+        } else {
+          focusCard.style.display = 'none';
+        }
+      }
+    }
+
+    function updateCountBadges() {
+      document.getElementById('badge-all').innerText = taskDatabase.length;
+      document.getElementById('badge-today').innerText = taskDatabase.filter(t => t.status === 'today' && !t.isCompleted).length;
+      document.getElementById('badge-later').innerText = taskDatabase.filter(t => t.status === 'later' && !t.isCompleted).length;
+      document.getElementById('badge-completed').innerText = taskDatabase.filter(t => t.isCompleted).length;
+    }
+
+    function saveTasksToStorage() {
+      localStorage.setItem('todayi_tasks_v5', JSON.stringify(taskDatabase));
+    }
+
+    // ==========================================================================
+    // 25 WILD ADHD INVENTIONS EXPLORER MOTOR
+    // ==========================================================================
+    function loadInventionsIndex() {
+      const listContainer = document.getElementById('inventionsMenuList');
+      listContainer.innerHTML = '';
+      
+      WILD_CASES.forEach(c => {
+        const div = document.createElement('div');
+        div.className = `invention-menu-item ${c.id === currentSelectedInventionId ? 'active' : ''}`;
+        div.id = `invention-menu-${c.id}`;
+        div.onclick = () => loadInventionDetails(c.id);
+        
+        div.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span class="inv-item-num">CASE ${c.id}</span>
+            <span class="inv-item-cat">${c.category}</span>
+          </div>
+          <div class="inv-item-title">${c.title}</div>
+        `;
+        listContainer.appendChild(div);
+      });
+    }
+
+    function loadInventionDetails(id) {
+      currentSelectedInventionId = id;
+      document.querySelectorAll('.invention-menu-item').forEach(m => m.classList.remove('active'));
+      const activeMenu = document.getElementById(`invention-menu-${id}`);
+      if (activeMenu) activeMenu.classList.add('active');
+
+      const item = WILD_CASES.find(c => c.id === id);
+      const pane = document.getElementById('inventionDetailsPane');
+      
+      pane.innerHTML = `
+        <div class="details-top-meta">
+          <div>
+            <span class="details-cat-badge">${item.category}</span>
+            <h1 class="details-title">Case ${item.id}: ${item.title}</h1>
+          </div>
+          <span style="font-size:24px; font-weight:800; color:var(--text-tertiary); font-family:var(--font-mono);">C${item.id}</span>
+        </div>
+
+        <div class="details-serif-quote">
+          "${item.tagline}"
+        </div>
+
+        <div class="details-body">
+          <h4 style="font-weight:700; text-transform:uppercase; font-size:10px; letter-spacing:0.04em; color:var(--text-secondary);">ADHD Cognitive Logic</h4>
+          <p>${item.adhdLogic}</p>
+        </div>
+
+        <div style="margin-top:10px;">
+          <h4 style="font-weight:700; text-transform:uppercase; font-size:10px; letter-spacing:0.04em; color:var(--accent); margin-bottom:8px;">Live Miniature Playground Sandbox</h4>
+          <div class="sandbox-widget-box">
+            <span class="sandbox-tag">Simulator Sandbox v5</span>
+            ${item.setupWidgetHtml}
+          </div>
+        </div>
+      `;
+
+      // Trigger secondary loaders for widgets that need special setups
+      if (id === 44) {
+        initializeFidgetDoodleCanvas();
+      }
+    }
+
+    function filterInventionIndex() {
+      const q = document.getElementById('inventionSearchInput').value.toLowerCase();
+      WILD_CASES.forEach(c => {
+        const el = document.getElementById(`invention-menu-${c.id}`);
+        if (c.title.toLowerCase().includes(q) || c.category.toLowerCase().includes(q) || c.tagline.toLowerCase().includes(q)) {
+          el.style.display = 'flex';
+        } else {
+          el.style.display = 'none';
+        }
+      });
+    }
+
+    // ==========================================================================
+    // 25 LIVE SIMULATORS HANDLERS & SCRIPTS
+    // ==========================================================================
+    
+    // Case 26: Anti-List
+    function widget26Focus() {
+      const val = document.getElementById('widget-26-input').value.trim();
+      if (!val) return;
+      document.getElementById('widget-26-title').innerText = val;
+      document.getElementById('widget-26-display').style.display = 'flex';
+    }
+    function widget26ShowList() {
+      document.getElementById('widget-26-modal').style.display = 'flex';
+    }
+    function widget26CloseModal() {
+      document.getElementById('widget-26-modal').style.display = 'none';
+    }
+
+    // Case 27: Cognitive Capacity Blocker
+    let widget27Points = 6;
+    function widget27Adjust(pts) {
+      widget27Points += pts;
+      if (widget27Points < 0) widget27Points = 0;
+      document.getElementById('widget-27-total').innerText = widget27Points;
+      
+      const input = document.getElementById('widget-27-editor');
+      const warning = document.getElementById('widget-27-warning');
+      
+      if (widget27Points > 10) {
+        input.disabled = true;
+        input.value = "⚠️ BLOCKED BY SENSIBLE CAPACITY GATE!";
+        warning.style.display = 'block';
+      } else {
+        input.disabled = false;
+        if (input.value.includes("BLOCKED")) input.value = '';
+        warning.style.display = 'none';
+      }
+    }
+
+    // Case 28: Roulette focus selector
+    function spinRoulette() {
+      const wheel = document.getElementById('roulette-wheel');
+      const result = document.getElementById('roulette-result');
+      const randomDeg = 720 + Math.floor(Math.random() * 360);
+      
+      wheel.style.transform = `rotate(${randomDeg}deg)`;
+      result.innerText = "Selecting target block...";
+      
+      setTimeout(() => {
+        const options = ["Prep meeting with @Maya", "PR #30 Temporal otel Release", "Register Zoe Zoe Gan #personal", "Incidents ticket zendesk stg13"];
+        const index = Math.floor(Math.random() * options.length);
+        result.innerText = `🎯 Target Selected: ${options[index]}! Go Focus!`;
+        triggerConfettiBlast(300, 300);
+      }, 2000);
+    }
+
+    // Case 29: Fog of War flashlight spotlight
+    function updateFogOfWar(e) {
+      const box = document.getElementById('fog-container');
+      const overlay = document.getElementById('fog-overlay');
+      const rect = box.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      overlay.style.background = `radial-gradient(circle 50px at ${x}px ${y}px, rgba(0,0,0,0) 100%, rgba(0,0,0,0.96) 100%)`;
+    }
+
+    // Case 30: AI Body double console interaction
+    function triggerBodyDoubleInteraction() {
+      const lines = [
+        "Sergey is reviewing your temporal otel modules... 👍",
+        "Sergey: 'Looking tight Ofer, let's merge stg13 user-sync PR!'",
+        "Sergey code synced: stg13 zendesk auth ok",
+        "Sergey is currently writing PR assignees documentation..."
+      ];
+      const randomLine = lines[Math.floor(Math.random() * lines.length)];
+      document.getElementById('double-status').innerText = randomLine;
+      
+      const consoleEl = document.getElementById('double-console');
+      consoleEl.innerHTML += `\n$ git fetch origin\n  synced remote branches`;
+    }
+
+    // Case 31: Crumple distractions Trash can
+    function crumpleDistraction() {
+      const input = document.getElementById('distract-input');
+      const val = input.value.trim();
+      if (!val) return;
+      
+      const ball = document.getElementById('paper-ball');
+      const bin = document.getElementById('trash-bin-emoji');
+      const status = document.getElementById('trash-status');
+      
+      status.innerText = `Crumpling up '${val}'...`;
+      ball.style.display = 'block';
+      ball.style.transform = 'translateY(0px) rotate(0deg)';
+      
+      setTimeout(() => {
+        ball.style.transition = 'all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        ball.style.transform = 'translateY(50px) scale(0.2) rotate(180deg)';
+        bin.style.transform = 'scale(1.2)';
+      }, 100);
+
+      setTimeout(() => {
+        ball.style.display = 'none';
+        ball.style.transition = 'none';
+        bin.style.transform = 'scale(1)';
+        status.innerText = `🗑️ Distraction successfully offloaded! Working memory buffer cleared.`;
+        input.value = '';
+      }, 700);
+    }
+
+    // Case 32: Reverse Drift timer
+    let driftInterval = null;
+    let driftSeconds = 0;
+    function toggleDriftTimer() {
+      const btn = document.getElementById('drift-toggle');
+      const input = document.getElementById('drift-cause');
+      
+      if (!driftInterval) {
+        // Start counting drift
+        driftInterval = setInterval(() => {
+          driftSeconds++;
+          const mins = String(Math.floor(driftSeconds / 60)).padStart(2, '0');
+          const secs = String(driftSeconds % 60).padStart(2, '0');
+          document.getElementById('drift-time').innerText = `${mins}:${secs}`;
+        }, 1000);
+        btn.innerText = "I caught myself! Log thoughts";
+        input.style.display = 'block';
+      } else {
+        // Stop
+        clearInterval(driftInterval);
+        driftInterval = null;
+        
+        const cause = input.value.trim() || "Mind wandered off";
+        const list = document.getElementById('drift-list');
+        list.style.display = 'block';
+        list.innerHTML += `<div>⏱️ ${document.getElementById('drift-time').innerText} - ${cause}</div>`;
+        
+        btn.innerText = "Catch Myself Drifting";
+        input.style.display = 'none';
+        input.value = '';
+      }
+    }
+    
+    function resetDriftTimer() {
+      clearInterval(driftInterval);
+      driftInterval = null;
+      driftSeconds = 0;
+      document.getElementById('drift-time').innerText = "00:00";
+      document.getElementById('drift-toggle').innerText = "Catch Myself Drifting";
+      document.getElementById('drift-cause').style.display = 'none';
+      document.getElementById('drift-list').innerHTML = '';
+      document.getElementById('drift-list').style.display = 'none';
+    }
+
+    // Case 33: Shame-Free Rollover sky
+    function simulateShameFreeRollover() {
+      const sky = document.getElementById('rollover-sky');
+      sky.innerText = "☁️ 🎈 ✨ ☁️";
+      setTimeout(() => {
+        sky.innerText = "🍃 All old task-debts disappeared into pure space! 🍃";
+        triggerConfettiBlast(200, 200);
+      }, 1000);
+    }
+
+    // Case 34: Dopamine Slots
+    function spinSlots() {
+      const items = ["✅", "🔔", "🟢", "💥", "💎", "⭐"];
+      const s1 = document.getElementById('slot-1');
+      const s2 = document.getElementById('slot-2');
+      const s3 = document.getElementById('slot-3');
+      const status = document.getElementById('slot-status');
+      
+      let timer = 0;
+      let interval = setInterval(() => {
+        s1.innerText = items[Math.floor(Math.random() * items.length)];
+        s2.innerText = items[Math.floor(Math.random() * items.length)];
+        s3.innerText = items[Math.floor(Math.random() * items.length)];
+        timer += 100;
+        if (timer > 1000) {
+          clearInterval(interval);
+          // Auto win for prototype dopamine!
+          s1.innerText = "✅";
+          s2.innerText = "✅";
+          s3.innerText = "✅";
+          status.innerText = "🎰 JACKPOT! TRIPLE CHECKMARKS! Double particle shower!";
+          triggerConfettiBlast(150, 200);
+          triggerConfettiBlast(350, 200);
+        }
+      }, 100);
+    }
+
+    // Case 35: Mood planner
+    function matchMood(mood, taskText) {
+      const result = document.getElementById('mood-matched-task');
+      result.style.display = 'block';
+      result.innerHTML = `
+        <span style="font-size:10px; color:var(--text-secondary);">FOR MOOD STATE: ${mood.toUpperCase()}</span>
+        <div style="font-size:13px; margin-top:4px;">🎯 Focus Suggestion: <strong>${taskText}</strong></div>
+      `;
+    }
+
+    // Case 36: Bonfire Hearth Typing
+    let flameSize = 42;
+    function growFlame() {
+      flameSize += 6;
+      if (flameSize > 80) flameSize = 80;
+      const flame = document.getElementById('fire-graphic');
+      flame.style.fontSize = `${flameSize}px`;
+      flame.style.filter = "grayscale(0%)";
+      document.getElementById('hearth-energy').innerText = `Bonfire energy: ${Math.floor(flameSize * 1.2)}%`;
+      
+      // Decay slowly
+      clearTimeout(window.flameDecay);
+      window.flameDecay = setTimeout(() => {
+        decayFlame();
+      }, 2000);
+    }
+
+    function decayFlame() {
+      flameSize -= 8;
+      if (flameSize < 24) flameSize = 24;
+      const flame = document.getElementById('fire-graphic');
+      flame.style.fontSize = `${flameSize}px`;
+      if (flameSize === 24) {
+        flame.style.filter = "grayscale(100%)";
+      }
+      document.getElementById('hearth-energy').innerText = `Bonfire energy: ${Math.floor(flameSize * 1.2)}%`;
+      if (flameSize > 24) {
+        window.flameDecay = setTimeout(decayFlame, 1500);
+      }
+    }
+
+    // Case 37: Bodyguard Challenge
+    function bodyguardChallenge() {
+      const input = document.getElementById('bodyguard-input');
+      const val = input.value.trim();
+      if (!val) return;
+      
+      const chat = document.getElementById('bodyguard-chat');
+      chat.innerHTML += `<div style="text-align:right;"><strong>You:</strong> ${val}</div>`;
+      
+      setTimeout(() => {
+        const questions = [
+          "Wait, Ofer. Is this actually critical today or is it a hyperfocus rabbit hole distraction?",
+          "Are you using this new task to avoid completing the Guesty cross-billing task?",
+          "Is Sergey already working on this? Don't duplicate steps!",
+          "Can we park this in the 'Later Vault' and focus on your active meeting prep?"
+        ];
+        const randomQ = questions[Math.floor(Math.random() * questions.length)];
+        chat.innerHTML += `<div style="color:var(--danger);"><strong>Bodyguard:</strong> ${randomQ}</div>`;
+        chat.scrollTop = chat.scrollHeight;
+      }, 800);
+      
+      input.value = '';
+    }
+
+    // Case 38: Guided Pacing Balloon
+    function startGuidedBreath() {
+      const balloon = document.getElementById('guided-balloon');
+      const text = document.getElementById('balloon-text');
+      const btn = document.getElementById('breath-action-btn');
+      
+      btn.disabled = true;
+      text.innerText = "Inhale slowly...";
+      balloon.style.transform = "scale(1.8)";
+      
+      setTimeout(() => {
+        text.innerText = "Exhale slowly...";
+        balloon.style.transform = "scale(1)";
+      }, 4000);
+
+      setTimeout(() => {
+        text.innerText = "Inhale deeply...";
+        balloon.style.transform = "scale(1.8)";
+      }, 8000);
+
+      setTimeout(() => {
+        text.innerText = "Exhale Serene...";
+        balloon.style.transform = "scale(1)";
+        btn.disabled = false;
+        triggerConfettiBlast(300, 300);
+      }, 12000);
+    }
+
+    // Case 39: Balance scales
+    function balanceScales() {
+      const effort = document.getElementById('scale-effort').value;
+      const reward = document.getElementById('scale-reward').value;
+      const left = document.getElementById('scale-left');
+      const right = document.getElementById('scale-right');
+      const status = document.getElementById('scales-status');
+      
+      const diff = effort - reward;
+      left.style.transform = `translateY(${diff * 3}px)`;
+      right.style.transform = `translateY(${-diff * 3}px)`;
+      
+      left.innerText = `⚖️ Mental effort: ${effort}`;
+      right.innerText = `Reward: ${reward}`;
+      
+      if (effort === reward) {
+        status.innerText = "Scales perfectly balanced! Action is aligned.";
+        status.style.color = "var(--success)";
+      } else if (effort > reward) {
+        status.innerText = "Warning: High anxiety / High weight. Cognitive avoidance likely.";
+        status.style.color = "var(--danger)";
+      } else {
+        status.innerText = "High reward goal! Excellent momentum anchor.";
+        status.style.color = "var(--accent)";
+      }
+    }
+
+    // Case 40: Soundscape speed synth
+    let audioCtx = null;
+    function playWebAudioBeep(freq) {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      
+      gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.1);
+      
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.1);
+    }
+    
+    function synthAccelerate() {
+      playWebAudioBeep(600 + Math.random() * 400);
+    }
+
+    // Case 41: Beacon background anchor word
+    function updateBeaconWord() {
+      const val = document.getElementById('beacon-keyword').value;
+      document.getElementById('beacon-word-bg').innerText = val;
+    }
+
+    // Case 42: Hyperfocus break lockout
+    function startLockoutTimer() {
+      const timeSpan = document.getElementById('lockout-time');
+      const btn = document.getElementById('lockout-btn');
+      const overlay = document.getElementById('lockout-overlay');
+      btn.disabled = true;
+      
+      let seconds = 5;
+      let interval = setInterval(() => {
+        seconds--;
+        timeSpan.innerText = `00:0${seconds}`;
+        if (seconds === 0) {
+          clearInterval(interval);
+          overlay.style.display = 'flex';
+          timeSpan.innerText = "00:05";
+          
+          setTimeout(() => {
+            overlay.style.display = 'none';
+            btn.disabled = false;
+          }, 3000);
+        }
+      }, 1000);
+    }
+
+    // Case 43: Admin vault box
+    function vaultAdminTasks() {
+      const box = document.getElementById('vault-vault-status');
+      box.innerText = "🔒 VAULT LOCKOUT: Chores safely parked.";
+      triggerConfettiBlast(200, 300);
+      setTimeout(() => {
+        box.innerText = "📪 Vault will auto-open tomorrow at 9:00 AM.";
+      }, 2000);
+    }
+
+    // Case 44: Doodle drawing canvas
+    let doodleCanvas, doodleCtx, isDrawingDoodle = false;
+    function initializeFidgetDoodleCanvas() {
+      doodleCanvas = document.getElementById('doodle-canvas');
+      if (!doodleCanvas) return;
+      doodleCtx = doodleCanvas.getContext('2d');
+      
+      doodleCtx.strokeStyle = "#007AFF";
+      doodleCtx.lineWidth = 2.5;
+      doodleCtx.lineCap = 'round';
+
+      doodleCanvas.onmousedown = (e) => {
+        isDrawingDoodle = true;
+        const rect = doodleCanvas.getBoundingClientRect();
+        doodleCtx.beginPath();
+        doodleCtx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+      };
+      
+      doodleCanvas.onmousemove = (e) => {
+        if (!isDrawingDoodle) return;
+        const rect = doodleCanvas.getBoundingClientRect();
+        doodleCtx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+        doodleCtx.stroke();
+      };
+      
+      doodleCanvas.onmouseup = () => {
+        isDrawingDoodle = false;
+      };
+    }
+    
+    function clearDoodleCanvas() {
+      if (doodleCtx) {
+        doodleCtx.clearRect(0, 0, doodleCanvas.width, doodleCanvas.height);
+      }
+    }
+
+    // Case 45: Slack log parser
+    function synthesizeSlackLogs() {
+      const text = document.getElementById('widget-45-input').value;
+      const out = document.getElementById('widget-45-output');
+      out.innerHTML = '';
+      
+      const lines = text.split('\n').map(l => l.replace(/^[-*•\s]+/, '').trim()).filter(Boolean);
+      lines.forEach(l => {
+        const div = document.createElement('div');
+        div.className = 'link-attachment-chip';
+        div.innerHTML = `✅ ${parseTextToTokens(l)}`;
+        out.appendChild(div);
+      });
+      triggerConfettiBlast(250, 300);
+    }
+
+    // Case 46: Gamified speedrun time attack
+    function startSpeedrunGame() {
+      const bar = document.getElementById('speedrun-bar');
+      const status = document.getElementById('speedrun-status');
+      
+      bar.style.width = '100%';
+      status.innerText = "Time Attack! Type replies fast!";
+      
+      setTimeout(() => {
+        bar.style.transition = 'width 5s linear';
+        bar.style.width = '0%';
+      }, 100);
+
+      setTimeout(() => {
+        status.innerText = "🎮 TIME OVER! 3 Chores offloaded! satisfying sprint!";
+        triggerConfettiBlast(200, 200);
+      }, 5100);
+    }
+
+    // Case 47: Sensory pop target bubbles
+    function popBubbleTarget(element, label) {
+      element.style.transform = "scale(1.5)";
+      element.style.opacity = "0";
+      setTimeout(() => {
+        element.style.display = 'none';
+        showDopamineToast(`Popped target ${label}!`);
+        triggerConfettiBlast(200, 200);
+      }, 200);
+    }
+
+    // Case 48: Guided unlock breath gate
+    let breathUnlockTimer = null;
+    let breathUnlockProgress = 0;
+    function holdBreathUnlock() {
+      const prog = document.getElementById('unlock-progress');
+      const status = document.getElementById('unlock-status');
+      status.innerText = "Breathing in... Keep holding...";
+      
+      breathUnlockTimer = setInterval(() => {
+        breathUnlockProgress += 5;
+        prog.style.width = `${breathUnlockProgress}%`;
+        if (breathUnlockProgress >= 100) {
+          clearInterval(breathUnlockTimer);
+          status.innerText = "🌿 Calm Gate Unlocked! Task Complete!";
+          status.style.color = "var(--success)";
+          triggerConfettiBlast(200, 200);
+        }
+      }, 150);
+    }
+    
+    function releaseBreathUnlock() {
+      clearInterval(breathUnlockTimer);
+      breathUnlockProgress = 0;
+      document.getElementById('unlock-progress').style.width = '0%';
+      document.getElementById('unlock-status').innerText = "Hold trigger down to balance breathing.";
+    }
+
+    // Case 49: Fidget disc spin
+    let fidgetSpinDeg = 0;
+    function flickFidgetSpinner() {
+      const disc = document.getElementById('tactile-fidget-disc');
+      const speed = document.getElementById('fidget-spin-speed');
+      fidgetSpinDeg += 360 + Math.random() * 360;
+      disc.style.transform = `rotate(${fidgetSpinDeg}deg)`;
+      
+      speed.innerText = "Spin velocity: 450 rpm";
+      setTimeout(() => {
+        speed.innerText = "Spin velocity: 120 rpm";
+      }, 1500);
+      setTimeout(() => {
+        speed.innerText = "Spin velocity: 0 rpm";
+      }, 3000);
+    }
+
+    // Case 50: Attention Compass Radar
+    function updateAttentionRadar(e) {
+      const box = document.getElementById('radar-box');
+      const needle = document.getElementById('radar-needle');
+      const rect = box.getBoundingClientRect();
+      const x = e.clientX - rect.left - (rect.width / 2);
+      const y = e.clientY - rect.top - (rect.height / 2);
+      
+      const angle = Math.atan2(y, x) * (180 / Math.PI) + 90;
+      needle.style.transform = `rotate(${angle}deg)`;
+    }
+
+
+    // ==========================================================================
+    // PHYSICAL CONFETTI ENGINE (RESTRICTED TO WINDOW SHELL)
+    // ==========================================================================
+    let canvas, ctx;
+    let particles = [];
+    
+    function setupConfettiCanvas() {
+      canvas = document.getElementById('dopamineCanvas');
+      ctx = canvas.getContext('2d');
+      resizeConfettiCanvas();
+      window.addEventListener('resize', resizeConfettiCanvas);
+    }
+
+    function resizeConfettiCanvas() {
+      const bounds = canvas.parentNode.getBoundingClientRect();
+      canvas.width = bounds.width;
+      canvas.height = bounds.height;
+    }
+
+    function triggerConfettiBlast(x, y) {
+      resizeConfettiCanvas();
+      const colors = ['#34C759', '#007AFF', '#FF9500', '#FF3B30', '#AF52DE'];
+      for (let i = 0; i < 40; i++) {
+        particles.push({
+          x: x || canvas.width / 2,
+          y: y || canvas.height / 2,
+          vx: (Math.random() - 0.5) * 8,
+          vy: (Math.random() - 0.5) * 8 - 4,
+          radius: Math.random() * 4 + 2,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          alpha: 1,
+          decay: Math.random() * 0.02 + 0.015
+        });
+      }
+      
+      if (!window.animationRunning) {
+        window.animationRunning = true;
+        animateConfetti();
+      }
+    }
+
+    function triggerConfettiFlash() {
+      triggerConfettiBlast(canvas.width / 2, canvas.height / 3);
+      showDopamineToast("Dopamine Emitter Active! 💥");
+    }
+
+    function animateConfetti() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      particles.forEach((p, idx) => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.15; // Gravity
+        p.alpha -= p.decay;
+        
+        ctx.save();
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+        
+        if (p.alpha <= 0 || p.y > canvas.height) {
+          particles.splice(idx, 1);
+        }
+      });
+      
+      if (particles.length > 0) {
+        requestAnimationFrame(animateConfetti);
+      } else {
+        window.animationRunning = false;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+
+    function showDopamineToast(text) {
+      const toast = document.getElementById('celebrationToast');
+      document.getElementById('celebrationToastText').innerText = text;
+      toast.classList.add('active');
+      setTimeout(() => {
+        toast.classList.remove('active');
+      }, 2000);
+    }
+
+    // Modal popup simulation triggers
+    function showTicketInfo(ticketKey) {
+      showDopamineToast(`Fetched JIRA details for: ${ticketKey}`);
+      triggerConfettiBlast(200, 200);
+    }
+
+    function showUserInfo(userName) {
+      showDopamineToast(`Contact Info loaded for teammate: ${userName}`);
+      triggerConfettiBlast(200, 200);
+    }
+
+    function triggerBreathingHearthSidebar() {
+      showDopamineToast("Breathe... Inhale Serenity... Exhale Clutter...");
+      triggerConfettiBlast(115, 600);
+    }
+  </script>
+</body>
+</html>

@@ -232,3 +232,31 @@ Format: `### YYYY-MM-DD — <topic> (<who made the call>)`
 **Why:** Endless “classifying” dots and silent failures are unacceptable for a companion app; need reproducible debug path and agent governance.
 
 **Open (see decision doc P0–P2):** hydrate pending UI, silent DB persist, fire-and-forget `addCapture`, packaged main logs, pass `flowId` to renderer.
+
+### 2026-05-27 — AI capture review blocks + v2-only persistence (Ofer directed, AI implemented)
+- Branch: `codex-ai-planning-foundation`.
+- Product direction: free-text capture is the first AI-native planning loop, but the user remains in control. The app must show the original text, generated blocks underneath, and editable structure before committing anything.
+- AI contract: `ai:classify` now asks Claude to return a top-level summary plus `items[]`, where each parsed item carries `itemType` (`task`/`event`), `scheduleMode` (`flexible`/`fixed`), bucket, optional date/time, reasoning, and confidence.
+- UI: Capture classified state renders editable generated blocks with title editing, task/event conversion, today/tomorrow/later/someday placement, flexible/fixed mode, optional time, split, merge, and remove controls.
+- Persistence: confirming drafts now calls `db:create-planning-items`, which writes v2 `items`, `item_plans`, `item_occurrences`, `capture_entries`, and `activity_log` rows. AI drafts do not silently mutate Today before confirmation.
+- UI bridge: Today still consumes the current `Task` / `CalendarEvent` view model, but `getAllTasks()` / `getAllEvents()` are v2 projections. New capture-created work is not written to legacy `tasks` / `calendar_events`.
+- Fresh demo seeding now creates v2 rows through the same planning endpoint, so new local databases start on the v2 path.
+- Cleanup: because there is no local data to preserve, `003_drop_legacy_tables` drops `tasks`, `calendar_events`, and `capture_entries`. Raw captures now write to `v2_capture_entries`.
+- Tradeoff: the renderer still uses the existing Today view model and IPC method names for now, but the repository behind those methods is v2-only.
+- Subtasks: `v2_item_relations(type='contains')` now stores child item links. Add/toggle/remove subtask actions create and update child `v2_items`; `Task.subtasks` is now only a Today adapter projection.
+- Next migration: move the Today store state itself to v2 domain records and stop exposing `Task.subtasks` outside the adapter.
+
+### 2026-05-27 — Today screen first-class child-item pass (Ofer directed, AI implemented)
+- Product correction: the Today surface should not treat subtasks like passive nested checklist lines. Child work needs visible edit/move/promote affordances and should share the same product language as task rows wherever possible.
+- Today DnD: Overdue and Today now share one drag context, so dragging an overdue flexible task into Today actually reparents it onto today's plan instead of implying a behavior the UI did not support.
+- Child-item actions: `SubtaskList` now renders editable child-item cards with title/notes editing, up/down reorder controls, move-to-another-task, and promote-to-standalone actions. Task detail also lets a standalone task move under another task explicitly.
+- Event/task parity: calendar event rows now expand into editable detail (`EventDetail`) so synced or timed items can change title, date, time, notes, or remove time to become a task. They are no longer display-only rows.
+- Capture review honesty: generated planning blocks now live in a scroll-bounded review area, `Split` is disabled unless a split is actually possible, and unfinished Voice / file-drop buttons were removed rather than leaving fake clickable UI.
+- Tradeoff: drag gestures for subtask-in/out-of-parent are still not implemented. The UI now exposes explicit move/promote controls instead of pretending gesture support exists.
+- Verification: `npm run typecheck`, `npm run lint`, and `git diff --check` passed. `npm run test` is currently blocked by a local `better-sqlite3` native-module mismatch against the host Node runtime. `npm run package` still fails in local codesign finalization.
+
+### 2026-05-27 — Calm Breathing Helper "Hearth Pomodoro" Integration (Ofer approved)
+- Locked the decision to include the "BREATH Calm breathing helper" (visually represented as a breathing, pulsing Hearth circle Pomodoro timer) as a core cognitive UX mechanism on the active Focus card.
+- User feedback was extremely enthusiastic ("I love this... super simple UI, very nice idea").
+- Animation guide: The circle core slowly pulses using a gentle 5-second CSS expand/contract keyframe animation. Cued with clear instruction: "Inhale as the circle expands, exhale as it contracts."
+- Purpose: Serves as a soothing, non-anxiety visual anchor to regulate breathing, manage time blindness, and defend against sensory overload or task-switching friction.

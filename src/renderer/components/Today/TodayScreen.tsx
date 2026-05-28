@@ -71,7 +71,9 @@ export default function TodayScreen({ onNavigateCapture }: Props) {
     if (!over) return;
 
     const activeId = String(active.id);
-    if (!tasks.find((t) => t.id === activeId)) return;
+    const activeRow = tasks.find((t) => t.id === activeId);
+    if (!activeRow) return;
+    if (section === 'overdue' && activeRow.isOverdue !== true) return;
 
     const gapMatch = /^gap-(today|overdue)-(\d+)$/.exec(String(over.id));
     if (!gapMatch) return;
@@ -89,7 +91,14 @@ export default function TodayScreen({ onNavigateCapture }: Props) {
       section === 'overdue',
     );
 
-    reorderTask(activeId, newSlotIndex, newSlotOrder);
+    reorderTask(
+      activeId,
+      newSlotIndex,
+      newSlotOrder,
+      section === 'today'
+        ? { date: today, timeSlot: 'today', isOverdue: false }
+        : undefined,
+    );
   }
 
   // A gap at position k sits between timeline[k-1] and timeline[k]; hide it
@@ -113,33 +122,37 @@ export default function TodayScreen({ onNavigateCapture }: Props) {
       />
 
       <div className="today-scroll">
-        {overdueTasks.length > 0 && (
-          <DndContext
-            sensors={sensors}
-            onDragStart={handleDragStart}
-            onDragEnd={(e) => handleDragEnd(e, overdueTimeline, 'overdue')}
-          >
+        <DndContext
+          sensors={sensors}
+          onDragStart={handleDragStart}
+          onDragEnd={(event) => {
+            const overId = event.over?.id === undefined ? '' : String(event.over.id);
+            if (overId.startsWith('gap-overdue-')) {
+              handleDragEnd(event, overdueTimeline, 'overdue');
+              return;
+            }
+            handleDragEnd(event, timelineItems, 'today');
+          }}
+        >
+          {overdueTasks.length > 0 && (
             <Section title="Overdue" count={overdueTasks.length} accent="var(--urgent)">
-              <GapDropZone
-                id="gap-overdue-0"
-                disabled={!isGapVisible(0, overdueTimeline)}
-              />
+              <GapDropZone id="gap-overdue-0" disabled={!isGapVisible(0, overdueTimeline)} />
               {overdueTimeline.map((item, index) => {
                 if (item.kind === 'event') return null;
-                const t = item.data;
+                const task = item.data;
                 return (
-                  <Fragment key={t.id}>
+                  <Fragment key={task.id}>
                     <TaskRow
-                      id={t.id}
-                      scheduleKind={t.scheduleKind}
-                      kind={t.kind}
-                      label={t.title}
-                      date={dateLabelForTask(t)}
-                      done={t.done}
-                      onToggle={() => toggleDone(t.id)}
-                      {...(t.sublabel !== undefined && { sublabel: t.sublabel })}
-                      {...(t.link !== undefined && { link: t.link })}
-                      {...(t.datePill !== undefined && { datePill: t.datePill })}
+                      id={task.id}
+                      scheduleKind={task.scheduleKind}
+                      kind={task.kind}
+                      label={task.title}
+                      date={dateLabelForTask(task)}
+                      done={task.done}
+                      onToggle={() => toggleDone(task.id)}
+                      {...(task.sublabel !== undefined && { sublabel: task.sublabel })}
+                      {...(task.link !== undefined && { link: task.link })}
+                      {...(task.datePill !== undefined && { datePill: task.datePill })}
                     />
                     <GapDropZone
                       id={`gap-overdue-${index + 1}`}
@@ -149,38 +162,21 @@ export default function TodayScreen({ onNavigateCapture }: Props) {
                 );
               })}
             </Section>
+          )}
 
-            <DragOverlay>
-              {activeTask !== undefined && activeTask.scheduleKind === 'flexible' ? (
-                <OverlayRow
-                  kind={activeTask.kind}
-                  label={activeTask.title}
-                  date={dateLabelForTask(activeTask)}
-                  {...(activeTask.sublabel !== undefined && { sublabel: activeTask.sublabel })}
-                  {...(activeTask.datePill !== undefined && { datePill: activeTask.datePill })}
-                />
-              ) : null}
-            </DragOverlay>
-          </DndContext>
-        )}
-
-        <DndContext
-          sensors={sensors}
-          onDragStart={handleDragStart}
-          onDragEnd={(e) => handleDragEnd(e, timelineItems, 'today')}
-        >
           <Section title="Today" date={formatShortDate(today)} count={activeTodayTasks.length}>
             <GapDropZone id="gap-today-0" disabled={!isGapVisible(0, timelineItems)} />
             {timelineItems.map((item, index) => {
               const gapK = index + 1;
               if (item.kind === 'event') {
-                const e = item.data;
+                const event = item.data;
                 return (
-                  <Fragment key={`event-${e.id}`}>
+                  <Fragment key={`event-${event.id}`}>
                     <EventRow
-                      startTime={e.startTime}
-                      label={e.label}
-                      {...(e.sublabel !== undefined && { sublabel: e.sublabel })}
+                      id={event.id}
+                      startTime={event.startTime}
+                      label={event.label}
+                      {...(event.sublabel !== undefined && { sublabel: event.sublabel })}
                     />
                     <GapDropZone
                       id={`gap-today-${gapK}`}
@@ -189,20 +185,21 @@ export default function TodayScreen({ onNavigateCapture }: Props) {
                   </Fragment>
                 );
               }
-              const t = item.data;
+
+              const task = item.data;
               return (
-                <Fragment key={`task-${t.id}`}>
+                <Fragment key={`task-${task.id}`}>
                   <TaskRow
-                    id={t.id}
-                    scheduleKind={t.scheduleKind}
-                    kind={t.kind}
-                    label={t.title}
-                    date={dateLabelForTask(t)}
-                    done={t.done}
-                    onToggle={() => toggleDone(t.id)}
-                    {...(t.sublabel !== undefined && { sublabel: t.sublabel })}
-                    {...(t.link !== undefined && { link: t.link })}
-                    {...(t.datePill !== undefined && { datePill: t.datePill })}
+                    id={task.id}
+                    scheduleKind={task.scheduleKind}
+                    kind={task.kind}
+                    label={task.title}
+                    date={dateLabelForTask(task)}
+                    done={task.done}
+                    onToggle={() => toggleDone(task.id)}
+                    {...(task.sublabel !== undefined && { sublabel: task.sublabel })}
+                    {...(task.link !== undefined && { link: task.link })}
+                    {...(task.datePill !== undefined && { datePill: task.datePill })}
                   />
                   <GapDropZone
                     id={`gap-today-${gapK}`}
@@ -219,8 +216,8 @@ export default function TodayScreen({ onNavigateCapture }: Props) {
                 kind={activeTask.kind}
                 label={activeTask.title}
                 date={dateLabelForTask(activeTask)}
-                {...(activeTask.sublabel !== undefined && { sublabel: activeTask.sublabel })}
-                {...(activeTask.datePill !== undefined && { datePill: activeTask.datePill })}
+                {...(activeTask.sublabel !== undefined ? { sublabel: activeTask.sublabel } : {})}
+                {...(activeTask.datePill !== undefined ? { datePill: activeTask.datePill } : {})}
               />
             ) : null}
           </DragOverlay>

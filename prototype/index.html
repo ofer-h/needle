@@ -1,0 +1,2275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Focus Room — ADHD 10-Design Masterpiece Playground</title>
+  
+  <!-- Premium Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..600&family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      /* Palette 1: Calming Parchment (Editorial Standard) */
+      --bg: #FAF7F2;
+      --surface: #FFFFFF;
+      --surface-sub: #F4EFE6;
+      --ink: #1E1E24;
+      --ink-muted: #626070;
+      --ink-light: #ABA7BC;
+      --border: rgba(30, 30, 36, 0.06);
+      --border-strong: rgba(30, 30, 36, 0.15);
+      
+      --accent: #A37C5E; /* Calming terracotta */
+      --accent-soft: #FAF0E6;
+      --success: #608863; /* Forest sage */
+      --success-soft: #EEF5EF;
+      --warning: #D98324; /* Sunset orange */
+      --warning-soft: #FEF6EC;
+      
+      --serif: 'Fraunces', Georgia, serif;
+      --sans: 'Sora', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+      
+      --shadow-sm: 0 2px 8px rgba(30, 30, 36, 0.02), 0 4px 20px rgba(30, 30, 36, 0.03);
+      --shadow-lg: 0 8px 30px rgba(30, 30, 36, 0.03), 0 30px 80px rgba(30, 30, 36, 0.08);
+      --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      --radius: 14px;
+      
+      --sidebar-width: 320px;
+      --inspector-width: 340px;
+    }
+
+    /* THEME 2: Serene Forest (Minimal Load) */
+    .theme-serene {
+      --bg: #F0F4F1;
+      --surface: #FFFFFF;
+      --surface-sub: #E2ECE5;
+      --ink: #1B291D;
+      --ink-muted: #546C5A;
+      --accent: #557E5B;
+      --accent-soft: #EDF3EE;
+    }
+
+    /* THEME 3: Alert Amber (Mental Overload) */
+    .theme-overload {
+      --bg: #FDF9F3;
+      --surface: #FFFFFF;
+      --surface-sub: #F6ECE0;
+      --ink: #3E2405;
+      --ink-muted: #7E5F3B;
+      --accent: #D0741B;
+      --accent-soft: #FEF4EA;
+    }
+
+    /* THEME 4: Monospace Obsidian (Developer Mode) */
+    .theme-terminal {
+      --bg: #0C0C0E;
+      --surface: #141417;
+      --surface-sub: #1D1D22;
+      --ink: #E4E4EA;
+      --ink-muted: #8E8E9F;
+      --ink-light: #4E4E58;
+      --border: rgba(228, 228, 234, 0.08);
+      --border-strong: rgba(228, 228, 234, 0.2);
+      --accent: #10B981; /* Emerald Neon */
+      --accent-soft: rgba(16, 185, 129, 0.1);
+      --success: #3B82F6; /* Cobalt */
+      --success-soft: rgba(59, 130, 246, 0.1);
+      --warning: #F59E0B;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background-color: var(--bg);
+      background-image: radial-gradient(rgba(30, 30, 36, 0.02) 1.5px, transparent 1.5px);
+      background-size: 32px 32px;
+      color: var(--ink);
+      font-family: var(--sans);
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+      transition: background-color 0.6s cubic-bezier(0.16, 1, 0.3, 1), color 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* ==========================================================================
+       SIDEBAR & DESIGN SELECTOR
+       ========================================================================== */
+    .sidebar {
+      width: var(--sidebar-width);
+      height: 100%;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      z-index: 10;
+      box-shadow: 10px 0 40px rgba(0,0,0,0.015);
+      transition: var(--transition);
+    }
+
+    .brand {
+      padding: 28px 24px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand-title {
+      font-family: var(--serif);
+      font-size: 1.5rem;
+      font-weight: 500;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-title span {
+      font-style: italic;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .brand-subtitle {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--ink-muted);
+      letter-spacing: 0.08em;
+      margin-top: 4px;
+    }
+
+    .nav-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .nav-section-title {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink-light);
+      padding: 0 12px;
+    }
+
+    .nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .nav-item {
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--ink-muted);
+      transition: var(--transition);
+    }
+
+    .nav-item:hover {
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    .nav-item.active {
+      background: var(--ink);
+      color: var(--surface);
+      font-weight: 600;
+    }
+
+    .nav-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-num {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      background: rgba(0, 0, 0, 0.04);
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: var(--transition);
+    }
+
+    .nav-item.active .nav-num {
+      background: rgba(255, 255, 255, 0.15);
+      color: var(--surface);
+    }
+
+    /* Spectrum Tags on Sidebar */
+    .spectrum-tag {
+      font-size: 0.6rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.02em;
+    }
+    .spectrum-messy { background: #FDE8E8; color: #E53E3E; }
+    .spectrum-balanced { background: #DEF7EC; color: #03543F; }
+    .spectrum-clean { background: #E1EFFE; color: #1E429F; }
+
+    /* ==========================================================================
+       MAIN CONTENT CANVAS
+       ========================================================================== */
+    .canvas {
+      flex: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Canvas Header */
+    .canvas-header {
+      padding: 28px 40px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(10px);
+      z-index: 5;
+    }
+
+    .header-title-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header-title {
+      font-family: var(--serif);
+      font-size: 2.1rem;
+      font-weight: 500;
+      line-height: 1.1;
+      letter-spacing: -0.01em;
+    }
+
+    .header-subtitle {
+      font-size: 0.82rem;
+      color: var(--ink-muted);
+      margin-top: 4px;
+      max-width: 600px;
+      line-height: 1.4;
+    }
+
+    /* ADHD Spectrum bar */
+    .spectrum-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface);
+      padding: 8px 16px;
+      border-radius: 30px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .spectrum-title {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--ink-light);
+    }
+
+    .spectrum-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .spectrum-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border-strong);
+    }
+    .spectrum-dot.active {
+      transform: scale(1.35);
+      box-shadow: 0 0 8px currentColor;
+    }
+
+    .spectrum-value {
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+
+    /* Active Viewport Frame */
+    .viewport {
+      flex: 1;
+      padding: 32px 40px;
+      overflow-y: auto;
+      display: none;
+      animation: viewportFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .viewport.active {
+      display: block;
+    }
+
+    @keyframes viewportFadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ==========================================================================
+       UNIVERSAL TOKEN PARSER & RICH HOVER ELEMENTS
+       ========================================================================== */
+    .rich-link {
+      font-family: var(--mono);
+      font-weight: 600;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: 1px 6px;
+      border-radius: 5px;
+      font-size: 0.82rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      transition: var(--transition);
+      border: 1px solid rgba(163, 124, 94, 0.12);
+      cursor: pointer;
+    }
+    .rich-link:hover {
+      background: var(--accent);
+      color: var(--surface);
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .rich-mention {
+      font-family: var(--sans);
+      font-weight: 600;
+      color: var(--success);
+      background: var(--success-soft);
+      padding: 1px 8px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      transition: var(--transition);
+      border: 1px solid rgba(96, 136, 99, 0.12);
+      cursor: pointer;
+    }
+    .rich-mention:hover {
+      background: var(--success);
+      color: var(--surface);
+      border-color: var(--success);
+      transform: translateY(-1px);
+    }
+
+    .hashtag-badge {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--ink-muted);
+      background: var(--surface-sub);
+      padding: 1px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    /* ==========================================================================
+       INTERACTIVE INSPECTOR DRAWER
+       ========================================================================== */
+    .inspector-drawer {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: var(--inspector-width);
+      height: 100%;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      box-shadow: -10px 0 45px rgba(0,0,0,0.02);
+      z-index: 20;
+      transform: translateX(100%);
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+    }
+    .inspector-drawer.open {
+      transform: translateX(0);
+    }
+
+    .inspector-header {
+      padding: 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .inspector-title {
+      font-family: var(--serif);
+      font-size: 1.25rem;
+      font-weight: 500;
+    }
+
+    .inspector-close {
+      cursor: pointer;
+      font-size: 1.2rem;
+      color: var(--ink-light);
+      background: transparent;
+      border: none;
+      transition: var(--transition);
+    }
+    .inspector-close:hover { color: var(--ink); }
+
+    .inspector-content {
+      padding: 24px;
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* ==========================================================================
+       DESIGN PARADIGMS & COMPONENTS
+       ========================================================================== */
+    
+    /* Layout utilities */
+    .flex-row { display: flex; gap: 24px; height: 100%; }
+    .flex-col { display: flex; flex-direction: column; gap: 16px; }
+    .w-half { width: 50%; }
+    .w-3-5 { width: 60%; }
+    .w-2-5 { width: 40%; }
+    
+    .card-eyebrow {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink-light);
+    }
+
+    .editorial-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+    }
+    .editorial-card:hover {
+      border-color: var(--border-strong);
+      box-shadow: 0 6px 24px rgba(30, 30, 36, 0.02);
+    }
+
+    .monospace-textarea {
+      font-family: var(--mono);
+      font-size: 0.86rem;
+      line-height: 1.6;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      outline: none;
+      resize: none;
+      background: var(--surface);
+      color: var(--ink);
+      flex: 1;
+      transition: var(--transition);
+    }
+    .monospace-textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    .pill-btn {
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      border: none;
+      cursor: pointer;
+      font-family: var(--sans);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+    }
+    .pill-btn-primary { background: var(--ink); color: var(--surface); }
+    .pill-btn-primary:hover { background: var(--accent); transform: translateY(-1.5px); }
+    .pill-btn-secondary { background: var(--surface-sub); color: var(--ink-muted); border: 1px solid var(--border); }
+    .pill-btn-secondary:hover { background: var(--border); color: var(--ink); }
+
+    /* Subtask Checklist */
+    .subtasks-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .subtask-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 0.88rem;
+      cursor: pointer;
+      user-select: none;
+      padding: 4px 0;
+    }
+
+    .subtask-bullet {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 1.5px solid var(--ink-light);
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .subtask-bullet::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      transform: scale(0);
+      transition: var(--transition);
+    }
+    .subtask-item.checked .subtask-bullet {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+    .subtask-item.checked .subtask-bullet::after {
+      transform: scale(1);
+    }
+    .subtask-item.checked span {
+      text-decoration: line-through;
+      color: var(--ink-light);
+    }
+
+    /* Priority Stack Slide Drawer */
+    .priority-drawer-toggle {
+      position: absolute;
+      right: 40px;
+      bottom: 40px;
+      z-index: 8;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .side-stack-pane {
+      width: 300px;
+      height: 100%;
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(15px);
+      border-left: 1px solid var(--border);
+      position: absolute;
+      top: 0;
+      right: 0;
+      transform: translateX(100%);
+      transition: var(--transition);
+      z-index: 7;
+      padding: 32px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .side-stack-pane.open {
+      transform: translateX(0);
+    }
+
+    /* Drag Cards */
+    .draggable-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      cursor: grab;
+      user-select: none;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .draggable-card:active { cursor: grabbing; }
+    .draggable-card.dragging {
+      opacity: 0.5;
+      transform: scale(0.95);
+      border-color: var(--accent);
+    }
+    .draggable-card.drag-over {
+      border-top: 3px solid var(--accent);
+    }
+
+    /* Floating action buttons */
+    .float-menu {
+      position: absolute;
+      background: var(--ink);
+      color: var(--surface);
+      border-radius: 8px;
+      padding: 6px;
+      display: flex;
+      gap: 4px;
+      box-shadow: var(--shadow-lg);
+      z-index: 100;
+      transform: translateY(-100%);
+      margin-top: -10px;
+      animation: floatFade 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes floatFade {
+      from { opacity: 0; transform: translateY(-80%) scale(0.95); }
+      to { opacity: 1; transform: translateY(-100%) scale(1); }
+    }
+    .float-btn {
+      font-size: 0.72rem;
+      background: transparent;
+      color: var(--surface);
+      border: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+    .float-btn:hover { background: var(--accent); }
+
+    /* Time Blindness Horizontal Fluid Strip */
+    .fluid-strip-container {
+      position: relative;
+      height: 180px;
+      background: var(--surface-sub);
+      border-radius: 20px;
+      margin: 40px 0;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+    }
+    .fluid-strip-line {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: var(--border-strong);
+      z-index: 1;
+    }
+    .fluid-node {
+      position: absolute;
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      border: 2px solid var(--accent);
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+      transform: translate(-50%, -50%);
+      top: 50%;
+    }
+    .fluid-node:hover {
+      transform: translate(-50%, -50%) scale(1.15);
+      background: var(--accent);
+      color: var(--surface);
+      box-shadow: 0 0 20px rgba(163, 124, 94, 0.4);
+    }
+    .fluid-node.active {
+      width: 110px;
+      height: 110px;
+      background: var(--ink);
+      color: var(--surface);
+      border-color: var(--ink);
+      box-shadow: var(--shadow-lg);
+    }
+
+    /* Pomodoro Hearth meditation */
+    .hearth-core {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      border: 1.5px solid rgba(163, 124, 94, 0.2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      margin: 30px auto;
+      box-shadow: 0 10px 40px rgba(163, 124, 94, 0.08);
+      transition: var(--transition);
+    }
+    .hearth-core.breathing {
+      animation: hearthMeditation 6s infinite ease-in-out;
+    }
+    @keyframes hearthMeditation {
+      0% { transform: scale(0.92); background: rgba(163, 124, 94, 0.08); box-shadow: 0 0 24px rgba(163, 124, 94, 0.08); }
+      50% { transform: scale(1.08); background: rgba(163, 124, 94, 0.25); box-shadow: 0 0 50px rgba(163, 124, 94, 0.3); }
+      100% { transform: scale(0.92); background: rgba(163, 124, 94, 0.08); box-shadow: 0 0 24px rgba(163, 124, 94, 0.08); }
+    }
+
+    /* Sandbox buckets */
+    .sandbox-column {
+      flex: 1;
+      background: var(--surface-sub);
+      border-radius: var(--radius);
+      padding: 20px;
+      border: 2px dashed transparent;
+      transition: var(--transition);
+      min-height: 350px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .sandbox-column.drag-hover {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+    }
+
+    /* Terminal Monospace styles */
+    .terminal-panel {
+      background: #09090B;
+      color: #38BDF8; /* Terminal bright cyan */
+      font-family: var(--mono);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.05);
+      font-size: 0.84rem;
+      line-height: 1.5;
+    }
+    .terminal-input-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-top: 16px;
+    }
+    .terminal-cli-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #34D399; /* Green active input */
+      font-family: var(--mono);
+      font-size: 0.84rem;
+      flex: 1;
+    }
+    .terminal-task-row {
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      transition: var(--transition);
+    }
+    .terminal-task-row:hover { background: rgba(255,255,255,0.03); }
+    .terminal-task-row.active { background: rgba(56, 189, 248, 0.15); color: #FFF; border-left: 3px solid #38BDF8; }
+    .terminal-task-row.done { text-decoration: line-through; opacity: 0.4; }
+
+    /* Energy Focus Wave */
+    .wave-chart-container {
+      position: relative;
+      height: 180px;
+      margin-bottom: 24px;
+      border-radius: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .wave-svg {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .wave-node-button {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      background: var(--surface);
+      border: 2px solid var(--accent);
+      border-radius: 20px;
+      padding: 4px 10px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+      z-index: 3;
+    }
+    .wave-node-button:hover {
+      background: var(--accent);
+      color: var(--surface);
+      transform: translate(-50%, -50%) scale(1.1);
+    }
+
+    /* Calm full-screen breathing helper veil */
+    .meditation-veil {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #111B15; /* Healing Forest Deep */
+      color: #EEF5EF;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .meditation-veil.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .meditation-circle {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: rgba(96, 136, 99, 0.15);
+      border: 2px solid #608863;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 40px;
+      animation: meditatePulse 6s infinite ease-in-out;
+    }
+    @keyframes meditatePulse {
+      0% { transform: scale(0.85); background: rgba(96, 136, 99, 0.08); box-shadow: 0 0 24px rgba(96, 136, 99, 0.1); }
+      50% { transform: scale(1.15); background: rgba(96, 136, 99, 0.3); box-shadow: 0 0 60px rgba(96, 136, 99, 0.4); }
+      100% { transform: scale(0.85); background: rgba(96, 136, 99, 0.08); box-shadow: 0 0 24px rgba(96, 136, 99, 0.1); }
+    }
+
+    /* Context Time Machine Overlay */
+    .time-machine-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #191922; /* Premium Charcoal Slate */
+      color: #FAF7F2;
+      z-index: 15;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px;
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .time-machine-screen.cleared {
+      transform: translateY(-100%);
+      opacity: 0;
+      pointer-events: none;
+    }
+    .time-machine-card {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+  </style>
+</head>
+<body class="theme-serene">
+
+  <!-- ==========================================================================
+       LEFT SIDEBAR (PLANNING CHANNELS & DESIGNS)
+       ========================================================================== -->
+  <aside class="sidebar">
+    <div class="brand">
+      <h2 class="brand-title">Focus <span>Room</span></h2>
+      <div class="brand-subtitle">ADHD COGNITIVE BENCHMARKS</div>
+    </div>
+    
+    <div class="nav-container">
+      <div class="nav-section-title">Paradigms Spectrum</div>
+      <ul class="nav-list">
+        
+        <!-- Design 1: Slack Mirror -->
+        <li class="nav-item active" id="nav-d1" onclick="switchLayout(1)">
+          <div class="nav-label">
+            <span class="nav-num">01</span>
+            <span>Slack Journal Mirror</span>
+          </div>
+          <span class="spectrum-tag spectrum-messy">Messy Stream</span>
+        </li>
+        
+        <!-- Design 2: Focus Spotlight -->
+        <li class="nav-item" id="nav-d2" onclick="switchLayout(2)">
+          <div class="nav-label">
+            <span class="nav-num">02</span>
+            <span>Focus Spotlight Room</span>
+          </div>
+          <span class="spectrum-tag spectrum-clean">Ultra Clean</span>
+        </li>
+        
+        <!-- Design 3: Split Editorial -->
+        <li class="nav-item" id="nav-d3" onclick="switchLayout(3)">
+          <div class="nav-label">
+            <span class="nav-num">03</span>
+            <span>Editorial Split Workbench</span>
+          </div>
+          <span class="spectrum-tag spectrum-balanced">Balanced</span>
+        </li>
+        
+        <!-- Design 4: Fluid Progress Strip -->
+        <li class="nav-item" id="nav-d4" onclick="switchLayout(4)">
+          <div class="nav-label">
+            <span class="nav-num">04</span>
+            <span>Fluid Progress Strip</span>
+          </div>
+          <span class="spectrum-tag spectrum-clean">Clean</span>
+        </li>
+        
+        <!-- Design 5: Two-Bucket Sandbox -->
+        <li class="nav-item" id="nav-d5" onclick="switchLayout(5)">
+          <div class="nav-label">
+            <span class="nav-num">05</span>
+            <span>Two-Bucket Sandbox</span>
+          </div>
+          <span class="spectrum-tag spectrum-balanced">Balanced</span>
+        </li>
+        
+        <!-- Design 6: Monospace Terminal -->
+        <li class="nav-item" id="nav-d6" onclick="switchLayout(6)">
+          <div class="nav-label">
+            <span class="nav-num">06</span>
+            <span>Monospace Dev Terminal</span>
+          </div>
+          <span class="spectrum-tag spectrum-messy">Monospace</span>
+        </li>
+        
+        <!-- Design 7: AI Coach Sentinel -->
+        <li class="nav-item" id="nav-d7" onclick="switchLayout(7)">
+          <div class="nav-label">
+            <span class="nav-num">07</span>
+            <span>AI Coach Sentinel</span>
+          </div>
+          <span class="spectrum-tag spectrum-balanced">Balanced</span>
+        </li>
+        
+        <!-- Design 8: Ritalin Peak Waves -->
+        <li class="nav-item" id="nav-d8" onclick="switchLayout(8)">
+          <div class="nav-label">
+            <span class="nav-num">08</span>
+            <span>Ritalin Focus Waves</span>
+          </div>
+          <span class="spectrum-tag spectrum-balanced">Energy-aware</span>
+        </li>
+        
+        <!-- Design 9: Mental Load Valve -->
+        <li class="nav-item" id="nav-d9" onclick="switchLayout(9)">
+          <div class="nav-label">
+            <span class="nav-num">09</span>
+            <span>Mental Load Valve</span>
+          </div>
+          <span class="spectrum-tag spectrum-messy">Dynamic Shifter</span>
+        </li>
+        
+        <!-- Design 10: Context Time Machine -->
+        <li class="nav-item" id="nav-d10" onclick="switchLayout(10)">
+          <div class="nav-label">
+            <span class="nav-num">10</span>
+            <span>Context Time Machine</span>
+          </div>
+          <span class="spectrum-tag spectrum-clean">Recovery</span>
+        </li>
+        
+      </ul>
+    </div>
+  </aside>
+
+  <!-- ==========================================================================
+       RIGHT CANVAS AREA & ACTIVE VIEWPORT WORKSPACE
+       ========================================================================== -->
+  <main class="canvas">
+    
+    <!-- Unified Top Header bar -->
+    <header class="canvas-header">
+      <div class="header-title-group">
+        <h1 class="header-title" id="pageTitle">Slack Journal Mirror</h1>
+        <span class="header-subtitle" id="pageSubtitle">Renders messy, text-journaling streams directly as interactive Slack messages, matching your 2.5-year habit.</span>
+      </div>
+      
+      <!-- ADHD Spectrum Slider Meter -->
+      <div class="spectrum-bar">
+        <span class="spectrum-title">Messy vs Clean Spectrum</span>
+        <div class="spectrum-indicator">
+          <span class="spectrum-dot" id="spec-dot-messy" style="color: #E53E3E;"></span>
+          <span class="spectrum-dot" id="spec-dot-mid" style="color: #D98324;"></span>
+          <span class="spectrum-dot" id="spec-dot-clean" style="color: #608863;"></span>
+        </div>
+        <span class="spectrum-value" id="specValue">Messy stream-first</span>
+      </div>
+    </header>
+
+    <!-- ==========================================================================
+         VIEWPORT 1: Slack Journal Mirror
+         ========================================================================== -->
+    <section class="viewport active" id="view-1">
+      <div class="flex-row">
+        <!-- Left Side Slack Channel UI -->
+        <div class="w-3-5 flex-col" style="border-right: 1px solid var(--border); padding-right: 24px; justify-content: space-between; height: 100%;">
+          
+          <!-- Slack message container -->
+          <div class="flex-col" id="slackMessages" style="overflow-y: auto; flex: 1; gap: 20px;">
+            <!-- Seeded daily Slack logs populated by script -->
+          </div>
+          
+          <!-- Message text area prompt box -->
+          <div class="flex-col" style="gap: 8px; margin-top: 16px;">
+            <textarea class="monospace-textarea" id="slackInput" style="height: 80px;" placeholder="- Prep for meeting with @Maya about CROSS-141 tomorrow morning #cross
+- Review smartviews-sdk PR #30 with @Aram
+- Remember to Register Zoe to Gan #personal"></textarea>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 0.72rem; color: var(--ink-light);">Supports ticket keys like CROSS-141, handles like @Sergey, and hashtags.</span>
+              <button class="pill-btn pill-btn-primary" onclick="postSlackMessage()">Post Intention</button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Right Side Side-Panel (Auto-collating summary blocks) -->
+        <div class="w-2-5 flex-col" style="background: var(--surface-sub); border-radius: var(--radius); padding: 24px; overflow-y: auto;">
+          <span class="card-eyebrow">Parsed Active Today Blocks</span>
+          <div class="flex-col" id="slackParsedBlocks" style="gap: 12px; margin-top: 12px;">
+            <!-- Auto populated on parse -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         VIEWPORT 2: Focus Spotlight Room
+         ========================================================================== -->
+    <section class="viewport" id="view-2">
+      <!-- Collapsible Stack Toggle -->
+      <button class="pill-btn pill-btn-secondary priority-drawer-toggle" onclick="togglePriorityDrawer()">
+        ⠿ Toggle Priority Stack
+      </button>
+
+      <div class="flex-row" style="position: relative; align-items: center; justify-content: center; height: 100%;">
+        
+        <!-- Giant Central Spotlight Card -->
+        <div class="editorial-card" style="width: 100%; max-width: 580px; padding: 48px; border: 1.5px solid var(--accent); box-shadow: var(--shadow-lg);">
+          <span class="card-eyebrow" style="color: var(--accent); font-size: 0.8rem;">Now Focusing On</span>
+          
+          <h2 class="header-title" id="d2ActiveTitle" style="font-size: 2.2rem; margin: 16px 0; font-family: var(--serif);">
+            Prep for meeting with <a class="rich-mention" onclick="inspectItem('@Maya')">@Maya</a> about <a class="rich-link" onclick="inspectItem('CROSS-141')">CROSS-141</a>
+          </h2>
+          
+          <p style="font-size: 0.88rem; color: var(--ink-muted); margin-bottom: 24px;">Lead time constraint: 2 hours remaining before standup.</p>
+          
+          <span class="card-eyebrow">Nested Subtasks Checklist</span>
+          <ul class="subtasks-list" id="d2Subtasks">
+            <li class="subtask-item checked" onclick="toggleD2Check(this)">
+              <span class="subtask-bullet"></span>
+              <span>Review Prisma schema migration routes for new billing stg13</span>
+            </li>
+            <li class="subtask-item" onclick="toggleD2Check(this)">
+              <span class="subtask-bullet"></span>
+              <span>Confirm backward compatibility details with <a class="rich-mention" onclick="inspectItem('@Sergey')">@Sergey</a></span>
+            </li>
+            <li class="subtask-item" onclick="toggleD2Check(this)">
+              <span class="subtask-bullet"></span>
+              <span>Verify Okta OAuth fallback redirect clientID configuration</span>
+            </li>
+          </ul>
+          
+          <div style="display: flex; gap: 12px; margin-top: 32px;">
+            <button class="pill-btn pill-btn-secondary" style="flex: 1; justify-content: center;" onclick="snoozeSpotlight()">Snooze Focus</button>
+            <button class="pill-btn pill-btn-primary" style="flex: 2; justify-content: center;" onclick="completeSpotlight()">Complete Needle</button>
+          </div>
+        </div>
+
+        <!-- Frosted glass collapsible slide drawer on the right -->
+        <div class="side-stack-pane" id="d2Drawer">
+          <span class="card-eyebrow">Priority Stack Drawer</span>
+          <div style="font-size: 0.72rem; color: var(--ink-muted);">Drag card stacks to prioritize. The top card is automatically Spotlighted!</div>
+          <div class="flex-col" id="d2DrawerContainer" style="overflow-y: auto; flex: 1;">
+            <!-- Populated with drag cards -->
+          </div>
+          <button class="pill-btn pill-btn-primary" style="width: 100%; justify-content: center;" onclick="togglePriorityDrawer()">Save Order</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         VIEWPORT 3: Split Editorial Workbench
+         ========================================================================== -->
+    <section class="viewport" id="view-3">
+      <div class="flex-row">
+        <!-- Left Side: Markdown Stream Editor -->
+        <div class="w-half flex-col" style="height: 100%; position: relative;">
+          <span class="card-eyebrow">Raw Messy Brain Dump Workspace</span>
+          
+          <!-- Float Selection Box -->
+          <div class="float-menu" id="d3FloatMenu" style="display: none;">
+            <button class="float-btn" onclick="castSelection('task')">Cast to Task</button>
+            <button class="float-btn" onclick="castSelection('note')">Cast to Note</button>
+          </div>
+
+          <textarea class="monospace-textarea" id="d3TextArea" onmouseup="checkD3Selection(event)" onkeyup="checkD3Selection(event)" placeholder="Write your messy logs here... Highlight any sentence fragment to cast it instantly into a structured block.
+
+- Deploy hq-user-sync following PP doc with @Sergey
+- Checked zendesk-integration messaging token on stg13 with @Aram
+- Need to resolve CROSS-568 Brands page bug on staging
+- Register Zoe to Gan for primary preschool school #personal"></textarea>
+          
+          <div style="display: flex; gap: 12px; margin-top: 12px;">
+            <button class="pill-btn pill-btn-secondary" onclick="d3Clear()">Clear editor</button>
+            <button class="pill-btn pill-btn-primary" onclick="d3ParseAllLines()">Split Lines Into Cards</button>
+          </div>
+        </div>
+
+        <!-- Right Side: Structural Card render -->
+        <div class="w-half flex-col" style="background: var(--surface-sub); border-radius: var(--radius); padding: 24px; overflow-y: auto;">
+          <span class="card-eyebrow">Structured Block Output</span>
+          <div class="flex-col" id="d3Blocks" style="gap: 12px; margin-top: 12px; overflow-y: auto; flex: 1;">
+            <!-- Interactive blocks populate here -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         VIEWPORT 4: Glanceable Fluid Strip
+         ========================================================================== -->
+    <section class="viewport" id="view-4">
+      <div class="flex-col justify-between" style="height: 100%;">
+        <span class="card-eyebrow">Time-Aware Glanceable Horizontal Grid (Combating Time Blindness)</span>
+        
+        <!-- Time strip line -->
+        <div class="fluid-strip-container" id="d4StripContainer">
+          <div class="fluid-strip-line"></div>
+          <!-- Fluid node bubbles populated dynamically by script -->
+        </div>
+        
+        <div style="display: flex; gap: 24px; align-items: flex-start; justify-content: center; flex: 1;">
+          <!-- Detail panel card -->
+          <div class="editorial-card" style="width: 100%; max-width: 460px;">
+            <span class="card-eyebrow" id="d4ActiveTime">Scheduled at 10:30 AM</span>
+            <h3 class="header-title" id="d4ActiveTitle" style="font-size: 1.4rem; margin: 12px 0 20px;">Click any bubble to view task</h3>
+            <div id="d4ActiveDetails" style="font-size: 0.84rem; color: var(--ink-muted); line-height: 1.5;">
+              Select bubble along the daily line flow to spotlight details without vertical list pressure.
+            </div>
+          </div>
+
+          <!-- Pulsing Pomodoro Hearth Circle -->
+          <div class="editorial-card" style="width: 100%; max-width: 340px; text-align: center;">
+            <span class="card-eyebrow">Pomodoro Hearth Anchor</span>
+            <div class="hearth-core" id="d4Hearth" onclick="toggleHearthPulse()">
+              <span style="font-family: var(--mono); font-size: 1.6rem; font-weight: 600;" id="d4HearthTime">25:00</span>
+              <span style="font-size: 0.65rem; color: var(--accent); margin-top: 4px;" id="d4HearthState">Pulse focus</span>
+            </div>
+            <p style="font-size: 0.76rem; color: var(--ink-muted); font-style: italic;">
+              Inhale as the circle expands, exhale as it contracts.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         VIEWPORT 5: Two-Bucket Sandbox
+         ========================================================================== -->
+    <section class="viewport" id="view-5">
+      <div class="flex-row">
+        <!-- Inbox source pile -->
+        <div class="w-2-5 flex-col" style="border-right: 1px solid var(--border); padding-right: 24px; overflow-y: auto;">
+          <span class="card-eyebrow">Raw Inbox captures (Drag from here)</span>
+          <div class="flex-col" id="d5InboxContainer" style="gap: 12px; margin-top: 12px;">
+            <div class="draggable-card" draggable="true" id="d5-inbox-1" ondragstart="handleD5DragStart(event)">
+              ⠿ CROSS-672 connect accounts organization BE config
+            </div>
+            <div class="draggable-card" draggable="true" id="d5-inbox-2" ondragstart="handleD5DragStart(event)">
+              ⠿ Checked stg13 zendesk integrations messaging SSO token
+            </div>
+            <div class="draggable-card" draggable="true" id="d5-inbox-3" ondragstart="handleD5DragStart(event)">
+              ⠿ Register Zoe to Gan school preschool
+            </div>
+            <div class="draggable-card" draggable="true" id="d5-inbox-4" ondragstart="handleD5DragStart(event)">
+              ⠿ CROSS-568 Brands page bug on layout staging13 with @Simon
+            </div>
+          </div>
+        </div>
+
+        <!-- Two bucket drop targets -->
+        <div class="w-3-5 flex-row">
+          
+          <!-- Column 1: Act Today -->
+          <div class="sandbox-column" id="d5-column-act" ondragover="handleD5DragOver(event)" ondragleave="handleD5DragLeave(event)" ondrop="handleD5Drop(event, 'act')">
+            <span class="card-eyebrow" style="color: var(--accent);">Act Today Bucket</span>
+            <!-- Dropped items go here -->
+          </div>
+
+          <!-- Column 2: Remember (Stash) -->
+          <div class="sandbox-column" id="d5-column-remember" ondragover="handleD5DragOver(event)" ondragleave="handleD5DragLeave(event)" ondrop="handleD5Drop(event, 'remember')">
+            <span class="card-eyebrow" style="color: var(--success);">Remember / Stash Bucket</span>
+            <!-- Dropped items go here -->
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         VIEWPORT 6: Monospace Dev Terminal
+         ========================================================================== -->
+    <section class="viewport" id="view-6" style="padding: 24px 40px;">
+      <div class="flex-col" style="height: 100%; justify-content: space-between;">
+        
+        <div class="terminal-panel" id="terminalPanel" style="flex: 1; overflow-y: auto;">
+          <div style="color: #6B7280; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 8px;">
+            FOCUS ROOM CLI TERMINAL v0.2.1 [HACKATHON SPEED ACTIVE]
+            <br>Hotkeys: [Tab] cycle active task · [Enter] toggle completion status · [Ctrl+A] add task
+          </div>
+          
+          <div class="flex-col" id="terminalRowContainer" style="gap: 4px;">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+
+        <div class="terminal-input-row">
+          <span style="color: #38BDF8; font-family: var(--mono); font-weight: 600;">ofer@needle:~$</span>
+          <input type="text" class="terminal-cli-input" id="terminalCli" placeholder="Type intention here and press enter..." onkeydown="handleTerminalCliEnter(event)">
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         VIEWPORT 7: AI Coach Sentinel
+         ========================================================================== -->
+    <section class="viewport" id="view-7">
+      <div class="flex-row">
+        <!-- AI Sentinel Coach Panel -->
+        <div class="w-half flex-col" style="background: var(--accent-soft); border-radius: var(--radius); padding: 32px; justify-content: space-between; border: 1.5px solid rgba(163,124,94,0.15);">
+          <div class="flex-col" style="gap: 20px;">
+            <span class="card-eyebrow" style="color: var(--accent);">AI Coach Sentinel</span>
+            <h2 class="header-title" style="font-size: 1.6rem; line-height: 1.3;">Ofer, your planning stack is extremely heavy today.</h2>
+            <p style="font-size: 0.86rem; color: var(--ink-muted); line-height: 1.55;">
+              You have planned **8 major engineering tasks** (including critical paths like <a class="rich-link" onclick="inspectItem('CROSS-672')">CROSS-672</a>). Research on ADHD executive load suggests focusing on a maximum of 2 major blocks.
+            </p>
+            
+            <div style="border-top: 1px solid rgba(163,124,94,0.15); padding-top: 16px;">
+              <span class="card-eyebrow" style="color: var(--accent);">AI Recommended Day Simplifications</span>
+            </div>
+            
+            <!-- Plan option buttons -->
+            <div class="flex-col" style="gap: 12px;">
+              <div class="editorial-card" style="padding: 16px; cursor: pointer; border-color: rgba(163,124,94,0.2);" onclick="applyCoachPlan('A')">
+                <strong>Option A: Dev Deep Work Focus</strong>
+                <div style="font-size: 0.76rem; color: var(--ink-muted); margin-top: 4px;">Focus strictly on CROSS-672. Stash remaining 6 items to Tomorrow's Stash.</div>
+              </div>
+              <div class="editorial-card" style="padding: 16px; cursor: pointer; border-color: rgba(163,124,94,0.2);" onclick="applyCoachPlan('B')">
+                <strong>Option B: Team PR & Communication Focus</strong>
+                <div style="font-size: 0.76rem; color: var(--ink-muted); margin-top: 4px;">Review PRs with Aram and Simon. Move all complex BE implementations to Tomorrow.</div>
+              </div>
+            </div>
+          </div>
+          
+          <button class="pill-btn pill-btn-primary" style="justify-content: center;" onclick="applyCoachPlan('A')">Adopt Option A (Deep Focus)</button>
+        </div>
+
+        <!-- Planned daily task cards -->
+        <div class="w-half flex-col" style="overflow-y: auto;">
+          <span class="card-eyebrow" id="d7TaskHeader">Planned Daily Commitments (8 items)</span>
+          <div class="flex-col" id="d7Tasks" style="gap: 10px;">
+            <!-- Seeded items populated dynamically -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         VIEWPORT 8: Ritalin Focus Waves
+         ========================================================================== -->
+    <section class="viewport" id="view-8">
+      <div class="flex-col" style="height: 100%; justify-content: space-between;">
+        
+        <div class="wave-chart-container" id="waveContainer">
+          <svg class="wave-svg" viewBox="0 0 800 200" preserveAspectRatio="none">
+            <path d="M 0 100 C 150 20 250 180 400 100 C 550 20 650 180 800 100 L 800 200 L 0 200 Z" fill="rgba(163, 124, 94, 0.05)" stroke="var(--accent)" stroke-width="2.5"></path>
+          </svg>
+          <!-- Tasks automatically positioned on wave peaks/troughs -->
+        </div>
+
+        <div class="flex-row" style="flex: 1; align-items: flex-start; justify-content: center; gap: 32px;">
+          <!-- Focus Details Card -->
+          <div class="editorial-card" style="width: 100%; max-width: 440px;">
+            <span class="card-eyebrow" id="d8PeakLabel">Morning Peak Attention Wave</span>
+            <h3 class="header-title" id="d8ActiveTitle" style="font-size: 1.4rem; margin: 12px 0 16px;">Click on wave nodes to plan along energy states</h3>
+            <p id="d8ActiveDesc" style="font-size: 0.86rem; color: var(--ink-muted); line-height: 1.5;">
+              ADHD energy cycles peak 1-3 hours post-medication. Align your complex architectural tasks during peak wave periods, and administrative tasks during valleys.
+            </p>
+          </div>
+
+          <!-- Transition Trigger Card -->
+          <div class="editorial-card" style="width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 16px; align-items: center; text-align: center;">
+            <span class="card-eyebrow">Task-Switching Breathing Helper</span>
+            <div style="font-size: 0.8rem; color: var(--ink-muted);">Avoid focus hyper-lock by taking a deliberate breathing pause between tasks.</div>
+            <button class="pill-btn pill-btn-primary" onclick="triggerMeditationVeil()">Take a 10s Breath</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         VIEWPORT 9: Mental Load Valve
+         ========================================================================== -->
+    <section class="viewport" id="view-9">
+      <div class="flex-col justify-between" style="height: 100%;">
+        
+        <div class="flex-row" style="align-items: center; justify-content: space-between;">
+          <div class="flex-col" style="gap: 6px;">
+            <span class="card-eyebrow">Mental Load Valve Controller</span>
+            <div style="display: flex; gap: 10px;">
+              <button class="pill-btn pill-btn-secondary" onclick="d9SetLoad(2)" id="btn-load-low">Low Load (2 Tasks)</button>
+              <button class="pill-btn pill-btn-secondary" onclick="d9SetLoad(5)" id="btn-load-med">Medium Load (5 Tasks)</button>
+              <button class="pill-btn pill-btn-secondary" onclick="d9SetLoad(8)" id="btn-load-high">Overload Mode (8 Tasks)</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
+          <div class="editorial-card" style="width: 100%; max-width: 500px; text-align: center; border: 1.5px solid var(--accent); padding: 40px;" id="d9LoadCard">
+            <span class="card-eyebrow" id="d9LoadLabel" style="color: var(--success);">Serene Green Load Status</span>
+            <h2 class="header-title" id="d9LoadTitle" style="font-size: 1.8rem; margin: 16px 0 12px;">Your Focus capacity is clear.</h2>
+            <p id="d9LoadDesc" style="font-size: 0.88rem; color: var(--ink-muted); margin-bottom: 24px; line-height: 1.5;">
+              Perfect 2-task planning array limits. Split attention danger is low.
+            </p>
+            <button class="pill-btn pill-btn-primary" id="d9ValveBtn" style="display: none; margin: 0 auto;" onclick="d9ReleaseValve()">Release Valve (Offload 6 tasks to Tomorrow)</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         VIEWPORT 10: Context Time Machine
+         ========================================================================== -->
+    <section class="viewport" id="view-10" style="padding: 0; position: relative;">
+      
+      <!-- Wake screen modal layer overlay -->
+      <div class="time-machine-screen" id="d10Overlay">
+        <div class="time-machine-card">
+          <span class="card-eyebrow" style="color: var(--accent);">Interruption Context Time Machine</span>
+          <h2 style="font-family: var(--serif); font-size: 2.5rem; font-style: italic; line-height: 1.2;">Welcome back, Ofer.</h2>
+          <p style="color: var(--ink-light); font-size: 0.88rem;">
+            You were interrupted 20 minutes ago while working on: 
+            <br><strong>Prep for meeting with <span class="rich-mention">@Maya</span> about <span class="rich-link">CROSS-141</span></strong>
+          </p>
+          
+          <div class="flex-col" style="gap: 8px;">
+            <label class="card-eyebrow" style="color: var(--ink-light);">Where did you leave off? (Capture mindset instantly)</label>
+            <textarea class="monospace-textarea" id="d10MindsetCapture" style="height: 90px; background: rgba(255,255,255,0.06); color: #FFF; border-color: rgba(255,255,255,0.12);" placeholder="e.g. reviewed Prisma schemas on stg13, now wiring Okta fallback oauth clientID..."></textarea>
+          </div>
+          
+          <button class="pill-btn pill-btn-primary" style="background: #FFF; color: #191922; justify-content: center;" onclick="d10RestoreContext()">Restore Context & Return to Task</button>
+        </div>
+      </div>
+
+      <!-- Recovered Workspace view -->
+      <div class="flex-row" style="padding: 32px 40px; height: 100%;">
+        <!-- Spotlight task details -->
+        <div class="w-half flex-col" style="justify-content: space-between;">
+          <div class="flex-col">
+            <!-- Active continuity mindset banner -->
+            <div class="editorial-card" id="d10MindsetBanner" style="background: var(--accent-soft); border-color: var(--accent); display: none;">
+              <span class="card-eyebrow" style="color: var(--accent);">Restored Mindset Note</span>
+              <p id="d10MindsetText" style="font-size: 0.84rem; font-weight: 500; margin-top: 6px;"></p>
+            </div>
+
+            <div class="editorial-card" style="margin-top: 12px;">
+              <span class="card-eyebrow">Spotlight focus Card</span>
+              <h2 class="header-title" style="font-size: 1.5rem; margin-top: 12px;">Prep for meeting with @Maya about CROSS-141</h2>
+              <ul class="subtasks-list" style="margin-top: 16px;">
+                <li class="subtask-item"><span class="subtask-bullet"></span><span>Review Prisma migrations stg13</span></li>
+                <li class="subtask-item"><span class="subtask-bullet"></span><span>Confirm backward compatibility with @Sergey</span></li>
+              </ul>
+            </div>
+          </div>
+          
+          <button class="pill-btn pill-btn-secondary" style="align-self: flex-start;" onclick="d10ResetOverlay()">Simulate Interruption (Lock Screen)</button>
+        </div>
+
+        <!-- Live Sandbox references and continuity notes -->
+        <div class="w-half flex-col" style="background: var(--surface-sub); border-radius: var(--radius); padding: 24px;">
+          <span class="card-eyebrow">Continuity Sandbox Scratchpad</span>
+          <textarea class="monospace-textarea" style="flex: 1;" placeholder="Write raw meeting notes, scratch scripts, or scratch code details here..."></textarea>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ==========================================================================
+       RIGHT INSPECTOR DRAWER OVERLAY
+       ========================================================================== -->
+  <aside class="inspector-drawer" id="inspectorDrawer">
+    <div class="inspector-header">
+      <h3 class="inspector-title" id="inspectTitle">Ticket Details</h3>
+      <button class="inspector-close" onclick="closeInspector()">✕</button>
+    </div>
+    <div class="inspector-content" id="inspectContent">
+      <!-- Generated dynamically based on item clicked -->
+    </div>
+  </aside>
+
+  <!-- ==========================================================================
+       FULL SCREEN MEDITATION BREATH VEIL
+       ========================================================================== -->
+  <div class="meditation-veil" id="meditationVeil">
+    <div class="meditation-circle">
+      <span style="font-size: 0.9rem; font-weight: 600;" id="veilTimer">10</span>
+    </div>
+    <h2 style="font-family: var(--serif); font-size: 2rem; margin-bottom: 8px;">Mindfulness Breathing Transition</h2>
+    <p style="color: var(--ink-light); text-align: center; max-width: 320px; font-size: 0.88rem;" id="veilCues">
+      Inhale deeply as the circle expands...
+    </p>
+  </div>
+
+  <!-- ==========================================================================
+       PLAYGROUND JAVASCRIPT CONTROLLER
+       ========================================================================== -->
+  <script>
+    // --------------------------------------------------------------------------
+    // STATIC MOCK DATA SOURCE SEEDED DIRECTLY FROM USER'S REAL SLACK LOGS
+    // --------------------------------------------------------------------------
+    const MOCK_SLACK_LOGS = [
+      { id: "sl-1", date: "August 4, 2024", text: "API UX – PRs reviews, met with @Aram about smartviews-sdk PR #30 approach." },
+      { id: "sl-2", date: "August 18, 2024", text: "HQ user data sync step 1: PUT route notification configs FE approved and tested stg13 with @Sergey." },
+      { id: "sl-3", date: "September 3, 2024", text: "Deployed hq-user-sync following PP doc. Completed NEX-982." },
+      { id: "sl-4", date: "October 10, 2024", text: "CROSS-141 – Billing info sync: Prisma schema update for Instances." },
+      { id: "sl-5", date: "November 14, 2024", text: "CROSS-568 – PAC brand bugs check on staging13 with @Simon." },
+      { id: "sl-6", date: "December 12, 2024", text: "Lite-registration-page PR #32: Add loader for Google registration flows." },
+      { id: "sl-7", date: "January 5, 2025", text: "CROSS-346: customFields reorder flow tested, ask @Aram for review." },
+      { id: "sl-8", date: "March 17, 2026", text: "Final test for zendesk-integration: deploy widget stable layout to stg13." }
+    ];
+
+    // Mock details for our universal Inspector overlay drawer
+    const INSPECT_DATABASE = {
+      "CROSS-141": {
+        title: "CROSS-141: Billing Info Sync for New Instances",
+        meta: "Epic: Accounts & Guesty HQ | Priority: High",
+        desc: "Build out the database schemas and consumers to sync Organization/Instance billing profile entities on create.",
+        details: "Assigned: Sergey Polakevitch (Principal Developer)<br>Status: IN REVIEW (PR #122)<br>Target Env: staging13"
+      },
+      "CROSS-672": {
+        title: "CROSS-672: Add existing Guesty account to HQ",
+        meta: "Epic: Organization Consolidation | Priority: Critical",
+        desc: "Allow Guesty standalone accounts to request pairing connection to Guesty HQ accounts inside the admin panel.",
+        details: "Assigned: Ofer Hashimshony (Owner)<br>Status: IN PROGRESS<br>Prerequisites: SYN-70, SYN-72 approved"
+      },
+      "CROSS-568": {
+        title: "CROSS-568: Brand tagging assignments in PAC",
+        meta: "Epic: Property Assignment | Priority: Medium",
+        desc: "Investigate why assignments are falling back and losing tag definitions on S3 sync.",
+        details: "Assigned: Simon (PAC Specialist)<br>Status: PENDING TEST<br>Incident: inc-2025-01-29"
+      },
+      "NEX-982": {
+        title: "NEX-982: HQ User Sync Notification Settings",
+        meta: "Epic: Platform Integration | Priority: High",
+        desc: "Wire the front-end layout to dispatch PUT route triggers to users account endpoints.",
+        details: "Assigned: Ofer Hashimshony (Owner)<br>Status: COMPLETED (Aug 2024)"
+      },
+      "@Sergey": {
+        title: "@Sergey (Sergey Polakevitch)",
+        meta: "Principal Platform Architect",
+        desc: "Collaborates with Ofer on Guesty HQ core sync services, AVRO event consumer schemas, and Okta SSO integrations.",
+        details: "Active Work: hq-user-sync, Okta dev trial integrations."
+      },
+      "@Aram": {
+        title: "@Aram (Aram G.)",
+        meta: "Engineering Director",
+        desc: "Reviews and aligns on major versions and filter approaches for the smartviews-sdk integrations.",
+        details: "Active Work: smartviews-sdk PR approvals."
+      },
+      "@Simon": {
+        title: "@Simon",
+        meta: "Senior Developer",
+        desc: "Expert on PAC (Property Assignment Core) database indexes and Algolia sync schemas.",
+        details: "Active Work: CROSS-568 Brand tags bug triage."
+      },
+      "@Maya": {
+        title: "@Maya",
+        meta: "Product Manager (HQ Features)",
+        desc: "Designs user flows and compliance parameters for the Organization admin consoles.",
+        details: "Active Meetings: 1:1 meeting at 10:30 AM."
+      }
+    };
+
+    // Global layout specs mapping to text spectrum positions
+    const LAYOUT_SPECS = {
+      1: { title: "Slack Journal Mirror", subtitle: "Renders messy text streams as familiar Slack message bubbles. Low starting friction.", value: "Messy stream-first", pos: "messy" },
+      2: { title: "Focus Spotlight Room", subtitle: "Strips away backlog noise entirely. Shows strictly one active card with a collapsible priority stack.", value: "Minimalist Spotlight", pos: "clean" },
+      3: { title: "Editorial Split Workbench", subtitle: "Dual-column parchment layout. Capture messy notes on the left, organize structured cards on the right.", value: "Balanced Split", pos: "mid" },
+      4: { title: "Fluid Progress Strip", subtitle: "A horizontal flowing timeline strip mapping tasks dynamically. Combats time blindness.", value: "Horizontal Spacing", pos: "clean" },
+      5: { title: "Two-Bucket Sandbox", subtitle: "Sort morning brain dumps directly into either Act Today or Remember Stash columns via drag-and-drop.", value: "Clean sandbox", pos: "mid" },
+      6: { title: "Monospace Dev Terminal", subtitle: "Full keyboard-driven dark console. Type commands, check items, and log speed sprints.", value: "Monospace text", pos: "messy" },
+      7: { title: "AI Coach Sentinel", subtitle: "Warns of over-planning load. Generates simplified day plans so you don't face analysis paralysis.", value: "Guided selection", pos: "mid" },
+      8: { title: "Ritalin Focus Waves", subtitle: "Lays tasks along an attention wave chart. Features mindfulness task-transition breathing checks.", value: "Energy-aware wave", pos: "mid" },
+      9: { title: "Mental Load Valve", subtitle: "Dashboard theme colors shift from forest green to amber warnings depending on task stack load.", value: "Dynamic overload shifts", pos: "messy" },
+      10: { title: "Context Time Machine", subtitle: "Focuses entirely on context recovery. Screen wake modal asks 'Where did you leave off?' to pin notes.", value: "Mindset continuity", pos: "clean" }
+    };
+
+    // --------------------------------------------------------------------------
+    // TEXT PARSING ENGINE
+    // --------------------------------------------------------------------------
+    function parseTextToEmbeddedLinks(text) {
+      // Parse ticket keys (e.g. CROSS-141, NEX-982, SYN-28)
+      let parsed = text.replace(/([A-Z]+-\d+)/g, '<a class="rich-link" onclick="inspectItem(\'$1\')">$1</a>');
+      // Parse user handles (e.g. @Sergey, @Aram, @Maya, @Simon)
+      parsed = parsed.replace(/(@\w+)/g, '<a class="rich-mention" onclick="inspectItem(\'$1\')">$1</a>');
+      // Parse hashtags (e.g. #cross, #personal)
+      parsed = parsed.replace(/(#\w+)/g, '<span class="hashtag-badge">$1</span>');
+      return parsed;
+    }
+
+    // --------------------------------------------------------------------------
+    // ROUTING & THEME CONTROLLER
+    // --------------------------------------------------------------------------
+    function switchLayout(num) {
+      // 1. Sidebar selection sync
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      const activeNav = document.getElementById(`nav-d${num}`);
+      if (activeNav) activeNav.classList.add('active');
+
+      // 2. Viewport switching
+      document.querySelectorAll('.viewport').forEach(el => el.classList.remove('active'));
+      const activeView = document.getElementById(`view-${num}`);
+      if (activeView) activeView.classList.add('active');
+
+      // 3. Header details & Spectrum meter sync
+      const spec = LAYOUT_SPECS[num];
+      document.getElementById('pageTitle').innerText = spec.title;
+      document.getElementById('pageSubtitle').innerText = spec.subtitle;
+      document.getElementById('specValue').innerText = spec.value;
+
+      // Spectrum slider dots
+      document.querySelectorAll('.spectrum-dot').forEach(el => {
+        el.classList.remove('active');
+        el.style.transform = 'scale(1)';
+      });
+      
+      let dotId = 'spec-dot-mid';
+      if (spec.pos === 'messy') dotId = 'spec-dot-messy';
+      if (spec.pos === 'clean') dotId = 'spec-dot-clean';
+      
+      const activeDot = document.getElementById(dotId);
+      activeDot.classList.add('active');
+      activeDot.style.transform = 'scale(1.4)';
+
+      // 4. Custom theme swaps per layout
+      if (num === 6) {
+        document.body.className = 'theme-terminal';
+      } else if (num === 9) {
+        // Theme 9 relies on its own dynamic state
+        d9UpdateTheme();
+      } else {
+        document.body.className = 'theme-serene';
+      }
+
+      // Initialize workspace hooks
+      if (num === 2) d2RenderDrawer();
+      if (num === 4) d4RenderStrip();
+      if (num === 6) d6RenderTerminalRows();
+      if (num === 7) d7RenderTasks();
+      if (num === 8) d8RenderWave();
+
+      // Close inspector
+      closeInspector();
+      
+      // Save selection
+      localStorage.setItem('focus_active_layout', num);
+    }
+
+    // --------------------------------------------------------------------------
+    // UNIVERSAL INSPECTOR DRAWER SYSTEM
+    // --------------------------------------------------------------------------
+    function inspectItem(key) {
+      const drawer = document.getElementById('inspectorDrawer');
+      const title = document.getElementById('inspectTitle');
+      const content = document.getElementById('inspectContent');
+
+      const data = INSPECT_DATABASE[key] || {
+        title: key,
+        meta: "Custom Intention Tag",
+        desc: "This ticket identifier or teammate contact is currently captured inside your active planning stream.",
+        details: "Source: Local Workspace Daily Logs"
+      };
+
+      title.innerText = data.title;
+      content.innerHTML = `
+        <div class="card-eyebrow" style="color: var(--accent);">${data.meta}</div>
+        <p style="font-size: 0.88rem; line-height: 1.5; color: var(--ink);">${data.desc}</p>
+        <div style="background: var(--surface-sub); padding: 14px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.8rem; line-height: 1.45; color: var(--ink-muted);">
+          <strong>Status Details:</strong><br>${data.details}
+        </div>
+        <button class="pill-btn pill-btn-primary" style="margin-top: 12px; font-size: 0.72rem; justify-content: center;" onclick="closeInspector()">Acknowledge Details</button>
+      `;
+
+      drawer.classList.add('open');
+    }
+
+    function closeInspector() {
+      document.getElementById('inspectorDrawer').classList.remove('open');
+    }
+
+    // --------------------------------------------------------------------------
+    // DESIGN 1: Slack Journal Mirror
+    // --------------------------------------------------------------------------
+    let slackMessagesList = JSON.parse(localStorage.getItem('focus_slack_messages')) || MOCK_SLACK_LOGS;
+
+    function renderSlackMessages() {
+      const container = document.getElementById('slackMessages');
+      const collatedBox = document.getElementById('slackParsedBlocks');
+      
+      container.innerHTML = '';
+      collatedBox.innerHTML = '';
+
+      slackMessagesList.forEach(msg => {
+        // Message element
+        const bubble = document.createElement('div');
+        bubble.className = 'editorial-card';
+        bubble.style.padding = '16px';
+        bubble.style.borderRadius = '10px';
+        bubble.style.background = 'var(--surface)';
+        bubble.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <strong style="font-size: 0.8rem; color: var(--accent);">ofer [Journal]</strong>
+            <span style="font-size: 0.7rem; color: var(--ink-light);">${msg.date}</span>
+          </div>
+          <div style="font-size: 0.88rem; line-height: 1.5;">${parseTextToEmbeddedLinks(msg.text)}</div>
+        `;
+        container.appendChild(bubble);
+
+        // Collated Summary tasks extracted on side panel
+        const rawItems = msg.text.split('\n');
+        rawItems.forEach(item => {
+          const cleanText = item.replace(/^[-*•\s]+/, '').trim();
+          if (cleanText) {
+            const parsedBlock = document.createElement('div');
+            parsedBlock.className = 'draggable-card';
+            parsedBlock.style.background = 'var(--surface)';
+            parsedBlock.style.fontSize = '0.8rem';
+            parsedBlock.innerHTML = `
+              <span style="color: var(--accent);">■</span>
+              <span style="flex: 1;">${parseTextToEmbeddedLinks(cleanText)}</span>
+            `;
+            collatedBox.appendChild(parsedBlock);
+          }
+        });
+      });
+
+      // Scroll to bottom
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function postSlackMessage() {
+      const textarea = document.getElementById('slackInput');
+      const text = textarea.value.trim();
+      if (!text) return;
+
+      const dateStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' today';
+      slackMessagesList.push({
+        id: `sl-${Date.now()}`,
+        date: dateStr,
+        text: text
+      });
+
+      localStorage.setItem('focus_slack_messages', JSON.stringify(slackMessagesList));
+      textarea.value = '';
+      renderSlackMessages();
+    }
+
+    // --------------------------------------------------------------------------
+    // DESIGN 2: Spotlight focus + Collapsible priority stack re-ordering
+    // --------------------------------------------------------------------------
+    let d2PriorityList = JSON.parse(localStorage.getItem('focus_priority_list')) || [
+      { id: "d2-1", text: "Prep for meeting with @Maya about CROSS-141", active: true },
+      { id: "d2-2", text: "Review smartviews-sdk PR #30 with @Aram", active: false },
+      { id: "d2-3", text: "Check zendesk-integration SSO token on stg13", active: false },
+      { id: "d2-4", text: "Register Zoe to Gan #personal", active: false }
+    ];
+
+    function togglePriorityDrawer() {
+      document.getElementById('d2Drawer').classList.toggle('open');
+    }
+
+    function d2RenderDrawer() {
+      const container = document.getElementById('d2DrawerContainer');
+      container.innerHTML = '';
+
+      d2PriorityList.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = 'draggable-card';
+        card.draggable = true;
+        card.id = `d2Drag-${item.id}`;
+        
+        // drag and drop events
+        card.addEventListener('dragstart', (e) => handleD2DragStart(e, index));
+        card.addEventListener('dragover', handleD2DragOver);
+        card.addEventListener('drop', (e) => handleD2Drop(e, index));
+        
+        card.innerHTML = `
+          <span style="color: var(--ink-light); cursor: grab;">⠿</span>
+          <div style="flex: 1; font-size: 0.8rem;">
+            <strong>${parseTextToEmbeddedLinks(item.text)}</strong>
+            <div style="font-size: 0.65rem; color: var(--ink-muted); margin-top: 2px;">Priority #${index + 1}</div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      // Update center spotlight view to reflect the top drag card
+      if (d2PriorityList.length > 0) {
+        document.getElementById('d2ActiveTitle').innerHTML = parseTextToEmbeddedLinks(d2PriorityList[0].text);
+      }
+    }
+
+    let d2DraggingIndex = null;
+    function handleD2DragStart(e, index) {
+      d2DraggingIndex = index;
+    }
+    function handleD2DragOver(e) {
+      e.preventDefault();
+    }
+    function handleD2Drop(e, toIndex) {
+      e.preventDefault();
+      if (d2DraggingIndex === null || d2DraggingIndex === toIndex) return;
+
+      const temp = d2PriorityList[d2DraggingIndex];
+      d2PriorityList.splice(d2DraggingIndex, 1);
+      d2PriorityList.splice(toIndex, 0, temp);
+
+      localStorage.setItem('focus_priority_list', JSON.stringify(d2PriorityList));
+      d2RenderDrawer();
+    }
+
+    function toggleD2Check(el) {
+      el.classList.toggle('checked');
+    }
+
+    function snoozeSpotlight() {
+      alert("Task stashed to priority slot 2. Spotlight shifts down.");
+    }
+
+    function completeSpotlight() {
+      const activeText = d2PriorityList[0] ? d2PriorityList[0].text : "Active task";
+      alert(`Hurrah! Completed: "${activeText}". Running transition buffer overlay next.`);
+      triggerMeditationVeil();
+    }
+
+    // --------------------------------------------------------------------------
+    // DESIGN 3: Split Editorial Workbench
+    // --------------------------------------------------------------------------
+    let d3Selections = [];
+
+    function checkD3Selection(e) {
+      const textarea = document.getElementById('d3TextArea');
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      
+      const menu = document.getElementById('d3FloatMenu');
+      if (start !== end) {
+        const textVal = textarea.value.substring(start, end).trim();
+        if (textVal.length > 0) {
+          // Position floating box near click
+          menu.style.display = 'flex';
+          menu.style.left = `${e.clientX - 100}px`;
+          menu.style.top = `${e.clientY - 20}px`;
+          return;
+        }
+      }
+      menu.style.display = 'none';
+    }
+
+    function castSelection(type) {
+      const textarea = document.getElementById('d3TextArea');
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const selectedText = textarea.value.substring(start, end).trim();
+      
+      if (selectedText) {
+        d3Selections.push({
+          id: Date.now(),
+          type: type,
+          text: selectedText
+        });
+        d3RenderBlocks();
+      }
+      document.getElementById('d3FloatMenu').style.display = 'none';
+      
+      // Clear highlight selection
+      textarea.selectionStart = textarea.selectionEnd;
+    }
+
+    function d3ParseAllLines() {
+      const text = document.getElementById('d3TextArea').value.trim();
+      if (!text) return;
+
+      const lines = text.split('\n');
+      lines.forEach(l => {
+        const clean = l.replace(/^[-*•\s]+/, '').trim();
+        if (clean) {
+          d3Selections.push({
+            id: Math.random(),
+            type: 'task',
+            text: clean
+          });
+        }
+      });
+      d3RenderBlocks();
+    }
+
+    function d3RenderBlocks() {
+      const container = document.getElementById('d3Blocks');
+      container.innerHTML = '';
+
+      d3Selections.forEach((item, index) => {
+        const block = document.createElement('div');
+        block.className = 'editorial-card';
+        block.style.background = 'var(--surface)';
+        block.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span class="card-eyebrow" style="color: ${item.type === 'task' ? 'var(--accent)' : 'var(--success)'};">${item.type}</span>
+            <button style="background:transparent; border:none; cursor:pointer; color:var(--ink-light);" onclick="d3DeleteBlock(${index})">✕</button>
+          </div>
+          <p style="font-size: 0.88rem; line-height: 1.5;">${parseTextToEmbeddedLinks(item.text)}</p>
+        `;
+        container.appendChild(block);
+      });
+    }
+
+    function d3DeleteBlock(index) {
+      d3Selections.splice(index, 1);
+      d3RenderBlocks();
+    }
+
+    function d3Clear() {
+      d3Selections = [];
+      document.getElementById('d3TextArea').value = '';
+      d3RenderBlocks();
+    }
+
+    // --------------------------------------------------------------------------
+    // DESIGN 4: Glanceable Fluid Strip + Hearth Pomodoro timer
+    // --------------------------------------------------------------------------
+    const d4NodesList = [
+      { id: 1, title: "Review smartviews-sdk PR #30 with @Aram", time: "09:30 AM", left: "20%" },
+      { id: 2, title: "Prep for meeting with @Maya about CROSS-141", time: "10:30 AM", left: "45%" },
+      { id: 3, title: "Verify CROSS-568 Brands page bug on staging13 with @Simon", time: "1:00 PM", left: "70%" },
+      { id: 4, title: "Register Zoe to Gan for preschool reminders", time: "3:30 PM", left: "90%" }
+    ];
+
+    function d4RenderStrip() {
+      const container = document.getElementById('d4StripContainer');
+      // clear elements except timeline line
+      container.innerHTML = '<div class="fluid-strip-line"></div>';
+
+      d4NodesList.forEach((node, index) => {
+        const bubble = document.createElement('div');
+        bubble.className = `fluid-node ${index === 1 ? 'active' : ''}`;
+        bubble.style.left = node.left;
+        bubble.innerHTML = `
+          <span>${node.time}</span>
+          <span style="font-size: 0.6rem; opacity:0.8;">Node ${index + 1}</span>
+        `;
+        bubble.onclick = () => d4SelectBubble(node, bubble);
+        container.appendChild(bubble);
+      });
+    }
+
+    function d4SelectBubble(node, el) {
+      document.querySelectorAll('.fluid-node').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+
+      document.getElementById('d4ActiveTime').innerText = `Scheduled at ${node.time}`;
+      document.getElementById('d4ActiveTitle').innerHTML = parseTextToEmbeddedLinks(node.title);
+      document.getElementById('d4ActiveDetails').innerText = "Timeline spacing matches lead times. Visual expansion represents spent focal energy.";
+    }
+
+    // Hearth Pomodoro Circle logic
+    let hearthInterval = null;
+    let hearthTime = 25 * 60;
+
+    function toggleHearthPulse() {
+      const hearth = document.getElementById('d4Hearth');
+      hearth.classList.toggle('breathing');
+
+      if (hearth.classList.contains('breathing')) {
+        document.getElementById('d4HearthState').innerText = "Inhale...";
+        hearthInterval = setInterval(() => {
+          hearthTime--;
+          const m = Math.floor(hearthTime / 60);
+          const s = hearthTime % 60;
+          document.getElementById('d4HearthTime').innerText = `${m}:${s.toString().padStart(2, '0')}`;
+
+          // Breathe cues expand/contract sync
+          if (hearthTime % 6 === 0) {
+            document.getElementById('d4HearthState').innerText = "Inhale deeply...";
+          } else if (hearthTime % 6 === 3) {
+            document.getElementById('d4HearthState').innerText = "Exhale slowly...";
+          }
+        }, 1000);
+      } else {
+        clearInterval(hearthInterval);
+        document.getElementById('d4HearthState').innerText = "Pulse paused";
+      }
+    }
+
+    // --------------------------------------------------------------------------
+    // DESIGN 5: Two-Bucket Sandbox
+    // --------------------------------------------------------------------------
+    let d5DraggedId = null;
+
+    function handleD5DragStart(e) {
+      d5DraggedId = e.target.id;
+      e.target.classList.add('dragging');
+      e.dataTransfer.setData('text/plain', e.target.id);
+    }
+
+    function handleD5DragOver(e) {
+      e.preventDefault();
+      e.currentTarget.classList.add('drag-over');
+    }
+
+    function handleD5DragLeave(e) {
+      e.currentTarget.classList.remove('drag-over');
+    }
+
+    function handleD5Drop(e, column) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('drag-over');
+
+      if (d5DraggedId) {
+        const card = document.getElementById(d5DraggedId);
+        card.classList.remove('dragging');
+        
+        // Append card into appropriate column container
+        e.currentTarget.appendChild(card);
+        
+        // Parse raw text inline if dragged to today
+        if (column === 'act') {
+          card.style.borderColor = 'var(--accent)';
+          card.innerHTML = `<span>✔</span> <span style='flex:1;'>${parseTextToEmbeddedLinks(card.innerText.replace('⠿', '').trim())}</span>`;
+        } else {
+          card.style.borderColor = 'var(--success)';
+          card.innerHTML = `<span>★</span> <span style='flex:1;'>${parseTextToEmbeddedLinks(card.innerText.replace('⠿', '').trim())}</span>`;
+        }
+        
+        d5DraggedId = null;
+      }
+    }
+
+    // --------------------------------------------------------------------------
+    // DESIGN 6: Monospace Dev Terminal
+    // --------------------------------------------------------------------------
+    let tTasks = [
+      { id: 1, cmd: "[t1]", text: "Deployed hq-user-sync following PP doc with @Sergey", done: false, active: true },
+      { id: 2, cmd: "[t2]", text: "smartviews-sdk PR #30 reviewed approach with @Aram", done: false, active: false },
+      { id: 3, cmd: "[t3]", text: "Check CROSS-568 brands page validation stg13", done: false, active: false }
+    ];
+    let activeTerminalIndex = 0;
+
+    function d6RenderTerminalRows() {
+      const container = document.getElementById('terminalRowContainer');
+      container.innerHTML = '';
+
+      tTasks.forEach((row, idx) => {
+        const div = document.createElement('div');
+        div.className = `terminal-task-row ${idx === activeTerminalIndex ? 'active' : ''} ${row.done ? 'done' : ''}`;
+        div.innerHTML = `
+          <span>${row.cmd} ${parseTextToEmbeddedLinks(row.text)}</span>
+          <span style="font-family:var(--sans); font-size:0.7rem;">${row.done ? 'DONE' : 'PENDING'}</span>
+        `;
+        div.onclick = () => {
+          activeTerminalIndex = idx;
+          d6RenderTerminalRows();
+        };
+        container.appendChild(div);
+      });
+    }
+
+    function handleTerminalCliEnter(e) {
+      if (e.key === 'Enter') {
+        const input = document.getElementById('terminalCli');
+        const text = input.value.trim();
+        if (!text) return;
+
+        if (text.startsWith('done')) {
+          const num = parseInt(text.replace('done', '').trim());
+          if (num > 0 && num <= tTasks.length) {
+            tTasks[num - 1].done = true;
+          }
+        } else if (text === 'clear') {
+          tTasks = [];
+        } else {
+          tTasks.push({
+            id: Date.now(),
+            cmd: `[t${tTasks.length + 1}]`,
+            text: text,
+            done: false,
+            active: false
+          });
+        }
+        
+        input.value = '';
+        d6RenderTerminalRows();
+      }
+    }
+
+    // Keyboard global listeners for terminal mode
+    window.addEventListener('keydown', (e) => {
+      const activeLayout = localStorage.getItem('focus_active_layout');
+      if (activeLayout !== '6') return;
+
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        activeTerminalIndex = (activeTerminalIndex + 1) % tTasks.length;
+        d6RenderTerminalRows();
+      } else if (e.key === 'Enter' && document.activeElement !== document.getElementById('terminalCli')) {
+        e.preventDefault();
+        if (tTasks[activeTerminalIndex]) {
+          tTasks[activeTerminalIndex].done = !tTasks[activeTerminalIndex].done;
+          d6RenderTerminalRows();
+        }
+      }
+    });
+
+    // --------------------------------------------------------------------------
+    // DESIGN 7: AI Coach Sentinel
+    // --------------------------------------------------------------------------
+    let coachDayList = [
+      { text: "CROSS-672 connect accounts organization integration", epic: "#cross", critical: true },
+      { text: "smartviews-sdk fix in thread reviews with @Aram", epic: "#views", critical: false },
+      { text: "Register Zoe to Gan school preschool", epic: "#personal", critical: false },
+      { text: "Checked stg13 zendesk integrations messaging SSO token", epic: "#support", critical: false },
+      { text: "CROSS-568 Brands page bug on layout staging13 with @Simon", epic: "#cross", critical: true },
+      { text: "Okta trial custom domain redirection settings", epic: "#security", critical: false },
+      { text: "Quickbooks resource IDs production billing", epic: "#billing", critical: false },
+      { text: "AVRO schema registry platform config with @Sergey", epic: "#cross", critical: false }
+    ];
+
+    function d7RenderTasks() {
+      const container = document.getElementById('d7Tasks');
+      container.innerHTML = '';
+
+      coachDayList.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'editorial-card';
+        card.style.padding = '14px 18px';
+        card.style.borderColor = item.critical ? 'var(--accent)' : 'var(--border)';
+        card.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:0.86rem; font-weight:500;">${parseTextToEmbeddedLinks(item.text)}</span>
+            <span class="hashtag-badge">${item.epic}</span>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+      document.getElementById('d7TaskHeader').innerText = `Planned Daily Commitments (${coachDayList.length} items)`;
+    }
+
+    function applyCoachPlan(plan) {
+      if (plan === 'A') {
+        coachDayList = [
+          { text: "CROSS-672 connect accounts organization integration", epic: "#cross", critical: true },
+          { text: "CROSS-568 Brands page bug on layout staging13 with @Simon", epic: "#cross", critical: true }
+        ];
+        alert("Plan A adopted. 6 low-priority/non-critical items offloaded to Tomorrow's Stash to protect your activation focus!");
+      } else {
+        coachDayList = [
+          { text: "smartviews-sdk fix in thread reviews with @Aram", epic: "#views", critical: false },
+          { text: "Checked stg13 zendesk integrations messaging SSO token", epic: "#support", critical: false }
+        ];
+        alert("Plan B adopted. Deep BE implementations stashed. Day focused on reviews and team communications.");
+      }
+      d7RenderTasks();
+    }
+
+    // --------------------------------------------------------------------------
+    // DESIGN 8: Ritalin Focus Waves
+    // --------------------------------------------------------------------------
+    const d8Nodes = [
+      { title: "Prep for meeting with @Maya about CROSS-141", time: "10:30 AM", x: 200, y: 50, peak: "Morning Focus Peak", desc: "Energy levels are optimal due to morning momentum. Ideal slot for complex architecture reviews." },
+      { title: "Deploy hq-user-sync with @Sergey", time: "01:00 PM", x: 400, y: 150, peak: "Midday Valley", desc: "Focus capacity dips slightly. Good slot for routine checks, testing, and communication logs." },
+      { title: "Review CROSS-568 Brands page bug with @Simon", time: "03:30 PM", x: 600, y: 60, peak: "Afternoon Boost Peak", desc: "Ritalin booster peak. Solve lingering core blockers or technical debt PRs." }
+    ];
+
+    function d8RenderWave() {
+      const container = document.getElementById('waveContainer');
+      // Remove any existing node buttons
+      container.querySelectorAll('.wave-node-button').forEach(btn => btn.remove());
+
+      d8Nodes.forEach(node => {
+        const btn = document.createElement('button');
+        btn.className = 'wave-node-button';
+        btn.style.left = `${(node.x / 800) * 100}%`;
+        btn.style.top = `${(node.y / 200) * 100}%`;
+        btn.innerText = node.time;
+        btn.onclick = () => {
+          document.getElementById('d8PeakLabel').innerText = node.peak;
+          document.getElementById('d8ActiveTitle').innerHTML = parseTextToEmbeddedLinks(node.title);
+          document.getElementById('d8ActiveDesc').innerText = node.desc;
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    // --------------------------------------------------------------------------
+    // DESIGN 9: Mental Load Valve
+    // --------------------------------------------------------------------------
+    let currentD9Load = 8; // High overload default
+
+    function d9SetLoad(loadNum) {
+      currentD9Load = loadNum;
+      d9UpdateTheme();
+    }
+
+    function d9UpdateTheme() {
+      const body = document.body;
+      const card = document.getElementById('d9LoadCard');
+      const label = document.getElementById('d9LoadLabel');
+      const title = document.getElementById('d9LoadTitle');
+      const desc = document.getElementById('d9LoadDesc');
+      const valve = document.getElementById('d9ValveBtn');
+
+      if (currentD9Load <= 3) {
+        body.className = 'theme-serene';
+        label.innerText = "Optimal Serene Green Load";
+        label.style.color = "var(--success)";
+        title.innerText = "Your daily flow is clear.";
+        desc.innerText = "Excellent capacity limits. 2 active tasks means minimal context splitting risks.";
+        valve.style.display = "none";
+        
+        document.getElementById('btn-load-low').className = "pill-btn pill-btn-primary";
+        document.getElementById('btn-load-med').className = "pill-btn pill-btn-secondary";
+        document.getElementById('btn-load-high').className = "pill-btn pill-btn-secondary";
+      } else if (currentD9Load <= 5) {
+        body.className = 'theme-serene'; // uses parchment standard
+        label.innerText = "Balanced Attention Stack";
+        label.style.color = "var(--accent)";
+        title.innerText = "Planned tasks inside stable range.";
+        desc.innerText = "5 tasks. Keep stack sorted to prevent afternoon burnout drift.";
+        valve.style.display = "none";
+
+        document.getElementById('btn-load-low').className = "pill-btn pill-btn-secondary";
+        document.getElementById('btn-load-med').className = "pill-btn pill-btn-primary";
+        document.getElementById('btn-load-high').className = "pill-btn pill-btn-secondary";
+      } else {
+        body.className = 'theme-overload';
+        label.innerText = "Cognitive Overload Danger";
+        label.style.color = "var(--accent)";
+        title.innerText = "Warning: 8 Tasks planned today.";
+        desc.innerText = "Exceeds ADHD limits. Reorganize or deploy the safety valve below to lower load.";
+        valve.style.display = "block";
+
+        document.getElementById('btn-load-low').className = "pill-btn pill-btn-secondary";
+        document.getElementById('btn-load-med').className = "pill-btn pill-btn-secondary";
+        document.getElementById('btn-load-high').className = "pill-btn pill-btn-primary";
+      }
+    }
+
+    function d9ReleaseValve() {
+      d9SetLoad(2);
+      alert("Safety Valve triggered! Re-routed 6 low-priority task cards to Tomorrow. Focus room reset to Serene!");
+    }
+
+    // --------------------------------------------------------------------------
+    // DESIGN 10: Context Time Machine
+    // --------------------------------------------------------------------------
+    function d10RestoreContext() {
+      const text = document.getElementById('d10MindsetCapture').value.trim();
+      const banner = document.getElementById('d10MindsetBanner');
+      const textNode = document.getElementById('d10MindsetText');
+
+      if (text) {
+        textNode.innerHTML = parseTextToEmbeddedLinks(text);
+        banner.style.display = 'block';
+      }
+
+      document.getElementById('d10Overlay').classList.add('cleared');
+    }
+
+    function d10ResetOverlay() {
+      document.getElementById('d10Overlay').classList.remove('cleared');
+      document.getElementById('d10MindsetCapture').value = '';
+      document.getElementById('d10MindsetBanner').style.display = 'none';
+    }
+
+    // --------------------------------------------------------------------------
+    // GENTLE TRANSITIONAL BREATHING ROOM VEIL
+    // --------------------------------------------------------------------------
+    let veilInterval = null;
+    function triggerMeditationVeil() {
+      const veil = document.getElementById('meditationVeil');
+      const timer = document.getElementById('veilTimer');
+      const cue = document.getElementById('veilCues');
+
+      veil.classList.add('active');
+      let countdown = 10;
+      timer.innerText = countdown;
+
+      veilInterval = setInterval(() => {
+        countdown--;
+        timer.innerText = countdown;
+
+        if (countdown >= 6) {
+          cue.innerText = "Inhale deeply as the circle expands...";
+        } else if (countdown >= 2) {
+          cue.innerText = "Exhale slowly as the circle contracts...";
+        } else {
+          cue.innerText = "Prepare to focus calmly...";
+        }
+
+        if (countdown <= 0) {
+          clearInterval(veilInterval);
+          veil.classList.remove('active');
+        }
+      }, 1000);
+    }
+
+    // --------------------------------------------------------------------------
+    // INITIALIZATION ON WINDOW LOAD
+    // --------------------------------------------------------------------------
+    window.onload = () => {
+      // Restore layout from local storage or default to 1
+      const savedLayout = localStorage.getItem('focus_active_layout') || 1;
+      
+      // Render components
+      renderSlackMessages();
+      switchLayout(parseInt(savedLayout));
+    };
+  </script>
+</body>
+</html>

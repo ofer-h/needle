@@ -115,6 +115,9 @@
 
 .capture-result {
   margin-top: var(--space-4);
+  display: grid;
+  gap: var(--space-4);
+  min-height: 0;
 }
 
 .capture-result__header {
@@ -149,6 +152,85 @@
   font-size: var(--text-14);
   color: var(--ink-3);
   margin-top: var(--space-1);
+}
+
+.capture-generated-list {
+  display: grid;
+  gap: var(--space-3);
+  max-height: min(52vh, 420px);
+  overflow-y: auto;
+  padding-right: var(--space-1);
+}
+
+.capture-generated-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 0.5px solid var(--hairline-2);
+  border-radius: var(--radius-3);
+  background: var(--surface-sub);
+}
+
+.capture-generated-item__main {
+  min-width: 0;
+}
+
+.capture-generated-item__title {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: var(--text-16);
+  font-weight: 500;
+  line-height: 1.35;
+  outline: none;
+}
+
+.capture-generated-item__title:focus {
+  border-bottom-color: var(--border-strong);
+}
+
+.capture-generated-item__reason {
+  margin-top: var(--space-1);
+  color: var(--ink-3);
+  font-size: var(--text-12);
+  line-height: 1.35;
+}
+
+.capture-generated-item__controls,
+.capture-generated-item__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.capture-generated-item__controls select,
+.capture-generated-item__time {
+  height: 28px;
+  min-width: 104px;
+  border: 0.5px solid var(--hairline-2);
+  border-radius: var(--radius-2);
+  background: var(--surface);
+  color: var(--ink-2);
+  font-family: var(--sans);
+  font-size: var(--text-12);
+  padding: 0 var(--space-2);
+}
+
+.capture-generated-item__time:disabled {
+  color: var(--ink-disabled);
+  background: var(--surface-disabled);
+}
+
+.capture-generated-item__controls select:focus-visible,
+.capture-generated-item__time:focus-visible {
+  outline: 2px solid var(--border-strong);
+  outline-offset: 2px;
 }
 
 .capture-time-chips {

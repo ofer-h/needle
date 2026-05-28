@@ -7,6 +7,7 @@ import { Icon } from '../primitives/Icon';
 import { IconButton } from '../primitives/IconButton';
 import { Pill } from '../primitives/Pill';
 import type { PillVariant } from '../primitives/Pill';
+import EventDetail from './EventDetail';
 import ItemDetail from './ItemDetail';
 import ItemMenu from './ItemMenu';
 
@@ -28,6 +29,7 @@ type TaskItemRowProps = {
 
 type EventItemRowProps = {
   kind: 'event';
+  id: string;
   label: string;
   startTime: string;
   sublabel?: string;
@@ -136,13 +138,14 @@ function FixedTaskItemRow({
   const task = useAppStore((s) => s.tasks.find((item) => item.id === id));
   const expandedItemId = useAppStore((s) => s.expandedItemId);
   const expandItem = useAppStore((s) => s.expandItem);
-  const isExpanded = expandedItemId === id;
+  const itemKey = `task:${id}`;
+  const isExpanded = expandedItemId === itemKey;
   const titleId = `item-row-title-${id}`;
   const detailId = `item-row-detail-${id}`;
   const subtaskProgress = getSubtaskProgress(task);
 
   function handleToggleExpand() {
-    expandItem(isExpanded ? null : id);
+    expandItem(isExpanded ? null : itemKey);
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
@@ -197,7 +200,8 @@ function FlexibleTaskItemRow({
   const task = useAppStore((s) => s.tasks.find((item) => item.id === id));
   const expandedItemId = useAppStore((s) => s.expandedItemId);
   const expandItem = useAppStore((s) => s.expandItem);
-  const isExpanded = expandedItemId === id;
+  const itemKey = `task:${id}`;
+  const isExpanded = expandedItemId === itemKey;
   const titleId = `item-row-title-${id}`;
   const detailId = `item-row-detail-${id}`;
   const subtaskProgress = getSubtaskProgress(task);
@@ -211,7 +215,7 @@ function FlexibleTaskItemRow({
   }`;
 
   function handleToggleExpand() {
-    expandItem(isExpanded ? null : id);
+    expandItem(isExpanded ? null : itemKey);
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
@@ -279,22 +283,48 @@ function getSubtaskProgress(task: ReturnType<typeof useAppStore.getState>['tasks
 
 /* ── Event row ───────────────────────────────────────────────── */
 
-function EventItemRow({ startTime, label, sublabel }: EventItemRowProps) {
+function EventItemRow({ id, startTime, label, sublabel }: EventItemRowProps) {
+  const expandedItemId = useAppStore((s) => s.expandedItemId);
+  const expandItem = useAppStore((s) => s.expandItem);
+  const itemKey = `event:${id}`;
+  const isExpanded = expandedItemId === itemKey;
+  const titleId = `item-row-title-event-${id}`;
+  const detailId = `item-row-detail-event-${id}`;
+
+  function handleToggleExpand() {
+    expandItem(isExpanded ? null : itemKey);
+  }
+
   return (
-    <div className="t-row event" role="listitem">
-      <span className="t-row__handle-placeholder" aria-hidden="true" />
-      <span className="t-row__event-icon">
-        <Icon name="calendar" size={14} tone="calendar" />
-      </span>
-      <div className="label">
-        <span className="t-row__event-label">{label}</span>
-        {sublabel !== undefined && <span className="sublabel">· {sublabel}</span>}
+    <>
+      <div
+        className={`t-row event${isExpanded ? ' expanded' : ''}`}
+        role="listitem"
+        tabIndex={0}
+        aria-expanded={isExpanded}
+        aria-controls={isExpanded ? detailId : undefined}
+        onClick={handleToggleExpand}
+        onKeyDown={(event) => {
+          if (event.key !== 'Enter' && event.key !== ' ') return;
+          event.preventDefault();
+          handleToggleExpand();
+        }}
+      >
+        <span className="t-row__handle-placeholder" aria-hidden="true" />
+        <span className="t-row__event-icon">
+          <Icon name="calendar" size={14} tone="calendar" />
+        </span>
+        <div className="label">
+          <span id={titleId} className="t-row__event-label">{label}</span>
+          {sublabel !== undefined && <span className="sublabel">· {sublabel}</span>}
+        </div>
+        <div className="meta-right">
+          <Pill variant="outline" tabular>
+            {startTime}
+          </Pill>
+        </div>
       </div>
-      <div className="meta-right">
-        <Pill variant="outline" tabular>
-          {startTime}
-        </Pill>
-      </div>
-    </div>
+      {isExpanded && <EventDetail id={detailId} eventId={id} labelledBy={titleId} />}
+    </>
   );
 }

@@ -1,5 +1,5 @@
 import type { FlowHealthSnapshot } from './flow-health';
-import type { CalendarEvent, CaptureEntry, ClassifyResponse, Task, Theme } from './types';
+import type { CalendarEvent, CaptureEntry, ClassifyResponse, ParsedPlanningItem, Task, Theme } from './types';
 
 export type TorchShowPayload = {
   /** Stable correlation id provided by the requester. Used to match the close
@@ -85,13 +85,45 @@ export type CaptureClosePayload = {
   reason: CaptureCloseReason;
 };
 
-export type DbCreateTaskPayload = Omit<Task, 'id'>;
 export type DbUpdateTaskPayload = { id: string; patch: Partial<Task> };
 export type DbDeleteTaskPayload = { id: string };
-export type DbGetTasksByDatePayload = { date: string };
-export type DbCreateEventPayload = Omit<CalendarEvent, 'id'>;
+export type DbAddSubtaskPayload = { taskId: string; title: string };
+export type DbSubtaskPayload = { taskId: string; subtaskId: string };
+export type DbUpdateSubtaskPayload = {
+  taskId: string;
+  subtaskId: string;
+  patch: { title?: string; notes?: string };
+};
+export type DbReorderSubtaskPayload = {
+  taskId: string;
+  subtaskId: string;
+  toIndex: number;
+};
+export type DbMoveSubtaskPayload = {
+  taskId: string;
+  subtaskId: string;
+  targetTaskId: string;
+};
+export type DbNestTaskPayload = {
+  taskId: string;
+  targetTaskId: string;
+};
+export type DbUpdateEventPayload = {
+  id: string;
+  patch: Partial<CalendarEvent>;
+};
+export type DbDeleteEventPayload = { id: string };
+export type DbConvertEventPayload = { id: string };
 export type DbAddCapturePayload = { body: string };
 export type DbGetCapturePayload = { limit?: number };
+export type DbCreatePlanningItemsPayload = {
+  rawInput: string;
+  items: ParsedPlanningItem[];
+};
+export type DbCreatePlanningItemsResponse = {
+  tasks: Task[];
+  events: CalendarEvent[];
+};
 
 export type AiClassifyPayload = {
   text: string;
@@ -116,12 +148,21 @@ export type IpcContracts = {
   'app:getDiagnostics': { req: void; res: AppDiagnostics };
   'app:getFlowHealth': { req: void; res: FlowHealthSnapshot };
   'db:get-tasks': { req: void; res: Task[] };
-  'db:get-tasks-by-date': { req: DbGetTasksByDatePayload; res: Task[] };
-  'db:create-task': { req: DbCreateTaskPayload; res: Task };
   'db:update-task': { req: DbUpdateTaskPayload; res: Task };
   'db:delete-task': { req: DbDeleteTaskPayload; res: void };
+  'db:add-subtask': { req: DbAddSubtaskPayload; res: Task };
+  'db:toggle-subtask': { req: DbSubtaskPayload; res: Task };
+  'db:remove-subtask': { req: DbSubtaskPayload; res: Task };
+  'db:update-subtask': { req: DbUpdateSubtaskPayload; res: Task };
+  'db:reorder-subtask': { req: DbReorderSubtaskPayload; res: void };
+  'db:move-subtask': { req: DbMoveSubtaskPayload; res: void };
+  'db:promote-subtask': { req: DbSubtaskPayload; res: void };
+  'db:nest-task': { req: DbNestTaskPayload; res: void };
   'db:get-events': { req: void; res: CalendarEvent[] };
-  'db:create-event': { req: DbCreateEventPayload; res: CalendarEvent };
+  'db:update-event': { req: DbUpdateEventPayload; res: CalendarEvent };
+  'db:delete-event': { req: DbDeleteEventPayload; res: void };
+  'db:convert-event-to-task': { req: DbConvertEventPayload; res: void };
+  'db:create-planning-items': { req: DbCreatePlanningItemsPayload; res: DbCreatePlanningItemsResponse };
   'db:add-capture': { req: DbAddCapturePayload; res: CaptureEntry };
   'db:get-capture-entries': { req: DbGetCapturePayload; res: CaptureEntry[] };
   'ai:classify': { req: AiClassifyPayload; res: ClassifyResponse };

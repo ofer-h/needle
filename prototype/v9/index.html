@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Needle v9 — Prototype Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #F6F1EB;
+      --surface: #FFFFFF;
+      --ink: #1F1A14;
+      --ink-2: #6B6259;
+      --ink-3: #9A918A;
+      --ink-4: #C5BDB5;
+      --hairline: rgba(31,26,20,0.08);
+      --accent: #D4A847;
+      --accent-soft: #FCF5E8;
+      --urgent: #C4622D;
+      --upcoming: #6F9272;
+      --serif: 'Fraunces', Georgia, serif;
+      --sans: 'Inter', -apple-system, sans-serif;
+      --ease: cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+    body {
+      font-family: var(--sans);
+      color: var(--ink);
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 80px 24px;
+    }
+
+    .hub-header {
+      text-align: center;
+      margin-bottom: 64px;
+      max-width: 560px;
+    }
+    .hub-logo {
+      font-family: var(--serif);
+      font-size: 48px;
+      font-weight: 400;
+      letter-spacing: -0.03em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--ink) 0%, var(--ink-2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hub-tagline {
+      font-size: 18px;
+      color: var(--ink-2);
+      font-weight: 300;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+    .hub-version {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: 4px 12px;
+      border-radius: 999px;
+      display: inline-block;
+    }
+
+    .hub-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .hub-card {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 1px 3px rgba(31,26,20,0.04), 0 4px 12px rgba(31,26,20,0.03);
+      transition: all 0.3s var(--ease);
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+    .hub-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      border-radius: 16px 16px 0 0;
+    }
+    .hub-card:nth-child(1)::before { background: var(--urgent); }
+    .hub-card:nth-child(2)::before { background: var(--accent); }
+    .hub-card:nth-child(3)::before { background: var(--upcoming); }
+    .hub-card:nth-child(4)::before { background: var(--ink-3); }
+
+    .hub-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 30px rgba(31,26,20,0.08), 0 4px 12px rgba(31,26,20,0.04);
+    }
+
+    .card-icon {
+      font-size: 32px;
+      margin-bottom: 16px;
+    }
+    .card-title {
+      font-family: var(--serif);
+      font-size: 22px;
+      font-weight: 400;
+      margin-bottom: 8px;
+      letter-spacing: -0.01em;
+    }
+    .card-desc {
+      font-size: 14px;
+      color: var(--ink-2);
+      line-height: 1.5;
+      margin-bottom: 20px;
+      flex: 1;
+    }
+    .card-badge {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--ink-3);
+    }
+    .card-badge span {
+      background: var(--accent-soft);
+      color: var(--accent);
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-left: 4px;
+    }
+
+    .hub-footer {
+      margin-top: 64px;
+      text-align: center;
+      color: var(--ink-3);
+      font-size: 13px;
+    }
+    .hub-footer a { color: var(--ink-2); text-decoration: none; }
+    .hub-footer a:hover { text-decoration: underline; }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .hub-card { animation: fadeInUp 0.5s var(--ease) forwards; opacity: 0; }
+    .hub-card:nth-child(1) { animation-delay: 0.1s; }
+    .hub-card:nth-child(2) { animation-delay: 0.2s; }
+    .hub-card:nth-child(3) { animation-delay: 0.3s; }
+    .hub-card:nth-child(4) { animation-delay: 0.4s; }
+  </style>
+</head>
+<body>
+  <div class="hub-header">
+    <div class="hub-logo">Needle</div>
+    <div class="hub-tagline">Move the needle. Help ADHD brains transition between tasks, dump their thoughts, and stay on track.</div>
+    <div class="hub-version">v9 Prototype</div>
+  </div>
+
+  <div class="hub-grid">
+    <a href="today.html" class="hub-card">
+      <div class="card-icon">📋</div>
+      <div class="card-title">Today Screen</div>
+      <div class="card-desc">The main day planning view. Top-to-bottom timeline with tasks, calendar events, JIRA links, @mentions, subtasks, and templates.</div>
+      <div class="card-badge">5 versions <span>Core</span></div>
+    </a>
+
+    <a href="interruptions.html" class="hub-card">
+      <div class="card-icon">⚡</div>
+      <div class="card-title">Hard Stop & Interruptions</div>
+      <div class="card-desc">50 creative attention-grabbing mechanisms to help users transition. From gentle nudges to screen takeovers, kitty visitors, and physics play.</div>
+      <div class="card-badge">50 mechanisms <span>Key Feature</span></div>
+    </a>
+
+    <a href="braindump.html" class="hub-card">
+      <div class="card-icon">🧠</div>
+      <div class="card-title">Brain Dump</div>
+      <div class="card-desc">Quick-capture transition screen. Dump your current mental state in 30 seconds, mentally release, and move to the next task.</div>
+      <div class="card-badge">5 versions <span>Core</span></div>
+    </a>
+
+    <a href="prd.html" class="hub-card">
+      <div class="card-icon">📄</div>
+      <div class="card-title">PRD & Research</div>
+      <div class="card-desc">Product requirements, ADHD research findings, design principles, data structures, template system architecture.</div>
+      <div class="card-badge">Design doc</div>
+    </a>
+  </div>
+
+  <div class="hub-footer">
+    <p>Needle — by Omri & Ofer · May 2026</p>
+  </div>
+</body>
+</html>

@@ -127,6 +127,7 @@ Primary screen:
 - Today timeline.
 - Current focus.
 - Upcoming flexible work.
+- Free-text capture that shows original text and editable AI-generated planning blocks before anything is committed.
 
 MVP features:
 
@@ -135,6 +136,20 @@ MVP features:
 - Current focus state.
 - Lightweight completion reflection.
 - Subtle contextual AI suggestions.
+- Multi-intent parsing for capture text, with user-controlled confirmation, editing, split/merge/remove, and task/event conversion.
+
+## AI Capture Review Loop
+
+Free-text capture is the first AI-native planning moment. It should preserve the user's words, then show the parsed structure underneath as draft blocks.
+
+Rules:
+
+- The raw capture text stays visible while reviewing generated blocks.
+- AI may split text into multiple tasks/events, but drafts remain editable before confirmation.
+- Fixed-time events and flexible tasks must remain visually and structurally distinct.
+- A suggested time does not remove control: users can change a block between flexible and fixed.
+- Confirming creates normal task/event records; dismissing leaves the user free to try again or save raw capture.
+- Future pipeline stages should stay separable: extraction, metadata enrichment, validation/cleanup, then explicit user acceptance.
 
 ## Future Product Shape
 

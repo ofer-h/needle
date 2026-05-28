@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Needle — Brain Dump (5 Versions)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..600&family=Inter:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #F6F1EB;
+      --bg-dark: #1A1816;
+      --surface: #FFFFFF;
+      --surface-dark: #242220;
+      --ink: #1F1A14;
+      --ink-2: #6B6259;
+      --ink-3: #9A918A;
+      --ink-4: #C5BDB5;
+      --ink-light: #E8E2DB;
+      --hairline: rgba(31,26,20,0.07);
+      --accent: #D4A847;
+      --accent-soft: #FCF5E8;
+      --urgent: #C4622D;
+      --upcoming: #6F9272;
+      --upcoming-soft: #EDF5EE;
+      --serif: 'Fraunces', Georgia, serif;
+      --sans: 'Inter', -apple-system, sans-serif;
+      --mono: 'Geist Mono', monospace;
+      --ease: cubic-bezier(0.25, 1, 0.5, 1);
+      --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+    body {
+      font-family: var(--sans);
+      color: var(--ink);
+      background: var(--bg);
+      min-height: 100vh;
+    }
+
+    /* ── VERSION SWITCHER ── */
+    .version-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 500;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(16px);
+      border-top: 1px solid var(--hairline);
+      padding: 8px 16px;
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+    }
+    .v-btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 999px;
+      font-family: var(--sans);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--ink-2);
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .v-btn:hover { background: var(--surface); }
+    .v-btn.active { background: var(--ink); color: var(--bg); }
+    .v-btn .v-num {
+      display: inline-block;
+      width: 18px; height: 18px;
+      line-height: 18px;
+      text-align: center;
+      border-radius: 50%;
+      font-size: 10px;
+      font-weight: 700;
+      margin-right: 4px;
+      background: rgba(31,26,20,0.06);
+    }
+    .v-btn.active .v-num { background: rgba(255,255,255,0.2); }
+
+    .back-link {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 600;
+      font-size: 13px;
+      color: var(--ink-3);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--ink); }
+
+    .version { display: none; min-height: 100vh; }
+    .version.active { display: flex; }
+
+    /* ── SHARED: Transition header ── */
+    .transition-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 24px;
+      font-size: 13px;
+      gap: 16px;
+    }
+    .transition-from {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .transition-from-label { color: var(--ink-3); }
+    .transition-from-task { font-weight: 500; color: var(--ink); }
+    .transition-arrow { color: var(--ink-4); font-size: 16px; }
+    .transition-to {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .transition-to-label { color: var(--ink-3); }
+    .transition-to-task { font-weight: 500; color: var(--upcoming); }
+    .transition-timer {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--urgent);
+      font-weight: 500;
+      background: rgba(196,98,45,0.08);
+      padding: 4px 10px;
+      border-radius: 999px;
+      animation: timerPulse 2s ease-in-out infinite;
+    }
+    @keyframes timerPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    /* ── REASSURANCE ── */
+    .reassurance {
+      text-align: center;
+      font-size: 12px;
+      color: var(--ink-3);
+      padding: 8px;
+    }
+    .reassurance-icon { margin-right: 4px; }
+
+    /* ── DONE BUTTON ── */
+    .done-btn {
+      padding: 14px 32px;
+      border-radius: 999px;
+      font-size: 15px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      font-family: var(--sans);
+      transition: all 0.2s var(--ease);
+    }
+    .done-btn:hover { transform: scale(1.03); }
+    .done-btn.primary {
+      background: var(--ink);
+      color: var(--bg);
+    }
+    .done-btn.light {
+      background: var(--surface);
+      color: var(--ink);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+
+    /* ══════════════════════════════════════
+       V1: THE VOID — Dark, minimal, one giant textarea
+       ══════════════════════════════════════ */
+    #v1 {
+      flex-direction: column;
+      background: var(--bg-dark);
+      color: rgba(255,255,255,0.85);
+    }
+    #v1 .transition-bar {
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    #v1 .transition-from-label, #v1 .transition-to-label { color: rgba(255,255,255,0.4); }
+    #v1 .transition-from-task { color: rgba(255,255,255,0.7); }
+    #v1 .transition-to-task { color: var(--upcoming); }
+    #v1 .transition-arrow { color: rgba(255,255,255,0.2); }
+
+    #v1 .void-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 32px 120px;
+      max-width: 700px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    #v1 .void-prompt {
+      font-family: var(--serif);
+      font-size: 24px;
+      font-weight: 300;
+      color: rgba(255,255,255,0.3);
+      margin-bottom: 32px;
+      text-align: center;
+    }
+    #v1 .void-textarea {
+      width: 100%;
+      min-height: 200px;
+      background: transparent;
+      border: none;
+      color: rgba(255,255,255,0.9);
+      font-family: var(--sans);
+      font-size: 18px;
+      line-height: 1.8;
+      font-weight: 300;
+      resize: none;
+      outline: none;
+      text-align: center;
+    }
+    #v1 .void-textarea::placeholder {
+      color: rgba(255,255,255,0.15);
+    }
+    #v1 .void-footer {
+      text-align: center;
+      padding-bottom: 32px;
+    }
+    #v1 .void-counter {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: rgba(255,255,255,0.2);
+      margin-bottom: 16px;
+    }
+    #v1 .void-reassurance {
+      font-size: 12px;
+      color: rgba(255,255,255,0.25);
+      margin-top: 16px;
+    }
+
+    /* ══════════════════════════════════════
+       V2: GUIDED DUMP — Sequential prompts
+       ══════════════════════════════════════ */
+    #v2 {
+      flex-direction: column;
+      background: var(--bg);
+    }
+    #v2 .guided-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 32px 120px;
+      max-width: 560px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    #v2 .guided-step-indicator {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 32px;
+    }
+    #v2 .step-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--ink-4);
+      transition: all 0.3s ease;
+    }
+    #v2 .step-dot.active { background: var(--accent); width: 24px; border-radius: 4px; }
+    #v2 .step-dot.done { background: var(--upcoming); }
+
+    #v2 .guided-question {
+      font-family: var(--serif);
+      font-size: 28px;
+      font-weight: 300;
+      text-align: center;
+      margin-bottom: 24px;
+      color: var(--ink);
+      line-height: 1.3;
+      min-height: 80px;
+    }
+    #v2 .guided-input {
+      width: 100%;
+      min-height: 100px;
+      background: var(--surface);
+      border: 1px solid var(--hairline);
+      border-radius: 12px;
+      padding: 16px 20px;
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--ink);
+      resize: none;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+    #v2 .guided-input:focus { border-color: var(--accent); }
+    #v2 .guided-input::placeholder { color: var(--ink-4); }
+    #v2 .guided-nav {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+      align-items: center;
+    }
+    #v2 .guided-skip {
+      font-size: 13px;
+      color: var(--ink-3);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: var(--sans);
+    }
+    #v2 .guided-skip:hover { color: var(--ink); }
+    #v2 .guided-next {
+      padding: 10px 24px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 600;
+      background: var(--ink);
+      color: var(--bg);
+      border: none;
+      cursor: pointer;
+      font-family: var(--sans);
+      transition: all 0.15s ease;
+    }
+    #v2 .guided-next:hover { transform: scale(1.03); }
+
+    #v2 .guided-summary {
+      display: none;
+      width: 100%;
+      text-align: left;
+    }
+    #v2 .guided-summary h3 {
+      font-family: var(--serif);
+      font-size: 22px;
+      font-weight: 400;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    #v2 .summary-item {
+      background: var(--surface);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 8px;
+    }
+    #v2 .summary-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--ink-3);
+      margin-bottom: 4px;
+    }
+    #v2 .summary-text {
+      font-size: 14px;
+      color: var(--ink);
+      line-height: 1.5;
+    }
+
+    /* ══════════════════════════════════════
+       V3: VOICE FIRST — Big mic button
+       ══════════════════════════════════════ */
+    #v3 {
+      flex-direction: column;
+      background: linear-gradient(180deg, var(--bg) 0%, #EDE7DF 100%);
+    }
+    #v3 .voice-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 32px 120px;
+      max-width: 560px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    #v3 .voice-prompt {
+      font-family: var(--serif);
+      font-size: 22px;
+      font-weight: 300;
+      color: var(--ink-2);
+      margin-bottom: 32px;
+      text-align: center;
+    }
+    #v3 .voice-mic-btn {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: none;
+      background: var(--ink);
+      color: white;
+      font-size: 36px;
+      cursor: pointer;
+      transition: all 0.3s var(--ease-bounce);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #v3 .voice-mic-btn:hover { transform: scale(1.06); }
+    #v3 .voice-mic-btn.recording {
+      background: var(--urgent);
+      animation: micPulse 1.5s ease-in-out infinite;
+    }
+    @keyframes micPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(196,98,45,0.3); }
+      50% { box-shadow: 0 0 0 20px rgba(196,98,45,0); }
+    }
+    #v3 .voice-mic-label {
+      font-size: 13px;
+      color: var(--ink-3);
+      margin-top: 16px;
+    }
+    #v3 .voice-waveform {
+      display: none;
+      gap: 3px;
+      align-items: center;
+      height: 40px;
+      margin-top: 24px;
+    }
+    #v3 .voice-waveform.active { display: flex; }
+    #v3 .wave-bar {
+      width: 4px;
+      background: var(--urgent);
+      border-radius: 2px;
+      animation: waveAnim 0.8s ease-in-out infinite alternate;
+    }
+    @keyframes waveAnim {
+      from { height: 8px; }
+      to { height: 32px; }
+    }
+    #v3 .voice-transcript {
+      width: 100%;
+      margin-top: 24px;
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 16px 20px;
+      min-height: 80px;
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--ink);
+      display: none;
+    }
+    #v3 .voice-transcript.active { display: block; }
+    #v3 .voice-or {
+      margin: 16px 0;
+      color: var(--ink-4);
+      font-size: 12px;
+    }
+    #v3 .voice-type-input {
+      width: 100%;
+      border: 1px solid var(--hairline);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-family: var(--sans);
+      font-size: 14px;
+      background: var(--surface);
+      color: var(--ink);
+      outline: none;
+    }
+    #v3 .voice-type-input:focus { border-color: var(--accent); }
+    #v3 .voice-type-input::placeholder { color: var(--ink-4); }
+
+    /* ══════════════════════════════════════
+       V4: STICKY NOTES — Board
+       ══════════════════════════════════════ */
+    #v4 {
+      flex-direction: column;
+      background: #E8E2DB;
+    }
+    #v4 .sticky-main {
+      flex: 1;
+      position: relative;
+      padding: 100px 32px 120px;
+    }
+    #v4 .sticky-prompt {
+      text-align: center;
+      font-family: var(--serif);
+      font-size: 20px;
+      font-weight: 300;
+      color: var(--ink-2);
+      margin-bottom: 24px;
+    }
+    #v4 .sticky-hint {
+      text-align: center;
+      font-size: 12px;
+      color: var(--ink-3);
+      margin-bottom: 40px;
+    }
+    #v4 .sticky-board {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: center;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .sticky-note {
+      width: 180px;
+      min-height: 140px;
+      padding: 16px;
+      border-radius: 4px;
+      box-shadow: 2px 4px 12px rgba(0,0,0,0.08);
+      cursor: move;
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--ink);
+      position: relative;
+      transition: transform 0.15s ease;
+    }
+    .sticky-note:hover { transform: scale(1.03) rotate(0deg) !important; }
+    .sticky-note:nth-child(6n+1) { background: #FFF9C4; transform: rotate(-2deg); }
+    .sticky-note:nth-child(6n+2) { background: #FFCCBC; transform: rotate(1deg); }
+    .sticky-note:nth-child(6n+3) { background: #C8E6C9; transform: rotate(-1deg); }
+    .sticky-note:nth-child(6n+4) { background: #BBDEFB; transform: rotate(2deg); }
+    .sticky-note:nth-child(6n+5) { background: #E1BEE7; transform: rotate(-1.5deg); }
+    .sticky-note:nth-child(6n+6) { background: #FFE0B2; transform: rotate(1.5deg); }
+    
+    .sticky-note textarea {
+      width: 100%;
+      min-height: 100px;
+      border: none;
+      background: transparent;
+      font-family: var(--sans);
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--ink);
+      resize: none;
+      outline: none;
+    }
+    .sticky-note .sticky-time {
+      position: absolute;
+      bottom: 8px;
+      right: 10px;
+      font-family: var(--mono);
+      font-size: 9px;
+      color: rgba(31,26,20,0.3);
+    }
+    .sticky-add-btn {
+      width: 180px;
+      height: 140px;
+      border: 2px dashed rgba(31,26,20,0.15);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 32px;
+      color: rgba(31,26,20,0.2);
+      transition: all 0.15s ease;
+    }
+    .sticky-add-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    #v4 .sticky-footer {
+      text-align: center;
+      padding: 24px;
+    }
+
+    /* ══════════════════════════════════════
+       V5: STREAM — Chat-like
+       ══════════════════════════════════════ */
+    #v5 {
+      flex-direction: column;
+      background: var(--bg);
+    }
+    #v5 .stream-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      max-width: 560px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 0 24px;
+    }
+    #v5 .stream-header {
+      text-align: center;
+      padding: 48px 0 24px;
+    }
+    #v5 .stream-title {
+      font-family: var(--serif);
+      font-size: 22px;
+      font-weight: 300;
+      margin-bottom: 4px;
+    }
+    #v5 .stream-sub {
+      font-size: 13px;
+      color: var(--ink-3);
+    }
+    #v5 .stream-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .stream-msg {
+      max-width: 80%;
+      padding: 12px 16px;
+      border-radius: 16px 16px 16px 4px;
+      font-size: 14px;
+      line-height: 1.5;
+      animation: msgIn 0.3s var(--ease);
+    }
+    @keyframes msgIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .stream-msg.user {
+      align-self: flex-end;
+      background: var(--ink);
+      color: white;
+      border-radius: 16px 16px 4px 16px;
+    }
+    .stream-msg.system {
+      align-self: flex-start;
+      background: var(--surface);
+      color: var(--ink);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .stream-msg .msg-time {
+      font-family: var(--mono);
+      font-size: 10px;
+      opacity: 0.5;
+      margin-top: 4px;
+    }
+    .stream-msg .msg-tag {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 999px;
+      margin-top: 4px;
+      display: inline-block;
+    }
+    .msg-tag.thought { background: var(--accent-soft); color: var(--accent); }
+    .msg-tag.todo { background: var(--upcoming-soft); color: var(--upcoming); }
+    .msg-tag.note { background: rgba(31,26,20,0.06); color: var(--ink-3); }
+
+    #v5 .stream-input-wrap {
+      padding: 12px 0 100px;
+      display: flex;
+      gap: 8px;
+    }
+    #v5 .stream-input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 1px solid var(--hairline);
+      border-radius: 999px;
+      font-family: var(--sans);
+      font-size: 14px;
+      background: var(--surface);
+      color: var(--ink);
+      outline: none;
+    }
+    #v5 .stream-input:focus { border-color: var(--accent); }
+    #v5 .stream-input::placeholder { color: var(--ink-4); }
+    #v5 .stream-send {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: none;
+      background: var(--ink);
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #v5 .stream-send:hover { transform: scale(1.06); }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <a href="index.html" class="back-link" id="back-link">← Hub</a>
+
+  <!-- ══════════════════════════════════════
+       V1: THE VOID
+       ══════════════════════════════════════ -->
+  <div class="version active" id="v1">
+    <div class="transition-bar">
+      <div class="transition-from">
+        <span class="transition-from-label">Leaving</span>
+        <span class="transition-from-task">JIRA-543 Account Onboarding</span>
+      </div>
+      <span class="transition-arrow">→</span>
+      <div class="transition-to">
+        <span class="transition-to-label">Next</span>
+        <span class="transition-to-task">3:00 PM Manager 1:1</span>
+      </div>
+      <span class="transition-timer" id="timer-1">4:58</span>
+    </div>
+
+    <div class="void-main">
+      <div class="void-prompt">Dump your thoughts here.<br>They're safe.</div>
+      <textarea class="void-textarea" id="void-text" placeholder="Everything in your head right now...&#10;&#10;Where you left off, what's pending, random thoughts...&#10;Just type. No structure needed." oninput="updateCounter()"></textarea>
+    </div>
+
+    <div class="void-footer">
+      <div class="void-counter" id="void-counter">0 words</div>
+      <button class="done-btn light" onclick="showConfirmation()">Done, I'm ready →</button>
+      <div class="void-reassurance">🔒 Your notes are saved. You can always come back.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       V2: GUIDED DUMP
+       ══════════════════════════════════════ -->
+  <div class="version" id="v2">
+    <div class="transition-bar">
+      <div class="transition-from">
+        <span class="transition-from-label">Leaving</span>
+        <span class="transition-from-task">JIRA-543 Account Onboarding</span>
+      </div>
+      <span class="transition-arrow">→</span>
+      <div class="transition-to">
+        <span class="transition-to-label">Next</span>
+        <span class="transition-to-task">3:00 PM Manager 1:1</span>
+      </div>
+      <span class="transition-timer">4:58</span>
+    </div>
+
+    <div class="guided-main">
+      <div class="guided-step-indicator">
+        <div class="step-dot active" id="dot-0"></div>
+        <div class="step-dot" id="dot-1"></div>
+        <div class="step-dot" id="dot-2"></div>
+      </div>
+
+      <div class="guided-question" id="guided-q">Where did you leave off?</div>
+      <textarea class="guided-input" id="guided-input" placeholder="I was working on..."></textarea>
+
+      <div class="guided-nav">
+        <button class="guided-skip" onclick="guidedNext(true)">Skip</button>
+        <button class="guided-next" onclick="guidedNext(false)">Next →</button>
+      </div>
+
+      <div class="guided-summary" id="guided-summary">
+        <h3>Brain dump saved ✓</h3>
+        <div id="summary-items"></div>
+        <div style="text-align:center;margin-top:24px;">
+          <button class="done-btn primary" onclick="showConfirmation()">Ready for Manager 1:1 →</button>
+        </div>
+        <div class="reassurance" style="margin-top:16px;">
+          <span class="reassurance-icon">🔒</span>
+          Everything is saved with JIRA-543. You'll see it when you return.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       V3: VOICE FIRST
+       ══════════════════════════════════════ -->
+  <div class="version" id="v3">
+    <div class="transition-bar">
+      <div class="transition-from">
+        <span class="transition-from-label">Leaving</span>
+        <span class="transition-from-task">JIRA-543 Account Onboarding</span>
+      </div>
+      <span class="transition-arrow">→</span>
+      <div class="transition-to">
+        <span class="transition-to-label">Next</span>
+        <span class="transition-to-task">3:00 PM Manager 1:1</span>
+      </div>
+      <span class="transition-timer">4:58</span>
+    </div>
+
+    <div class="voice-main">
+      <div class="voice-prompt">Speak your mind.<br>We'll capture everything.</div>
+
+      <button class="voice-mic-btn" id="mic-btn" onclick="toggleRecording()">
+        🎙️
+      </button>
+      <div class="voice-mic-label" id="mic-label">Tap to record</div>
+
+      <div class="voice-waveform" id="waveform">
+        <div class="wave-bar" style="animation-delay:0s;height:12px"></div>
+        <div class="wave-bar" style="animation-delay:0.1s;height:20px"></div>
+        <div class="wave-bar" style="animation-delay:0.2s;height:16px"></div>
+        <div class="wave-bar" style="animation-delay:0.15s;height:28px"></div>
+        <div class="wave-bar" style="animation-delay:0.25s;height:14px"></div>
+        <div class="wave-bar" style="animation-delay:0.05s;height:24px"></div>
+        <div class="wave-bar" style="animation-delay:0.3s;height:18px"></div>
+        <div class="wave-bar" style="animation-delay:0.12s;height:22px"></div>
+        <div class="wave-bar" style="animation-delay:0.18s;height:10px"></div>
+        <div class="wave-bar" style="animation-delay:0.08s;height:26px"></div>
+        <div class="wave-bar" style="animation-delay:0.22s;height:15px"></div>
+        <div class="wave-bar" style="animation-delay:0.28s;height:20px"></div>
+      </div>
+
+      <div class="voice-transcript" id="transcript">
+        <em style="color:var(--ink-3)">Transcription will appear here...</em>
+      </div>
+
+      <div class="voice-or">— or type —</div>
+      <input class="voice-type-input" type="text" placeholder="Type your thoughts...">
+
+      <div style="margin-top:32px;">
+        <button class="done-btn primary" onclick="showConfirmation()">Done, I'm ready →</button>
+      </div>
+      <div class="reassurance" style="margin-top:12px;">🔒 Audio and notes are saved safely.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       V4: STICKY NOTES
+       ══════════════════════════════════════ -->
+  <div class="version" id="v4">
+    <div class="transition-bar">
+      <div class="transition-from">
+        <span class="transition-from-label">Leaving</span>
+        <span class="transition-from-task">JIRA-543 Account Onboarding</span>
+      </div>
+      <span class="transition-arrow">→</span>
+      <div class="transition-to">
+        <span class="transition-to-label">Next</span>
+        <span class="transition-to-task">3:00 PM Manager 1:1</span>
+      </div>
+      <span class="transition-timer">4:58</span>
+    </div>
+
+    <div class="sticky-main">
+      <div class="sticky-prompt">Drop your thoughts as sticky notes.</div>
+      <div class="sticky-hint">Each note is a separate thought. Just type and move on.</div>
+
+      <div class="sticky-board" id="sticky-board">
+        <div class="sticky-note">
+          <textarea placeholder="A thought...">Was debugging the auth flow, found the issue in the middleware validation</textarea>
+          <span class="sticky-time">10:12</span>
+        </div>
+        <div class="sticky-note">
+          <textarea placeholder="A thought...">Need to test with staging env before pushing</textarea>
+          <span class="sticky-time">10:12</span>
+        </div>
+        <div class="sticky-note">
+          <textarea placeholder="A thought...">Might also affect the signup flow — check later</textarea>
+          <span class="sticky-time">10:13</span>
+        </div>
+        <div class="sticky-add-btn" onclick="addStickyNote()">+</div>
+      </div>
+    </div>
+
+    <div class="sticky-footer">
+      <button class="done-btn primary" onclick="showConfirmation()">Done, I'm ready →</button>
+      <div class="reassurance" style="margin-top:12px;">🔒 All notes saved with JIRA-543.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       V5: STREAM — Chat-like
+       ══════════════════════════════════════ -->
+  <div class="version" id="v5">
+    <div class="transition-bar">
+      <div class="transition-from">
+        <span class="transition-from-label">Leaving</span>
+        <span class="transition-from-task">JIRA-543 Account Onboarding</span>
+      </div>
+      <span class="transition-arrow">→</span>
+      <div class="transition-to">
+        <span class="transition-to-label">Next</span>
+        <span class="transition-to-task">3:00 PM Manager 1:1</span>
+      </div>
+      <span class="transition-timer">4:58</span>
+    </div>
+
+    <div class="stream-main">
+      <div class="stream-header">
+        <div class="stream-title">Brain Stream</div>
+        <div class="stream-sub">Text yourself. Each message is saved.</div>
+      </div>
+
+      <div class="stream-messages" id="stream-messages">
+        <div class="stream-msg system">
+          You're leaving <strong>JIRA-543</strong>. What's on your mind?
+          <div class="msg-time">10:12 AM</div>
+        </div>
+        <div class="stream-msg user">
+          Was debugging auth flow, found the issue in middleware
+          <div class="msg-time">10:12 AM</div>
+          <span class="msg-tag thought">💭 thought</span>
+        </div>
+        <div class="stream-msg user">
+          Need to test with staging before pushing
+          <div class="msg-time">10:12 AM</div>
+          <span class="msg-tag todo">✓ todo</span>
+        </div>
+        <div class="stream-msg user">
+          Might affect signup flow too
+          <div class="msg-time">10:13 AM</div>
+          <span class="msg-tag note">📝 note</span>
+        </div>
+      </div>
+
+      <div class="stream-input-wrap">
+        <input class="stream-input" id="stream-input" type="text" placeholder="Type a thought..." onkeydown="if(event.key==='Enter')sendStreamMsg()">
+        <button class="stream-send" onclick="sendStreamMsg()">↑</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       VERSION NAV
+       ══════════════════════════════════════ -->
+  <div class="version-nav" id="version-nav">
+    <button class="v-btn active" onclick="switchVersion(1, this)"><span class="v-num">1</span>The Void</button>
+    <button class="v-btn" onclick="switchVersion(2, this)"><span class="v-num">2</span>Guided</button>
+    <button class="v-btn" onclick="switchVersion(3, this)"><span class="v-num">3</span>Voice</button>
+    <button class="v-btn" onclick="switchVersion(4, this)"><span class="v-num">4</span>Stickies</button>
+    <button class="v-btn" onclick="switchVersion(5, this)"><span class="v-num">5</span>Stream</button>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       CONFIRMATION OVERLAY
+       ══════════════════════════════════════ -->
+  <div id="confirmation" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(31,26,20,0.5);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;">
+    <div style="background:var(--surface);border-radius:20px;padding:40px;max-width:400px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.15);animation:fadeScale 0.3s var(--ease);">
+      <div style="font-size:48px;margin-bottom:16px;">✨</div>
+      <div style="font-family:var(--serif);font-size:24px;font-weight:300;margin-bottom:8px;">You're ready.</div>
+      <div style="font-size:14px;color:var(--ink-2);line-height:1.5;margin-bottom:24px;">
+        Brain dump saved with JIRA-543.<br>
+        It'll be waiting for you when you return.
+      </div>
+      <button class="done-btn primary" onclick="document.getElementById('confirmation').style.display='none';">
+        Go to Manager 1:1 →
+      </button>
+    </div>
+  </div>
+  <style>
+    @keyframes fadeScale {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+
+  <script>
+    // Version switching
+    function switchVersion(n, btn) {
+      document.querySelectorAll('.version').forEach(v => v.classList.remove('active'));
+      document.querySelectorAll('.v-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('v' + n).classList.add('active');
+      btn.classList.add('active');
+
+      // Dark mode adjustments
+      const backLink = document.getElementById('back-link');
+      const nav = document.getElementById('version-nav');
+      if (n === 1) {
+        backLink.style.color = 'rgba(255,255,255,0.4)';
+        nav.style.background = 'rgba(26,24,22,0.85)';
+        nav.querySelectorAll('.v-btn').forEach(b => { b.style.color = 'rgba(255,255,255,0.5)'; });
+        btn.style.color = 'var(--bg)';
+      } else {
+        backLink.style.color = '';
+        nav.style.background = '';
+        nav.querySelectorAll('.v-btn').forEach(b => { b.style.color = ''; });
+      }
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      const n = parseInt(e.key);
+      if (n >= 1 && n <= 5) {
+        const btns = document.querySelectorAll('.v-btn');
+        switchVersion(n, btns[n-1]);
+      }
+    });
+
+    // V1: Word counter
+    function updateCounter() {
+      const text = document.getElementById('void-text').value;
+      const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+      document.getElementById('void-counter').textContent = words + ' word' + (words !== 1 ? 's' : '');
+    }
+
+    // V2: Guided dump
+    const guidedSteps = [
+      { q: 'Where did you leave off?', placeholder: 'I was working on...' },
+      { q: 'What\'s still pending?', placeholder: 'Still need to...' },
+      { q: 'Anything else on your mind?', placeholder: 'Random thoughts, ideas, worries...' }
+    ];
+    let guidedStep = 0;
+    const guidedAnswers = ['', '', ''];
+
+    function guidedNext(skip) {
+      if (!skip) {
+        guidedAnswers[guidedStep] = document.getElementById('guided-input').value;
+      }
+
+      // Update dots
+      document.getElementById('dot-' + guidedStep).classList.remove('active');
+      document.getElementById('dot-' + guidedStep).classList.add('done');
+
+      guidedStep++;
+      if (guidedStep < guidedSteps.length) {
+        document.getElementById('dot-' + guidedStep).classList.add('active');
+        document.getElementById('guided-q').textContent = guidedSteps[guidedStep].q;
+        document.getElementById('guided-input').placeholder = guidedSteps[guidedStep].placeholder;
+        document.getElementById('guided-input').value = '';
+        document.getElementById('guided-input').focus();
+      } else {
+        // Show summary
+        document.querySelector('#v2 .guided-step-indicator').style.display = 'none';
+        document.getElementById('guided-q').style.display = 'none';
+        document.getElementById('guided-input').style.display = 'none';
+        document.querySelector('#v2 .guided-nav').style.display = 'none';
+
+        const summaryItems = document.getElementById('summary-items');
+        const labels = ['Where I left off', 'What\'s pending', 'Other thoughts'];
+        summaryItems.innerHTML = guidedAnswers
+          .map((a, i) => a ? `<div class="summary-item"><div class="summary-label">${labels[i]}</div><div class="summary-text">${a}</div></div>` : '')
+          .join('');
+        
+        document.getElementById('guided-summary').style.display = 'block';
+      }
+    }
+
+    // V3: Voice recording simulation
+    let isRecording = false;
+    function toggleRecording() {
+      isRecording = !isRecording;
+      const btn = document.getElementById('mic-btn');
+      const label = document.getElementById('mic-label');
+      const waveform = document.getElementById('waveform');
+      const transcript = document.getElementById('transcript');
+
+      if (isRecording) {
+        btn.classList.add('recording');
+        btn.textContent = '⏹️';
+        label.textContent = 'Recording... tap to stop';
+        waveform.classList.add('active');
+        transcript.classList.add('active');
+        
+        // Simulate transcription
+        const phrases = [
+          'I was debugging the auth flow...',
+          'I was debugging the auth flow, found the issue in the middleware validation...',
+          'I was debugging the auth flow, found the issue in the middleware validation. Still need to test with staging environment before pushing.'
+        ];
+        let pi = 0;
+        const transcriptInterval = setInterval(() => {
+          if (!isRecording || pi >= phrases.length) { clearInterval(transcriptInterval); return; }
+          transcript.innerHTML = phrases[pi];
+          pi++;
+        }, 1500);
+      } else {
+        btn.classList.remove('recording');
+        btn.textContent = '🎙️';
+        label.textContent = 'Tap to record again';
+        waveform.classList.remove('active');
+      }
+    }
+
+    // V4: Add sticky note
+    function addStickyNote() {
+      const board = document.getElementById('sticky-board');
+      const addBtn = board.querySelector('.sticky-add-btn');
+      const note = document.createElement('div');
+      note.className = 'sticky-note';
+      const now = new Date();
+      note.innerHTML = `
+        <textarea placeholder="A thought..." autofocus></textarea>
+        <span class="sticky-time">${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}</span>
+      `;
+      board.insertBefore(note, addBtn);
+      note.querySelector('textarea').focus();
+    }
+
+    // V5: Send stream message
+    function sendStreamMsg() {
+      const input = document.getElementById('stream-input');
+      const text = input.value.trim();
+      if (!text) return;
+      
+      const messages = document.getElementById('stream-messages');
+      const now = new Date();
+      const time = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      
+      // Auto-detect tag
+      const tags = ['thought', 'todo', 'note'];
+      const tag = text.toLowerCase().includes('need to') || text.toLowerCase().includes('should') ? 'todo' : 
+                  text.toLowerCase().includes('maybe') || text.toLowerCase().includes('might') ? 'note' : 'thought';
+      const tagEmojis = { thought: '💭', todo: '✓', note: '📝' };
+
+      const msg = document.createElement('div');
+      msg.className = 'stream-msg user';
+      msg.innerHTML = `
+        ${text}
+        <div class="msg-time">${time}</div>
+        <span class="msg-tag ${tag}">${tagEmojis[tag]} ${tag}</span>
+      `;
+      messages.appendChild(msg);
+      messages.scrollTop = messages.scrollHeight;
+      input.value = '';
+    }
+
+    // Confirmation modal
+    function showConfirmation() {
+      const conf = document.getElementById('confirmation');
+      conf.style.display = 'flex';
+    }
+
+    // Countdown timer simulation
+    function startTimers() {
+      let seconds = 298; // 4:58
+      setInterval(() => {
+        seconds = Math.max(0, seconds - 1);
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        const text = `${m}:${String(s).padStart(2, '0')}`;
+        document.querySelectorAll('.transition-timer').forEach(t => t.textContent = text);
+      }, 1000);
+    }
+    startTimers();
+  </script>
+</body>
+</html>

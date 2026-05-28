@@ -6,8 +6,7 @@ import type {
   CaptureEntryPayload,
   CapturePromotePayload,
   CaptureShowPayload,
-  DbCreateEventPayload,
-  DbCreateTaskPayload,
+  DbCreatePlanningItemsPayload,
   TorchBrainDumpSubmitPayload,
   TorchClosePayload,
   TorchHeroPayload,
@@ -46,12 +45,25 @@ declare global {
       };
       db: {
         getTasks(): Promise<Task[]>;
-        getTasksByDate(date: string): Promise<Task[]>;
-        createTask(payload: DbCreateTaskPayload): Promise<Task>;
         updateTask(id: string, patch: Partial<Task>): Promise<Task>;
         deleteTask(id: string): Promise<void>;
+        addSubtask(taskId: string, title: string): Promise<Task>;
+        toggleSubtask(taskId: string, subtaskId: string): Promise<Task>;
+        removeSubtask(taskId: string, subtaskId: string): Promise<Task>;
+        updateSubtask(
+          taskId: string,
+          subtaskId: string,
+          patch: { title?: string; notes?: string },
+        ): Promise<Task>;
+        reorderSubtask(taskId: string, subtaskId: string, toIndex: number): Promise<void>;
+        moveSubtask(taskId: string, subtaskId: string, targetTaskId: string): Promise<void>;
+        promoteSubtask(taskId: string, subtaskId: string): Promise<void>;
+        nestTask(taskId: string, targetTaskId: string): Promise<void>;
         getEvents(): Promise<CalendarEvent[]>;
-        createEvent(payload: DbCreateEventPayload): Promise<CalendarEvent>;
+        updateEvent(id: string, patch: Partial<CalendarEvent>): Promise<CalendarEvent>;
+        deleteEvent(id: string): Promise<void>;
+        convertEventToTask(id: string): Promise<void>;
+        createPlanningItems(payload: DbCreatePlanningItemsPayload): Promise<{ tasks: Task[]; events: CalendarEvent[] }>;
         addCapture(body: string): Promise<CaptureEntry>;
         getCaptureEntries(limit?: number): Promise<CaptureEntry[]>;
       };

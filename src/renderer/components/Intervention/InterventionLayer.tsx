@@ -140,7 +140,7 @@ export default function InterventionLayer() {
       }
     });
     return unsub;
-  }, [resolveIntervention, escalateIntervention]);
+  }, [addCaptureEntry, resolveIntervention, escalateIntervention]);
 
   // Receive capture events.
   useEffect(() => {

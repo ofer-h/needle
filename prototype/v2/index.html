@@ -1,0 +1,1977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Focus Room v2 — ADHD 25-Design Playground & Flagship Workbench</title>
+  
+  <!-- Premium Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..600&family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      /* Theme 1: Premium Parchment & Terracotta */
+      --bg: #FAF6F0;
+      --surface: #FFFFFF;
+      --surface-sub: #F3ECE2;
+      --ink: #1F1F26;
+      --ink-muted: #5E5C6B;
+      --ink-light: #A7A3B7;
+      --border: rgba(31, 31, 38, 0.06);
+      --border-strong: rgba(31, 31, 38, 0.15);
+      
+      --accent: #B28867; /* Terracotta Warmth */
+      --accent-soft: #FAF1E8;
+      --success: #5F8762; /* Quiet Sage Green */
+      --success-soft: #EEF5EF;
+      --warning: #DE862A; /* Alert Amber */
+      --warning-soft: #FDF4E9;
+      
+      --serif: 'Fraunces', Georgia, serif;
+      --sans: 'Sora', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+      
+      --shadow-sm: 0 2px 8px rgba(31, 31, 38, 0.02), 0 4px 20px rgba(31, 31, 38, 0.03);
+      --shadow-lg: 0 10px 30px rgba(31, 31, 38, 0.03), 0 30px 80px rgba(31, 31, 38, 0.08);
+      --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      --radius: 16px;
+      
+      --sidebar-width: 320px;
+      --inspector-width: 350px;
+    }
+
+    /* THEME 2: Serene Forest Green (Low planned load) */
+    .theme-serene {
+      --bg: #EFF4F0;
+      --surface: #FFFFFF;
+      --surface-sub: #E0EAE2;
+      --ink: #1C2B1E;
+      --ink-muted: #526B57;
+      --accent: #537E56;
+      --accent-soft: #ECF3ED;
+    }
+
+    /* THEME 3: Alert Overload Amber (High planned load) */
+    .theme-overload {
+      --bg: #FDF9F2;
+      --surface: #FFFFFF;
+      --surface-sub: #F6ECE0;
+      --ink: #422606;
+      --ink-muted: #80613C;
+      --accent: #D27618;
+      --accent-soft: #FEF4EA;
+    }
+
+    /* THEME 4: Monospace Obsidian (Developer Mode) */
+    .theme-terminal {
+      --bg: #0A0A0C;
+      --surface: #121215;
+      --surface-sub: #1A1A20;
+      --ink: #E2E2E8;
+      --ink-muted: #8B8B9B;
+      --ink-light: #484852;
+      --border: rgba(226, 226, 232, 0.08);
+      --border-strong: rgba(226, 226, 232, 0.2);
+      --accent: #10B981;
+      --accent-soft: rgba(16, 185, 129, 0.1);
+      --success: #3B82F6;
+      --success-soft: rgba(59, 130, 246, 0.1);
+      --warning: #F59E0B;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background-color: var(--bg);
+      background-image: radial-gradient(rgba(31, 31, 38, 0.02) 1.5px, transparent 1.5px);
+      background-size: 32px 32px;
+      color: var(--ink);
+      font-family: var(--sans);
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+      transition: background-color 0.6s cubic-bezier(0.16, 1, 0.3, 1), color 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* ==========================================================================
+       SIDEBAR INTERFACE
+       ========================================================================== */
+    .sidebar {
+      width: var(--sidebar-width);
+      height: 100%;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      z-index: 10;
+      box-shadow: 10px 0 40px rgba(0,0,0,0.012);
+    }
+
+    .brand {
+      padding: 30px 24px 22px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand-title {
+      font-family: var(--serif);
+      font-size: 1.6rem;
+      font-weight: 500;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-title span {
+      font-style: italic;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .brand-subtitle {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--ink-muted);
+      letter-spacing: 0.08em;
+      margin-top: 4px;
+    }
+
+    .sidebar-nav-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .nav-header-title {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink-light);
+      padding: 0 12px;
+    }
+
+    .sidebar-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .sidebar-link {
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--ink-muted);
+      transition: var(--transition);
+    }
+
+    .sidebar-link:hover {
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    .sidebar-link.active {
+      background: var(--ink);
+      color: var(--surface);
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .sidebar-icon-num {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      background: rgba(0, 0, 0, 0.04);
+      padding: 2px 6px;
+      border-radius: 5px;
+      transition: var(--transition);
+    }
+
+    .sidebar-link.active .sidebar-icon-num {
+      background: rgba(255, 255, 255, 0.15);
+      color: var(--surface);
+    }
+
+    /* ==========================================================================
+       MAIN CONTENT CANVAS & GLOBAL HEADER
+       ========================================================================== */
+    .canvas {
+      flex: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .canvas-header {
+      padding: 24px 40px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(12px);
+      z-index: 5;
+    }
+
+    .title-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .main-page-title {
+      font-family: var(--serif);
+      font-size: 2.2rem;
+      font-weight: 500;
+      line-height: 1.1;
+      letter-spacing: -0.01em;
+    }
+
+    .main-page-subtitle {
+      font-size: 0.84rem;
+      color: var(--ink-muted);
+      margin-top: 4px;
+      max-width: 650px;
+      line-height: 1.45;
+    }
+
+    /* ADHD Spectrum bar */
+    .spectrum-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface);
+      padding: 8px 18px;
+      border-radius: 30px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .spectrum-title {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--ink-light);
+    }
+
+    .spectrum-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .spectrum-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border-strong);
+      transition: var(--transition);
+    }
+    .spectrum-dot.active {
+      transform: scale(1.4);
+      box-shadow: 0 0 10px currentColor;
+    }
+
+    .spectrum-value {
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+
+    /* Active Viewport Frame */
+    .viewport {
+      flex: 1;
+      padding: 32px 40px;
+      overflow-y: auto;
+      display: none;
+      animation: viewportFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .viewport.active {
+      display: block;
+    }
+
+    @keyframes viewportFadeIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ==========================================================================
+       TOKEN REGEX PARSER BADGES
+       ========================================================================== */
+    .rich-link {
+      font-family: var(--mono);
+      font-weight: 600;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      transition: var(--transition);
+      border: 1px solid rgba(178, 136, 103, 0.15);
+      cursor: pointer;
+    }
+    .rich-link:hover {
+      background: var(--accent);
+      color: var(--surface);
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .rich-mention {
+      font-family: var(--sans);
+      font-weight: 600;
+      color: var(--success);
+      background: var(--success-soft);
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      transition: var(--transition);
+      border: 1px solid rgba(95, 135, 98, 0.15);
+      cursor: pointer;
+    }
+    .rich-mention:hover {
+      background: var(--success);
+      color: var(--surface);
+      border-color: var(--success);
+      transform: translateY(-1px);
+    }
+
+    .hashtag-badge {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--ink-muted);
+      background: var(--surface-sub);
+      padding: 1px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    /* ==========================================================================
+       UNIVERSAL DETAIL INSPECTOR DRAWER
+       ========================================================================== */
+    .inspector-drawer {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: var(--inspector-width);
+      height: 100%;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      box-shadow: -10px 0 45px rgba(0,0,0,0.025);
+      z-index: 20;
+      transform: translateX(100%);
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+    }
+    .inspector-drawer.open {
+      transform: translateX(0);
+    }
+
+    .inspector-header {
+      padding: 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .inspector-title {
+      font-family: var(--serif);
+      font-size: 1.3rem;
+      font-weight: 500;
+    }
+
+    .inspector-close {
+      cursor: pointer;
+      font-size: 1.2rem;
+      color: var(--ink-light);
+      background: transparent;
+      border: none;
+      transition: var(--transition);
+    }
+    .inspector-close:hover { color: var(--ink); }
+
+    .inspector-content {
+      padding: 24px;
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* ==========================================================================
+       V2 CORE WORKBENCH & COMPONENTS
+       ========================================================================== */
+    .flex-row { display: flex; gap: 24px; height: 100%; }
+    .flex-col { display: flex; flex-direction: column; gap: 16px; }
+    .w-half { width: 50%; }
+    .w-3-5 { width: 60%; }
+    .w-2-5 { width: 40%; }
+    .w-full { width: 100%; }
+    
+    .card-eyebrow {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink-light);
+    }
+
+    .editorial-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+      position: relative;
+    }
+    .editorial-card:hover {
+      border-color: var(--border-strong);
+      box-shadow: 0 6px 24px rgba(31, 31, 38, 0.02);
+    }
+
+    .monospace-textarea {
+      font-family: var(--mono);
+      font-size: 0.86rem;
+      line-height: 1.6;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      outline: none;
+      resize: none;
+      background: var(--surface);
+      color: var(--ink);
+      flex: 1;
+      transition: var(--transition);
+    }
+    .monospace-textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    .pill-btn {
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      border: none;
+      cursor: pointer;
+      font-family: var(--sans);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+    }
+    .pill-btn-primary { background: var(--ink); color: var(--surface); }
+    .pill-btn-primary:hover { background: var(--accent); transform: translateY(-1.5px); }
+    .pill-btn-secondary { background: var(--surface-sub); color: var(--ink-muted); border: 1px solid var(--border); }
+    .pill-btn-secondary:hover { background: var(--border); color: var(--ink); }
+
+    /* Collapsible Stack side drawer */
+    .priority-stack-drawer {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 280px;
+      height: 100%;
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(18px);
+      border-left: 1px solid var(--border);
+      z-index: 10;
+      padding: 24px 16px;
+      transform: translateX(100%);
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .priority-stack-drawer.open {
+      transform: translateX(0);
+    }
+
+    /* Draggable cards */
+    .draggable-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      cursor: grab;
+      user-select: none;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.78rem;
+    }
+    .draggable-item:active { cursor: grabbing; }
+    .draggable-item.dragging {
+      opacity: 0.4;
+      transform: scale(0.96);
+    }
+
+    /* Column bucket containers */
+    .bucket-container {
+      flex: 1;
+      background: var(--surface-sub);
+      border-radius: var(--radius);
+      padding: 20px;
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      border: 2px dashed transparent;
+      transition: var(--transition);
+    }
+    .bucket-container.drag-hover {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+    }
+
+    /* Spotlight Card & ACCORDION CASCADE SUBTASKS */
+    .spotlight-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      padding: 40px 0;
+    }
+
+    .spotlight-card {
+      width: 100%;
+      max-width: 580px;
+      border: 1.5px solid var(--accent);
+      box-shadow: var(--shadow-lg);
+      padding: 40px;
+      border-radius: var(--radius);
+      background: var(--surface);
+      transition: var(--transition);
+    }
+
+    .subtask-cascade-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin: 20px 0;
+      position: relative;
+    }
+
+    /* Cascade specific items */
+    .cascade-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.88rem;
+      cursor: pointer;
+      user-select: none;
+      transition: var(--transition);
+    }
+
+    .cascade-bullet {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--ink-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .cascade-bullet::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      transform: scale(0);
+      transition: var(--transition);
+    }
+
+    /* Faded step cascade items */
+    .cascade-item.faded {
+      opacity: 0.25;
+      pointer-events: none;
+      transform: scale(0.97);
+    }
+
+    .cascade-item.active {
+      opacity: 1;
+      pointer-events: auto;
+      font-weight: 500;
+    }
+
+    .cascade-item.done .cascade-bullet {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+    .cascade-item.done .cascade-bullet::after {
+      transform: scale(1);
+    }
+    .cascade-item.done span {
+      text-decoration: line-through;
+      color: var(--ink-light);
+    }
+
+    /* Pomodoro Hearth Pulse */
+    .hearth-meditation-circle {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      border: 1px solid rgba(178, 136, 103, 0.2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      margin: 16px auto;
+      box-shadow: 0 8px 30px rgba(178, 136, 103, 0.06);
+      transition: var(--transition);
+    }
+    .hearth-meditation-circle.breathing {
+      animation: hearthBreathingLoop 6s infinite ease-in-out;
+    }
+    @keyframes hearthBreathingLoop {
+      0% { transform: scale(0.93); background: rgba(178, 136, 103, 0.08); box-shadow: 0 0 20px rgba(178, 136, 103, 0.05); }
+      50% { transform: scale(1.07); background: rgba(178, 136, 103, 0.25); box-shadow: 0 0 45px rgba(178, 136, 103, 0.25); }
+      100% { transform: scale(0.93); background: rgba(178, 136, 103, 0.08); box-shadow: 0 0 20px rgba(178, 136, 103, 0.05); }
+    }
+
+    /* Ritalin Wave Chart Peak nodes */
+    .ritalin-wave-box {
+      height: 140px;
+      position: relative;
+      border-radius: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      margin: 16px 0;
+    }
+    .wave-line-svg {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .wave-peak-node {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      background: var(--surface);
+      border: 2px solid var(--accent);
+      border-radius: 20px;
+      padding: 3px 8px;
+      font-size: 0.68rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+      z-index: 3;
+    }
+    .wave-peak-node:hover {
+      background: var(--accent);
+      color: var(--surface);
+      transform: translate(-50%, -50%) scale(1.08);
+    }
+
+    /* Particle confetti canvas */
+    #confettiCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    /* Full screen transition veil overlay */
+    .meditation-takeover-veil {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #111A15;
+      color: #EEF4F0;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .meditation-takeover-veil.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .veil-breath-circle {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: rgba(95, 135, 98, 0.15);
+      border: 2px solid #5F8762;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 32px;
+      animation: veilBreatheLoop 5s infinite ease-in-out;
+    }
+    @keyframes veilBreatheLoop {
+      0% { transform: scale(0.88); background: rgba(95, 135, 98, 0.08); box-shadow: 0 0 20px rgba(95, 135, 98, 0.1); }
+      50% { transform: scale(1.12); background: rgba(95, 135, 98, 0.28); box-shadow: 0 0 50px rgba(95, 135, 98, 0.35); }
+      100% { transform: scale(0.88); background: rgba(95, 135, 98, 0.08); box-shadow: 0 0 20px rgba(95, 135, 98, 0.1); }
+    }
+
+    /* Interruption Context overlay */
+    .time-machine-takeover {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #1D1E24;
+      color: #FAF6F0;
+      z-index: 15;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .time-machine-takeover.cleared {
+      transform: translateY(-100%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* ==========================================================================
+       25 ADHD CASES DIRECTORY VIEWER
+       ========================================================================== */
+    .cases-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      padding-top: 12px;
+    }
+    .case-card {
+      cursor: pointer;
+      transition: var(--transition);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .case-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+    .case-card-num {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      background: var(--accent-soft);
+      color: var(--accent);
+      padding: 2px 6px;
+      border-radius: 4px;
+      align-self: flex-start;
+    }
+    .case-card-title {
+      font-family: var(--serif);
+      font-size: 1.15rem;
+      font-weight: 500;
+    }
+    .case-card-meta {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--ink-light);
+    }
+
+    /* Modal detailed presentation overlay for cases */
+    .case-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(31, 31, 38, 0.5);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: var(--transition);
+    }
+    .case-modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .case-modal-box {
+      width: 100%;
+      max-width: 640px;
+      max-height: 85vh;
+      overflow-y: auto;
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border-strong);
+      box-shadow: var(--shadow-lg);
+      padding: 36px;
+      animation: modalFadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    @keyframes modalFadeUp {
+      from { transform: translateY(24px); }
+      to { transform: translateY(0); }
+    }
+    .case-wireframe-block {
+      background: #141416;
+      color: #34D399;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      line-height: 1.5;
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+      white-space: pre;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+  </style>
+</head>
+<body class="theme-serene">
+
+  <!-- ==========================================================================
+       LEFT SIDEBAR (SWITCH VIEWS & DIRECTORIES)
+       ========================================================================== -->
+  <aside class="sidebar">
+    <div class="brand">
+      <h2 class="brand-title">Focus <span>Room v2</span></h2>
+      <div class="brand-subtitle">ADHD COGNITIVE BENCHMARKS</div>
+    </div>
+    
+    <div class="sidebar-nav-container">
+      <div class="nav-header-title">Flagship Workbench</div>
+      <ul class="sidebar-list">
+        <li class="sidebar-link active" id="side-wb" onclick="toggleMainTab('wb')">
+          <div class="nav-label">
+            <span class="sidebar-icon-num">★</span>
+            <span>Focus Room v2 Workbench</span>
+          </div>
+        </li>
+      </ul>
+
+      <div class="nav-header-title">ADHD 25-Case Directory</div>
+      <ul class="sidebar-list" style="flex: 1; overflow-y: auto;" id="sideCaseList">
+        <li class="sidebar-link" id="side-dir" onclick="toggleMainTab('dir')">
+          <div class="nav-label">
+            <span class="sidebar-icon-num">📋</span>
+            <span>Explore All 25 Cases</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </aside>
+
+  <!-- ==========================================================================
+       RIGHT CANVAS AREA & ACTIVE VIEWPORT WORKSPACE
+       ========================================================================== -->
+  <main class="canvas">
+    
+    <!-- Canvas Header -->
+    <header class="canvas-header">
+      <div class="title-group">
+        <h1 class="main-page-title" id="wbTitle">Focus Room v2 Workbench</h1>
+        <span class="main-page-subtitle" id="wbSubtitle">Mixes and matches the smartest cognitive restoration designs we invented to protect your day.</span>
+      </div>
+      
+      <!-- ADHD Spectrum Slider Meter -->
+      <div class="spectrum-bar">
+        <span class="spectrum-title">ADHD Spectrum Meter</span>
+        <div class="spectrum-indicator">
+          <span class="spectrum-dot" id="spec-dot-messy" style="color: #DE862A;"></span>
+          <span class="spectrum-dot" id="spec-dot-mid" style="color: #B28867;"></span>
+          <span class="spectrum-dot" id="spec-dot-clean" style="color: #5F8762;"></span>
+        </div>
+        <span class="spectrum-value" id="specVal">ADHD Focus Suite</span>
+      </div>
+    </header>
+
+    <!-- ==========================================================================
+         VIEWPORT A: The Flagship v2 Focus Workbench
+         ========================================================================== -->
+    <section class="viewport active" id="view-wb" style="position: relative;">
+      
+      <!-- Confetti visual Canvas engine layer -->
+      <canvas id="confettiCanvas"></canvas>
+
+      <!-- Collapsible Stack Drawer Toggle button -->
+      <button class="pill-btn pill-btn-secondary" style="position: absolute; right: 40px; top: 20px; z-index: 8; box-shadow: var(--shadow-sm);" onclick="toggleStackDrawer()">
+        ⠿ Toggle Priority Stack
+      </button>
+
+      <!-- Context Interruption modal Screen overlay -->
+      <div class="time-machine-takeover" id="d10Overlay">
+        <div class="flex-col" style="width: 100%; max-width: 480px; gap: 20px;">
+          <span class="card-eyebrow" style="color: var(--accent);">Context Recovery Time Machine</span>
+          <h2 style="font-family: var(--serif); font-size: 2.4rem; font-style: italic;">Welcome back, Ofer.</h2>
+          <p style="color: var(--ink-light); font-size: 0.88rem;">
+            You were interrupted 15 minutes ago while focusing on:
+            <br><strong id="d10InterruptedTaskText">Prep for meeting with @Maya about CROSS-141</strong>
+          </p>
+          
+          <div class="flex-col" style="gap: 8px;">
+            <label class="card-eyebrow" style="color: var(--ink-light);">Where did you leave off? (Capture mindset instantly)</label>
+            <textarea class="monospace-textarea" id="d10RestoreInput" style="height: 80px; background: rgba(255,255,255,0.06); color: #FFF; border-color: rgba(255,255,255,0.15);" placeholder="Reviewed Prisma migrations stg13, now wiring connected account table FE rows..."></textarea>
+          </div>
+          
+          <button class="pill-btn pill-btn-primary" style="background: #FFF; color: #1D1E24; justify-content: center;" onclick="restoreContextMindset()">Restore Context & Return</button>
+        </div>
+      </div>
+
+      <!-- Main Workbench Layout -->
+      <div class="flex-row">
+        
+        <!-- Left Side: Slack-Mirror Capture Feed & Sandbox columns -->
+        <div class="w-half flex-col" style="border-right: 1px solid var(--border); padding-right: 24px; justify-content: space-between; height: 100%;">
+          
+          <!-- Slack log feed -->
+          <div class="flex-col" id="wbSlackFeed" style="overflow-y: auto; flex: 1; gap: 14px;">
+            <!-- Message boxes populated dynamically by script -->
+          </div>
+
+          <!-- Message entry prompt gate -->
+          <div class="flex-col" style="gap: 8px; margin-top: 12px; border-top: 1px solid var(--border); padding-top: 16px;">
+            <textarea class="monospace-textarea" id="wbSlackInput" style="height: 70px;" placeholder="- Checked stg13 zendesk integrations token with @Aram #support
+- Review CROSS-568 Brands page bug on staging with @Simon #cross
+- Register Zoe to Gan #personal"></textarea>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 0.65rem; color: var(--ink-light);">Supports parsing of CROSS-141, handles like @Sergey, and hashtags.</span>
+              <button class="pill-btn pill-btn-primary" onclick="postWbMessage()">Post Intention</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Side: Dual-stage priorities (Active Spotlight & Sandboxes) -->
+        <div class="w-half flex-col" style="overflow-y: auto;">
+          
+          <!-- Active mindset restoration banner if available -->
+          <div class="editorial-card" id="wbMindsetBanner" style="background: var(--accent-soft); border-color: var(--accent); padding: 14px 18px; display: none;">
+            <span class="card-eyebrow" style="color: var(--accent);">Restored Mindset Note</span>
+            <p id="wbMindsetText" style="font-size: 0.8rem; font-weight: 500; margin-top: 4px;"></p>
+          </div>
+
+          <!-- Spotlight Stage Card (Zen isolated Focus) -->
+          <div class="editorial-card" style="border-color: var(--accent); box-shadow: var(--shadow-sm);">
+            <span class="card-eyebrow" style="color: var(--accent);">Active Spotlight Card</span>
+            
+            <h2 class="main-page-title" id="wbSpotlightTitle" style="font-size: 1.45rem; margin: 10px 0 16px;">
+              Prep for meeting with <a class="rich-mention" onclick="inspectItem('@Maya')">@Maya</a> about <a class="rich-link" onclick="inspectItem('CROSS-141')">CROSS-141</a>
+            </h2>
+
+            <span class="card-eyebrow">Nested Steps (Isolated Accordion Cascade)</span>
+            <ul class="subtask-cascade-list" id="wbCascadeList">
+              <li class="cascade-item done" onclick="completeCascadeStep(0)">
+                <span class="cascade-bullet"></span>
+                <span>Review Prisma schema migration queries on stg13</span>
+              </li>
+              <li class="cascade-item active" onclick="completeCascadeStep(1)">
+                <span class="cascade-bullet"></span>
+                <span>Confirm backward compatibility details with <a class="rich-mention" onclick="inspectItem('@Sergey')">@Sergey</a></span>
+              </li>
+              <li class="cascade-item faded" onclick="completeCascadeStep(2)">
+                <span class="cascade-bullet"></span>
+                <span>Verify Okta OAuth fallback redirect clientID configuration</span>
+              </li>
+            </ul>
+
+            <div style="display: flex; gap: 10px; margin-top: 24px;">
+              <button class="pill-btn pill-btn-secondary" style="flex:1; justify-content:center; padding: 10px 16px;" onclick="simulateInterruption()">Lock/Interrupt</button>
+              <button class="pill-btn pill-btn-primary" style="flex:2; justify-content:center; padding: 10px 16px;" onclick="completeSpotlightTask()">Complete Step</button>
+            </div>
+          </div>
+
+          <!-- Ritalin Energy Focus waves -->
+          <div class="editorial-card">
+            <span class="card-eyebrow" id="wbWaveLabel">Morning Peak Attention Wave</span>
+            <div class="ritalin-wave-box" id="wbWaveBox">
+              <svg class="wave-line-svg" viewBox="0 0 500 120" preserveAspectRatio="none">
+                <path d="M 0 60 C 100 10 150 110 250 60 C 350 10 400 110 500 60 L 500 120 L 0 120 Z" fill="rgba(178, 136, 103, 0.05)" stroke="var(--accent)" stroke-width="2"></path>
+              </svg>
+              <!-- Wave Peak Nodes -->
+            </div>
+            <p style="font-size: 0.76rem; color: var(--ink-muted); line-height: 1.45;" id="wbWaveDesc">
+              Click attention wave nodes to schedule tasks along medication peaks!
+            </p>
+          </div>
+
+          <!-- Breath Hearth Anchor -->
+          <div class="editorial-card" style="text-align: center; padding: 16px;">
+            <span class="card-eyebrow">Task-Switching Breathing Hearth</span>
+            <div class="hearth-meditation-circle" id="wbHearth" onclick="toggleWbHearth()">
+              <span style="font-family: var(--mono); font-size: 1.4rem; font-weight: 600;" id="wbHearthTime">25:00</span>
+              <span style="font-size: 0.6rem; color: var(--accent); margin-top: 2px;" id="wbHearthLabel">Breathe hearth</span>
+            </div>
+          </div>
+
+          <!-- Mental Load Valve Indicator box -->
+          <div class="editorial-card" id="wbLoadIndicatorCard" style="border-left: 4px solid var(--success); padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;">
+            <div class="flex-col" style="gap: 4px;">
+              <strong id="wbLoadText" style="font-size: 0.86rem;">Serene Green Load active (2 tasks)</strong>
+              <div style="font-size: 0.72rem; color: var(--ink-muted);" id="wbLoadSubtext">Focal stack limits optimal. Split-attention danger is minimal.</div>
+            </div>
+            <button class="pill-btn pill-btn-secondary" style="font-size:0.72rem; padding: 6px 12px; display: none;" id="wbLoadValveBtn" onclick="wbReleaseValve()">Release Valve</button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Priority Stack slider drawer panel -->
+      <aside class="priority-stack-drawer" id="wbStackDrawer">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 10px;">
+          <span class="card-eyebrow">Priority Stack Drawer</span>
+          <button style="background:transparent; border:none; cursor:pointer; font-size: 1rem;" onclick="toggleStackDrawer()">✕</button>
+        </div>
+        <div style="font-size: 0.65rem; color: var(--ink-muted); margin-bottom: 10px;">Drag-and-drop to sort your day stack order.</div>
+        <div class="flex-col" id="wbDrawerContainer" style="flex:1; overflow-y:auto; gap: 8px;">
+          <!-- Draggable items go here -->
+        </div>
+        <button class="pill-btn pill-btn-primary" style="width:100%; justify-content:center; font-size:0.75rem; padding: 10px;" onclick="toggleStackDrawer()">Apply Stack order</button>
+      </aside>
+
+    </section>
+
+    <!-- ==========================================================================
+         VIEWPORT B: ADHD 25-Case Directory Viewer
+         ========================================================================== -->
+    <section class="viewport" id="view-dir">
+      <div class="flex-col" style="height: 100%;">
+        <span class="card-eyebrow">Comprehensive ADHD Cognitive Designs & Cases Directory</span>
+        
+        <div class="cases-grid" id="casesGrid">
+          <!-- Grid items populated dynamically from cases database -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==========================================================================
+       RIGHT UNIVERSAL INSPECTOR DRAWER OVERLAY
+       ========================================================================== -->
+  <aside class="inspector-drawer" id="inspectorDrawer">
+    <div class="inspector-header">
+      <h3 class="inspector-title" id="inspectTitle">Ticket Details</h3>
+      <button class="inspector-close" onclick="closeInspector()">✕</button>
+    </div>
+    <div class="inspector-content" id="inspectContent">
+      <!-- Generated dynamically based on item clicked -->
+    </div>
+  </aside>
+
+  <!-- ==========================================================================
+       FULL SCREEN MIND-RESET BREATH VEIL TAKE OVER
+       ========================================================================== -->
+  <div class="meditation-takeover-veil" id="meditationVeil">
+    <div class="veil-breath-circle">
+      <span style="font-size: 1.1rem; font-weight: 600;" id="veilTimer">10</span>
+    </div>
+    <h2 style="font-family: var(--serif); font-size: 2.2rem; margin-bottom: 8px;">Mental Transition buffer</h2>
+    <p style="color: var(--ink-light); text-align: center; max-width: 340px; font-size: 0.9rem;" id="veilCue">
+      Inhale deeply as the circle expands...
+    </p>
+  </div>
+
+  <!-- ==========================================================================
+       CASE DECK MODAL DIALOG PRESENTATION OVERLAY
+       ========================================================================== -->
+  <div class="case-modal-overlay" id="caseModal">
+    <div class="case-modal-box">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div class="flex-col" style="gap: 4px;">
+          <span class="case-card-num" id="modalCaseNum">Case 01</span>
+          <h2 class="case-card-title" id="modalCaseTitle">Concept Name</h2>
+          <span class="case-card-meta" id="modalCaseCategory">Category</span>
+        </div>
+        <button class="inspector-close" onclick="closeCaseModal()" style="font-size: 1.4rem;">✕</button>
+      </div>
+
+      <div class="flex-col" style="gap: 16px; border-top: 1px solid var(--border); padding-top: 20px; overflow-y: auto;">
+        <div>
+          <strong style="font-size: 0.8rem; text-transform: uppercase; color: var(--ink-light);">ADHD Friction Solved:</strong>
+          <p id="modalCaseFriction" style="font-size: 0.86rem; line-height: 1.5; color: var(--ink); margin-top: 4px;"></p>
+        </div>
+        <div>
+          <strong style="font-size: 0.8rem; text-transform: uppercase; color: var(--ink-light);">Visual Structure & Layout:</strong>
+          <p id="modalCaseVisual" style="font-size: 0.86rem; line-height: 1.5; color: var(--ink-muted); margin-top: 4px;"></p>
+        </div>
+        <div>
+          <strong style="font-size: 0.8rem; text-transform: uppercase; color: var(--ink-light);">Interaction Flow:</strong>
+          <p id="modalCaseFlow" style="font-size: 0.86rem; line-height: 1.5; color: var(--ink-muted); margin-top: 4px;"></p>
+        </div>
+        
+        <div>
+          <strong style="font-size: 0.8rem; text-transform: uppercase; color: var(--ink-light); display: block; margin-bottom: 8px;">Interactive ASCII Wireframe:</strong>
+          <pre class="case-wireframe-block" id="modalCaseWireframe"></pre>
+        </div>
+      </div>
+
+      <button class="pill-btn pill-btn-primary" style="justify-content: center; margin-top: 12px;" onclick="closeCaseModal()">Acknowledge Paradigm</button>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       PLAYGROUND CONTROL LOGIC
+       ========================================================================== -->
+  <script>
+    // --------------------------------------------------------------------------
+    // STATIC DATA SOURCE
+    // --------------------------------------------------------------------------
+    const MOCK_SLACK_LOGS = [
+      { id: "sl-1", date: "August 4, 2024", text: "API UX – PRs reviews, met with @Aram about smartviews-sdk PR #30 approach." },
+      { id: "sl-2", date: "August 18, 2024", text: "HQ user data sync step 1: PUT route notification configs FE approved and tested stg13 with @Sergey." },
+      { id: "sl-3", date: "September 3, 2024", text: "Deployed hq-user-sync following PP doc. Completed NEX-982." },
+      { id: "sl-4", date: "October 10, 2024", text: "CROSS-141 – Billing info sync: Prisma schema update for Instances." },
+      { id: "sl-5", date: "November 14, 2024", text: "CROSS-568 – PAC brand bugs check on staging13 with @Simon." },
+      { id: "sl-8", date: "March 17, 2026", text: "Final test for zendesk-integration: deploy widget stable layout to stg13." }
+    ];
+
+    const INSPECT_DATABASE = {
+      "CROSS-141": {
+        title: "CROSS-141: Billing Info Sync for New Instances",
+        meta: "Epic: Accounts & Guesty HQ | Priority: High",
+        desc: "Build out the database schemas and consumers to sync Organization/Instance billing profile entities on create.",
+        details: "Assigned: Sergey Polakevitch (Principal Developer)<br>Status: IN REVIEW (PR #122)<br>Target Env: staging13"
+      },
+      "CROSS-672": {
+        title: "CROSS-672: Add existing Guesty account to HQ",
+        meta: "Epic: Organization Consolidation | Priority: Critical",
+        desc: "Allow Guesty standalone accounts to request pairing connection to Guesty HQ accounts inside the admin panel.",
+        details: "Assigned: Ofer Hashimshony (Owner)<br>Status: IN PROGRESS<br>Prerequisites: SYN-70, SYN-72 approved"
+      },
+      "CROSS-568": {
+        title: "CROSS-568: Brand tagging assignments in PAC",
+        meta: "Epic: Property Assignment | Priority: Medium",
+        desc: "Investigate why assignments are falling back and losing tag definitions on S3 sync.",
+        details: "Assigned: Simon (PAC Specialist)<br>Status: PENDING TEST<br>Incident: inc-2025-01-29"
+      },
+      "NEX-982": {
+        title: "NEX-982: HQ User Sync Notification Settings",
+        meta: "Epic: Platform Integration | Priority: High",
+        desc: "Wire the front-end layout to dispatch PUT route triggers to users account endpoints.",
+        details: "Assigned: Ofer Hashimshony (Owner)<br>Status: COMPLETED (Aug 2024)"
+      },
+      "@Sergey": {
+        title: "@Sergey (Sergey Polakevitch)",
+        meta: "Principal Platform Architect",
+        desc: "Collaborates with Ofer on Guesty HQ core sync services, AVRO event consumer schemas, and Okta SSO integrations.",
+        details: "Active Work: hq-user-sync, Okta dev trial integrations."
+      },
+      "@Aram": {
+        title: "@Aram (Aram G.)",
+        meta: "Engineering Director",
+        desc: "Reviews and aligns on major versions and filter approaches for the smartviews-sdk integrations.",
+        details: "Active Work: smartviews-sdk PR approvals."
+      },
+      "@Simon": {
+        title: "@Simon",
+        meta: "Senior Developer",
+        desc: "Expert on PAC (Property Assignment Core) database indexes and Algolia sync schemas.",
+        details: "Active Work: CROSS-568 Brand tags bug triage."
+      },
+      "@Maya": {
+        title: "@Maya",
+        meta: "Product Manager (HQ Features)",
+        desc: "Designs user flows and compliance parameters for the Organization admin consoles.",
+        details: "Active Meetings: 1:1 meeting at 10:30 AM."
+      }
+    };
+
+    // --------------------------------------------------------------------------
+    // THE 25 ADHD DESIGN CASES DATABASE
+    // --------------------------------------------------------------------------
+    const ADHD_CASES = [
+      {
+        num: "Case 01",
+        title: "The Slack-Journal Mirror",
+        category: "Low-Friction Capture",
+        friction: "Morning organization anxiety. Staring at blank task forms triggers cognitive avoidance.",
+        visual: "Slack-like chronological stream. Plain text channel chat bubbles with a bottom-anchored message prompt.",
+        flow: "Ofer dumps chaotic bullet lines. The system parses them in real-time, matching tickets and handles into inline badges.",
+        wireframe: "┌────────────────────────────────────────┐\n│ #today_i                               │\n│ [ofer] Deployed user-sync with @Sergey │\n│ [ofer] Check stg13 zendesk token       │\n│ ────────────────────────────────────── │\n│ [ - Type plan as message...     ][Send]│\n└────────────────────────────────────────┘"
+      },
+      {
+        num: "Case 02",
+        title: "The Monospace Zen Scratchpad",
+        category: "Low-Friction Capture",
+        friction: "Taxonomy overload. Forcing users to choose categories, timelines, and tags before writing.",
+        visual: "Full-bleed monospace paper board. JetBrains Mono typeface, large line-heights, zero folders.",
+        flow: "Type freely. Highlight any line or sentence block to open a floating action bar: 'Cast as Task Card' or 'Cast as Note'.",
+        wireframe: "┌────────────────────────────────────────┐\n│ Wednesday, May 27                      │\n│ - Prep for meeting with @Maya          │\n│ - Review smartviews-sdk PR #30         │\n│                                        │\n│ [ Float menu: Cast Task | Cast Note ]  │\n└────────────────────────────────────────┘"
+      },
+      {
+        num: "Case 03",
+        title: "Global Desktop Capture Tray",
+        category: "Low-Friction Capture",
+        friction: "Context switching decay. Having to open the full app to log a thought, getting distracted on the way.",
+        visual: "Frosted glass sliver docked to the edge of the desktop, hidden until hovered.",
+        flow: "Slide-expands on hover. Paste ticket keys or write quick logs. Hit Enter: collapses back to edge instantly.",
+        wireframe: "┌─┐┌───────────────────────────────┐     \n│⠿││ paste PR/Ticket or Note... [Cast]│     \n└─┘└───────────────────────────────┘     "
+      },
+      {
+        num: "Case 04",
+        title: "Voice-Stream Block Transcriber",
+        category: "Low-Friction Capture",
+        friction: "Typing friction. Distracted minds have fast thought trails that are tedious to type out.",
+        visual: "Soft clay-colored page showing a large pulsing audio waveform circle.",
+        flow: "Hold Spacebar and speak out loud. AI transcribes, auto-detects anchors, and creates structured cards in your backlog.",
+        wireframe: "┌────────────────────────────────────────┐\n│ Speak your focus plan...               │\n│                ((( 🎙️ )))               │\n│           [ Transcribing... ]          │\n│ 'I need to sync QuickBooks production'  │\n└────────────────────────────────────────┘"
+      },
+      {
+        num: "Case 05",
+        title: "Jira & PR Autolinker",
+        category: "Low-Friction Capture",
+        friction: "Lost reference files. Searching through browser tabs for tickets or PR documents.",
+        visual: "A smart inline URL collector inside task titles.",
+        flow: "Type CROSS-141. The system fetches the ticket name, epic status, and PR tags and embeds them directly.",
+        wireframe: "┌────────────────────────────────────────┐\n│ Quick Add: [ CROSS-141               ] │\n│ ┌────────────────────────────────────┐ │\n│ │ 🔗 [CROSS-141] user-sync BE | REVIEW │ │\n│ └────────────────────────────────────┘ │\n└────────────────────────────────────────┘"
+      },
+      {
+        num: "Case 06",
+        title: "Single-Focus Spotlight Room",
+        category: "Attention Shielding",
+        friction: "Split attention paralysis. Staring at a list of 10 tasks makes the brain drift constantly.",
+        visual: "Warm parchment card in the center of the viewport. Faded, collapsed borders for other elements.",
+        flow: "Shows STRICTLY one active focus block with nested subtasks. Backlogs are 100% hidden.",
+        wireframe: "┌────────────────────────────────────────┐\n│           NOW FOCUSING ON              │\n│     ┌────────────────────────────┐     │\n│     │ Prep for meeting with @Maya│     │\n│     │   [ ] Review migrations BE │     │\n│     │   [ ] Verify backward comp │     │\n│     └────────────────────────────┘     │\n└────────────────────────────────────────┘"
+      },
+      {
+        num: "Case 07",
+        title: "Hearth Desktop Dome",
+        category: "Attention Shielding",
+        friction: "Desktop notifications and browser tabs pulling attention away from intentional work.",
+        visual: "Frosted, blurred overlay masking everything on screen except the active focus card.",
+        flow: "Tapping Focus activates the glass dome mask. Rest of screen is blacked out, isolating your eyes.",
+        wireframe: "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░\n░░░░░░░  ┌────────────────────────┐  ░░░░░\n░░░░░░░  │ ACTIVE FOCUS CARD      │  ░░░░░\n░░░░░░░  └────────────────────────┘  ░░░░░\n░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░"
+      },
+      {
+        num: "Case 08",
+        title: "Subtask Cascade Accordion",
+        category: "Attention Shielding",
+        friction: "Looking ahead at complex checklist stages creates dread and anxiety.",
+        visual: "A stacked pile of subtask cards showing only the topmost row in high contrast.",
+        flow: "Only Step 1 is active. Steps 2 and 3 are blurred underneath. Checking Step 1 slides Step 2 upward.",
+        wireframe: "┌────────────────────────────────────────┐\n│ ACTIVE STEP:                           │\n│ ┌────────────────────────────────────┐ │\n│ │ [ ] 1. Review Prisma migrations    │ │\n│ └────────────────────────────────────┘ │\n│ [══ Faded stack: 2 steps hidden ═══]   │\n└────────────────────────────────────────┘"
+      },
+      {
+        num: "Case 9",
+        title: "Collapsible Stack Drawer",
+        category: "Attention Shielding",
+        friction: "Strict event calendars are inflexible; unordered backlogs lead to administrative clutter.",
+        visual: "Tactile, slide-out frosted glass priority panel on the right margin.",
+        flow: "Slide-open drawer to drag-and-drop sort cards. Tucking the drawer away locks the top task in the center spotlight.",
+        wireframe: "┌───────────────────────────┬────────────┐\n│                           │ PRIORITY   │\n│      ACTIVE SPOTLIGHT     │ ⠿ CROSS141 │\n│                           │ ⠿ SDK fix  │\n│                           │ ⠿ Zoe Gan  │\n└───────────────────────────┴────────────┘"
+      },
+      {
+        num: "Case 10",
+        title: "Double-Exposure Splitter",
+        category: "Attention Shielding",
+        friction: "Context switching to find task references (connected files, ticket specs, contact details).",
+        visual: "50/50 vertical grid dashboard.",
+        flow: "Left column spotlights active card; right column displays rich, clickable reference badges for handles and tickets.",
+        wireframe: "┌─────────────────────┬──────────────────┐\n│ FOCUS SPOTLIGHT     │ ACTIVE REFERENCE │\n│ Prep for meeting    │ 🔗 CROSS-141 doc │\n│ with @Maya          │ 👥 @Maya profile │\n└─────────────────────┴──────────────────┘"
+      },
+      {
+        num: "Case 11",
+        title: "Fluid Spacing Time Strip",
+        category: "Time Blindness",
+        friction: "Time blindness. Clock numbers don't represent the spatial buffer of the day.",
+        visual: "A horizontal neon timeline running across the screen center.",
+        flow: "Tasks sit as rounded flowing bubbles. Estimated weight dictates bubble width. Jumps focus bubble-to-bubble smoothly.",
+        wireframe: "┌────────────────────────────────────────┐\n│ DAILY TIMELINE                         │\n│ ──(09:30)────────(10:30)────────(13:00) │\n│    [Review]       [Maya Meeting] [Lunch]│\n│       ○                 ●           ○   │\n└────────────────────────────────────────┘"
+      },
+      {
+        num: "Case 12",
+        title: "Focus Hourglass Hearth",
+        category: "Time Blindness",
+        friction: "Stress countdown clocks trigger task avoidance and panic cycles.",
+        visual: "A beautiful, liquid gradient card background.",
+        flow: "Slowly shifts colors (terracotta orange to quiet sage) over 25 minutes, showing time elapsed ambiently.",
+        wireframe: "┌────────────────────────────────────────┐\n│          FOCUSING: CROSS-672           │\n│ ┌────────────────────────────────────┐ │\n│ │ [ Liquid gradient: Clay -> Moss ]  │ │\n│ └────────────────────────────────────┘ │\n└────────────────────────────────────────┘"
+      },
+      {
+        num: "Case 13",
+        title: "Medication Peak Schedulers",
+        category: "Time Blindness",
+        friction: "Schedules ignore biological energy waves, resulting in planning hard tasks during cognitive crashes.",
+        visual: "A soft focus wave chart showing energy peaks post-Ritalin/coffee intake.",
+        flow: "Nodes represent tasks. Drag deep tasks to peaks and light administrative tasks to valley troughs.",
+        wireframe: "┌────────────────────────────────────────┐\n│ ATTENTION WAVE CHART                   │\n│     /\ (Peak focus)                    │\n│ ___/  \___[CROSS-672]_______/\          │\n│                             \___[Valley]│\n└────────────────────────────────────────┘"
+      },
+      {
+        num: "Case 14",
+        title: "Sunlight Ambient Orbit",
+        category: "Time Blindness",
+        friction: "Severe disorientation regarding daily progression. Forgetting the day is ending until it's too late.",
+        visual: "A high-contrast circular solar arc path across the screen background.",
+        flow: "Task nodes sit on the arc. A glowing sun marker moves down the arc in real-time, showing day progression.",
+        wireframe: "┌────────────────────────────────────────┐\n│                  .  (Noon)             │\n│               .     .                  │\n│   (Morning) .         . (Evening)      │\n│           [t1]   ●[Now] [t3]           │\n└────────────────────────────────────────┘"
+      },
+      {
+        num: "Case 15",
+        title: "Monospace Hackathon Strip",
+        category: "Time Blindness",
+        friction: "Heavy graphical interfaces induce sensory distraction and overload.",
+        visual: "A dense, single-row monospace status bar at the bottom of the screen.",
+        flow: "Developer-centric. Renders active tasks and live focus durations like terminal stdout logs.",
+        wireframe: "┌────────────────────────────────────────┐\n│ needle-shell::[CROSS-672]::active[42m]  │\n└────────────────────────────────────────┘"
+      },
+      {
+        num: "Case 16",
+        title: "AI Sentinel Coach",
+        category: "Load Regulation",
+        friction: "Analysis paralysis and overplanning. Loading 8+ heavy tasks and burning out before starting.",
+        visual: "Sandy editorial panel displaying AI Sentinel recommendations.",
+        flow: "Sentinel identifies overcommitments. Suggests 2 simplified options (Plan A vs Plan B). Click to instantly adopt.",
+        wireframe: "┌─────────────────────┬──────────────────┐\n│ AI sentinel Coach   │ YOUR DAILY STACK │\n│ Let's simplify!     │ 1. CROSS-672 BE  │\n│ [ Plan A: Dev ]     │ 2. smartviews    │\n│ [ Plan B: Review ]  │ ... 6 stashed!   │\n└─────────────────────┴──────────────────┘"
+      },
+      {
+        num: "Case 17",
+        title: "The Mental Load Valve",
+        category: "Load Regulation",
+        friction: "Unrealistic over-planning in the morning, leading to end-of-day guilt.",
+        visual: "Dashboard theme shifts colors dynamically: Serene Green (1-3 tasks) to Overload Amber (7+ tasks).",
+        flow: "High load triggers a prominent 'Release Valve' button, offloading lowest priority tasks instantly to tomorrow.",
+        wireframe: "┌────────────────────────────────────────┐\n│ ⚠️ CAPACITY OVERLOAD (8 Tasks planned)   │\n│                                        │\n│ [ Release Valve: Offload 5 tasks ]     │\n└────────────────────────────────────────┘"
+      },
+      {
+        num: "Case 18",
+        title: "The Zero-Guilt Roller",
+        category: "Load Regulation",
+        friction: "Seeing overdue, red-alert tasks from yesterday induces immediate shame and avoidance.",
+        visual: "A quiet, slate morning slate dashboard.",
+        flow: "Incomplete tasks silently slide into Tomorrow's 'Stashed' list at midnight. Every morning starts fresh.",
+        wireframe: "┌────────────────────────────────────────┐\n│ A New Morning, Ofer.                   │\n│ Your slate is clean.                   │\n│ [ Open Carried Tasks (4 stashed) ]     │\n└────────────────────────────────────────┘"
+      },
+      {
+        num: "Case 19",
+        title: "Two-Bucket Sandbox",
+        category: "Load Regulation",
+        friction: "Complex project trees, folders, and priority grids lead to administrative exhaustion.",
+        visual: "Simplest two-column layout: Act Today (Actionable) vs Remember (Notes & Stash).",
+        flow: "Drag elements directly into either container. Keeps choices extremely binary.",
+        wireframe: "┌─────────────────────┬──────────────────┐\n│ DO TODAY (ACT)      │ REMEMBER (STASH) │\n│ ┌─────────────────┐ │ ┌──────────────┐ │\n│ │ ■ CROSS-672 BE  │ │ │ ★ Ritalin    │ │\n│ └─────────────────┘ │ └──────────────┘ │\n└─────────────────────┴──────────────────┘"
+      },
+      {
+        num: "Case 20",
+        title: "Capacity Tax Estimator",
+        category: "Load Regulation",
+        friction: "Planning 5 tasks that take 8 hours each, failing to gauge realistic capacity limits.",
+        visual: "Visual battery energy tags on task cards (1-5 lightning bolts).",
+        flow: "App aggregates energy taxes and caps your daily planned limit to 10 total energy points.",
+        wireframe: "┌────────────────────────────────────────┐\n│ CAPACITY TAX: [⚡⚡⚡⚡⚡⚡⚡⚡░░] (8/10 Energy)│\n│ ┌────────────────────────────────────┐ │\n│ │ Prep for meeting with @Maya   [⚡⚡⚡]│ │\n│ └────────────────────────────────────┘ │\n└────────────────────────────────────────┘"
+      },
+      {
+        num: "Case 21",
+        title: "Interruption Time Machine",
+        category: "Recovery & Cushion",
+        friction: "Drifting post-interruption. Forgetting your exact train of thought and starting procrastination cycles.",
+        visual: "Dark Slate full-screen modal takeover appearing upon screen wake.",
+        flow: "Prompt asks: 'Where did you leave off?' Type raw details. It saves and pins the note above your active focus card.",
+        wireframe: "┌────────────────────────────────────────┐\n│ Welcome back. Where did you leave off? │\n│ ┌────────────────────────────────────┐ │\n│ │ Connecting database tables FE...   │ │\n│ └────────────────────────────────────┘ │\n│ [ Restore Context & Return ]           │\n└────────────────────────────────────────┘"
+      },
+      {
+        num: "Case 22: Breathing Transition",
+        title: "Transition Breathing Hearth",
+        category: "Recovery & Cushion",
+        friction: "Executive resource exhaustion when switching between complex tasks.",
+        visual: "Healing green takeover veil with a central pulsing circle.",
+        flow: "Completing a task locks the screen for 10 seconds, guiding you through deep breathing exercises to reset.",
+        wireframe: "┌────────────────────────────────────────┐\n│                ((( 🟢 )))              │\n│                 Time: 10s              │\n│    Inhale deeply as circle expands...  │\n└────────────────────────────────────────┘"
+      },
+      {
+        num: "Case 23",
+        title: "Context-Switch Scratchpad",
+        category: "Recovery & Cushion",
+        friction: "Losing temporary notes or code snippets when context-switching to other apps.",
+        visual: "Integrated monospace clipboard/reference box split beside your focus spotlight.",
+        flow: "Automatically syncs active copies, file paths, and temporary markdown scratch logs.",
+        wireframe: "┌─────────────────────┬──────────────────┐\n│ ACTIVE SPOTLIGHT    │ LIVE SCRATCHPAD  │\n│ CROSS-672 BE        │ 📋 Clipboard log │\n│                     │ 🔗 Ref: CROSS141 │\n└─────────────────────┴──────────────────┘"
+      },
+      {
+        num: "Case 24",
+        title: "Gentle Accountability Sentinel",
+        category: "Recovery & Cushion",
+        friction: "Hyperfocus drift. Getting lost in rabbit holes (checking emails, reading docs) for hours.",
+        visual: "A non-intrusive companion bot avatar sitting quietly in the sidebar corner.",
+        flow: "If sensors detect keyboard idle times, it gently pops a chat bubble asking if you got drifted.",
+        wireframe: "┌────────────────────────────────────────┐\n│ [ofer working...]                      │\n│                               ┌──────┐ │\n│                         🤖    │ Still│ │\n│                       [Coach] │ focus│ │\n└────────────────────────────────────────┘"
+      },
+      {
+        num: "Case 25",
+        title: "Confetti Celebration Blast",
+        category: "Recovery & Cushion",
+        friction: "Lack of immediate dopamine rewards for completing administrative tasks, causing low task completion rates.",
+        visual: "Satisfying HTML5 physics particle engine.",
+        flow: "Completing a task card triggers a gorgeous explosion of tag-colored confetti particles across the viewport.",
+        wireframe: "┌────────────────────────────────────────┐\n│                                        │\n│             🎉  CROSS-141  ✔️          │\n│          ✨   *completed!*   🎉        │\n│                                        │\n└────────────────────────────────────────┘"
+      }
+    ];
+
+    // --------------------------------------------------------------------------
+    // DYNAMIC WORKBENCH DRAG STACK
+    // --------------------------------------------------------------------------
+    let wbStackList = JSON.parse(localStorage.getItem('focus_wb_stack')) || [
+      { id: "ws-1", text: "Prep for meeting with @Maya about CROSS-141", active: true },
+      { id: "ws-2", text: "Review smartviews-sdk PR #30 with @Aram", active: false },
+      { id: "ws-3", text: "Check stg13 zendesk integrations token with @Aram", active: false },
+      { id: "ws-4", text: "Register Zoe to Gan #personal", active: false }
+    ];
+
+    let wbSlackFeedList = JSON.parse(localStorage.getItem('focus_wb_slack_feed')) || MOCK_SLACK_LOGS;
+
+    // --------------------------------------------------------------------------
+    // TAB CONTROLLER
+    // --------------------------------------------------------------------------
+    function toggleMainTab(tab) {
+      document.querySelectorAll('.sidebar-link').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.viewport').forEach(el => el.classList.remove('active'));
+
+      if (tab === 'wb') {
+        document.getElementById('side-wb').classList.add('active');
+        document.getElementById('view-wb').classList.add('active');
+        document.getElementById('wbTitle').innerText = "Focus Room v2 Workbench";
+        document.getElementById('wbSubtitle').innerText = "Mixes and matches the smartest cognitive restoration designs we invented to protect your day.";
+        
+        // Render workbench
+        renderWbSlackFeed();
+        wbRenderStackDrawer();
+        wbUpdateLoadStatus();
+      } else {
+        document.getElementById('side-dir').classList.add('active');
+        document.getElementById('view-dir').classList.add('active');
+        document.getElementById('wbTitle').innerText = "25 ADHD Design Cases Directory";
+        document.getElementById('wbSubtitle').innerText = "Explore all 25 out-of-the-box visual paradigms designed specifically for Distracted & ADHD minds.";
+        
+        // Render cases directory
+        renderCasesDirectory();
+      }
+      closeInspector();
+    }
+
+    // --------------------------------------------------------------------------
+    // TEXT PARSER
+    // --------------------------------------------------------------------------
+    function parseTextToBadges(text) {
+      let parsed = text.replace(/([A-Z]+-\d+)/g, '<a class="rich-link" onclick="inspectItem(\'$1\')">$1</a>');
+      parsed = parsed.replace(/(@\w+)/g, '<a class="rich-mention" onclick="inspectItem(\'$1\')">$1</a>');
+      parsed = parsed.replace(/(#\w+)/g, '<span class="hashtag-badge">$1</span>');
+      return parsed;
+    }
+
+    // --------------------------------------------------------------------------
+    // UNIVERSAL INSPECTOR DRAWER
+    // --------------------------------------------------------------------------
+    function inspectItem(key) {
+      const drawer = document.getElementById('inspectorDrawer');
+      const title = document.getElementById('inspectTitle');
+      const content = document.getElementById('inspectContent');
+
+      const data = INSPECT_DATABASE[key] || {
+        title: key,
+        meta: "Custom Workspace Intention Tag",
+        desc: "This ticket identifier or teammate contact is currently captured inside your active planning stream.",
+        details: "Source: Local Workspace Daily Logs"
+      };
+
+      title.innerText = data.title;
+      content.innerHTML = `
+        <div class="card-eyebrow" style="color: var(--accent);">${data.meta}</div>
+        <p style="font-size: 0.88rem; line-height: 1.5; color: var(--ink);">${data.desc}</p>
+        <div style="background: var(--surface-sub); padding: 14px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.8rem; line-height: 1.45; color: var(--ink-muted);">
+          <strong>Status Details:</strong><br>${data.details}
+        </div>
+        <button class="pill-btn pill-btn-primary" style="margin-top: 12px; font-size: 0.72rem; justify-content: center;" onclick="closeInspector()">Acknowledge Details</button>
+      `;
+
+      drawer.classList.add('open');
+    }
+
+    function closeInspector() {
+      document.getElementById('inspectorDrawer').classList.remove('open');
+    }
+
+    // --------------------------------------------------------------------------
+    // WORKBENCH LOGIC
+    // --------------------------------------------------------------------------
+    function renderWbSlackFeed() {
+      const container = document.getElementById('wbSlackFeed');
+      container.innerHTML = '';
+
+      wbSlackFeedList.forEach(msg => {
+        const div = document.createElement('div');
+        div.className = 'editorial-card';
+        div.style.padding = '14px 18px';
+        div.style.background = 'var(--surface)';
+        div.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px;">
+            <strong style="font-size: 0.8rem; color:var(--accent);">ofer [Journal]</strong>
+            <span style="font-size: 0.68rem; color:var(--ink-light);">${msg.date}</span>
+          </div>
+          <div style="font-size: 0.86rem; line-height: 1.5;">${parseTextToBadges(msg.text)}</div>
+        `;
+        container.appendChild(div);
+      });
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function postWbMessage() {
+      const textarea = document.getElementById('wbSlackInput');
+      const text = textarea.value.trim();
+      if (!text) return;
+
+      const dateStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' today';
+      
+      // 1. Post into Slack logs
+      wbSlackFeedList.push({
+        id: `sl-${Date.now()}`,
+        date: dateStr,
+        text: text
+      });
+      localStorage.setItem('focus_wb_slack_feed', JSON.stringify(wbSlackFeedList));
+
+      // 2. Auto extract items into day stack
+      const lines = text.split('\n');
+      lines.forEach(l => {
+        const clean = l.replace(/^[-*•\s]+/, '').trim();
+        if (clean) {
+          wbStackList.push({
+            id: `ws-${Math.random()}`,
+            text: clean,
+            active: false
+          });
+        }
+      });
+      localStorage.setItem('focus_wb_stack', JSON.stringify(wbStackList));
+
+      textarea.value = '';
+      renderWbSlackFeed();
+      wbRenderStackDrawer();
+      wbUpdateLoadStatus();
+    }
+
+    // Stack Drawer sorting
+    function toggleStackDrawer() {
+      document.getElementById('wbStackDrawer').classList.toggle('open');
+    }
+
+    function wbRenderStackDrawer() {
+      const container = document.getElementById('wbDrawerContainer');
+      container.innerHTML = '';
+
+      wbStackList.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'draggable-item';
+        div.draggable = true;
+        div.id = `wbDrag-${item.id}`;
+
+        div.addEventListener('dragstart', (e) => wbDragStart(e, index));
+        div.addEventListener('dragover', wbDragOver);
+        div.addEventListener('drop', (e) => wbDrop(e, index));
+
+        div.innerHTML = `
+          <span style="color: var(--ink-light); cursor:grab;">⠿</span>
+          <div style="flex:1;">
+            <strong>${parseTextToBadges(item.text)}</strong>
+            <div style="font-size: 0.65rem; color:var(--ink-muted); margin-top:2px;">Intention #${index + 1}</div>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+
+      // Update Center Spotlight Task card
+      if (wbStackList.length > 0) {
+        const topTask = wbStackList[0];
+        document.getElementById('wbSpotlightTitle').innerHTML = parseTextToBadges(topTask.text);
+      }
+    }
+
+    let wbDraggingIndex = null;
+    function wbDragStart(e, index) {
+      wbDraggingIndex = index;
+    }
+    function wbDragOver(e) {
+      e.preventDefault();
+    }
+    function wbDrop(e, toIndex) {
+      e.preventDefault();
+      if (wbDraggingIndex === null || wbDraggingIndex === toIndex) return;
+
+      const temp = wbStackList[wbDraggingIndex];
+      wbStackList.splice(wbDraggingIndex, 1);
+      wbStackList.splice(toIndex, 0, temp);
+
+      localStorage.setItem('focus_wb_stack', JSON.stringify(wbStackList));
+      wbRenderStackDrawer();
+    }
+
+    // ACCORDION CASCADE SUBTASK ENGINE
+    let cascadeActiveStep = 1; // Step index 1 is active
+
+    function completeCascadeStep(idx) {
+      const list = document.getElementById('wbCascadeList');
+      const items = list.querySelectorAll('.cascade-item');
+
+      if (idx === 1 && cascadeActiveStep === 1) {
+        // Mark step 1 done, trigger particle CONFETTI blast!
+        items[0].classList.add('done');
+        items[1].classList.add('done');
+        items[1].classList.remove('active');
+        
+        // Unlock step 2
+        items[2].classList.add('active');
+        items[2].classList.remove('faded');
+        
+        cascadeActiveStep = 2;
+        triggerWbConfettiBurst(250, 180);
+      }
+    }
+
+    function completeSpotlightTask() {
+      // Trigger full page Breathing transition buffer takeover
+      triggerMeditationTakeover();
+    }
+
+    // Ritalin waves node scheduler
+    const rNodes = [
+      { text: "Prep for meeting with @Maya about CROSS-141", time: "10:30 AM (Peak Focus)", x: 120, y: 35, desc: "Morning peak momentum. Ideal slot for complex architecture reviews." },
+      { text: "Deploy hq-user-sync with @Sergey", time: "01:00 PM (Midday Valley)", x: 260, y: 80, desc: "Focus capacity dips slightly. Ideal for routine checks, testing, and logs." },
+      { text: "Review CROSS-568 Brands page bug with @Simon", time: "03:30 PM (Booster Peak)", x: 400, y: 40, desc: "Afternoon booster peak. Solve lingering core blockers or technical debt." }
+    ];
+
+    function wbRenderWave() {
+      const box = document.getElementById('wbWaveBox');
+      // clear old nodes
+      box.querySelectorAll('.wave-peak-node').forEach(n => n.remove());
+
+      rNodes.forEach(node => {
+        const btn = document.createElement('button');
+        btn.className = 'wave-peak-node';
+        btn.style.left = `${(node.x / 500) * 100}%`;
+        btn.style.top = `${(node.y / 120) * 100}%`;
+        btn.innerText = node.time.split(' ')[0];
+        
+        btn.onclick = () => {
+          document.getElementById('wbWaveLabel').innerText = node.time;
+          document.getElementById('wbWaveDesc').innerHTML = `<strong>${parseTextToBadges(node.text)}</strong><br>${node.desc}`;
+        };
+        box.appendChild(btn);
+      });
+    }
+
+    // Hearth breathing timer
+    let wbHearthTimer = null;
+    let wbHearthSeconds = 25 * 60;
+
+    function toggleWbHearth() {
+      const el = document.getElementById('wbHearth');
+      el.classList.toggle('breathing');
+
+      if (el.classList.contains('breathing')) {
+        document.getElementById('wbHearthLabel').innerText = "Inhale deeply...";
+        wbHearthTimer = setInterval(() => {
+          wbHearthSeconds--;
+          const m = Math.floor(wbHearthSeconds / 60);
+          const s = wbHearthSeconds % 60;
+          document.getElementById('wbHearthTime').innerText = `${m}:${s.toString().padStart(2, '0')}`;
+
+          if (wbHearthSeconds % 6 === 0) {
+            document.getElementById('wbHearthLabel').innerText = "Inhale deeply...";
+          } else if (wbHearthSeconds % 6 === 3) {
+            document.getElementById('wbHearthLabel').innerText = "Exhale slowly...";
+          }
+        }, 1000);
+      } else {
+        clearInterval(wbHearthTimer);
+        document.getElementById('wbHearthLabel').innerText = "Pulse paused";
+      }
+    }
+
+    // Load shifting themes
+    function wbUpdateLoadStatus() {
+      const body = document.body;
+      const indicator = document.getElementById('wbLoadIndicatorCard');
+      const text = document.getElementById('wbLoadText');
+      const sub = document.getElementById('wbLoadSubtext');
+      const btn = document.getElementById('wbLoadValveBtn');
+
+      if (wbStackList.length <= 3) {
+        body.className = 'theme-serene';
+        indicator.style.borderLeftColor = 'var(--success)';
+        text.innerText = `Serene Green Load active (${wbStackList.length} tasks)`;
+        sub.innerText = "Focal stack limits optimal. Split-attention danger is minimal.";
+        btn.style.display = 'none';
+      } else if (wbStackList.length <= 5) {
+        body.className = 'theme-serene';
+        indicator.style.borderLeftColor = 'var(--accent)';
+        text.innerText = `Balanced Attention Stack (${wbStackList.length} tasks)`;
+        sub.innerText = "Tasks within manageable limits. Keep prioritizer stack sorted.";
+        btn.style.display = 'none';
+      } else {
+        body.className = 'theme-overload';
+        indicator.style.borderLeftColor = 'var(--accent)';
+        text.innerText = `⚠️ Cognitive Overload Warning (${wbStackList.length} Tasks)`;
+        sub.innerText = "Exceeds ADHD limits. Reorganize or deploy safety valve to offload tasks.";
+        btn.style.display = 'block';
+      }
+    }
+
+    function wbReleaseValve() {
+      wbStackList = [
+        { id: "ws-1", text: "Prep for meeting with @Maya about CROSS-141", active: true },
+        { id: "ws-2", text: "Review smartviews-sdk PR #30 with @Aram", active: false }
+      ];
+      localStorage.setItem('focus_wb_stack', JSON.stringify(wbStackList));
+      wbRenderStackDrawer();
+      wbUpdateLoadStatus();
+      alert("Safety Valve triggered! Re-routed uncompleted stack tasks to Tomorrow's Stash. Focus room reset to Serene!");
+    }
+
+    // --------------------------------------------------------------------------
+    // CONTEXT RESTORATION MACHINE
+    // --------------------------------------------------------------------------
+    function simulateInterruption() {
+      document.getElementById('d10Overlay').classList.remove('cleared');
+      document.getElementById('d10RestoreInput').value = '';
+      document.getElementById('wbMindsetBanner').style.display = 'none';
+    }
+
+    function restoreContextMindset() {
+      const text = document.getElementById('d10RestoreInput').value.trim();
+      const banner = document.getElementById('wbMindsetBanner');
+      const textNode = document.getElementById('wbMindsetText');
+
+      if (text) {
+        textNode.innerHTML = parseTextToBadges(text);
+        banner.style.display = 'block';
+      }
+
+      document.getElementById('d10Overlay').classList.add('cleared');
+    }
+
+    // --------------------------------------------------------------------------
+    // MEDITATION TRANSITION TAKEOVER
+    // --------------------------------------------------------------------------
+    let takeoverInterval = null;
+    function triggerMeditationTakeover() {
+      const veil = document.getElementById('meditationVeil');
+      const timer = document.getElementById('veilTimer');
+      const cue = document.getElementById('veilCue');
+
+      veil.classList.add('active');
+      let count = 10;
+      timer.innerText = count;
+
+      takeoverInterval = setInterval(() => {
+        count--;
+        timer.innerText = count;
+
+        if (count >= 6) {
+          cue.innerText = "Inhale deeply as the green circle expands...";
+        } else if (count >= 2) {
+          cue.innerText = "Exhale slowly as the circle contracts...";
+        } else {
+          cue.innerText = "Transitioning your focus mindset cleanly...";
+        }
+
+        if (count <= 0) {
+          clearInterval(takeoverInterval);
+          veil.classList.remove('active');
+          
+          // Reset Cascade checklist in Spotlight Card
+          const list = document.getElementById('wbCascadeList');
+          list.querySelectorAll('.cascade-item').forEach((item, idx) => {
+            item.className = `cascade-item ${idx === 0 ? 'active' : 'faded'}`;
+          });
+          cascadeActiveStep = 0;
+        }
+      }, 1000);
+    }
+
+    // --------------------------------------------------------------------------
+    // CONFETTI PHYSICS PARTICLE ENGINE
+    // --------------------------------------------------------------------------
+    const canvas = document.getElementById("confettiCanvas");
+    const ctx = canvas.getContext("2d");
+    let particles = [];
+
+    function resizeConfettiCanvas() {
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = canvas.parentElement.clientHeight;
+    }
+
+    class Particle {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.size = Math.random() * 5 + 3;
+        this.speedX = Math.random() * 8 - 4;
+        this.speedY = Math.random() * -10 - 4;
+        this.gravity = 0.35;
+        this.color = `hsl(${Math.random() * 360}, 75%, 60%)`;
+        this.alpha = 1;
+        this.decay = Math.random() * 0.015 + 0.01;
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        this.speedY += this.gravity;
+        this.alpha -= this.decay;
+      }
+      draw() {
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    function triggerWbConfettiBurst(x, y) {
+      resizeConfettiCanvas();
+      for (let i = 0; i < 40; i++) {
+        particles.push(new Particle(x, y));
+      }
+    }
+
+    function animateConfetti() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = particles.length - 1; i >= 0; i--) {
+        particles[i].update();
+        particles[i].draw();
+        if (particles[i].alpha <= 0) {
+          particles.splice(i, 1);
+        }
+      }
+      requestAnimationFrame(animateConfetti);
+    }
+    requestAnimationFrame(animateConfetti);
+
+    // --------------------------------------------------------------------------
+    // 25 ADHD CASES DIRECTORY RENDER
+    // --------------------------------------------------------------------------
+    function renderCasesDirectory() {
+      const container = document.getElementById('casesGrid');
+      container.innerHTML = '';
+
+      ADHD_CASES.forEach(c => {
+        const card = document.createElement('div');
+        card.className = 'case-card';
+        card.onclick = () => openCaseModal(c);
+        card.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span class="case-card-num">${c.num}</span>
+            <span class="case-card-meta">${c.category}</span>
+          </div>
+          <h3 class="case-card-title">${c.title}</h3>
+          <p style="font-size:0.78rem; color:var(--ink-muted); line-height:1.4;">${c.friction.substring(0, 75)}...</p>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function renderSidebarCaseLinks() {
+      const container = document.getElementById('sideCaseList');
+      // preserve first item which is "Explore all 25"
+      const exploreItem = document.getElementById('side--dir');
+      
+      ADHD_CASES.forEach(c => {
+        const li = document.createElement('li');
+        li.className = 'sidebar-link';
+        li.style.fontSize = '0.74rem';
+        li.style.padding = '8px 14px';
+        li.innerHTML = `
+          <span style="font-family:var(--mono); font-size:0.65rem; color:var(--ink-light);">${c.num.replace('Case ', '')}</span>
+          <span>${c.title}</span>
+        `;
+        li.onclick = () => openCaseModal(c);
+        container.appendChild(li);
+      });
+    }
+
+    // Modal Presentation cases dialog
+    function openCaseModal(c) {
+      document.getElementById('modalCaseNum').innerText = c.num;
+      document.getElementById('modalCaseTitle').innerText = c.title;
+      document.getElementById('modalCaseCategory').innerText = c.category;
+      document.getElementById('modalCaseFriction').innerText = c.friction;
+      document.getElementById('modalCaseVisual').innerText = c.visual;
+      document.getElementById('modalCaseFlow').innerText = c.flow;
+      document.getElementById('modalCaseWireframe').innerText = c.wireframe;
+
+      document.getElementById('caseModal').classList.add('active');
+    }
+
+    function closeCaseModal() {
+      document.getElementById('caseModal').classList.remove('active');
+    }
+
+    // --------------------------------------------------------------------------
+    // WINDOW LOAD INIT
+    // --------------------------------------------------------------------------
+    window.onload = () => {
+      // Init workbench
+      renderWbSlackFeed();
+      wbRenderStackDrawer();
+      wbRenderWave();
+      wbUpdateLoadStatus();
+
+      // Init directory list
+      renderSidebarCaseLinks();
+      
+      // Auto-resize confetti canvas
+      window.addEventListener('resize', resizeConfettiCanvas);
+    };
+  </script>
+</body>
+</html>

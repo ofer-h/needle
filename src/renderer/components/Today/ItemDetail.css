@@ -16,6 +16,18 @@
   gap: var(--space-1);
 }
 
+.item-detail__input,
+.item-detail__inline-controls select {
+  min-height: 34px;
+  border: 0.5px solid var(--hairline-2);
+  border-radius: var(--radius-2);
+  background: var(--bg);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--text-13);
+  padding: 0 var(--space-3);
+}
+
 .item-detail__label {
   color: var(--ink-3);
   font-size: var(--text-11);
@@ -43,6 +55,8 @@
   padding: var(--space-3);
 }
 
+.item-detail__input:focus-visible,
+.item-detail__inline-controls select:focus-visible,
 .item-detail__notes textarea:focus-visible {
   outline: 2px solid var(--border-strong);
   outline-offset: 2px;
@@ -56,6 +70,12 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
+}
+
+.item-detail__inline-controls {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
 }
 
 @media (prefers-reduced-motion: reduce) {

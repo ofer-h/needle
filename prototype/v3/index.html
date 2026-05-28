@@ -1,0 +1,1610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>today-i — Premium macOS Focus Room Surface</title>
+  
+  <style>
+    /* ── macOS Native System Tokens (matching today-i styles.css) ── */
+    :root {
+      --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      --font-text:    -apple-system, BlinkMacSystemFont, "SF Pro Text",    "Helvetica Neue", Helvetica, Arial, sans-serif;
+      --font-mono:    "SF Mono", ui-monospace, Menlo, Monaco, monospace;
+
+      --bg:          #FFFFFF;
+      --bg-surface:  #FAFAFA;
+      --bg-subtle:   #F5F5F7;
+      --border:      #D2D2D7;
+      --border-focus: #007AFF;
+      --text:        #1D1D1F;
+      --text-secondary: #86868B;
+      --text-tertiary:  #A1A1A6;
+      
+      --accent:      #007AFF; /* Apple Blue */
+      --accent-dim:  rgba(0, 122, 255, 0.10);
+      --success:     #34C759; /* Apple Green */
+      --success-soft: rgba(52, 199, 89, 0.08);
+      --danger:      #FF3B30; /* Apple Red */
+      --shadow:      0 4px 16px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
+      --radius:      8px;
+    }
+
+    /* Native Dark Mode Preferences */
+    .theme-dark {
+      --bg:          #1C1C1E;
+      --bg-surface:  #2C2C2E;
+      --bg-subtle:   #252527;
+      --border:      #3A3A3C;
+      --border-focus: #0A84FF;
+      --text:        #F5F5F7;
+      --text-secondary: #98989D;
+      --text-tertiary:  #6E6E73;
+      
+      --accent:      #0A84FF;
+      --accent-dim:  rgba(10, 132, 255, 0.18);
+      --success:     #30D158;
+      --success-soft: rgba(48, 209, 88, 0.12);
+      --danger:      #FF453A;
+      --shadow:      0 8px 24px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background: var(--bg-subtle);
+      color: var(--text);
+      font-family: var(--font-text);
+      font-size: 13px;
+      line-height: 1.45;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    /* ==========================================================================
+       MAC ELECTRON APP WINDOW CONTAINER
+       ========================================================================== */
+    .electron-window {
+      width: 780px;
+      height: 640px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+      transition: background-color 0.3s, border-color 0.3s;
+    }
+
+    /* Native Titlebar with drag region & Traffic light dots */
+    .titlebar {
+      height: 38px;
+      background: var(--bg-surface);
+      border-bottom: 0.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      justify-content: space-between;
+      position: relative;
+      user-select: none;
+    }
+
+    .traffic-lights {
+      display: flex;
+      gap: 8px;
+    }
+
+    .traffic-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #E5E5EA;
+    }
+    .dot-close { background: #FF5F56; }
+    .dot-min { background: #FFBD2E; }
+    .dot-zoom { background: #27C93F; }
+
+    .window-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
+
+    .window-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Native theme toggle switch */
+    .theme-toggle-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .theme-toggle-btn:hover { color: var(--text); }
+
+    /* ==========================================================================
+       ITERATION NAV SELECTOR (The 5 Iterations)
+       ========================================================================== */
+    .iteration-nav {
+      background: var(--bg-surface);
+      border-bottom: 0.5px solid var(--border);
+      padding: 8px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .iteration-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+    }
+
+    .iteration-tabs {
+      display: flex;
+      gap: 2px;
+      background: var(--bg-subtle);
+      padding: 2px;
+      border-radius: 6px;
+      border: 0.5px solid var(--border);
+    }
+
+    .iter-tab {
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .iter-tab:hover { color: var(--text); }
+    .iter-tab.active {
+      background: var(--bg);
+      color: var(--text);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    /* ==========================================================================
+       WORKSPACE VIEWPORTS
+       ========================================================================== */
+    .viewport-body {
+      flex: 1;
+      padding: 24px 32px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Clean structural sections */
+    .surface-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 4px;
+      border-bottom: 0.5px solid var(--border);
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      letter-spacing: 0.04em;
+    }
+
+    .section-count {
+      font-size: 11px;
+      color: var(--text-tertiary);
+    }
+
+    /* Typewriter textarea */
+    .brain-dump-input {
+      width: 100%;
+      height: 110px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--text);
+      outline: none;
+      resize: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .brain-dump-input:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px var(--accent-dim);
+    }
+
+    .actions-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    /* Apple flat buttons */
+    .btn {
+      height: 28px;
+      padding: 0 12px;
+      font-size: 12px;
+      font-weight: 500;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-family: var(--font-text);
+      transition: all 0.15s;
+    }
+    .btn-blue {
+      background: var(--accent);
+      color: #FFFFFF;
+      border: none;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.08), inset 0 -1px 0 rgba(0,0,0,0.06);
+    }
+    .btn-blue:hover { background: #0063D1; }
+    .btn-blue:disabled { opacity: 0.4; cursor: default; }
+
+    .btn-gray {
+      background: var(--bg-surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-gray:hover { background: var(--bg-subtle); }
+
+    /* ==========================================================================
+       NATIVE INTERACTIVE TASK ROWS & CHECKBOXES
+       ========================================================================== */
+    .task-row {
+      display: grid;
+      grid-template-columns: 22px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      min-height: 38px;
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg);
+      transition: all 0.2s;
+      position: relative;
+    }
+    .task-row:hover {
+      border-color: var(--border-focus);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+    .task-row.is-now {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+    }
+    .task-row.is-done {
+      opacity: 0.55;
+    }
+    .task-row.is-done .task-title-input {
+      text-decoration: line-through;
+      color: var(--text-secondary);
+    }
+
+    /* Native checked bubble dot */
+    .task-checkbox {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      background: var(--bg);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+    .task-checkbox::after {
+      content: '✓';
+      font-size: 11px;
+      font-weight: 700;
+      color: #FFFFFF;
+      opacity: 0;
+      transform: scale(0.6);
+      transition: all 0.15s;
+    }
+    .task-row.is-done .task-checkbox {
+      background: var(--success);
+      border-color: var(--success);
+    }
+    .task-row.is-done .task-checkbox::after {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .task-title-input {
+      background: transparent;
+      border: 1px solid transparent;
+      font-family: var(--font-text);
+      font-size: 13px;
+      color: var(--text);
+      outline: none;
+      width: 100%;
+      padding: 2px 4px;
+      transition: all 0.15s;
+    }
+    .task-title-input:focus {
+      border-color: var(--border-focus);
+      background: var(--bg);
+      border-radius: 4px;
+    }
+
+    .task-actions {
+      display: flex;
+      gap: 4px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .task-row:hover .task-actions {
+      opacity: 1;
+    }
+
+    .task-btn {
+      padding: 3px 6px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      border-radius: 4px;
+      background: var(--bg-subtle);
+      border: 0.5px solid var(--border);
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-family: var(--font-text);
+    }
+    .task-btn:hover {
+      background: var(--border);
+      color: var(--text);
+    }
+
+    .empty-placeholder {
+      padding: 16px;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      color: var(--text-tertiary);
+      text-align: center;
+      font-size: 12px;
+    }
+
+    /* Inline Badges (Jira & Handles) */
+    .badge {
+      font-weight: 600;
+      font-size: 12px;
+      padding: 1px 5px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: inline-flex;
+      align-items: center;
+    }
+    .badge-jira {
+      font-family: var(--font-mono);
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid rgba(0, 122, 255, 0.12);
+    }
+    .badge-jira:hover {
+      background: var(--accent);
+      color: #FFFFFF;
+    }
+    .badge-handle {
+      color: var(--success);
+      background: var(--success-soft);
+      border: 1px solid rgba(52, 199, 89, 0.12);
+    }
+    .badge-handle:hover {
+      background: var(--success);
+      color: #FFFFFF;
+    }
+
+    /* ==========================================================================
+       NATIVE APPLE MACOS POPOVER CARD
+       ========================================================================== */
+    .apple-popover {
+      position: absolute;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 10px 32px rgba(0,0,0,0.12), 0 1px 4px rgba(0,0,0,0.06);
+      width: 250px;
+      padding: 14px;
+      z-index: 100;
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      animation: popoverFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes popoverFadeIn {
+      from { opacity: 0; transform: scale(0.95) translateY(4px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    /* Popover triangular anchor arrow */
+    .apple-popover::before {
+      content: '';
+      position: absolute;
+      top: -6px;
+      left: 24px;
+      width: 10px;
+      height: 10px;
+      background: var(--bg);
+      border-left: 1px solid var(--border);
+      border-top: 1px solid var(--border);
+      transform: rotate(45deg);
+    }
+
+    .popover-header {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      letter-spacing: 0.04em;
+    }
+
+    .popover-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .popover-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    /* ==========================================================================
+       ITERATION 2: SPLIT COLUMN WORKSPACE
+       ========================================================================== */
+    .split-container {
+      display: flex;
+      gap: 20px;
+      height: 100%;
+    }
+    .split-col {
+      width: 50%;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* ==========================================================================
+       ITERATION 3: COMPACT SPOTLIGHT SEARCH BAR
+       ========================================================================== */
+    .spotlight-search-box {
+      width: 100%;
+      height: 42px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0 16px;
+      font-family: var(--font-text);
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);
+      transition: all 0.2s;
+    }
+    .spotlight-search-box:focus-within {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px var(--accent-dim);
+    }
+    .spotlight-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      flex: 1;
+      font-size: 14px;
+      color: var(--text);
+    }
+
+    /* ==========================================================================
+       ITERATION 4: CHRONO TIMELINE
+       ========================================================================== */
+    .chrono-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+      padding-left: 20px;
+    }
+    .chrono-list::before {
+      content: '';
+      position: absolute;
+      left: 6px;
+      top: 4px;
+      bottom: 4px;
+      width: 2px;
+      background: var(--border);
+    }
+    .chrono-row {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .chrono-dot {
+      position: absolute;
+      left: -18px;
+      top: 5px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 2px solid var(--accent);
+      z-index: 2;
+    }
+    .chrono-row.is-done .chrono-dot {
+      border-color: var(--success);
+      background: var(--success);
+    }
+    .chrono-time-pill {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* ==========================================================================
+       ITERATION 5: DOPAMINE CONFETTI CANVAS & VEILS
+       ========================================================================== */
+    #dopamineCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 200;
+    }
+
+    /* Particle celebration dot */
+    .celebration-toast {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      opacity: 0;
+      background: rgba(0, 0, 0, 0.85);
+      color: #FFFFFF;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+      z-index: 210;
+    }
+    .celebration-toast.active {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ==========================================================================
+       ACCORDION CASCADE SUBTASKS
+       ========================================================================== */
+    .accordion-cascade-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px;
+      border-top: 0.5px solid var(--border);
+      padding-top: 12px;
+    }
+    .accordion-step {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      transition: all 0.2s;
+    }
+    .accordion-step.faded {
+      opacity: 0.3;
+      pointer-events: none;
+    }
+    .accordion-step.active {
+      opacity: 1;
+      pointer-events: auto;
+      color: var(--text);
+      font-weight: 500;
+    }
+    .accordion-step.done {
+      text-decoration: line-through;
+      color: var(--text-tertiary);
+    }
+    .accordion-step-check {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .accordion-step.done .accordion-step-check {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* Interruption Overlay within Window bounds */
+    .local-interruption-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg-surface);
+      z-index: 150;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      animation: slideInFromTop 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes slideInFromTop {
+      from { transform: translateY(-100%); }
+      to { transform: translateY(0); }
+    }
+    .local-interruption-card {
+      width: 100%;
+      max-width: 440px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==========================================================================
+       THE MAIN PREMIUM MAC WINDOW SHELL
+       ========================================================================== -->
+  <div class="electron-window">
+    
+    <!-- Confetti canvas built directly inside the Electron window for containment -->
+    <canvas id="dopamineCanvas"></canvas>
+
+    <!-- macOS Window Titlebar -->
+    <header class="titlebar">
+      <div class="traffic-lights">
+        <span class="traffic-dot dot-close"></span>
+        <span class="traffic-dot dot-min"></span>
+        <span class="traffic-dot dot-zoom"></span>
+      </div>
+      <span class="window-title">today-i · daily focus companion</span>
+      
+      <div class="window-controls">
+        <button class="theme-toggle-btn" onclick="toggleThemeMode()">
+          🌓 <span id="themeToggleText">Dark Mode</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- 5-Iteration Selector bar -->
+    <div class="iteration-nav">
+      <span class="iteration-label">Visual Planning Iterations</span>
+      <div class="iteration-tabs">
+        <div class="iter-tab active" id="tab-1" onclick="switchIteration(1)">1. Clean Standard</div>
+        <div class="iter-tab" id="tab-2" onclick="switchIteration(2)">2. Split Column</div>
+        <div class="iter-tab" id="tab-3" onclick="switchIteration(3)">3. Spotlight Search</div>
+        <div class="iter-tab" id="tab-4" onclick="switchIteration(4)">4. Chrono Timeline</div>
+        <div class="iter-tab" id="tab-5" onclick="switchIteration(5)">5. Dopamine Zen</div>
+      </div>
+    </div>
+
+    <!-- Interruption local screen wake-up overlay (Mac restoration) -->
+    <div class="local-interruption-screen" id="localInterruption">
+      <div class="local-interruption-card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span class="popover-header" style="color:var(--accent);">Interruption Recovery Time Machine</span>
+          <span style="font-size:11px; color:var(--text-secondary);">Interrupted 12m ago</span>
+        </div>
+        <h3 class="popover-title" style="font-size: 1.5rem; font-family: var(--font-display);">Welcome back, Ofer.</h3>
+        <p class="popover-desc">
+          You were working on:
+          <br><strong id="interruptTaskTitleText">Prep for meeting with @Maya about CROSS-141</strong>
+        </p>
+
+        <div class="surface-section">
+          <span class="field-label">Where did you leave off? (Capture mindset instantly)</span>
+          <input type="text" id="mindsetRestoreInput" placeholder="Prisma BE schema migrations verified, now wiring connected account table row FE...">
+        </div>
+
+        <div style="display:flex; gap:8px; justify-content:flex-end;">
+          <button class="btn btn-gray" onclick="cancelInterruption()">Skip</button>
+          <button class="btn btn-blue" onclick="restoreContext()">Restore Context</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Mindset Banner pinned at the top of the workspace on restore -->
+    <div style="background:var(--success-soft); border-bottom:0.5px solid var(--success); padding: 8px 32px; display:none;" id="mindsetBanner">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:11px; color:var(--success); font-weight:600;">✦ RESTORED MINDSET CONTEXT: <span id="mindsetText" style="font-weight:400; color:var(--text);"></span></span>
+        <button style="background:transparent; border:none; cursor:pointer; color:var(--text-secondary); font-size:10px;" onclick="closeMindsetBanner()">✕</button>
+      </div>
+    </div>
+
+    <!-- ==========================================================================
+         VIEWPORT A: ITERATION 1: The Clean Standard macOS
+         ========================================================================== -->
+    <section class="viewport-body active" id="view-1">
+      
+      <!-- Raw input brain dump section -->
+      <section class="surface-section">
+        <div class="section-header">
+          <span class="section-title">What's in your head?</span>
+          <span class="section-count">Write it messy. Extract blocks after.</span>
+        </div>
+        <textarea class="brain-dump-input" id="v1TextArea" placeholder="Tasks, links, worries, people to ping, things you might forget...
+
+- Prep for meeting with @Maya about CROSS-141 tomorrow morning #cross
+- Review smartviews-sdk PR #30 approach with @Aram
+- Deployed hq-user-sync following PP doc with @Sergey
+- Remember to Register Zoe to Gan #personal"></textarea>
+        <div class="actions-row">
+          <button class="btn btn-blue" onclick="v1AddSelected()">Add Selected</button>
+          <button class="btn btn-gray" onclick="v1SplitLines()">Split Lines</button>
+        </div>
+      </section>
+
+      <!-- Now Section -->
+      <section class="surface-section">
+        <span class="section-title" style="color:var(--accent);">Now focusing on</span>
+        <div id="v1NowContainer">
+          <!-- Spotlight Now block gets rendered here -->
+        </div>
+      </section>
+
+      <!-- Today Section -->
+      <section class="surface-section">
+        <div class="section-header">
+          <span class="section-title">Today</span>
+          <span class="section-count" id="v1TodayCount">2 active</span>
+        </div>
+        <div class="flex-col" id="v1TodayContainer" style="gap:6px;">
+          <!-- Today active blocks list -->
+        </div>
+      </section>
+
+      <!-- Later Section -->
+      <section class="surface-section">
+        <div class="section-header">
+          <span class="section-title">Later / Waiting</span>
+          <span class="section-count" id="v1LaterCount">1 parked</span>
+        </div>
+        <div class="flex-col" id="v1LaterContainer" style="gap:6px;">
+          <!-- Parked blocks list -->
+        </div>
+      </section>
+
+    </section>
+
+    <!-- ==========================================================================
+         VIEWPORT B: ITERATION 2: Dual Column Split Editorial
+         ========================================================================== -->
+    <section class="viewport-body" id="view-2">
+      <div class="split-container">
+        
+        <!-- Left Column: Brain dump -->
+        <div class="split-col" style="border-right: 0.5px solid var(--border); padding-right: 12px;">
+          <span class="section-title">Type raw daily thoughts</span>
+          <textarea class="brain-dump-input" id="v2TextArea" style="height: 380px;" placeholder="Write raw daily plans... Highlight lines to cast, or click split below.
+
+- Prep for meeting with @Maya about CROSS-141 tomorrow morning #cross
+- Review smartviews-sdk PR #30 approach with @Aram
+- Deployed hq-user-sync following PP doc with @Sergey
+- Remember to Register Zoe to Gan #personal"></textarea>
+          <div class="actions-row">
+            <button class="btn btn-blue" onclick="v2AddSelected()">Add Selected</button>
+            <button class="btn btn-gray" onclick="v2SplitLines()">Split Lines</button>
+          </div>
+        </div>
+
+        <!-- Right Column: Active Task stack -->
+        <div class="split-col" style="overflow-y: auto;">
+          <span class="section-title" style="color:var(--accent);">Now focuses</span>
+          <div id="v2NowContainer"></div>
+          
+          <div class="section-header" style="margin-top: 10px;">
+            <span class="section-title">Today Stack</span>
+            <span class="section-count" id="v2TodayCount">2 active</span>
+          </div>
+          <div class="flex-col" id="v2TodayContainer" style="gap:6px;"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         VIEWPORT C: ITERATION 3: Spotlight Search Bar
+         ========================================================================== -->
+    <section class="viewport-body" id="view-3">
+      
+      <!-- Spotlight Search Input -->
+      <div class="spotlight-search-box">
+        <span style="font-size: 16px;">🔍</span>
+        <input type="text" class="spotlight-input" id="v3Search" placeholder="Search intentions, write quick task, or type CROSS-141..." onkeydown="handleV3SearchEnter(event)">
+        <span style="font-size:10px; color:var(--text-tertiary);">[Enter] to add block</span>
+      </div>
+
+      <!-- Large Centerpiece active spotlight block -->
+      <section class="surface-section" style="margin: 20px 0;">
+        <span class="section-title" style="color:var(--accent); font-size:11px; text-align:center; display:block;">Active Spotlight focus</span>
+        <div id="v3NowContainer" style="margin-top: 12px; display:flex; justify-content:center;">
+          <!-- Centered spotlight task -->
+        </div>
+      </section>
+
+      <!-- Today list -->
+      <section class="surface-section">
+        <div class="section-header">
+          <span class="section-title">Active Daily Queue</span>
+          <span class="section-count" id="v3TodayCount">2 active</span>
+        </div>
+        <div class="flex-col" id="v3TodayContainer" style="gap:6px;"></div>
+      </section>
+
+    </section>
+
+    <!-- ==========================================================================
+         VIEWPORT D: ITERATION 4: Chronological Timeline
+         ========================================================================== -->
+    <section class="viewport-body" id="view-4">
+      
+      <!-- Quick input at top -->
+      <div class="actions-row" style="background:var(--bg-surface); padding: 8px 12px; border-radius:6px; border:0.5px solid var(--border);">
+        <input type="text" id="v4QuickAdd" placeholder="Quick schedule a block (e.g. CROSS-672 at 10:30 AM)..." style="flex:1; height:28px;" onkeydown="handleV4SearchEnter(event)">
+        <button class="btn btn-blue" onclick="v4QuickAddBlock()">Add block</button>
+      </div>
+
+      <div class="split-container" style="margin-top:16px;">
+        <!-- Left Column: Chronological line -->
+        <div class="split-col" style="border-right: 0.5px solid var(--border); padding-right:12px;">
+          <span class="section-title">Schedule line</span>
+          
+          <div class="chrono-list" id="v4ChronoContainer">
+            <!-- Timeline task rows -->
+          </div>
+        </div>
+
+        <!-- Right Column: Unplanned/Later pile -->
+        <div class="split-col" style="overflow-y:auto;">
+          <span class="section-title" style="color:var(--text-secondary);">Unplanned flexible stash</span>
+          <div class="flex-col" id="v4StashContainer" style="gap:6px;">
+            <!-- Parked flex tasks -->
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==========================================================================
+         VIEWPORT E: ITERATION 5: Dopamine Zen
+         ========================================================================== -->
+    <section class="viewport-body" id="view-5" style="align-items:center; justify-content:center; padding: 48px;">
+      
+      <div class="flex-col" style="width:100%; max-width: 520px; text-align:center; gap:24px;">
+        <span class="popover-header" style="color:var(--accent); font-size:11px;">Zen focus Stage</span>
+        
+        <div id="v5SpotlightStage">
+          <!-- Active spotlight element -->
+        </div>
+
+        <div style="font-size:11px; color:var(--text-secondary); line-height: 1.5; font-style:italic;">
+          Tapping 'Complete Task' or checking subtask steps triggers a crisp, physical particle shower of checkmarks and green dots directly inside the window, satisfying your brain's dopamine craving.
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Apple Popover Popup Card overlay -->
+    <div class="apple-popover" id="applePopover">
+      <div class="popover-header" id="popoverMeta">JIRA TICKET DETS</div>
+      <div class="popover-title" id="popoverTitle">Title of Ticket</div>
+      <p class="popover-desc" id="popoverDesc">Description of issue and details.</p>
+    </div>
+
+    <!-- Dopamine celebration toast bubble -->
+    <div class="celebration-toast" id="celebrationToast">
+      <span style="font-size:16px;">🎉</span>
+      <span id="celebrationToastText">CROSS-141 Completed!</span>
+    </div>
+
+  </div>
+
+  <!-- ==========================================================================
+       JAVASCRIPT LOGIC ENGINE
+       ========================================================================== -->
+  <script>
+    // --------------------------------------------------------------------------
+    // STATIC BLOCK ARRAY DATABASE (Seeded with Ofer's real Slack records)
+    // --------------------------------------------------------------------------
+    let blockArray = [
+      { 
+        id: 1, 
+        content: "Prep for meeting with @Maya about CROSS-141", 
+        status: "now", 
+        time: "10:30 AM",
+        subtasks: [
+          { text: "Review Prisma migrations stg13", done: true },
+          { text: "Confirm backward compatibility with @Sergey", done: false },
+          { text: "Verify Okta OAuth redirect clientID", done: false }
+        ]
+      },
+      { 
+        id: 2, 
+        content: "Review smartviews-sdk PR #30 with @Aram", 
+        status: "today", 
+        time: "01:00 PM",
+        subtasks: []
+      },
+      { 
+        id: 3, 
+        content: "Check stg13 zendesk integrations token with @Aram", 
+        status: "later", 
+        time: "03:30 PM",
+        subtasks: []
+      },
+      { 
+        id: 4, 
+        content: "Register Zoe to Gan #personal", 
+        status: "today", 
+        time: "04:30 PM",
+        subtasks: []
+      }
+    ];
+
+    // Mock Jira and Handle info database for macOS popover tooltips
+    const MOCK_TOOLTIPS = {
+      "CROSS-141": {
+        meta: "Jira Epic: Core Consolidation",
+        title: "CROSS-141: Instance Billing Info Sync BE",
+        desc: "Wire database consumers to sync billing settings for newly initialized guesty instances.<br><strong>Status:</strong> In review | <strong>PR:</strong> #122"
+      },
+      "CROSS-672": {
+        meta: "Jira Epic: Consolidate Organization",
+        title: "CROSS-672: Connected Org Admin consent flow",
+        desc: "Build admin portal dialogs letting standalone users consent to link under organization HQs.<br><strong>Status:</strong> In progress | <strong>PR:</strong> #8"
+      },
+      "CROSS-568": {
+        meta: "Jira Task: PAC Brands",
+        title: "CROSS-568: Tags assignment bug check",
+        desc: "Investigate tag-based assignments resetting on S3 bucket syncs on stg13.<br><strong>Status:</strong> Pending QA | <strong>Assignee:</strong> Simon"
+      },
+      "@Sergey": {
+        meta: "Teammate Profile",
+        title: "Sergey Polakevitch (Principal Developer)",
+        desc: "Collaborating on Guesty HQ consumer schemas and Okta user group auth migrations.<br><strong>Active topic:</strong> Temporal Otel tracing."
+      },
+      "@Aram": {
+        meta: "Teammate Profile",
+        title: "Aram G. (Engineering Director)",
+        desc: "Aligning on smartviews-sdk filters approaches and release procedures.<br><strong>Active topic:</strong> PR #30 approval."
+      },
+      "@Simon": {
+        meta: "Teammate Profile",
+        title: "Simon (Senior Developer)",
+        desc: "Expert on PAC database structures, tags counter inconsistencies, and S3 deployments.<br><strong>Active topic:</strong> CROSS-568 brand tag patches."
+      },
+      "@Maya": {
+        meta: "Teammate Profile",
+        title: "Maya (Product Manager)",
+        desc: "Designing Organization admin panel features, billing settings forms, and consent widgets.<br><strong>Meeting:</strong> Today at 10:30 AM."
+      }
+    };
+
+    let activeIteration = 1;
+    let selectedText = "";
+
+    // --------------------------------------------------------------------------
+    // REAL-TIME INLINE BADGE REGEX PARSER
+    // --------------------------------------------------------------------------
+    function parseTextToEmbeddedBadges(text) {
+      let parsed = text.replace(/([A-Z]+-\d+)/g, '<span class="badge badge-jira" onclick="showApplePopover(event, \'$1\')">$1</span>');
+      parsed = parsed.replace(/(@\w+)/g, '<span class="badge badge-handle" onclick="showApplePopover(event, \'$1\')">$1</span>');
+      parsed = parsed.replace(/(#\w+)/g, '<span class="hashtag-badge">$1</span>');
+      return parsed;
+    }
+
+    // --------------------------------------------------------------------------
+    // THEME & VIEWPORT NAV CONTROLLER
+    // --------------------------------------------------------------------------
+    function toggleThemeMode() {
+      const windowEl = document.querySelector('.electron-window');
+      windowEl.classList.toggle('theme-dark');
+      const isDark = windowEl.classList.contains('theme-dark');
+      document.getElementById('themeToggleText').innerText = isDark ? "Light Mode" : "Dark Mode";
+    }
+
+    function switchIteration(num) {
+      activeIteration = num;
+      
+      // Update iteration selector tab classes
+      document.querySelectorAll('.iter-tab').forEach(tab => tab.classList.remove('active'));
+      document.getElementById(`tab-${num}`).classList.add('active');
+
+      // Update viewport block display
+      document.querySelectorAll('.electron-window > .viewport-body').forEach(el => el.classList.remove('active'));
+      document.getElementById(`view-${num}`).classList.add('active');
+
+      renderActiveIteration();
+      hideApplePopover();
+    }
+
+    // --------------------------------------------------------------------------
+    // UNIVERSAL RENDER MATRIX FOR ALL 5 ITERATIONS
+    // --------------------------------------------------------------------------
+    function renderActiveIteration() {
+      // 1. Clear contents across all viewport containers
+      const containers = [
+        "v1NowContainer", "v1TodayContainer", "v1LaterContainer",
+        "v2NowContainer", "v2TodayContainer",
+        "v3NowContainer", "v3TodayContainer",
+        "v4ChronoContainer", "v4StashContainer",
+        "v5SpotlightStage"
+      ];
+      containers.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = '';
+      });
+
+      const now = blockArray.find(b => b.status === 'now');
+      const today = blockArray.filter(b => b.status === 'today');
+      const later = blockArray.filter(b => b.status === 'later');
+
+      // --- ITERATION 1: Standard Apple clean split-lines planner ---
+      if (activeIteration === 1) {
+        // Spotlight Focus
+        const nowBox = document.getElementById('v1NowContainer');
+        if (now) {
+          nowBox.appendChild(buildNativeTaskRow(now, 'now'));
+        } else {
+          nowBox.innerHTML = '<div class="empty-placeholder">No active focus. Toggle Today tasks to Focus!</div>';
+        }
+
+        // Today items
+        const todayBox = document.getElementById('v1TodayContainer');
+        if (today.length > 0) {
+          today.forEach(t => todayBox.appendChild(buildNativeTaskRow(t)));
+        } else {
+          todayBox.innerHTML = '<div class="empty-placeholder">Today stack is clear. Extract tasks above!</div>';
+        }
+        document.getElementById('v1TodayCount').innerText = `${today.length} active`;
+
+        // Later items
+        const laterBox = document.getElementById('v1LaterContainer');
+        if (later.length > 0) {
+          later.forEach(t => laterBox.appendChild(buildNativeTaskRow(t)));
+        } else {
+          laterBox.innerHTML = '<div class="empty-placeholder">Later stash is empty.</div>';
+        }
+        document.getElementById('v1LaterCount').innerText = `${later.length} parked`;
+      }
+
+      // --- ITERATION 2: Dual Column split editorial ---
+      if (activeIteration === 2) {
+        const nowBox = document.getElementById('v2NowContainer');
+        if (now) nowBox.appendChild(buildNativeTaskRow(now, 'now'));
+        else nowBox.innerHTML = '<div class="empty-placeholder">No active focus.</div>';
+
+        const todayBox = document.getElementById('v2TodayContainer');
+        if (today.length > 0) {
+          today.forEach(t => todayBox.appendChild(buildNativeTaskRow(t)));
+        } else {
+          todayBox.innerHTML = '<div class="empty-placeholder">Pull blocks from the editor.</div>';
+        }
+        document.getElementById('v2TodayCount').innerText = `${today.length} active`;
+      }
+
+      // --- ITERATION 3: Spotlight search-style ---
+      if (activeIteration === 3) {
+        const nowBox = document.getElementById('v3NowContainer');
+        if (now) {
+          nowBox.appendChild(buildSpotlightCenterCard(now));
+        } else {
+          nowBox.innerHTML = '<div class="empty-placeholder" style="width:100%;">No current focus block.</div>';
+        }
+
+        const todayBox = document.getElementById('v3TodayContainer');
+        if (today.length > 0) {
+          today.forEach(t => todayBox.appendChild(buildNativeTaskRow(t)));
+        } else {
+          todayBox.innerHTML = '<div class="empty-placeholder">Search list is empty.</div>';
+        }
+        document.getElementById('v3TodayCount').innerText = `${today.length} active`;
+      }
+
+      // --- ITERATION 4: Chronological timeline strip ---
+      if (activeIteration === 4) {
+        const chronoBox = document.getElementById('v4ChronoContainer');
+        // Sort items by scheduled times
+        const scheduled = blockArray.filter(b => b.status === 'now' || b.status === 'today');
+        if (scheduled.length > 0) {
+          scheduled.forEach(t => chronoBox.appendChild(buildChronoTimelineRow(t)));
+        } else {
+          chronoBox.innerHTML = '<div class="empty-placeholder">No scheduled blocks. Add times inside cards!</div>';
+        }
+
+        const stashBox = document.getElementById('v4StashContainer');
+        if (later.length > 0) {
+          later.forEach(t => stashBox.appendChild(buildNativeTaskRow(t)));
+        } else {
+          stashBox.innerHTML = '<div class="empty-placeholder">Stash is empty.</div>';
+        }
+      }
+
+      // --- ITERATION 5: Dopamine Zen focus spotlight ---
+      if (activeIteration === 5) {
+        const stage = document.getElementById('v5SpotlightStage');
+        if (now) {
+          stage.appendChild(buildSpotlightCenterCard(now));
+        } else {
+          stage.innerHTML = '<div class="empty-placeholder" style="padding: 40px;">No current active task. Switch Iteration 1 to plan Today!</div>';
+        }
+      }
+    }
+
+    // --------------------------------------------------------------------------
+    // NATIVE CARD BUILDERS
+    // --------------------------------------------------------------------------
+    function buildNativeTaskRow(task, variant) {
+      const isDone = task.status === 'done';
+      const div = document.createElement('div');
+      div.className = `task-row ${variant === 'now' ? 'is-now' : ''} ${isDone ? 'is-done' : ''}`;
+      
+      div.innerHTML = `
+        <div class="task-checkbox" onclick="toggleTaskDone(${task.id})"></div>
+        <div style="flex:1; display:flex; flex-direction:column; gap:2px;">
+          <div class="task-title-input">${parseTextToEmbeddedBadges(task.content)}</div>
+          ${task.time ? `<span style="font-family:var(--font-mono); font-size:10px; color:var(--accent);">${task.time}</span>` : ''}
+        </div>
+        <div class="task-actions">
+          ${task.status !== 'now' && !isDone ? `<button class="task-btn" onclick="setTaskStatus(${task.id}, 'now')">Now</button>` : ''}
+          ${task.status !== 'today' && !isDone ? `<button class="task-btn" onclick="setTaskStatus(${task.id}, 'today')">Today</button>` : ''}
+          ${task.status !== 'later' && !isDone ? `<button class="task-btn" onclick="setTaskStatus(${task.id}, 'later')">Later</button>` : ''}
+          <button class="task-btn" onclick="deleteTaskRow(${task.id})" style="color:var(--danger);">Drop</button>
+        </div>
+      `;
+      return div;
+    }
+
+    function buildSpotlightCenterCard(task) {
+      const isDone = task.status === 'done';
+      const div = document.createElement('div');
+      div.className = 'spotlight-card';
+      
+      // Accordion cascade items list
+      let cascadeHtml = '';
+      if (task.subtasks && task.subtasks.length > 0) {
+        cascadeHtml += '<ul class="accordion-cascade-list">';
+        
+        let firstActiveFound = false;
+        task.subtasks.forEach((sub, sIdx) => {
+          let itemClass = 'accordion-step';
+          if (sub.done) {
+            itemClass += ' done';
+          } else if (!firstActiveFound) {
+            itemClass += ' active';
+            firstActiveFound = true;
+          } else {
+            itemClass += ' faded';
+          }
+
+          cascadeHtml += `
+            <li class="${itemClass}" onclick="clickCascadeSubtask(${task.id}, ${sIdx}, event)">
+              <div class="accordion-step-check"></div>
+              <span>${parseTextToEmbeddedBadges(sub.text)}</span>
+            </li>
+          `;
+        });
+        
+        cascadeHtml += '</ul>';
+      }
+
+      div.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+          <span class="popover-header" style="color:var(--accent);">Now focusing</span>
+          <span style="font-family:var(--font-mono); font-size:10px; color:var(--text-secondary);">${task.time || 'flexible'}</span>
+        </div>
+        <h2 class="main-page-title" style="font-size: 1.5rem; margin-bottom: 16px;">
+          ${parseTextToEmbeddedBadges(task.content)}
+        </h2>
+        
+        ${cascadeHtml}
+
+        <div style="display:flex; gap:8px; margin-top:24px;">
+          <button class="btn btn-gray" style="flex:1;" onclick="triggerLocalInterruption(${task.id})">Simulate Interruption</button>
+          <button class="btn btn-blue" style="flex:2;" onclick="completeSpotlightCard(${task.id}, event)">Complete Task</button>
+        </div>
+      `;
+      return div;
+    }
+
+    function buildChronoTimelineRow(task) {
+      const isDone = task.status === 'done';
+      const div = document.createElement('div');
+      div.className = `chrono-row ${isDone ? 'is-done' : ''}`;
+      div.innerHTML = `
+        <div class="chrono-dot"></div>
+        <div class="chrono-time-pill">${task.time || 'flexible'}</div>
+        <div class="task-row ${task.status === 'now' ? 'is-now' : ''}" style="margin-top: 4px; grid-template-columns: 22px minmax(0, 1fr);">
+          <div class="task-checkbox" onclick="toggleTaskDone(${task.id})"></div>
+          <div class="task-title-input">${parseTextToEmbeddedBadges(task.content)}</div>
+        </div>
+      `;
+      return div;
+    }
+
+    // --------------------------------------------------------------------------
+    // ACTION CONTROLLERS
+    // --------------------------------------------------------------------------
+    function setTaskStatus(id, status) {
+      blockArray = blockArray.map(b => {
+        if (status === 'now' && b.status === 'now' && b.id !== id) {
+          return { ...b, status: 'today' };
+        }
+        if (b.id !== id) return b;
+        return { ...b, status };
+      });
+      renderActiveIteration();
+    }
+
+    function toggleTaskDone(id) {
+      blockArray = blockArray.map(b => {
+        if (b.id !== id) return b;
+        const doneState = b.status === 'done';
+        
+        if (!doneState) {
+          // Trigger confetti visual particle burst on completion!
+          triggerDopamineConfetti(250, 200);
+          showCelebrationToast(`${b.content.substring(0, 20)} Completed!`);
+        }
+        
+        return { ...b, status: doneState ? 'today' : 'done' };
+      });
+      renderActiveIteration();
+    }
+
+    function clickCascadeSubtask(taskId, subIdx, e) {
+      const task = blockArray.find(b => b.id === taskId);
+      if (!task || !task.subtasks) return;
+
+      const sub = task.subtasks[subIdx];
+      // confirm it is active step to toggle
+      const activeIdx = task.subtasks.findIndex(s => !s.done);
+      if (subIdx === activeIdx) {
+        sub.done = true;
+        
+        //Confetti on subtask check!
+        triggerDopamineConfetti(e.clientX - 100, e.clientY - 120);
+        showCelebrationToast(`Step Completed!`);
+        
+        renderActiveIteration();
+      }
+    }
+
+    function completeSpotlightCard(id, e) {
+      const task = blockArray.find(b => b.id === id);
+      if (!task) return;
+
+      // Confetti burst!
+      triggerDopamineConfetti(e.clientX - 100, e.clientY - 120);
+      showCelebrationToast(`${task.content.substring(0, 20)} Completed!`);
+
+      blockArray = blockArray.map(b => (b.id === id ? { ...b, status: 'done' } : b));
+      renderActiveIteration();
+    }
+
+    function deleteTaskRow(id) {
+      blockArray = blockArray.filter(b => b.id !== id);
+      renderActiveIteration();
+    }
+
+    // --------------------------------------------------------------------------
+    // RAW TEXT DUMP EXTRACT MECHANICS
+    // --------------------------------------------------------------------------
+    function parseLinesToBlocks(text) {
+      const clean = text.split('\n').map(l => l.replace(/^[-*•\s]+/, '').trim()).filter(Boolean);
+      if (clean.length === 0) return;
+
+      const nextId = blockArray.reduce((max, b) => Math.max(max, b.id), 0) + 1;
+      const created = clean.map((content, idx) => ({
+        id: nextId + idx,
+        content: content,
+        status: 'today',
+        time: "flexible",
+        subtasks: []
+      }));
+
+      blockArray = [...blockArray, ...created];
+      renderActiveIteration();
+    }
+
+    function v1AddSelected() {
+      const el = document.getElementById('v1TextArea');
+      const start = el.selectionStart;
+      const end = el.selectionEnd;
+      const txt = el.value.substring(start, end).trim();
+      
+      if (txt) {
+        parseLinesToBlocks(txt);
+        // clean highlights
+        el.selectionStart = el.selectionEnd;
+      }
+    }
+
+    function v1SplitLines() {
+      const txt = document.getElementById('v1TextArea').value.trim();
+      if (txt) {
+        parseLinesToBlocks(txt);
+        document.getElementById('v1TextArea').value = '';
+      }
+    }
+
+    function v2AddSelected() {
+      const el = document.getElementById('v2TextArea');
+      const txt = el.value.substring(el.selectionStart, el.selectionEnd).trim();
+      if (txt) {
+        parseLinesToBlocks(txt);
+        el.selectionStart = el.selectionEnd;
+      }
+    }
+
+    function v2SplitLines() {
+      const txt = document.getElementById('v2TextArea').value.trim();
+      if (txt) {
+        parseLinesToBlocks(txt);
+        document.getElementById('v2TextArea').value = '';
+      }
+    }
+
+    function handleV3SearchEnter(e) {
+      if (e.key === 'Enter') {
+        const input = document.getElementById('v3Search');
+        const text = input.value.trim();
+        if (text) {
+          parseLinesToBlocks(text);
+          input.value = '';
+        }
+      }
+    }
+
+    function handleV4SearchEnter(e) {
+      if (e.key === 'Enter') {
+        v4QuickAddBlock();
+      }
+    }
+
+    function v4QuickAddBlock() {
+      const input = document.getElementById('v4QuickAdd');
+      const text = input.value.trim();
+      if (!text) return;
+
+      // Extract raw scheduled time if present e.g. "at 10:30 AM"
+      let time = "flexible";
+      let cleanText = text;
+      const timeMatch = /at (\d+:\d+\s*[APMapm]*)/.exec(text);
+      if (timeMatch && timeMatch[1]) {
+        time = timeMatch[1].trim();
+        cleanText = text.replace(/at \d+:\d+\s*[APMapm]*/, '').trim();
+      }
+
+      const nextId = blockArray.reduce((max, b) => Math.max(max, b.id), 0) + 1;
+      blockArray.push({
+        id: nextId,
+        content: cleanText,
+        status: 'today',
+        time: time,
+        subtasks: []
+      });
+
+      input.value = '';
+      renderActiveIteration();
+    }
+
+    // --------------------------------------------------------------------------
+    // APPLE POPOVER OVERLAY TOOLTIP DRAWING
+    // --------------------------------------------------------------------------
+    function showApplePopover(e, key) {
+      e.stopPropagation();
+      const popover = document.getElementById('applePopover');
+      const meta = document.getElementById('popoverMeta');
+      const title = document.getElementById('popoverTitle');
+      const desc = document.getElementById('popoverDesc');
+
+      const data = MOCK_TOOLTIPS[key] || {
+        meta: "Intention Anchor",
+        title: key,
+        desc: "Teammate profile reference or Jira tracking key in active workflow."
+      };
+
+      meta.innerText = data.meta;
+      title.innerText = data.title;
+      desc.innerHTML = data.desc;
+
+      // Position popover relatively below click
+      const rect = e.target.getBoundingClientRect();
+      const windowRect = document.querySelector('.electron-window').getBoundingClientRect();
+
+      popover.style.display = 'flex';
+      popover.style.left = `${rect.left - windowRect.left - 24}px`;
+      popover.style.top = `${rect.bottom - windowRect.top + 8}px`;
+    }
+
+    function hideApplePopover() {
+      document.getElementById('applePopover').style.display = 'none';
+    }
+
+    document.addEventListener('click', hideApplePopover);
+
+    // --------------------------------------------------------------------------
+    // INTERRUPTION & MINDSET RESTORE SYSTEMS
+    // --------------------------------------------------------------------------
+    let activeInterruptTaskId = null;
+
+    function triggerLocalInterruption(taskId) {
+      activeInterruptTaskId = taskId;
+      const task = blockArray.find(b => b.id === taskId);
+      document.getElementById('interruptTaskTitleText').innerText = task ? task.content : "Active focus";
+
+      document.getElementById('localInterruption').style.display = 'flex';
+      document.getElementById('mindsetRestoreInput').value = '';
+      document.getElementById('mindsetBanner').style.display = 'none';
+    }
+
+    function cancelInterruption() {
+      document.getElementById('localInterruption').style.display = 'none';
+    }
+
+    function restoreContext() {
+      const text = document.getElementById('mindsetRestoreInput').value.trim();
+      const banner = document.getElementById('mindsetBanner');
+      const textNode = document.getElementById('mindsetText');
+
+      if (text) {
+        textNode.innerText = text;
+        banner.style.display = 'block';
+      }
+
+      document.getElementById('localInterruption').style.display = 'none';
+    }
+
+    function closeMindsetBanner() {
+      document.getElementById('mindsetBanner').style.display = 'none';
+    }
+
+    // --------------------------------------------------------------------------
+    // DOPAMINE CELEBRATION SHOWER PHYSICS
+    // --------------------------------------------------------------------------
+    const canvas = document.getElementById("dopamineCanvas");
+    const ctx = canvas.getContext("2d");
+    let particles = [];
+
+    function resizeCanvas() {
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = canvas.parentElement.clientHeight;
+    }
+
+    class Particle {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.size = Math.random() * 4 + 2;
+        this.speedX = Math.random() * 6 - 3;
+        this.speedY = Math.random() * -8 - 3;
+        this.gravity = 0.3;
+        this.color = Math.random() > 0.5 ? '#34C759' : '#007AFF'; // Green & Blue apple particles
+        this.alpha = 1;
+        this.decay = Math.random() * 0.02 + 0.01;
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        this.speedY += this.gravity;
+        this.alpha -= this.decay;
+      }
+      draw() {
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    function triggerDopamineConfetti(x, y) {
+      resizeCanvas();
+      for (let i = 0; i < 30; i++) {
+        particles.push(new Particle(x, y));
+      }
+    }
+
+    function animateConfetti() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = particles.length - 1; i >= 0; i--) {
+        particles[i].update();
+        particles[i].draw();
+        if (particles[i].alpha <= 0) {
+          particles.splice(i, 1);
+        }
+      }
+      requestAnimationFrame(animateConfetti);
+    }
+    requestAnimationFrame(animateConfetti);
+
+    function showCelebrationToast(text) {
+      const toast = document.getElementById('celebrationToast');
+      document.getElementById('celebrationToastText').innerText = text;
+      toast.classList.add('active');
+
+      setTimeout(() => {
+        toast.classList.remove('active');
+      }, 2000);
+    }
+
+    // --------------------------------------------------------------------------
+    // WINDOW ONLOAD INITIALIZATION
+    // --------------------------------------------------------------------------
+    window.onload = () => {
+      renderActiveIteration();
+      window.addEventListener('resize', resizeCanvas);
+    };
+  </script>
+</body>
+</html>

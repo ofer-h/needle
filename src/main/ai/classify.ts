@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import type { ClassificationResult } from '../../shared/types';
+import type { ClassificationResult, ParsedPlanningItem } from '../../shared/types';
 import { needleLog } from '../log';
 import { mintFlowId, recordFlowEvent } from '../services/flow-health';
 import { getApiKey, getApiKeySource } from './config';
@@ -7,7 +7,7 @@ import { getApiKey, getApiKeySource } from './config';
 const MODEL = 'claude-haiku-4-5-20251001';
 const CLASSIFY_TIMEOUT_MS = 30_000;
 
-const SYSTEM_PROMPT = `You classify quick-capture text for a personal productivity app.
+const SYSTEM_PROMPT = `You parse quick-capture text for an AI-assisted daily planning app.
 Return ONLY valid JSON with this exact shape (no markdown, no extra keys):
 {
   "bucket": "today" | "tomorrow" | "later" | "someday",
@@ -15,15 +15,106 @@ Return ONLY valid JSON with this exact shape (no markdown, no extra keys):
   "suggestedDate": string | null,
   "suggestedTime": string | null,
   "reasoning": string,
-  "confidence": number
+  "confidence": number,
+  "items": [
+    {
+      "id": string,
+      "itemType": "task" | "event",
+      "scheduleMode": "flexible" | "fixed",
+      "title": string,
+      "bucket": "today" | "tomorrow" | "later" | "someday",
+      "suggestedDate": string | null,
+      "suggestedTime": string | null,
+      "reasoning": string,
+      "confidence": number
+    }
+  ]
 }
 Rules:
+- Split multiple intentions into separate items.
+- itemType event only when the text describes a hard-time calendar commitment or appointment. Otherwise use task.
+- scheduleMode fixed only when a strict wall-clock time is explicit. Otherwise use flexible.
 - bucket: when the user should act (today/tomorrow/later/someday).
 - title: short imperative or noun phrase, max ~80 chars.
 - suggestedDate: ISO date YYYY-MM-DD if implied, else null.
-- suggestedTime: 24h HH:mm if implied, else null.
+- suggestedTime: 24h HH:mm if a strict time is implied, else null.
 - reasoning: one short sentence for the user.
-- confidence: 0.0 to 1.0.`;
+- confidence: 0.0 to 1.0.
+- Top-level bucket/title should summarize the overall capture.`;
+
+const BUCKETS = ['today', 'tomorrow', 'later', 'someday'] as const;
+const ITEM_TYPES = ['task', 'event'] as const;
+const SCHEDULE_MODES = ['flexible', 'fixed'] as const;
+
+function optionalString(record: Record<string, unknown>, key: string): string | undefined {
+  const value = record[key];
+  if (value === null || value === undefined || value === '') return undefined;
+  return String(value);
+}
+
+function parsePlanningItems(record: Record<string, unknown>): ParsedPlanningItem[] | { error: string } {
+  const rawItems = Array.isArray(record.items) ? record.items : undefined;
+  if (rawItems === undefined || rawItems.length === 0) {
+    const suggestedDate = optionalString(record, 'suggestedDate');
+    const suggestedTime = optionalString(record, 'suggestedTime');
+    const item: ParsedPlanningItem = {
+      id: 'parsed-1',
+      itemType: 'task',
+      scheduleMode: suggestedTime === undefined ? 'flexible' : 'fixed',
+      title: String(record.title).trim(),
+      bucket: record.bucket as ClassificationResult['bucket'],
+      reasoning: String(record.reasoning).trim(),
+      confidence: Number(record.confidence),
+    };
+    if (suggestedDate !== undefined) item.suggestedDate = suggestedDate;
+    if (suggestedTime !== undefined) item.suggestedTime = suggestedTime;
+    return [item];
+  }
+
+  const items: ParsedPlanningItem[] = [];
+  for (const [index, raw] of rawItems.entries()) {
+    if (raw === null || typeof raw !== 'object') {
+      return { error: 'Model returned invalid parsed item' };
+    }
+
+    const item = raw as Record<string, unknown>;
+    if (!ITEM_TYPES.includes(item.itemType as ParsedPlanningItem['itemType'])) {
+      return { error: 'Model returned invalid item type' };
+    }
+    if (!SCHEDULE_MODES.includes(item.scheduleMode as ParsedPlanningItem['scheduleMode'])) {
+      return { error: 'Model returned invalid schedule mode' };
+    }
+    if (!BUCKETS.includes(item.bucket as ParsedPlanningItem['bucket'])) {
+      return { error: 'Model returned invalid item bucket' };
+    }
+    if (typeof item.title !== 'string' || item.title.trim().length === 0) {
+      return { error: 'Model returned invalid item title' };
+    }
+    if (typeof item.reasoning !== 'string') {
+      return { error: 'Model returned invalid item reasoning' };
+    }
+    if (typeof item.confidence !== 'number' || item.confidence < 0 || item.confidence > 1) {
+      return { error: 'Model returned invalid item confidence' };
+    }
+
+    const suggestedDate = optionalString(item, 'suggestedDate');
+    const suggestedTime = optionalString(item, 'suggestedTime');
+    const parsedItem: ParsedPlanningItem = {
+      id: optionalString(item, 'id') ?? `parsed-${index + 1}`,
+      itemType: item.itemType as ParsedPlanningItem['itemType'],
+      scheduleMode: item.scheduleMode as ParsedPlanningItem['scheduleMode'],
+      title: item.title.trim(),
+      bucket: item.bucket as ParsedPlanningItem['bucket'],
+      reasoning: item.reasoning.trim(),
+      confidence: item.confidence,
+    };
+    if (suggestedDate !== undefined) parsedItem.suggestedDate = suggestedDate;
+    if (suggestedTime !== undefined) parsedItem.suggestedTime = suggestedTime;
+    items.push(parsedItem);
+  }
+
+  return items;
+}
 
 function parseClassification(raw: string): ClassificationResult | { error: string } {
   const trimmed = raw.trim();
@@ -42,8 +133,7 @@ function parseClassification(raw: string): ClassificationResult | { error: strin
   }
 
   const record = parsed as Record<string, unknown>;
-  const buckets = ['today', 'tomorrow', 'later', 'someday'] as const;
-  if (!buckets.includes(record.bucket as (typeof buckets)[number])) {
+  if (!BUCKETS.includes(record.bucket as (typeof BUCKETS)[number])) {
     return { error: 'Model returned invalid bucket' };
   }
   if (typeof record.title !== 'string' || record.title.trim().length === 0) {
@@ -56,11 +146,15 @@ function parseClassification(raw: string): ClassificationResult | { error: strin
     return { error: 'Model returned invalid confidence' };
   }
 
+  const parsedItems = parsePlanningItems(record);
+  if ('error' in parsedItems) return parsedItems;
+
   const result: ClassificationResult = {
     bucket: record.bucket as ClassificationResult['bucket'],
     title: record.title.trim(),
     reasoning: record.reasoning.trim(),
     confidence: record.confidence,
+    items: parsedItems,
   };
   if (record.suggestedDate !== null && record.suggestedDate !== undefined) {
     result.suggestedDate = String(record.suggestedDate);
