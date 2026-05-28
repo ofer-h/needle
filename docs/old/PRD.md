@@ -1,4 +1,16 @@
 # Focus — Product Requirements Document
+
+> **⚠️ ARCHIVED / SUPERSEDED (2026-05-28).** This is the original v1 thesis —
+> "intelligent second brain" with zero-decision capture and Remember/Act buckets.
+> The product direction has since shifted to a **transition coach** (help the user
+> switch from one task to the next). It is kept for history only — **do not treat
+> it as current product direction.**
+>
+> Current direction:
+> - [`docs/positioning.md`](../positioning.md) — pitch & what Needle is now.
+> - [`docs/competitive-landscape.md`](../competitive-landscape.md) — market position.
+> - [`docs/v2/`](../v2/README.md) — architecture source of truth.
+
 **Version:** 0.2 | **Date:** May 2026 | **Owner:** Omri and Ofer
 
 ---

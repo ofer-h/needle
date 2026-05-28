@@ -260,3 +260,13 @@ Format: `### YYYY-MM-DD — <topic> (<who made the call>)`
 - User feedback was extremely enthusiastic ("I love this... super simple UI, very nice idea").
 - Animation guide: The circle core slowly pulses using a gentle 5-second CSS expand/contract keyframe animation. Cued with clear instruction: "Inhale as the circle expands, exhale as it contracts."
 - Purpose: Serves as a soothing, non-anxiety visual anchor to regulate breathing, manage time blindness, and defend against sensory overload or task-switching friction.
+
+### 2026-05-28 — Monorepo + NestJS backend direction (Ofer)
+- Merged `codex-ai-planning-foundation` to `master` (fast-forward, pushed). Opened `v2-monorepo` branch for the platform refactor. Full plan: `docs/v2/monorepo-migration-plan.md`.
+- Confirms and pins the existing `architecture-guidelines.md` / `multi-app-roadmap.md` direction with concrete tech: NestJS modular monolith + Postgres, ts-rest contract, better-auth, Vite-SPA web, Expo mobile deferred, pnpm + Turborepo.
+- Delivery model: **two paths, one shared core.** Path A = macOS standalone/local-first (local SQLite, never blocked, keeps shipping core+MVP). Path B = cloud track (NestJS+Postgres+auth+web+mobile, server-of-record). Connect later via a **sync adapter**, not a rewrite.
+- Anti-divergence guardrail: both paths consume the same shared domain (`packages/domain` + `packages/contract`); Mac SQLite and BE Postgres are two storage representations of ONE model. Mac data already actor/workspace-scoped, so it maps onto a real account when connected.
+- Two seams enable it: transport-agnostic shared UI (`packages/ui-web`, components take data via props/context), and the Mac's existing `window.api` IPC boundary as the connect seam (swap behind the handlers, renderer unchanged).
+- Multi-user from day one. Auth is provider-agnostic: business logic only ever sees an internal `userId`; linked providers live in a separate `auth_identities` table so Google→Okta/Auth0 swaps touch only `AuthModule`. **Authorization is its own layer** (`AccessModule`), checking ownership/role on the internal `userId`, never trusting the auth provider for permissions.
+- pnpm + Turborepo adopted from the start (deviates from the docs' "keep npm" default).
+- Migration: **Foundation** (F0 tooling → F1 extract domain+contract → F2 move desktop → F3 extract ui+tokens) builds the shared spine, then two parallel tracks (A: Mac standalone ongoing; B: backend → web → mobile), then the deferred Bridge (Mac sync adapter). Each phase one green commit. No code written yet — plan only, pending Ofer's go on the Foundation bootstrap.

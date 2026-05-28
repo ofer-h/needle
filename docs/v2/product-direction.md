@@ -96,6 +96,10 @@ Architecture mapping:
 - Coaching relationships are `ItemAssignment(role='coach' | 'accountability_partner')` or comments/suggestions from those actors.
 - Metrics should track clarity/control and reduced overwhelm, not only raw throughput.
 
+How this becomes a feature — monitoring transition-ritual adherence, scoring,
+coach push, and private self-accountability — is captured in
+[`accountability-and-scoring.md`](./accountability-and-scoring.md).
+
 ### AI as companion, not operator
 
 AI should:

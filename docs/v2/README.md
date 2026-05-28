@@ -2,6 +2,14 @@
 
 This folder is the architectural source of truth for the next model iteration.
 
+**Product framing (read first for the *why*):**
+
+- [`../positioning.md`](../positioning.md) — what Needle is and how to pitch it (transition coach).
+- [`../competitive-landscape.md`](../competitive-landscape.md) — market position vs. timers/planners/body-doubling.
+
+> The original v1 PRD ("second brain" / Remember-Act capture) is archived at
+> [`../old/PRD.md`](../old/PRD.md) and is **no longer current direction**.
+
 Read in order:
 
 1. `product-direction.md` - product north star for AI-guided daily flow.
