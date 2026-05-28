@@ -38,3 +38,7 @@ npm-debug.log*
 *.cer
 *.mobileprovision
 build/entitlements.mac.plist
+
+# Debug artifacts
+debug_screenshot.png
+scripts/debug_*.js
