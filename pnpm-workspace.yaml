@@ -1,0 +1,17 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# Electron's @electron/rebuild pulls @electron/node-gyp from a git fork.
+# pnpm 11 blocks git-resolved subdeps by default; allow it for this app.
+blockExoticSubdeps: false
+
+# Build/postinstall scripts we trust (pnpm blocks them by default).
+# better-sqlite3 = native build; electron = binary download; esbuild = vite;
+# fs-xattr/macos-alias = dmg maker.
+allowBuilds:
+  better-sqlite3: true
+  electron: true
+  esbuild: true
+  fs-xattr: true
+  macos-alias: true
