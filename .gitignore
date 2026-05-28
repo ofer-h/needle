@@ -6,6 +6,9 @@ node_modules/
 out/
 dist/
 
+# Turborepo
+.turbo/
+
 # macOS
 .DS_Store
 .AppleDouble

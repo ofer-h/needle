@@ -7,6 +7,12 @@ settings:
 importers:
 
   .:
+    devDependencies:
+      turbo:
+        specifier: ^2.9.15
+        version: 2.9.15
+
+  apps/desktop:
     dependencies:
       '@anthropic-ai/sdk':
         specifier: ^0.99.0
@@ -25,10 +31,10 @@ importers:
         version: 0.27.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@needle/contract':
         specifier: workspace:*
-        version: link:packages/contract
+        version: link:../../packages/contract
       '@needle/domain':
         specifier: workspace:*
-        version: link:packages/domain
+        version: link:../../packages/domain
       better-sqlite3:
         specifier: ^12.10.0
         version: 12.10.0
@@ -99,9 +105,6 @@ importers:
       prettier:
         specifier: ^3.5.3
         version: 3.8.3
-      turbo:
-        specifier: ^2.9.15
-        version: 2.9.15
       typescript:
         specifier: ^5.8.3
         version: 5.9.3

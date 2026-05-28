@@ -12,10 +12,26 @@ export type EnvLoadResult = {
 let envLoadResult: EnvLoadResult = { loaded: false, path: null };
 
 /**
- * Load repo-root `.env` for local development only.
+ * Walk up from `start` looking for the monorepo root (the dir holding
+ * `pnpm-workspace.yaml`). Returns null if not found within a few levels.
+ */
+function findMonorepoRoot(start: string): string | null {
+  let dir = start;
+  for (let i = 0; i < 10; i++) {
+    if (existsSync(path.join(dir, 'pnpm-workspace.yaml'))) return dir;
+    const parent = path.dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  return null;
+}
+
+/**
+ * Load the monorepo-root `.env` for local development only.
  *
- * Tries `../../.env` from the compiled main bundle (Forge → `.vite/build/main.js`)
- * and `process.cwd()/.env` as a fallback when cwd is the project root.
+ * The app now lives in `apps/desktop`, so the dev `.env` is at the monorepo
+ * root. Prefer the dir holding `pnpm-workspace.yaml`; fall back to walking up
+ * from the compiled bundle and cwd.
  */
 export function loadLocalEnv(): EnvLoadResult {
   if (app.isPackaged) {
@@ -23,10 +39,14 @@ export function loadLocalEnv(): EnvLoadResult {
     return envLoadResult;
   }
 
+  const repoRoot =
+    findMonorepoRoot(__dirname) ?? findMonorepoRoot(process.cwd());
   const candidates = [
+    repoRoot ? path.join(repoRoot, '.env') : null,
     path.join(__dirname, '../../.env'),
+    path.join(__dirname, '../../../../.env'),
     path.join(process.cwd(), '.env'),
-  ];
+  ].filter((p): p is string => p !== null);
 
   for (const envPath of candidates) {
     if (!existsSync(envPath)) continue;

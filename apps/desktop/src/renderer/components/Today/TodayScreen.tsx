@@ -125,7 +125,7 @@ export default function TodayScreen({ onNavigateCapture }: Props) {
         <DndContext
           sensors={sensors}
           onDragStart={handleDragStart}
-          onDragEnd={(event) => {
+          onDragEnd={(event: DragEndEvent) => {
             const overId = event.over?.id === undefined ? '' : String(event.over.id);
             if (overId.startsWith('gap-overdue-')) {
               handleDragEnd(event, overdueTimeline, 'overdue');
