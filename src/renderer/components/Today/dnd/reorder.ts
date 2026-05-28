@@ -1,4 +1,4 @@
-import type { Task } from '../../../../shared/types';
+import type { Task } from '@needle/domain/types';
 import type { TimelineItem } from '../../../utils/timeline';
 
 /** Compute the new `slotOrder` for a task being dropped into gap `gapN` of

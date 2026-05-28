@@ -6,7 +6,7 @@ import type {
   ClassificationBucket,
   ParsedPlanningItem,
   Task,
-} from '../../shared/types';
+} from '@needle/domain/types';
 import { getDb } from './index';
 
 const DEFAULT_WORKSPACE_ID = 'ws_personal';

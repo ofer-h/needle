@@ -5,7 +5,7 @@ import type {
   ClassificationResult,
   ClassifyResponse,
   ParsedPlanningItem,
-} from '../../../shared/types';
+} from '@needle/domain/types';
 import { AsyncStatusPanel, Button, Divider, Icon, Pill } from '../primitives';
 import ApiKeySettings from './ApiKeySettings';
 import { usePendingOperation } from '../../hooks/usePendingOperation';

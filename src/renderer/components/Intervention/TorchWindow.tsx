@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { TorchShowPayload } from '../../../shared/ipc-contracts';
+import type { TorchShowPayload } from '@needle/contract';
 import BrainDumpPanel from './BrainDumpPanel';
 import SkipPanel from './SkipPanel';
 import TorchBanner from './TorchBanner';

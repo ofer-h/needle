@@ -1,4 +1,4 @@
-import type { ScheduleKind } from '../../../shared/types';
+import type { ScheduleKind } from '@needle/domain/types';
 import ItemRow from './ItemRow';
 
 type Kind = 'urgent' | 'upcoming' | 'faded';

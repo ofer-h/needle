@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import type { FlowEvent, FlowHealthSnapshot, LastClassifySummary } from '../../shared/flow-health';
+import type { FlowEvent, FlowHealthSnapshot, LastClassifySummary } from '@needle/domain/flow-health';
 import { needleLog } from '../log';
 
 const MAX_EVENTS = 50;

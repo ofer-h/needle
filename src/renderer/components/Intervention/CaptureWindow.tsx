@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import type { CaptureShowPayload } from '../../../shared/ipc-contracts';
+import type { CaptureShowPayload } from '@needle/contract';
 import { Button } from '../primitives/Button';
 import './CaptureWindow.css';
 

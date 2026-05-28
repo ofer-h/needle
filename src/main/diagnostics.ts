@@ -2,7 +2,7 @@ import { execSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { app } from 'electron';
-import type { AppDiagnostics } from '../shared/ipc-contracts';
+import type { AppDiagnostics } from '@needle/contract';
 import { getEnvLoadResult } from './load-env';
 import { getApiKeySource } from './ai/config';
 

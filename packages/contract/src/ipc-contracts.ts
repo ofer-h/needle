@@ -1,5 +1,5 @@
-import type { FlowHealthSnapshot } from './flow-health';
-import type { CalendarEvent, CaptureEntry, ClassifyResponse, ParsedPlanningItem, Task, Theme } from './types';
+import type { FlowHealthSnapshot } from '@needle/domain/flow-health';
+import type { CalendarEvent, CaptureEntry, ClassifyResponse, ParsedPlanningItem, Task, Theme } from '@needle/domain/types';
 
 export type TorchShowPayload = {
   /** Stable correlation id provided by the requester. Used to match the close

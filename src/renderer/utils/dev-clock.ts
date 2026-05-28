@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { toISODate } from './date';
-import type { ISODateTime } from '../../shared/domain-v2';
+import type { ISODateTime } from '@needle/domain/domain-v2';
 
 type DevClockState = {
   frozenIso: ISODateTime | null;

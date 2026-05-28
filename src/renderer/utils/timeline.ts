@@ -1,4 +1,4 @@
-import type { Task, CalendarEvent } from '../../shared/types';
+import type { Task, CalendarEvent } from '@needle/domain/types';
 
 export type TimelineItem =
   | { kind: 'task'; data: Task }

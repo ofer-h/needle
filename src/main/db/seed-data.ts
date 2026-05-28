@@ -1,4 +1,4 @@
-import type { CalendarEvent, Task } from '../../shared/types';
+import type { CalendarEvent, Task } from '@needle/domain/types';
 
 function toISODate(date = new Date()): string {
   const year = date.getFullYear();

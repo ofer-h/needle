@@ -14,7 +14,7 @@ import type {
   DbUpdateTaskPayload,
   DbUpdateEventPayload,
   DbUpdateSubtaskPayload,
-} from '../../shared/ipc-contracts';
+} from '@needle/contract';
 import * as repo from '../db/repository';
 
 export function registerDbHandlers(): void {

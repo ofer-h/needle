@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Screen, Theme, TimeSlot, Task, CalendarEvent, ParsedPlanningItem } from '../../shared/types';
+import type { Screen, Theme, TimeSlot, Task, CalendarEvent, ParsedPlanningItem } from '@needle/domain/types';
 
 type AppState = {
   screen: Screen;

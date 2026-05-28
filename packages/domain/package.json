@@ -1,0 +1,17 @@
+{
+  "name": "@needle/domain",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./types": "./src/types.ts",
+    "./domain-v2": "./src/domain-v2.ts",
+    "./flow-health": "./src/flow-health.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}

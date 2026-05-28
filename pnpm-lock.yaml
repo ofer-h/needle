@@ -23,6 +23,12 @@ importers:
       '@floating-ui/react':
         specifier: ^0.27.19
         version: 0.27.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@needle/contract':
+        specifier: workspace:*
+        version: link:packages/contract
+      '@needle/domain':
+        specifier: workspace:*
+        version: link:packages/domain
       better-sqlite3:
         specifier: ^12.10.0
         version: 12.10.0
@@ -107,6 +113,22 @@ importers:
         version: 4.1.7(@types/node@25.9.1)(vite@6.4.2(@types/node@25.9.1)(jiti@2.7.0)(terser@5.48.0))
 
   packages/config: {}
+
+  packages/contract:
+    dependencies:
+      '@needle/domain':
+        specifier: workspace:*
+        version: link:../domain
+    devDependencies:
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
+  packages/domain:
+    devDependencies:
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
 
 packages:
 

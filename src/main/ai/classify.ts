@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import type { ClassificationResult, ParsedPlanningItem } from '../../shared/types';
+import type { ClassificationResult, ParsedPlanningItem } from '@needle/domain/types';
 import { needleLog } from '../log';
 import { mintFlowId, recordFlowEvent } from '../services/flow-health';
 import { getApiKey, getApiKeySource } from './config';

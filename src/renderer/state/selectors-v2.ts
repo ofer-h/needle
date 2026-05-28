@@ -9,8 +9,8 @@ import type {
   ItemOccurrence,
   ItemPlan,
   TodayItemView,
-} from '../../shared/domain-v2';
-import type { CalendarEvent, Relation, SourceId, Task, TaskKind, TimeSlot } from '../../shared/types';
+} from '@needle/domain/domain-v2';
+import type { CalendarEvent, Relation, SourceId, Task, TaskKind, TimeSlot } from '@needle/domain/types';
 import { buildTimeline, type TimelineItem } from '../utils/timeline';
 import { addDaysISO, toISODate } from '../utils/date';
 import type { V2FixtureBundle } from './fixture-v2';

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import type { AppDiagnostics } from '../../../shared/ipc-contracts';
-import type { FlowHealthSnapshot } from '../../../shared/flow-health';
+import type { AppDiagnostics } from '@needle/contract';
+import type { FlowHealthSnapshot } from '@needle/domain/flow-health';
 import { uiLog } from '../../utils/ui-log';
 import './BuildDiagnostics.css';
 

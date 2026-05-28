@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import type { CalendarEvent, CaptureEntry, ClassifyResponse, Screen, Task, Theme } from '../shared/types';
+import type { CalendarEvent, CaptureEntry, ClassifyResponse, Screen, Task, Theme } from '@needle/domain/types';
 import type {
   CaptureClosePayload,
   CaptureEntryPayload,
@@ -26,7 +26,7 @@ import type {
   TorchShowPayload,
   TorchSkipConfirmPayload,
   TorchSnoozePayload,
-} from '../shared/ipc-contracts';
+} from '@needle/contract';
 
 const api = {
   app: {

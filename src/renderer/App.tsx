@@ -5,7 +5,7 @@ import CaptureScreen from './components/Capture/CaptureScreen';
 import BuildDiagnostics from './components/DevTools/BuildDiagnostics';
 import DevClockControl from './components/DevTools/DevClockControl';
 import InterventionLayer from './components/Intervention/InterventionLayer';
-import type { Screen } from '../shared/types';
+import type { Screen } from '@needle/domain/types';
 
 export default function App() {
   const screen = useAppStore((s) => s.screen);

@@ -1,6 +1,6 @@
 import { BrowserWindow, Notification, screen, WebContents } from 'electron';
 import path from 'node:path';
-import type { TorchHeroPayload, TorchShowPayload } from '../../shared/ipc-contracts';
+import type { TorchHeroPayload, TorchShowPayload } from '@needle/contract';
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
 declare const MAIN_WINDOW_VITE_NAME: string;

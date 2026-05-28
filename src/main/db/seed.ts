@@ -1,5 +1,5 @@
 import type Database from 'better-sqlite3';
-import type { ClassificationBucket, ParsedPlanningItem } from '../../shared/types';
+import type { ClassificationBucket, ParsedPlanningItem } from '@needle/domain/types';
 import { buildSeedTasksAndEvents } from './seed-data';
 import * as repo from './repository';
 

@@ -9,7 +9,7 @@ import type {
   TorchShowPayload,
   TorchSkipConfirmPayload,
   TorchSnoozePayload,
-} from '../../shared/ipc-contracts';
+} from '@needle/contract';
 import { registerAiHandlers } from './ai-handlers';
 import { getAppDiagnostics } from '../diagnostics';
 import { needleLog } from '../log';

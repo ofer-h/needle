@@ -34,7 +34,7 @@ import type {
   UserId,
   Workspace,
   WorkspaceId,
-} from '../../shared/domain-v2';
+} from '@needle/domain/domain-v2';
 
 const LOCAL_TZ = (Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC') as TimeZone;
 const NOW = new Date().toISOString() as ISODateTime;

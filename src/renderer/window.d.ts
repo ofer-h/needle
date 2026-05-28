@@ -1,6 +1,6 @@
-import type { CalendarEvent, CaptureEntry, ClassifyResponse, Screen, Task, Theme } from '../shared/types';
-import type { AppDiagnostics } from '../shared/ipc-contracts';
-import type { FlowHealthSnapshot } from '../shared/flow-health';
+import type { CalendarEvent, CaptureEntry, ClassifyResponse, Screen, Task, Theme } from '@needle/domain/types';
+import type { AppDiagnostics } from '@needle/contract';
+import type { FlowHealthSnapshot } from '@needle/domain/flow-health';
 import type {
   CaptureClosePayload,
   CaptureEntryPayload,
@@ -13,7 +13,7 @@ import type {
   TorchShowPayload,
   TorchSkipConfirmPayload,
   TorchSnoozePayload,
-} from '../shared/ipc-contracts';
+} from '@needle/contract';
 
 declare global {
   interface Window {

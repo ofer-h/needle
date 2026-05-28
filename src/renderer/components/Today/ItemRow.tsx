@@ -1,6 +1,6 @@
 import type { KeyboardEvent, ReactNode } from 'react';
 import { useDraggable } from '@dnd-kit/core';
-import type { ScheduleKind } from '../../../shared/types';
+import type { ScheduleKind } from '@needle/domain/types';
 import { useAppStore } from '../../state/store';
 import { Checkbox } from '../primitives/Checkbox';
 import { Icon } from '../primitives/Icon';

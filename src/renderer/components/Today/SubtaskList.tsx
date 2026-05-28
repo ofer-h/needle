@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
-import type { Subtask } from '../../../shared/types';
+import type { Subtask } from '@needle/domain/types';
 import { useAppStore } from '../../state/store';
 import { Button } from '../primitives/Button';
 import { Checkbox } from '../primitives/Checkbox';

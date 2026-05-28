@@ -27,7 +27,7 @@ import type {
   TransitionEventId,
   User,
   Workspace,
-} from '../../shared/domain-v2';
+} from '@needle/domain/domain-v2';
 import { createV2Fixture, FIXTURE_IDS } from './fixture-v2';
 
 /* ─── ID + timestamp helpers ──────────────────────────────────── */

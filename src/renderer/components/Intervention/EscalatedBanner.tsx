@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import type { Intervention } from '../../../shared/domain-v2';
+import type { Intervention } from '@needle/domain/domain-v2';
 import { Button } from '../primitives/Button';
 import './EscalatedBanner.css';
 

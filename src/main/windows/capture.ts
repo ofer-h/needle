@@ -1,6 +1,6 @@
 import { BrowserWindow, screen } from 'electron';
 import path from 'node:path';
-import type { CaptureShowPayload } from '../../shared/ipc-contracts';
+import type { CaptureShowPayload } from '@needle/contract';
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
 declare const MAIN_WINDOW_VITE_NAME: string;

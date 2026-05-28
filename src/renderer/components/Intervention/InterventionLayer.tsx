@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react';
-import type { ISODateTime, InterventionId } from '../../../shared/domain-v2';
+import type { ISODateTime, InterventionId } from '@needle/domain/domain-v2';
 import { useV2Store } from '../../state/store-v2';
 import { nowIso, useDevClock } from '../../utils/dev-clock';
 import EscalatedBanner from './EscalatedBanner';
