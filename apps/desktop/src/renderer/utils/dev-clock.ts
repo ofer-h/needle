@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { toISODate } from './date';
 import type { ISODateTime } from '@needle/domain/domain-v2';
 
 type DevClockState = {
@@ -8,17 +7,26 @@ type DevClockState = {
   jumpToTime: (hhmm: string) => void;
 };
 
-const TODAY = toISODate();
-// Default the dev clock to before any seeded intervention so the slice starts
-// in a clean state. Interventions only fire when the user advances the clock.
-const INITIAL_FROZEN_ISO = `${TODAY}T14:54:00.000Z` as ISODateTime;
+// Build an ISO timestamp for `hh:mm` as LOCAL wall-clock time today. SQLite
+// occurrences are local wall-clock (the board shows "3:00 PM"), so the dev
+// clock must match — otherwise a UTC "15:00" lands at the wrong instant and the
+// transition engine never sees the meeting window.
+function localIsoForToday(hhmm: string): ISODateTime {
+  const [h, m] = hhmm.split(':').map((n) => parseInt(n, 10));
+  const d = new Date();
+  d.setHours(h ?? 0, m ?? 0, 0, 0);
+  return d.toISOString() as ISODateTime;
+}
+
+// Default the dev clock to inside the 3pm-meeting transition window so the
+// unified overlay is visible on launch in dev. Use the presets to step around.
+const INITIAL_FROZEN_ISO = localIsoForToday('14:54');
 
 export const useDevClock = create<DevClockState>((set) => ({
   frozenIso: INITIAL_FROZEN_ISO,
   setFrozen: (iso) => set({ frozenIso: iso }),
   jumpToTime: (hhmm) => {
-    const iso = `${TODAY}T${hhmm}:00.000Z` as ISODateTime;
-    set({ frozenIso: iso });
+    set({ frozenIso: localIsoForToday(hhmm) });
   },
 }));
 

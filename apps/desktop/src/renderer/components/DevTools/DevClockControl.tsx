@@ -1,14 +1,21 @@
 import { useDevClock } from '../../utils/dev-clock';
 import './DevClockControl.css';
 
-const PRESET_TIMES = ['14:54', '14:55', '14:59', '15:00', '15:01'] as const;
+const PRESET_TIMES = ['09:00', '14:54', '14:55', '14:59', '15:00', '15:01'] as const;
 
 export default function DevClockControl() {
   const frozenIso = useDevClock((s) => s.frozenIso);
   const jumpToTime = useDevClock((s) => s.jumpToTime);
   const setFrozen = useDevClock((s) => s.setFrozen);
 
-  const label = frozenIso === null ? 'live' : frozenIso.slice(11, 16);
+  const label =
+    frozenIso === null
+      ? 'live'
+      : new Date(frozenIso).toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false,
+        });
 
   return (
     <div className="dev-clock" role="group" aria-label="Developer clock control">
