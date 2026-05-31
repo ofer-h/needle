@@ -1,0 +1,58 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getAllReferenceDocs } from '../../lib/reference';
+
+const docs = getAllReferenceDocs();
+const docsOnly = docs.filter((d) => d.category === 'docs');
+const designOnly = docs.filter((d) => d.category === 'design');
+---
+
+<Layout title="Reference" description="Rendered docs and design markdown from the repo.">
+  <h1>Reference</h1>
+  <p>
+    Live render of <code>docs/**</code> and <code>design/**</code> from the monorepo root. Use search
+    to filter; click any file to read the formatted markdown.
+  </p>
+
+  <input
+    type="search"
+    class="search-box"
+    id="ref-search"
+    placeholder="Search reference docs…"
+    aria-label="Search reference docs"
+  />
+
+  <h2>docs/</h2>
+  <ul class="ref-list" id="docs-list">
+    {
+      docsOnly.map((doc) => (
+        <li data-title={doc.title.toLowerCase()} data-slug={doc.slug.toLowerCase()}>
+          <a href={`/reference/${doc.slug}/`}>{doc.relativePath}</a>
+        </li>
+      ))
+    }
+  </ul>
+
+  <h2>design/</h2>
+  <ul class="ref-list" id="design-list">
+    {
+      designOnly.map((doc) => (
+        <li data-title={doc.title.toLowerCase()} data-slug={doc.slug.toLowerCase()}>
+          <a href={`/reference/${doc.slug}/`}>{doc.relativePath}</a>
+        </li>
+      ))
+    }
+  </ul>
+
+  <script>
+    const input = document.getElementById('ref-search') as HTMLInputElement | null;
+    input?.addEventListener('input', () => {
+      const q = input.value.trim().toLowerCase();
+      document.querySelectorAll('.ref-list li').forEach((li) => {
+        const el = li as HTMLElement;
+        const hay = `${el.dataset.title ?? ''} ${el.dataset.slug ?? ''}`;
+        el.style.display = !q || hay.includes(q) ? '' : 'none';
+      });
+    });
+  </script>
+</Layout>

@@ -1,0 +1,32 @@
+---
+interface Props {
+  chart: string;
+  id?: string;
+}
+
+const { chart, id = `mermaid-${Math.random().toString(36).slice(2, 9)}` } = Astro.props;
+---
+
+<div class="mermaid-wrap">
+  <pre class="mermaid" id={id}>{chart}</pre>
+</div>
+
+<script>
+  import mermaid from 'mermaid';
+
+  function initMermaid() {
+    const theme = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'default';
+    mermaid.initialize({
+      startOnLoad: false,
+      theme,
+      securityLevel: 'loose',
+    });
+    mermaid.run({ querySelector: '.mermaid' });
+  }
+
+  initMermaid();
+  window.addEventListener('needle-theme-change', () => {
+    document.querySelectorAll('.mermaid svg').forEach((el) => el.remove());
+    initMermaid();
+  });
+</script>

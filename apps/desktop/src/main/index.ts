@@ -12,6 +12,20 @@ import { registerIpcHandlers } from './ipc/index';
 
 let mainWindow: BrowserWindow | null = null;
 
+// Returns the live main window, recreating it if it was closed/destroyed.
+// On macOS the app stays alive after the window closes, so a stale reference
+// to a destroyed BrowserWindow must never be used (it throws "Object has been
+// destroyed"). This is the single source of truth for the main window.
+function ensureMainWindow(): BrowserWindow {
+  if (mainWindow && !mainWindow.isDestroyed()) return mainWindow;
+  const win = createMainWindow();
+  win.on('closed', () => {
+    if (mainWindow === win) mainWindow = null;
+  });
+  mainWindow = win;
+  return win;
+}
+
 function bootstrap(): void {
   const database = open();
   seedIfEmpty(database);
@@ -34,14 +48,14 @@ function bootstrap(): void {
     callback((allowedPermissions as any[]).includes(permission));
   });
 
-  mainWindow = createMainWindow();
+  ensureMainWindow();
 
   // Global shortcut: ⌘K to open/focus Capture
   globalShortcut.register('CommandOrControl+K', () => {
-    if (!mainWindow) return;
-    if (!mainWindow.isVisible()) mainWindow.show();
-    mainWindow.focus();
-    mainWindow.webContents.send('navigate', 'capture');
+    const win = ensureMainWindow();
+    if (!win.isVisible()) win.show();
+    win.focus();
+    win.webContents.send('navigate', 'capture');
   });
 }
 
@@ -53,7 +67,7 @@ app.on('window-all-closed', () => {
 
 app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) {
-    mainWindow = createMainWindow();
+    ensureMainWindow();
   } else {
     mainWindow?.show();
   }

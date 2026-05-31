@@ -1,0 +1,33 @@
+---
+import { navSections, isActive } from '../config/nav-config';
+
+interface Props {
+  pathname: string;
+}
+
+const { pathname } = Astro.props;
+---
+
+<nav class="nav" aria-label="Handbook">
+  <div class="brand">
+    <div class="brand-mark" aria-hidden="true">N</div>
+    <div class="brand-title">Needle</div>
+    <div class="brand-sub">Project handbook</div>
+  </div>
+  {
+    navSections.map((section) => (
+      <div class="nav-section">
+        <h2 class="nav-section-title">{section.title}</h2>
+        <ul class="nav-list">
+          {section.items.map((item) => (
+            <li>
+              <a class:list={['nav-link', isActive(pathname, item.href) && 'active']} href={item.href}>
+                {item.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))
+  }
+</nav>

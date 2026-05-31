@@ -1,0 +1,15 @@
+---
+description: Handbook app — Astro static site conventions
+globs: apps/handbook/**/*
+---
+
+# Handbook app rules
+
+- Stack: Astro 5, static output, MD via `marked`, Mermaid client-side.
+- Navigation lives in `src/config/nav-config.ts` — only scaffold/orchestrator edits it.
+- Layout shell: `src/layouts/Layout.astro` — same restriction.
+- Curated pages go under `src/pages/` by section; reference auto-renders repo `docs/` + `design/`.
+- Theme tokens mirror `apps/desktop/src/renderer/styles/` (semantic sand/ink palette).
+- Run: `pnpm --filter @needle/handbook dev` from repo root.
+
+Per-app rules convention: see `docs/v2/migration-progress.md` § "Per-app rules/skills convention".

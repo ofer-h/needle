@@ -1,0 +1,90 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Mermaid from '../../components/Mermaid.astro';
+---
+
+<Layout title="Architecture" description="Monorepo layout, two paths, IPC seam, data flow.">
+  <h1>Architecture</h1>
+
+  <h2>Monorepo layout</h2>
+  <pre><code>{`needle/
+  apps/
+    desktop/     @needle/desktop — Electron + Vite + React
+    handbook/    @needle/handbook — Astro static site (this)
+  packages/
+    domain/      @needle/domain — types, validation, rules
+    contract/    @needle/contract — IPC/API shapes
+    config/      @needle/config — shared tsconfig base
+  docs/          product + architecture markdown
+  design/        design system docs
+  memory/        context + decisions log`}</code></pre>
+
+  <h2>Two paths, one shared core</h2>
+  <Mermaid
+    chart={`flowchart TB
+    subgraph core [Shared core]
+      D[packages/domain]
+      C[packages/contract]
+    end
+    subgraph pathA [Path A — Mac]
+      DT[apps/desktop]
+      SQL[(SQLite local)]
+    end
+    subgraph pathB [Path B — Cloud]
+      SV[apps/server planned]
+      WB[apps/web planned]
+      PG[(Postgres)]
+    end
+    core --> DT
+    core --> SV
+    DT --> SQL
+    SV --> PG
+    DT -. sync adapter later .-> SV`}
+  />
+
+  <ul>
+    <li><strong>Path A</strong> — macOS standalone, local-first SQLite, never blocked on backend</li>
+    <li><strong>Path B</strong> — NestJS + Postgres + web/mobile, parallel track</li>
+    <li><strong>Bridge</strong> — deferred sync adapter; same domain model prevents divergence</li>
+  </ul>
+
+  <h2>Electron process boundaries</h2>
+  <table>
+    <thead><tr><th>Context</th><th>Role</th><th>Rules</th></tr></thead>
+    <tbody>
+      <tr><td><code>main/</code></td><td>App lifecycle, IPC, SQLite, AI, native APIs</td><td>Node only</td></tr>
+      <tr><td><code>preload/</code></td><td><code>contextBridge</code> → <code>window.api</code></td><td>Thin bridge</td></tr>
+      <tr><td><code>renderer/</code></td><td>React UI</td><td>No Node; IPC only</td></tr>
+      <tr><td><code>shared/</code> (packages)</td><td>Types, pure helpers</td><td>No Node/DOM</td></tr>
+    </tbody>
+  </table>
+
+  <h2>IPC seam (connect later)</h2>
+  <p>
+    Renderer talks only via <code>window.api</code>. To add cloud sync later, swap what main does
+    behind handlers (API + cache vs SQLite-only) — renderer unchanged. Contracts live in
+    <code>@needle/contract</code>, evolving from ipc-contracts.
+  </p>
+
+  <Mermaid
+    chart={`sequenceDiagram
+    participant R as Renderer
+    participant P as Preload
+    participant M as Main IPC handler
+    participant S as SQLite / API
+    R->>P: window.api.tasks.list()
+    P->>M: ipcMain.handle
+    M->>S: query or fetch
+    S-->>M: data
+    M-->>P: typed response
+    P-->>R: render`}
+  />
+
+  <h2>Transport-agnostic UI (future)</h2>
+  <p>
+    Planned <code>packages/ui-web</code> components receive data + callbacks — same components on
+    desktop (via IPC-backed props) and web (via api-client).
+  </p>
+
+  <p><a href="/infra/">Infra 101 →</a> · <a href="/reference/docs/v2/monorepo-migration-plan/">Migration plan</a></p>
+</Layout>

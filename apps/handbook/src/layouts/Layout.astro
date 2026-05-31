@@ -1,0 +1,52 @@
+---
+import '../styles/global.css';
+import Sidebar from '../components/Sidebar.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = 'Needle project handbook' } = Astro.props;
+const fullTitle = title === 'Overview' ? 'Needle Project Handbook' : `${title} · Needle Handbook`;
+---
+
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <title>{fullTitle}</title>
+    <script is:inline>
+      (function () {
+        const stored = localStorage.getItem('needle-handbook-theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.dataset.theme = stored ?? (prefersDark ? 'dark' : 'light');
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="shell">
+      <Sidebar pathname={Astro.url.pathname} />
+      <div class="main-column">
+        <Header title={title} />
+        <main class="content prose">
+          <slot />
+        </main>
+        <Footer />
+      </div>
+    </div>
+    <script>
+      document.querySelector('.theme-toggle')?.addEventListener('click', () => {
+        const html = document.documentElement;
+        const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
+        html.dataset.theme = next;
+        localStorage.setItem('needle-handbook-theme', next);
+        window.dispatchEvent(new CustomEvent('needle-theme-change'));
+      });
+    </script>
+  </body>
+</html>

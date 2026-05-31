@@ -1,0 +1,31 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getAllReferenceDocs, getReferenceDoc, readReferenceContent } from '../../lib/reference';
+import { renderMarkdown, rewriteDocLinks } from '../../lib/markdown';
+
+export function getStaticPaths() {
+  return getAllReferenceDocs().map((doc) => ({
+    params: { slug: doc.slug },
+    props: { doc },
+  }));
+}
+
+interface Props {
+  doc: ReturnType<typeof getReferenceDoc>;
+}
+
+const { doc } = Astro.props;
+if (!doc) {
+  throw new Error('Reference doc not found');
+}
+
+const source = readReferenceContent(doc);
+const html = rewriteDocLinks(renderMarkdown(source), doc.slug);
+const title = doc.title;
+---
+
+<Layout title={title} description={`Reference: ${doc.relativePath}`}>
+  <p><a href="/reference/">← Reference index</a></p>
+  <p><code>{doc.category}/{doc.relativePath}</code></p>
+  <div set:html={html} />
+</Layout>

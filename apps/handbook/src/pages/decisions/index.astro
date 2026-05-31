@@ -1,0 +1,47 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import fs from 'node:fs';
+import path from 'node:path';
+import { repoRoot } from '../../lib/reference';
+
+const decisionsPath = path.join(repoRoot, 'memory/decisions.md');
+const raw = fs.readFileSync(decisionsPath, 'utf8');
+
+type Entry = { heading: string; lines: string[] };
+
+const entries: Entry[] = [];
+let current: Entry | null = null;
+
+for (const line of raw.split('\n')) {
+  if (line.startsWith('### ')) {
+    if (current) entries.push(current);
+    current = { heading: line.replace(/^### /, ''), lines: [] };
+  } else if (current && line.trim() && !line.startsWith('# Decision Log') && line !== '---') {
+    current.lines.push(line);
+  }
+}
+if (current) entries.push(current);
+---
+
+<Layout title="Decisions timeline" description="Scannable project decision history.">
+  <h1>Decisions timeline</h1>
+  <p>
+    Condensed from <code>memory/decisions.md</code>. Full prose in
+    <a href="/reference/docs/">reference</a> or the source file in repo.
+  </p>
+
+  {
+    entries.map((entry) => (
+      <article class="decision-entry">
+        <div class="decision-date">{entry.heading}</div>
+        <ul>
+          {entry.lines.slice(0, 6).map((line) => (
+            <li>{line.replace(/^- /, '')}</li>
+          ))}
+        </ul>
+      </article>
+    ))
+  }
+
+  <p><a href="/roadmap/">Roadmap & migration status →</a></p>
+</Layout>

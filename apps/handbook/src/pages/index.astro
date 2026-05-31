@@ -1,0 +1,68 @@
+---
+import Layout from '../layouts/Layout.astro';
+import StatusBanner from '../components/StatusBanner.astro';
+---
+
+<Layout title="Overview" description="What Needle is, who it's for, and current project status.">
+  <StatusBanner />
+
+  <h1>Needle Project Handbook</h1>
+  <p>
+    A browsable guide to what Needle is, how the macOS app works, how tasks are modeled,
+    the monorepo architecture, infra choices, decision history, and raw reference docs.
+  </p>
+
+  <h2>What Needle is</h2>
+  <blockquote>
+    Every other app helps you <strong>plan</strong>. Needle helps you <strong>let go of one task and
+    start the next</strong> — the exact moment focus is lost.
+  </blockquote>
+  <p>
+    Needle is a <strong>transition coach</strong>, not a to-do app and not a timer. It catches you at
+    the moment of the switch, helps you clear your head, and points you at the next thing. The
+    rotating intervention kit keeps your brain from habituating to a single nudge.
+  </p>
+
+  <h2>Who it's for</h2>
+  <ul>
+    <li>Knowledge workers who lose time and focus when switching tasks or meetings</li>
+    <li>People who benefit from intentional transitions (including ADHD-friendly workflows)</li>
+    <li>macOS-first users who want local-first, calm coaching — not streak shame</li>
+  </ul>
+
+  <h2>What Needle is NOT</h2>
+  <ul>
+    <li>Not another backlog or second-brain capture system — the brain-dump is ephemeral; the ritual is the point</li>
+    <li>Not a Pomodoro or timeboxing timer you have to remember to start</li>
+    <li>Not a daily planner that stops helping after the morning ritual</li>
+    <li>Not notification silencing — it uses one well-timed interruption on purpose</li>
+  </ul>
+
+  <h2>Explore the handbook</h2>
+  <div class="card-grid">
+    <a class="card" href="/product/">
+      <h3>Product</h3>
+      <p>Positioning, competitive landscape, daily-flow direction, accountability concept.</p>
+    </a>
+    <a class="card" href="/app/today/">
+      <h3>How the app works</h3>
+      <p>Today scheduling, Capture classify, Torch intervention, async UX.</p>
+    </a>
+    <a class="card" href="/anatomy/">
+      <h3>Anatomy</h3>
+      <p>v2 Item model, relations, plans, occurrences — with visual task cards.</p>
+    </a>
+    <a class="card" href="/infra/">
+      <h3>Infra 101</h3>
+      <p>Monorepo, pnpm, Turbo, Vite, Forge, TypeScript — what and why.</p>
+    </a>
+    <a class="card" href="/decisions/">
+      <h3>Decisions</h3>
+      <p>Scannable timeline from the project decision log.</p>
+    </a>
+    <a class="card" href="/reference/">
+      <h3>Reference</h3>
+      <p>Rendered <code>docs/**</code> and <code>design/**</code> markdown.</p>
+    </a>
+  </div>
+</Layout>

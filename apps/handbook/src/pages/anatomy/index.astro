@@ -1,0 +1,74 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ItemCard from '../../components/ItemCard.astro';
+import Mermaid from '../../components/Mermaid.astro';
+---
+
+<Layout title="Anatomy" description="How tasks and items are modeled in v2.">
+  <h1>Anatomy — task & item model</h1>
+
+  <h2>Glossary (UI ↔ code)</h2>
+  <table>
+    <thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td>Item</td><td>Anything in the system — task, event, note, memory, habit</td></tr>
+      <tr><td>Act / Remember</td><td>Buckets — do now vs store for later</td></tr>
+      <tr><td>Anchor / Float</td><td>UI terms for fixed vs flexible scheduling</td></tr>
+      <tr><td>Block</td><td>Time-anchored timeline row (meeting or anchored task)</td></tr>
+      <tr><td>Stash</td><td>Act items not yet placed on a day (<code>PlanMode: stash</code>)</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Core v2 entities</h2>
+  <p>Source: <code>packages/domain/src/domain-v2.ts</code></p>
+  <ul>
+    <li><strong>Item</strong> — <code>kind</code>, <code>bucket</code>, <code>status</code>, title, body</li>
+    <li><strong>ItemRelation</strong> — <code>contains</code>, <code>prep_for</code>, <code>blocks</code>, … (subtasks are Items, not embedded arrays)</li>
+    <li><strong>ItemPlan</strong> — <code>mode: anchor | float | stash</code> per actor/date</li>
+    <li><strong>ItemOccurrence</strong> — timed instance for events/recurring items</li>
+    <li><strong>ItemAssignment</strong> — owner, coach, accountability_partner roles</li>
+  </ul>
+
+  <h2>Visual row types (Today)</h2>
+  <p>Shared 4-column grid — drag handle, icon/checkbox, label, meta:</p>
+  <ItemCard variant="flexible" title="Ship handbook" bucket="act" meta="float · slot 2" />
+  <ItemCard variant="fixed" title="Deep work block" time="09:00" bucket="act" meta="anchor" />
+  <ItemCard variant="event" title="1:1 with Omri" time="15:00" bucket="act" />
+  <ItemCard variant="flexible" title="Book dentist" bucket="remember" meta="stash" />
+
+  <h2>Daily flow entities</h2>
+  <ul>
+    <li><code>FlowSession</code> — daily flow state for an actor/date</li>
+    <li><code>FocusSession</code> — time on an item</li>
+    <li><code>TransitionEvent</code> — switch_item, break, end_day, …</li>
+    <li><code>Reflection</code> — lightweight completion/transition notes</li>
+    <li><code>Suggestion</code> — AI reorder/nudge proposals (pending → accepted/dismissed)</li>
+  </ul>
+
+  <Mermaid
+    chart={`erDiagram
+    Item ||--o{ ItemRelation : links
+    Item ||--o{ ItemPlan : planned
+    Item ||--o{ ItemOccurrence : occurs
+    Item ||--o{ ItemAssignment : assigned
+    Actor ||--o{ ItemAssignment : receives
+    Item {
+      string kind
+      string bucket
+      string status
+    }
+    ItemPlan {
+      string mode
+    }`}
+  />
+
+  <h2>Design system</h2>
+  <p>
+    Components use semantic tokens only — see
+    <a href="/reference/design/tokens/">design/tokens.md</a> and
+    <a href="/reference/design/components/">design/components.md</a>. Primitives:
+    <code>Button</code>, <code>Pill</code>, <code>Checkbox</code>, <code>ItemRow</code>, etc.
+  </p>
+
+  <p><a href="/architecture/">Architecture →</a></p>
+</Layout>

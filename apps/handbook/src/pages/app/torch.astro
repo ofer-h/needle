@@ -1,0 +1,57 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Mermaid from '../../components/Mermaid.astro';
+---
+
+<Layout title="Torch intervention" description="Full-screen transition intervention system.">
+  <h1>Torch intervention</h1>
+  <p>
+    Torch is Needle's attention-takeover UX at transition moments — full-screen dimming overlays,
+    embedded action banner, brain-dump and skip flows. Built and iterated 2026-05-27 (see
+    <a href="/decisions/">decisions log</a>).
+  </p>
+
+  <h2>Architecture</h2>
+  <ul>
+    <li><code>TorchWindow</code> — full-screen overlay per display, cursor spotlight, up to 0.95 opacity</li>
+    <li><code>TorchBanner</code> embedded in overlay (not separate window) — Brain dump + Skip…</li>
+    <li><code>InterventionLayer</code> in renderer triggers <code>torch.show</code> via IPC</li>
+    <li>Click-through via <code>setIgnoreMouseEvents(forward:true)</code> + hover → <code>torch:set-interactive</code></li>
+  </ul>
+
+  <Mermaid
+    chart={`flowchart LR
+    T[Transition trigger] --> IL[InterventionLayer]
+    IL --> IPC[torch.show IPC]
+    IPC --> OW[TorchWindow overlays]
+    OW --> TB[TorchBanner]
+    TB --> BD[BrainDumpPanel]
+    TB --> SK[SkipPanel]
+    BD --> CAP[addCaptureEntry]
+    SK --> CL[torch:closed skipped]`}
+  />
+
+  <h2>Brain dump flow</h2>
+  <ol>
+    <li>User clicks <strong>Brain dump</strong> on banner</li>
+    <li>Overlays become interactive; <code>BrainDumpPanel</code> on all displays</li>
+    <li>Submit stores text as capture entry via main process</li>
+  </ol>
+
+  <h2>Skip flow</h2>
+  <ol>
+    <li><strong>Skip…</strong> → <code>torch:skip-init</code> → <code>SkipPanel</code></li>
+    <li>Reason selection (meeting vs task flavours) + optional notes</li>
+    <li>4-second SVG countdown on confirm button</li>
+    <li><code>torch:skip-confirm</code> → <code>torch:closed</code> with reason skipped</li>
+  </ol>
+
+  <h2>Design notes</h2>
+  <ul>
+    <li>All overlay windows use <code>data-theme='dark'</code> for token resolution</li>
+    <li>Capture window opens on cursor display, not always primary</li>
+    <li>Banner shows <code>title · in Xm · HH:MM</code> for meeting context</li>
+  </ul>
+
+  <p><a href="/app/async/">Async UX & logging →</a></p>
+</Layout>

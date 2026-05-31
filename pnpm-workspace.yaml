@@ -2,6 +2,11 @@ packages:
   - "apps/*"
   - "packages/*"
 
+# Electron + native better-sqlite3 require a flat node_modules. pnpm 11 reads
+# this from pnpm-workspace.yaml (NOT .npmrc), and electron-forge's preflight
+# check fails without it. Must reinstall after changing.
+nodeLinker: hoisted
+
 # Electron's @electron/rebuild pulls @electron/node-gyp from a git fork.
 # pnpm 11 blocks git-resolved subdeps by default; allow it for this app.
 blockExoticSubdeps: false
@@ -15,3 +20,4 @@ allowBuilds:
   esbuild: true
   fs-xattr: true
   macos-alias: true
+  sharp: true

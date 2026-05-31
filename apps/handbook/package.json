@@ -1,0 +1,31 @@
+{
+  "name": "@needle/handbook",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Needle project handbook — static Astro site for product, architecture, and docs.",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "typecheck": "astro check && tsc --noEmit",
+    "lint": "eslint src/"
+  },
+  "author": "Omri and Ofer",
+  "license": "MIT",
+  "dependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@astrojs/mdx": "^4.3.0",
+    "astro": "^5.7.10",
+    "marked": "^15.0.12",
+    "mermaid": "^11.6.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@needle/config": "workspace:*",
+    "@types/node": "^25.9.1",
+    "eslint": "^9.27.0",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.32.1"
+  }
+}

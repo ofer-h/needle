@@ -1,0 +1,58 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Mermaid from '../../components/Mermaid.astro';
+---
+
+<Layout title="Capture & classify" description="Free-text capture and AI classification flow.">
+  <h1>Capture & classify</h1>
+
+  <h2>Purpose</h2>
+  <p>
+    Capture is the first AI-native planning moment: user types free text, Claude classifies it into
+    Act/Remember buckets and structured fields, with the original text always visible during review.
+  </p>
+
+  <h2>Renderer flow</h2>
+  <ul>
+    <li><code>CaptureScreen.tsx</code> — token-based UI, live classify on submit</li>
+    <li><code>usePendingOperation</code> — FSM for pending/success/error/cancel</li>
+    <li><code>AsyncStatusPanel</code> — elapsed time, slow hint after 3s, cancel, retry</li>
+  </ul>
+
+  <h2>Main process</h2>
+  <ul>
+    <li><code>src/main/ai/classify.ts</code> — Anthropic call with hard timeout</li>
+    <li>IPC channel per <code>packages/contract</code> / shared ipc-contracts</li>
+    <li>API key: repo-root <code>.env</code> → userData <code>config.json</code> fallback</li>
+    <li><code>addCaptureEntry</code> persists brain-dump text from Torch as capture entries</li>
+  </ul>
+
+  <Mermaid
+    chart={`sequenceDiagram
+    participant R as Renderer CaptureScreen
+    participant P as Preload window.api
+    participant M as Main classify.ts
+    participant AI as Anthropic API
+    R->>P: classify(text)
+    P->>M: IPC classify
+    M->>M: mint flowId, needleLog start
+    M->>AI: messages API
+    AI-->>M: structured result / error
+    M-->>P: bucket + fields + flowId
+    P-->>R: usePendingOperation success
+    R->>R: uiLog + show review UI`}
+  />
+
+  <h2>Review loop (target)</h2>
+  <ol>
+    <li>Raw text visible while reviewing AI-generated blocks</li>
+    <li>User can edit, split, merge, convert task ↔ event before confirm</li>
+    <li>Confirm writes to store + SQLite; dismiss keeps raw capture</li>
+  </ol>
+
+  <h2>Trust requirements</h2>
+  <p>
+    Classify must never hang silently. See <a href="/app/async/">Async UX</a> — 30s max pending,
+    actionable errors, cancel path.
+  </p>
+</Layout>

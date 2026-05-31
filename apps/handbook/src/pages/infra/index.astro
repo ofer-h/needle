@@ -1,0 +1,125 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Infra 101" description="Monorepo tooling — what, why, alternatives, how we use it.">
+  <h1>Infra 101</h1>
+  <p>
+    The handbook itself runs on the same monorepo tooling it describes. Each section: what it is, the
+    problem it solves, alternatives, why Needle chose it, how it's used here.
+  </p>
+
+  <div class="infra-card">
+    <h3>Monorepo</h3>
+    <dl>
+      <dt>What</dt>
+      <dd>One git repository containing multiple apps and shared packages.</dd>
+      <dt>Problem</dt>
+      <dd>Duplicated types, drift between desktop and future web/server, painful cross-project refactors.</dd>
+      <dt>Alternatives</dt>
+      <dd>Multi-repo with published packages; git submodules; copy-paste shared code.</dd>
+      <dt>Why us</dt>
+      <dd>"Two paths, one core" requires one domain spine. Desktop and cloud must share <code>@needle/domain</code> and <code>@needle/contract</code>.</dd>
+      <dt>How used</dt>
+      <dd><code>apps/desktop</code>, <code>apps/handbook</code>, <code>packages/*</code> — see root <code>README.md</code>.</dd>
+    </dl>
+  </div>
+
+  <div class="infra-card">
+    <h3>pnpm workspaces</h3>
+    <dl>
+      <dt>What</dt>
+      <dd>Fast package manager with workspace protocol (<code>workspace:*</code>) linking local packages.</dd>
+      <dt>Problem</dt>
+      <dd>npm/yarn hoisting quirks; slow installs; linking local packages without publish cycles.</dd>
+      <dt>Alternatives</dt>
+      <dd>npm workspaces, Yarn Berry, Bun.</dd>
+      <dt>Why us</dt>
+      <dd>Strict deps + hoisted <code>nodeLinker</code> for Electron native modules (better-sqlite3). Locked in migration F0.</dd>
+      <dt>How used</dt>
+      <dd><code>pnpm-workspace.yaml</code> globs <code>apps/*</code> and <code>packages/*</code>. Root scripts delegate via <code>pnpm --filter @needle/desktop</code>.</dd>
+    </dl>
+  </div>
+
+  <div class="infra-card">
+    <h3>Turborepo</h3>
+    <dl>
+      <dt>What</dt>
+      <dd>Task runner with caching and dependency-aware pipeline across workspaces.</dd>
+      <dt>Problem</dt>
+      <dd>Running typecheck/lint/build in every package manually; no incremental cache.</dd>
+      <dt>Alternatives</dt>
+      <dd>nx, lage, plain pnpm recursive scripts.</dd>
+      <dt>Why us</dt>
+      <dd>Minimal config; <code>turbo run typecheck lint build</code> from root. Handbook adds another leaf task.</dd>
+      <dt>How used</dt>
+      <dd><code>turbo.json</code> — <code>build</code> depends on <code>^build</code>; outputs <code>dist/**</code>, <code>.vite/**</code>.</dd>
+    </dl>
+  </div>
+
+  <div class="infra-card">
+    <h3>TypeScript</h3>
+    <dl>
+      <dt>What</dt>
+      <dd>Typed JavaScript compiling to JS across main, preload, renderer, packages, handbook.</dd>
+      <dt>Problem</dt>
+      <dd>IPC contract drift; runtime errors from shape mismatches; shared domain needs one language.</dd>
+      <dt>Alternatives</dt>
+      <dd>Plain JS; Rust core + TS shell; codegen from OpenAPI only.</dd>
+      <dt>Why us</dt>
+      <dd>End-to-end types via <code>@needle/contract</code> + strict tsconfig from <code>@needle/config</code>.</dd>
+      <dt>How used</dt>
+      <dd>Separate tsconfigs per Electron context; handbook extends base with Astro types.</dd>
+    </dl>
+  </div>
+
+  <div class="infra-card">
+    <h3>Vite</h3>
+    <dl>
+      <dt>What</dt>
+      <dd>Fast dev server and bundler for web and Electron renderer/preload/main via Forge plugin.</dd>
+      <dt>Problem</dt>
+      <dd>Slow webpack rebuilds; HMR for React renderer during desktop dev.</dd>
+      <dt>Alternatives</dt>
+      <dd>webpack (Electron Forge default history), esbuild alone, Turbopack.</dd>
+      <dt>Why us</dt>
+      <dd>Forge + Vite plugin — one config per context (<code>vite.main.config.ts</code>, etc.). Handbook uses Vite via Astro.</dd>
+      <dt>How used</dt>
+      <dd>Renderer HMR on <code>pnpm start</code>; main/preload restart on change. Handbook: <code>astro dev/build</code>.</dd>
+    </dl>
+  </div>
+
+  <div class="infra-card">
+    <h3>Electron Forge</h3>
+    <dl>
+      <dt>What</dt>
+      <dd>Electron packaging toolchain — start, package, make (.dmg), publish hooks.</dd>
+      <dt>Problem</dt>
+      <dd>Manual electron binary wiring, signing, native module rebuild, multi-context builds.</dd>
+      <dt>Alternatives</dt>
+      <dd>electron-builder, custom scripts, Tauri.</dd>
+      <dt>Why us</dt>
+      <dd>First-party Vite integration; macOS signing/notarization path; already on master.</dd>
+      <dt>How used</dt>
+      <dd><code>apps/desktop/forge.config.ts</code> — <code>pnpm start</code>, <code>package</code>, <code>make</code>.</dd>
+    </dl>
+  </div>
+
+  <div class="infra-card">
+    <h3>Astro (handbook only)</h3>
+    <dl>
+      <dt>What</dt>
+      <dd>Static site generator with optional islands; MDX + content collections.</dd>
+      <dt>Problem</dt>
+      <dd>Single-file <code>docs/site/index.html</code> didn't scale; need browsable handbook + raw doc render.</dd>
+      <dt>Alternatives</dt>
+      <dd>VitePress, plain HTML, Vite+React SPA.</dd>
+      <dt>Why us</dt>
+      <dd>Static output, design control, lives in monorepo as infra example. Mermaid + reference wiring.</dd>
+      <dt>How used</dt>
+      <dd><code>pnpm --filter @needle/handbook dev|build|preview</code> → <code>dist/</code>.</dd>
+    </dl>
+  </div>
+
+  <p><a href="/architecture/">Architecture diagrams →</a></p>
+</Layout>

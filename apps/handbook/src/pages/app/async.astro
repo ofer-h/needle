@@ -1,0 +1,67 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Async UX & observability" description="Loading, failure, logging, and debug playbooks.">
+  <h1>Async UX & observability</h1>
+
+  <h2>Why async UX matters</h2>
+  <p>
+    Infinite "classifying…" dots without feedback break trust. Every user-triggered async flow must
+    terminate in success, actionable error, or explicit cancel — with a hard timeout (default 30s).
+  </p>
+
+  <h2>Non-negotiable rules</h2>
+  <ol>
+    <li>No infinite pending — max 30s (10s for trivial IPC)</li>
+    <li>Always exit pending — <code>try/finally</code> or <code>usePendingOperation</code></li>
+    <li>Cancel for operations expected &gt;3s</li>
+    <li>Slow hint after 3s — "Taking longer than usual"</li>
+    <li>Elapsed seconds on pending UI</li>
+    <li>Actionable errors — message + Try again + context action</li>
+    <li>Logging — <code>[needle]</code> main, <code>[needle-ui]</code> renderer; never secrets</li>
+    <li>Stale IPC — generation id ignores results after cancel/new run</li>
+  </ol>
+
+  <h2>Implementation map</h2>
+  <table>
+    <thead><tr><th>Piece</th><th>Path</th></tr></thead>
+    <tbody>
+      <tr><td>Hook</td><td><code>apps/desktop/src/renderer/hooks/usePendingOperation.ts</code></td></tr>
+      <tr><td>Pending UI</td><td><code>components/primitives/AsyncStatusPanel.tsx</code></td></tr>
+      <tr><td>Example</td><td><code>components/Capture/CaptureScreen.tsx</code></td></tr>
+      <tr><td>Main timeout</td><td><code>src/main/ai/classify.ts</code></td></tr>
+      <tr><td>Dev diagnostics</td><td><code>BuildDiagnostics</code> + <code>app:getDiagnostics</code></td></tr>
+      <tr><td>Flow health</td><td><code>src/shared/flow-health.ts</code>, <code>app:getFlowHealth</code></td></tr>
+    </tbody>
+  </table>
+
+  <h2>Observability</h2>
+  <ul>
+    <li><code>needleLog</code> — dev-only main process terminal output</li>
+    <li><code>uiLog</code> — renderer DevTools, always available</li>
+    <li><code>flowId</code> — correlates multi-step flows in logs + flow-health ring buffer</li>
+    <li><code>recordFlowEvent</code> — last 50 events in memory via IPC</li>
+  </ul>
+
+  <h2>Debug playbook ("stuck UI")</h2>
+  <ol>
+    <li>Check <code>BuildDiagnostics</code> strip — version, SHA, key source</li>
+    <li>Terminal: <code>[needle]</code> classify start/ok/failed with ms</li>
+    <li>DevTools: <code>[needle-ui]</code> capture events match UI state</li>
+    <li>IPC: <code>app:getFlowHealth</code> for recent flow events</li>
+    <li>SQLite userData for persisted state (main process only)</li>
+  </ol>
+
+  <h2>Still open (integration follow-up)</h2>
+  <ul>
+    <li>Today hydrate pending UI</li>
+    <li>Silent task persist feedback</li>
+    <li>Intervention logging completeness</li>
+  </ul>
+
+  <p>
+    Full decision record:
+    <a href="/reference/docs/decisions/2026-05-27-async-ux-and-observability/">2026-05-27 async UX doc</a>
+  </p>
+</Layout>

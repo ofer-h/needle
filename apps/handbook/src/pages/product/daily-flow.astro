@@ -1,0 +1,59 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Daily flow direction" description="v2 product north star for Needle.">
+  <h1>Daily flow direction</h1>
+  <p>North star for v2 architecture and product work — calm AI-assisted daily operating system.</p>
+
+  <h2>Vision</h2>
+  <p>
+    Needle is a calm AI-assisted daily operating system for intentional work and life flow. It should
+    feel like a calm companion and lightweight workflow coach — not another overloaded task manager.
+  </p>
+
+  <h2>Product principles</h2>
+
+  <h3>Today-first</h3>
+  <p>Today is the primary surface. Future planning supports the active day, not a backlog maze.</p>
+
+  <h3>Flexible structure</h3>
+  <ul>
+    <li><strong>Hard-time commitments</strong> — fixed time, fixed order (`Item(kind='event')` + `ItemOccurrence`)</li>
+    <li><strong>Flexible tasks</strong> — movable, reorderable (`Item(kind='task')` + `ItemPlan(mode='float')`)</li>
+    <li><strong>Anchored tasks</strong> — `ItemPlan(mode='anchor')`</li>
+  </ul>
+
+  <h3>Intentional transitions</h3>
+  <p>
+    Close the previous task, reset mentally, start the next with intent. Domain hooks:
+    <code>FlowSession</code>, <code>FocusSession</code>, <code>TransitionEvent</code>,
+    <code>Reflection</code>.
+  </p>
+
+  <h3>Accountability without aggression</h3>
+  <p>Supportive, reflective, adaptive — no shame mechanics or streak obsession.</p>
+
+  <h3>AI as companion, not operator</h3>
+  <p>
+    AI guides, observes patterns, suggests — as <code>Actor(kind='ai_agent')</code> with visible,
+    reversible <code>Suggestion</code> records.
+  </p>
+
+  <h2>MVP shape</h2>
+  <ul>
+    <li>Today timeline with current focus and upcoming flexible work</li>
+    <li>Free-text capture with editable AI-generated planning blocks before commit</li>
+    <li>Multi-intent parsing with user-controlled confirm/split/merge</li>
+  </ul>
+
+  <h2>AI capture review loop</h2>
+  <ol>
+    <li>Raw capture text stays visible while reviewing blocks</li>
+    <li>AI may split into multiple tasks/events — drafts editable before confirm</li>
+    <li>Fixed-time events and flexible tasks stay visually distinct</li>
+    <li>Confirming creates normal records; dismissing leaves raw capture</li>
+  </ol>
+
+  <p><a href="/product/accountability/">Accountability concept →</a> · <a href="/anatomy/">Item model →</a></p>
+</Layout>

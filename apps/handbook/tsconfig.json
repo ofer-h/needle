@@ -1,0 +1,14 @@
+{
+  "extends": "@needle/config/tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "preserve",
+    "jsxImportSource": "astro",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "types": ["astro/client"]
+  },
+  "include": ["src/**/*", ".astro/types.d.ts"],
+  "exclude": ["dist"]
+}

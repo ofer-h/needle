@@ -23,6 +23,15 @@ Focus — macOS desktop app for a software engineer with ADHD.
 Intelligent second brain: capture anything, AI classifies it, surfaces the right things at the right time.
 
 ## Current state (as of 2026-05-27)
+
+**Update 2026-05-29 (`v2-monorepo`):** Monorepo Foundation pass is runtime-verified.
+Desktop app builds and boots via `pnpm start` from `apps/desktop`; boot logs confirm
+Forge preflight, Vite main+preload, SQLite + IPC (`app:getDiagnostics`,
+`app:getFlowHealth`), and repo-root `.env` API key load. Post-migration fixes: ⌘K
+destroyed-window crash (`ensureMainWindow()` in `apps/desktop/src/main/index.ts`);
+pnpm 11 requires `nodeLinker: hoisted` in `pnpm-workspace.yaml` (not `.npmrc` alone).
+Branch pushed; steps D (`fc56ed4`) and P complete. Owner still to verify pixel-level
+GUI (reorder/persist, full classify flow).
 - **`master`** includes orchestration merge: SQLite `db:*`, Anthropic classify, Today hydration, async UX, dev diagnostics, `.env` key loading (Electron 41.7.1 pin).
 - **Active branch:** `needle-integration-followup` — P0 gaps from async/observability decision doc (hydrate pending UI, DB persist feedback, intervention logging); optional Phase 4 v2 Today adapter.
 - **Today planning behavior reset landed 2026-05-27:** child work now behaves more like first-class items in the renderer. Today uses one DnD context so overdue tasks can be moved back into Today, task detail can nest a standalone task under another task, subtask detail rows support edit/reorder/move/promote actions, and event rows now open an editable detail surface with time/title/notes plus "remove time" conversion to task. Renderer still uses projected `Task.subtasks` and explicit buttons for child-item moves; gesture drag in/out of parent is not implemented yet.

@@ -1,0 +1,66 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Mermaid from '../../components/Mermaid.astro';
+import ItemCard from '../../components/ItemCard.astro';
+---
+
+<Layout title="Today & scheduling" description="How the Today screen and timeline scheduling work.">
+  <h1>Today & scheduling</h1>
+
+  <h2>Surface role</h2>
+  <p>
+    Today is the primary product surface — a single interleaved timeline of hard-time blocks and
+    flexible tasks for the active day. Overdue work sits above Today; future items collapse into an
+    Upcoming footer.
+  </p>
+
+  <h2>Two scheduling kinds</h2>
+  <ul>
+    <li><strong>Fixed (Anchor)</strong> — has <code>startTime</code>, immovable on the timeline</li>
+    <li><strong>Flexible (Float)</strong> — <code>slotIndex</code> + <code>slotOrder</code>, freely draggable between anchors</li>
+  </ul>
+
+  <h2>Example timeline</h2>
+  <ItemCard variant="fixed" title="Write spec" time="09:00" bucket="act" />
+  <ItemCard variant="event" title="Daily standup" time="10:00" bucket="act" />
+  <ItemCard variant="flexible" title="Review PR" bucket="act" meta="slot 1" />
+  <ItemCard variant="flexible" title="Email follow-ups" bucket="act" meta="slot 1" />
+  <ItemCard variant="event" title="Design review" time="14:00" bucket="act" />
+
+  <h2>Timeline construction</h2>
+  <p>
+    <code>buildTimeline()</code> in <code>apps/desktop/src/renderer/utils/timeline.ts</code> merges
+    fixed anchors and flexible tasks into one ordered list. Fixed anchors divide the day into
+    numbered slots; flexible tasks float inside slots using fractional indexing on reorder.
+  </p>
+
+  <h2>Drag and drop</h2>
+  <ul>
+    <li>Gap zones (<code>useDroppable</code>) between every item — insert-between, not swap</li>
+    <li><code>DragOverlay</code> clone; original dimmed during drag</li>
+    <li>Today and Overdue share one DnD context — overdue can drop back into Today</li>
+    <li>Events and fixed tasks are not draggable; gaps around them still accept drops</li>
+  </ul>
+
+  <Mermaid
+    chart={`flowchart TD
+    A[User opens Today] --> B[buildTimeline forDate]
+    B --> C{Item kind}
+    C -->|fixed/event| D[Sort by startTime]
+    C -->|flexible| E[Place in slotIndex/order]
+    D --> F[Interleaved timeline]
+    E --> F
+    F --> G[DnD gap drop]
+    G --> H[reorderTask in Zustand]
+    H --> I[IPC persist to SQLite]`}
+  />
+
+  <h2>UI composition</h2>
+  <p>
+    <code>TodayScreen</code> orchestrates <code>TodayToolbar</code> (with <code>LiveClock</code>),
+    <code>QuickAddRow</code>, <code>ItemRow</code>, <code>UpcomingFooter</code>, and
+    <code>CaptureFab</code>. Shared row anatomy: 4-column grid (drag, icon/checkbox, label, meta).
+  </p>
+
+  <p><a href="/app/capture/">Capture & classify →</a></p>
+</Layout>

@@ -1,0 +1,58 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Mermaid from '../../components/Mermaid.astro';
+---
+
+<Layout title="Competitive landscape" description="Where Needle sits in the market.">
+  <h1>Competitive landscape</h1>
+
+  <h2>What Needle is</h2>
+  <p>
+    A macOS app that coaches you through the moment you switch from one task or meeting to the next.
+    It interrupts at the hard stop, clears your head, and starts you clean — with a rotating
+    intervention kit so habituation doesn't kill the nudge.
+  </p>
+
+  <h2>Differentiation</h2>
+  <ul>
+    <li><strong>Acts at the transition</strong> — not plan-ahead or capture-after</li>
+    <li><strong>Interrupts on purpose</strong> — opposite of OS "reduce interruptions"</li>
+    <li><strong>Rotating kit</strong> — moat against wallpaper timers</li>
+    <li><strong>macOS-native, local-first</strong></li>
+    <li><strong>Calm, not aggressive</strong> — coach, not streak machine</li>
+  </ul>
+
+  <h2>Position map</h2>
+  <Mermaid
+    chart={`quadrantChart
+    title Competitive position
+    x-axis Low planning --> High planning
+    y-axis Low in-moment --> High in-moment
+    Needle: [0.85, 0.9]
+    Apple Focus: [0.2, 0.15]
+    Sunsama: [0.7, 0.25]
+    Llama Life: [0.5, 0.35]
+    ADHD Focus Mate: [0.4, 0.75]`}
+  />
+
+  <h2>Tier 1 — Focus-state intervention</h2>
+  <table>
+    <thead><tr><th>Product</th><th>Overlap</th><th>Needle differs</th></tr></thead>
+    <tbody>
+      <tr><td>ADHD Focus Mate</td><td>AI nudges on distraction</td><td>Fires at transitions + brain-dump ritual</td></tr>
+      <tr><td>Centered</td><td>Distraction detection in session</td><td>Coaches switch between sessions</td></tr>
+      <tr><td>Brain.fm</td><td>Transition ritual science</td><td>Content, not enforcing app</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Tiers 2–6 (summary)</h2>
+  <ul>
+    <li><strong>Timers</strong> (Llama Life, Tiimo) — you start them; static habituation</li>
+    <li><strong>Body doubling</strong> (Focusmate) — needs scheduled partner</li>
+    <li><strong>Daily planners</strong> (Sunsama, Akiflow, Motion) — optimize the plan, silent at switch</li>
+    <li><strong>OS focus</strong> — hides interruptions</li>
+    <li><strong>Capture / second brain</strong> — adjacent under transition-coach thesis</li>
+  </ul>
+
+  <p><a href="/product/daily-flow/">Daily flow direction →</a></p>
+</Layout>

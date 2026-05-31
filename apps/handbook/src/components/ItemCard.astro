@@ -1,0 +1,22 @@
+---
+interface Props {
+  variant?: 'event' | 'fixed' | 'flexible';
+  title: string;
+  meta?: string;
+  bucket?: 'act' | 'remember';
+  time?: string;
+}
+
+const { variant = 'flexible', title, meta, bucket = 'act', time } = Astro.props;
+---
+
+<div class={`item-card ${variant}`}>
+  <span aria-hidden="true">⠿</span>
+  <span aria-hidden="true">{variant === 'event' ? '📅' : '☐'}</span>
+  <span>{title}</span>
+  <span class="time">
+    {time && <span>{time} · </span>}
+    <span class={`pill ${bucket}`}>{bucket}</span>
+    {meta && ` · ${meta}`}
+  </span>
+</div>

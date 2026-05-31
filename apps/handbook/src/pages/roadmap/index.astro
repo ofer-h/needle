@@ -1,0 +1,57 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Roadmap" description="Migration status, Track B, open gaps.">
+  <h1>Roadmap</h1>
+
+  <h2>Migration status (Foundation)</h2>
+  <p>Branch <code>v2-monorepo</code> — Foundation F0–F2 complete and runtime-verified.</p>
+  <table>
+    <thead><tr><th>Step</th><th>Status</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>F0 — pnpm + Turbo + config</td><td>✅</td><td><code>828723c</code></td></tr>
+      <tr><td>F1 — domain + contract extract</td><td>✅</td><td><code>72839d9</code>, 31 imports rewired</td></tr>
+      <tr><td>F2 — desktop → apps/desktop</td><td>✅</td><td><code>d83264f</code>, boots via <code>pnpm start</code></td></tr>
+      <tr><td>F3 — ui-web extract</td><td>Deferred</td><td>Premature without web app</td></tr>
+      <tr><td>D — READMEs</td><td>✅</td><td><code>fc56ed4</code></td></tr>
+      <tr><td>Handbook site</td><td>✅</td><td><code>apps/handbook</code> (this site)</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Track B (parallel cloud path)</h2>
+  <p>Scaffold next — one agent per app when ready:</p>
+  <ul>
+    <li><code>apps/server</code> — NestJS modular monolith + Postgres + better-auth</li>
+    <li><code>apps/web</code> — Vite + React SPA, api-client, shared ui-web</li>
+    <li><code>apps/mobile</code> — Expo (deferred)</li>
+    <li><code>{'packages/{ui-web,api-client,design-tokens,ai}'}</code></li>
+  </ul>
+
+  <h2>Product / integration gaps</h2>
+  <ul>
+    <li>Today hydrate pending UI + silent persist feedback</li>
+    <li>Intervention logging completeness</li>
+    <li>Phase 4 v2 Today adapter (optional)</li>
+    <li>Full classify review loop (split/merge/convert)</li>
+    <li>Accountability & scoring — concept only</li>
+    <li>Sync adapter — after cloud operation model proven</li>
+  </ul>
+
+  <h2>Multi-app roadmap phases</h2>
+  <ol>
+    <li>Foundation — monorepo + desktop running (done)</li>
+    <li>Shared UI extraction when web exists</li>
+    <li>Backend + auth + contract-first API</li>
+    <li>Web client consuming same domain</li>
+    <li>Mobile + coach/accountability surfaces</li>
+    <li>Sync/outbox — after endpoints stable</li>
+  </ol>
+
+  <p>
+    Details:
+    <a href="/reference/docs/v2/migration-progress/">migration-progress.md</a>,
+    <a href="/reference/docs/next-integration-steps/">next-integration-steps.md</a>,
+    <a href="/reference/docs/v2/multi-app-roadmap/">multi-app-roadmap.md</a>
+  </p>
+</Layout>

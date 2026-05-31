@@ -1,0 +1,59 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Accountability" description="Transition-ritual adherence and scoring concept.">
+  <h1>Accountability & scoring</h1>
+  <p><em>Status: concept / captured brain-dump (2026-05-28). Implementation TBD.</em></p>
+
+  <h2>Timeboxed transition rituals</h2>
+  <p>A transition can be a short sequence of intentional sub-blocks. Example before a meeting:</p>
+  <ul>
+    <li>5 min — memory dump</li>
+    <li>5 min — plan the next meeting</li>
+    <li>5 min — break</li>
+  </ul>
+  <p>The product runs the ritual and notices what actually happened.</p>
+
+  <h2>Adherence signals</h2>
+  <ul>
+    <li>Completed vs skipped (per block or whole ritual)</li>
+    <li>Postponed — with knock-on cost to following blocks</li>
+    <li>Repeated patterns (e.g. always skipping the break)</li>
+    <li>On-time arrival at the next commitment</li>
+    <li>Plan vs actual</li>
+  </ul>
+
+  <h2>Three delivery modes (user-selectable)</h2>
+  <ol>
+    <li><strong>Gamification / scoring</strong> — opt-in streak/consistency, optional leaderboard</li>
+    <li>
+      <strong>Coached</strong> — push adherence to <code>Actor(kind='coach')</code> for human nudge
+    </li>
+    <li>
+      <strong>Self-accountability (private)</strong> — AI encouragement or message to future self;
+      first-class, not a downgrade
+    </li>
+  </ol>
+
+  <blockquote>
+    Tone guardrail: supportive, reflective — no shame, no streak obsession. Scoring is opt-in; private
+    mode is a peer of the others.
+  </blockquote>
+
+  <h2>Domain hooks</h2>
+  <ul>
+    <li><code>TransitionEvent</code>, <code>Reflection</code>, <code>FlowSession</code>, <code>FocusSession</code></li>
+    <li><code>Actor(kind='accountability_partner' | 'coach')</code></li>
+    <li><code>Suggestion</code> for AI nudges — optional, attributed</li>
+    <li><code>usage_events</code> + <code>activity_log</code> for metrics</li>
+  </ul>
+
+  <h2>Open questions</h2>
+  <ul>
+    <li>Where does accountability run? Local (Mac, real-time) vs cloud (leaderboards, coach push)</li>
+    <li>New entities: ritual instance, score record, self-authored encouragement</li>
+    <li>Privacy model per mode</li>
+    <li>Scoring function — reward consistency/clarity, not raw throughput</li>
+  </ul>
+</Layout>
