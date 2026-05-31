@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import {
   addChild,
   addItem,
@@ -12,15 +12,18 @@ import {
   type ItemId,
   type NewItemInput,
   type Template,
+  type TemplateId,
   type TodayData,
 } from '@needle/ui-web';
 import CaptureFab from './CaptureFab';
-
-const TEMPLATE: Template = BUILTIN_TEMPLATES.editorial as Template;
+import EventEditorModal from './EventEditorModal';
+import './TodayScreen.css';
 
 type TodayBoardScreenProps = {
   data: TodayData;
   now: Date;
+  templateId: TemplateId;
+  onTemplateChange: (id: TemplateId) => void;
   onChange: (data: TodayData) => void;
   onNavigateCapture: () => void;
 };
@@ -28,10 +31,19 @@ type TodayBoardScreenProps = {
 export default function TodayBoardScreen({
   data,
   now,
+  templateId,
+  onTemplateChange,
   onChange,
   onNavigateCapture,
 }: TodayBoardScreenProps) {
   const views = useMemo(() => buildTodayView(data, now), [data, now]);
+  const [eventModalOpen, setEventModalOpen] = useState(false);
+
+  // Templates are pure presentation — switching only swaps which layout renders,
+  // never the underlying item data. The editorial fallback is the documented
+  // default and always present in the built-in registry.
+  const template: Template =
+    BUILTIN_TEMPLATES[templateId] ?? (BUILTIN_TEMPLATES.editorial as Template);
 
   const todayISO = now.toISOString().slice(0, 10);
   const hasYesterday = data.plans.some((plan) => {
@@ -52,7 +64,23 @@ export default function TodayBoardScreen({
 
   return (
     <div className="today-screen">
-      <ProgressKudos views={views} />
+      <div className="today-screen__header">
+        <ProgressKudos views={views} />
+        <label className="template-switch">
+          <span className="template-switch__label">Template</span>
+          <select
+            className="template-switch__select"
+            value={template.id}
+            onChange={(e) => onTemplateChange(e.target.value as TemplateId)}
+          >
+            {Object.values(BUILTIN_TEMPLATES).map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
 
       <InlineAdd
         onAdd={handleAdd}
@@ -61,13 +89,32 @@ export default function TodayBoardScreen({
         hasYesterday={hasYesterday}
       />
 
-      {TEMPLATE.showCountdown && <Countdown views={views} now={now} variant="inline" />}
+      <div className="today-screen__event-add">
+        <button
+          type="button"
+          className="today-screen__event-btn"
+          onClick={() => setEventModalOpen(true)}
+        >
+          + Event
+        </button>
+      </div>
 
-      <TodayBoard data={data} template={TEMPLATE} now={now} onChange={onChange} />
+      {template.showCountdown && <Countdown views={views} now={now} variant="inline" />}
 
-      {TEMPLATE.showCountdown && <Countdown views={views} now={now} variant="floating" />}
+      <TodayBoard data={data} template={template} now={now} onChange={onChange} />
+
+      {template.showCountdown && <Countdown views={views} now={now} variant="floating" />}
 
       <CaptureFab onClick={onNavigateCapture} />
+
+      {eventModalOpen && (
+        <EventEditorModal
+          data={data}
+          now={now}
+          onChange={onChange}
+          onClose={() => setEventModalOpen(false)}
+        />
+      )}
     </div>
   );
 }

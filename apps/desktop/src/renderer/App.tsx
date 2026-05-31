@@ -14,9 +14,11 @@ import {
   defaultFeedbackConfig,
   defaultNotificationConfig,
   defaultTransitionSettings,
+  DEFAULT_TEMPLATE_ID,
   type FeedbackBus,
   type FeedbackConfig,
   type NotificationConfig,
+  type TemplateId,
   type TodayData,
   type TransitionSettings,
 } from '@needle/ui-web';
@@ -34,6 +36,7 @@ const EMPTY_DATA: TodayData = {
 const LS_TRANSITION = 'needle.transition';
 const LS_NOTIFICATIONS = 'needle.notifications';
 const LS_FEEDBACK = 'needle.feedback';
+const LS_TEMPLATE = 'needle.template';
 
 /** Load a JSON value from localStorage, falling back to a default on any error. */
 function loadPersisted<T>(key: string, fallback: T): T {
@@ -74,6 +77,9 @@ export default function App() {
   );
   const [notifications, setNotifications] = useState<NotificationConfig>(() =>
     loadPersisted<NotificationConfig>(LS_NOTIFICATIONS, defaultNotificationConfig),
+  );
+  const [templateId, setTemplateId] = useState<TemplateId>(() =>
+    loadPersisted<TemplateId>(LS_TEMPLATE, DEFAULT_TEMPLATE_ID),
   );
   // Feedback config is loaded once from localStorage. There is no feedback UI
   // yet (ui-web's SettingsPanel covers transition + notifications), so it stays
@@ -118,6 +124,7 @@ export default function App() {
   useEffect(() => savePersisted(LS_TRANSITION, transitionSettings), [transitionSettings]);
   useEffect(() => savePersisted(LS_NOTIFICATIONS, notifications), [notifications]);
   useEffect(() => savePersisted(LS_FEEDBACK, feedbackConfig), [feedbackConfig]);
+  useEffect(() => savePersisted(LS_TEMPLATE, templateId), [templateId]);
 
   // Drive `now` from the dev clock: update immediately when frozenIso changes,
   // and tick every second so a live (unfrozen) clock advances.
@@ -232,6 +239,8 @@ export default function App() {
             <TodayBoardScreen
               data={todayData}
               now={now}
+              templateId={templateId}
+              onTemplateChange={setTemplateId}
               onChange={handleTodayChange}
               onNavigateCapture={() => setScreen('capture')}
             />
