@@ -1,0 +1,29 @@
+.editorial {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.editorial__group-title {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: var(--text-18);
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  padding: 0 var(--space-2) var(--space-2);
+  border-bottom: 0.5px solid var(--hairline);
+  margin-bottom: var(--space-2);
+}
+
+.editorial__rows {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.editorial__empty {
+  font-size: var(--text-13);
+  color: var(--ink-4);
+  padding: var(--space-2);
+  font-style: italic;
+}

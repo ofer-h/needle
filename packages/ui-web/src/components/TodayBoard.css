@@ -1,0 +1,16 @@
+.today-board {
+  width: 100%;
+}
+
+/* Density tunes vertical rhythm without touching layout logic. */
+.today-board[data-density='compact'] .itemline__row {
+  min-height: 30px;
+}
+
+.today-board[data-density='compact'] .itemline {
+  padding: 0 var(--space-2);
+}
+
+.today-board[data-density='roomy'] .itemline__row {
+  min-height: 40px;
+}

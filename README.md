@@ -15,15 +15,20 @@ are a parallel track that gets added later — see
 ```text
 apps/
   desktop/        Electron + Vite + React macOS app (@needle/desktop)
+  studio/         browser demo for the new design system (@needle/studio)
 packages/
   domain/         domain types, validation, business rules (@needle/domain)
   contract/       API/IPC contract shapes (@needle/contract)
   config/         shared tsconfig base (@needle/config)
+  ui-web/         reusable web design system + model (@needle/ui-web)
 docs/             product + architecture docs (start at docs/v2/README.md)
 ```
 
+`packages/ui-web` + `apps/studio` are the in-progress design-system redesign —
+see [`docs/v2/studio-redesign.md`](docs/v2/studio-redesign.md).
+
 Planned next (not built yet): `apps/web` (Vite SPA), `apps/server` (NestJS +
-Postgres), `apps/mobile` (Expo), `packages/{ui-web,api-client,design-tokens,ai}`.
+Postgres), `apps/mobile` (Expo), `packages/{api-client,design-tokens,ai}`.
 
 ## Tools / prerequisites
 

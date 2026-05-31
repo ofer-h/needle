@@ -1,0 +1,174 @@
+/* Countdown — the alert STYLE rotates (color via --cd-accent, motion class,
+ * scale via --cd-scale) so it never becomes wallpaper. */
+
+.cd {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-12);
+  color: var(--cd-accent, var(--ink-2));
+  background: color-mix(in srgb, var(--cd-accent, var(--ink-3)) 12%, transparent);
+  white-space: nowrap;
+  transform: scale(var(--cd-scale, 1));
+  transform-origin: left center;
+}
+
+.cd--empty {
+  color: var(--ink-4);
+  background: transparent;
+}
+
+.cd__time {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.cd__arrow {
+  opacity: 0.6;
+}
+
+.cd__title {
+  color: var(--ink-2);
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Floating ──────────────────────────────────────────────── */
+.cd-float {
+  position: fixed;
+  right: var(--space-6);
+  bottom: var(--space-6);
+  z-index: 50;
+  min-width: 180px;
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-4);
+  background: var(--surface);
+  border: 1px solid var(--cd-accent, var(--hairline-2));
+  box-shadow: var(--shadow-win);
+  transform: scale(var(--cd-scale, 1));
+  transform-origin: bottom right;
+}
+
+.cd-float__time {
+  font-family: var(--serif);
+  font-size: var(--text-32);
+  font-weight: 600;
+  line-height: 1;
+  color: var(--cd-accent, var(--ink));
+  font-variant-numeric: tabular-nums;
+}
+
+.cd-float__meta {
+  margin-top: var(--space-2);
+  font-size: var(--text-13);
+  color: var(--ink-2);
+}
+
+.cd-float__arrow {
+  opacity: 0.6;
+}
+
+.cd-float__prep {
+  margin-top: var(--space-1);
+  font-size: var(--text-11);
+  color: var(--cd-accent, var(--ink-3));
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ── App-icon badge (simulated) ────────────────────────────── */
+.cd-badge {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  transform: scale(var(--cd-scale, 1));
+}
+
+.cd-badge__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  background: var(--ink);
+  color: var(--bg);
+  display: grid;
+  place-items: center;
+  font-family: var(--serif);
+  font-size: var(--text-18);
+  box-shadow: var(--shadow-card);
+}
+
+.cd-badge__bubble {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 5px;
+  border-radius: var(--radius-pill);
+  background: var(--cd-accent, var(--urgent));
+  color: #fff;
+  font-size: var(--text-11);
+  font-weight: 600;
+  display: grid;
+  place-items: center;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 0 0 2px var(--bg);
+}
+
+/* ── Motion (anti-habituation) ─────────────────────────────── */
+.cd--pulse,
+.cd-float--imminent.cd--pulse,
+.cd-badge.cd--pulse {
+  animation: cd-pulse 1.4s var(--ease-out) infinite;
+}
+
+.cd--breathe {
+  animation: cd-breathe 4s ease-in-out infinite;
+}
+
+.cd--shake {
+  animation: cd-shake 0.9s ease-in-out infinite;
+}
+
+@keyframes cd-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@keyframes cd-breathe {
+  0%, 100% {
+    transform: scale(calc(var(--cd-scale, 1) * 1));
+  }
+  50% {
+    transform: scale(calc(var(--cd-scale, 1) * 1.04));
+  }
+}
+
+@keyframes cd-shake {
+  0%, 100% {
+    transform: scale(var(--cd-scale, 1)) translateX(0);
+  }
+  25% {
+    transform: scale(var(--cd-scale, 1)) translateX(-2px);
+  }
+  75% {
+    transform: scale(var(--cd-scale, 1)) translateX(2px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cd--pulse,
+  .cd--breathe,
+  .cd--shake,
+  .cd-badge.cd--pulse {
+    animation: none;
+  }
+}

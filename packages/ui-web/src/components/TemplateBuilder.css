@@ -1,0 +1,201 @@
+/* ── Container ───────────────────────────────────────────────────────────── */
+
+.tb {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: var(--surface);
+  border: 0.5px solid var(--hairline-2);
+  border-radius: var(--radius-4);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+/* ── Section ─────────────────────────────────────────────────────────────── */
+
+.tb__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+}
+
+.tb__section--row {
+  gap: var(--space-4);
+}
+
+.tb__divider {
+  height: 0.5px;
+  background: var(--hairline-2);
+  flex-shrink: 0;
+}
+
+/* ── Eyebrow + caption ───────────────────────────────────────────────────── */
+
+.tb__eyebrow {
+  font-size: var(--text-11);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.tb__caption {
+  margin: 0;
+  font-size: var(--text-12);
+  color: var(--ink-3);
+  font-style: italic;
+  font-family: var(--serif);
+  line-height: 1.4;
+}
+
+/* ── Text input ──────────────────────────────────────────────────────────── */
+
+.tb__text-input {
+  height: 36px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-2);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: var(--text-14);
+  font-family: inherit;
+  outline: none;
+  transition: border-color var(--duration-fast) var(--ease-out);
+}
+
+.tb__text-input::placeholder {
+  color: var(--ink-4);
+}
+
+.tb__text-input:focus-visible {
+  border-color: var(--upcoming);
+}
+
+/* ── Chips ───────────────────────────────────────────────────────────────── */
+
+.tb__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.tb__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--hairline-2);
+  background: transparent;
+  color: var(--ink-2);
+  font-size: var(--text-13);
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.tb__chip:hover:not(.tb__chip--on) {
+  border-color: var(--upcoming);
+  color: var(--upcoming);
+}
+
+.tb__chip:focus-visible {
+  outline: 2px solid var(--upcoming);
+  outline-offset: 2px;
+}
+
+.tb__chip--on {
+  background: var(--upcoming);
+  border-color: var(--upcoming);
+  color: var(--surface);
+  font-weight: 600;
+}
+
+.tb__chip--on:hover {
+  opacity: 0.85;
+}
+
+/* ── Accent swatch chips ─────────────────────────────────────────────────── */
+
+.tb__chips--accent {
+  gap: var(--space-2);
+}
+
+.tb__chip--swatch {
+  gap: var(--space-2);
+}
+
+/* The dynamic swatch dot — background set via inline style={{ background: 'var(--<accent>)' }} */
+.tb__swatch {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-pill);
+}
+
+/* When selected, keep the swatch visible against the chip fill */
+.tb__chip--swatch.tb__chip--on .tb__swatch {
+  outline: 1.5px solid var(--surface);
+  outline-offset: 1px;
+}
+
+/* ── Fields shown (checkbox list) ────────────────────────────────────────── */
+
+.tb__check-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.tb__check-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-1) 0;
+}
+
+.tb__check-label {
+  font-size: var(--text-14);
+  color: var(--ink-2);
+  cursor: pointer;
+  user-select: none;
+}
+
+/* ── Live summary ────────────────────────────────────────────────────────── */
+
+.tb__summary {
+  margin: 0;
+  font-size: var(--text-13);
+  color: var(--ink-3);
+  font-style: italic;
+  font-family: var(--serif);
+  line-height: 1.5;
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-sub);
+  border-radius: var(--radius-2);
+  border: 1px solid var(--hairline);
+}
+
+/* ── Footer ──────────────────────────────────────────────────────────────── */
+
+.tb__footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-top: 0.5px solid var(--hairline-2);
+}
+
+/* ── Reduced motion ──────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .tb__text-input,
+  .tb__chip {
+    transition: none;
+  }
+}

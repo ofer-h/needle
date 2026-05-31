@@ -22,6 +22,9 @@ Read in order:
 8. `multi-app-roadmap.md` - staged path from macOS MVP to web, mobile, server, and coach surfaces.
 9. `research-notes.md` - external sources checked and conclusions to revisit.
 10. `implementation-roadmap.md` - near-term migration path from the current app.
+11. `studio-redesign.md` - the in-progress UI redesign as `@needle/ui-web` + `apps/studio` (one canonical model; templates are pure config). Living record; see also `../decisions/2026-05-31-ui-web-studio-redesign.md`.
+12. `studio-handoff.md` - **continuation guide for the Studio redesign**: exact current state (Phases 0–4; typecheck green, pending final verify + commit), remaining steps, how to run, file map, gotchas. Read this first if picking the work up.
+13. **`needle-next-master-plan.md`** - **the authoritative go-forward master plan**: Desktop next-level + the **Transition System**, reconciling Ofer's direction + the Cursor and Codex plans into one implement-ready, subagent-parallelizable spec. Read this before starting feature work. Raw requirements appendix: `needle-next-master-plan-DRAFT.md`.
 
 Related artifacts:
 

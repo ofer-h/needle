@@ -1,0 +1,128 @@
+.chatdock {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 360px;
+  border-radius: var(--radius-4);
+  background: var(--surface);
+  border: 0.5px solid var(--hairline-2);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.chatdock__log {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5);
+}
+
+.chatdock__msg {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  max-width: 82%;
+}
+
+.chatdock__msg--assistant {
+  align-self: flex-start;
+  align-items: flex-start;
+}
+
+.chatdock__msg--user {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.chatdock__bubble {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-4);
+  font-size: var(--text-14);
+  line-height: 1.5;
+  letter-spacing: -0.005em;
+}
+
+.chatdock__msg--assistant .chatdock__bubble {
+  background: var(--surface-sub);
+  color: var(--ink);
+  border-bottom-left-radius: var(--radius-1);
+}
+
+.chatdock__msg--user .chatdock__bubble {
+  background: var(--ink);
+  color: var(--bg);
+  border-bottom-right-radius: var(--radius-1);
+}
+
+.chatdock__undo {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px var(--space-2);
+  font-size: var(--text-11);
+  color: var(--ink-3);
+  border-radius: var(--radius-1);
+}
+
+.chatdock__undo:hover:not(:disabled) {
+  color: var(--ink);
+  background: var(--surface-sub);
+}
+
+.chatdock__undo:disabled {
+  color: var(--ink-4);
+  cursor: default;
+  text-decoration: line-through;
+}
+
+.chatdock__compose {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-top: 0.5px solid var(--hairline);
+  background: var(--bg-elev);
+}
+
+.chatdock__input {
+  flex: 1;
+  min-width: 0;
+  height: 38px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-3);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: var(--text-14);
+  outline: none;
+}
+
+.chatdock__input:focus {
+  border-color: var(--border-strong);
+}
+
+.chatdock__send {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: var(--radius-3);
+  background: var(--ink);
+  color: var(--bg);
+  display: inline-grid;
+  place-items: center;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.chatdock__send:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chatdock__send {
+    transition: none;
+  }
+}

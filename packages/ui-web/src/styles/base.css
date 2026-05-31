@@ -1,0 +1,66 @@
+/* Base resets + typography helpers. Subset of the desktop app's global.css,
+ * stripped of Electron window-chrome rules. Domain row/section styles live
+ * with their components in src/components and src/templates. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'ss01', 'ss02', 'cv11';
+  letter-spacing: -0.005em;
+  color: var(--ink);
+  background: var(--bg);
+}
+
+button {
+  cursor: pointer;
+  font-family: var(--sans);
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+input,
+textarea {
+  font-family: var(--sans);
+  color: inherit;
+}
+
+/* ── Typography helpers ─────────────────────────────────────── */
+.t-display {
+  font-family: var(--serif);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  font-feature-settings: 'ss01';
+}
+
+.t-serif-i {
+  font-family: var(--serif);
+  font-style: italic;
+}
+
+.t-mono {
+  font-family: var(--mono);
+  font-feature-settings: 'ss01', 'ss03';
+}
+
+.t-eyebrow {
+  font-family: var(--sans);
+  font-size: var(--text-11);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}

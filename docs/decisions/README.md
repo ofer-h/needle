@@ -5,5 +5,6 @@ Short-lived product/engineering decisions that are too detailed for `memory/deci
 | Date | Topic | Document |
 |------|--------|----------|
 | 2026-05-27 | Async UX + observability baseline | [2026-05-27-async-ux-and-observability.md](./2026-05-27-async-ux-and-observability.md) |
+| 2026-05-31 | UI redesign as `@needle/ui-web` + `apps/studio` | [2026-05-31-ui-web-studio-redesign.md](./2026-05-31-ui-web-studio-redesign.md) |
 
 When adding a new record: one file per theme, link from `memory/decisions.md`, update this index.

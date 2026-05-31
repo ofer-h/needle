@@ -1,0 +1,32 @@
+.ds-progress {
+  width: 100%;
+  height: 5px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-sub);
+  overflow: hidden;
+}
+
+.ds-progress__fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  transition: width var(--duration-slow) var(--ease-out);
+}
+
+.ds-progress--upcoming .ds-progress__fill {
+  background: var(--upcoming);
+}
+
+.ds-progress--accent .ds-progress__fill {
+  background: var(--accent);
+}
+
+.ds-progress--urgent .ds-progress__fill {
+  background: var(--urgent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ds-progress__fill {
+    transition: none;
+  }
+}

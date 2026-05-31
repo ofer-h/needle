@@ -1,0 +1,98 @@
+/* Semantic tokens — role-based. Ported verbatim from
+ * apps/desktop/src/renderer/styles/tokens.css. Components reference ONLY
+ * these (never the --sand-* / --ink-* primitives). Each token has a value for
+ * BOTH light and dark themes; dark mode is recalibrated, never inverted. */
+
+:root {
+  --sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  --serif: 'Fraunces', 'New York', Georgia, serif;
+  --mono: 'Geist Mono', ui-monospace, 'SFMono-Regular', monospace;
+}
+
+/* ── Light theme (Warm Light) ──────────────────────────────────────── */
+[data-theme='light'] {
+  --bg: var(--sand-100);
+  --bg-elev: var(--sand-50);
+  --surface: #ffffff;
+  --surface-sub: var(--sand-200);
+  --surface-active: #e6dccb;
+  --surface-disabled: var(--sand-200);
+
+  --surface-raised: var(--surface);
+  --surface-hover: var(--surface-sub);
+
+  --hairline: rgba(34, 24, 12, 0.08);
+  --hairline-2: rgba(34, 24, 12, 0.14);
+  --border-strong: rgba(34, 24, 12, 0.32);
+
+  --border-subtle: var(--hairline);
+  --border-default: var(--hairline-2);
+
+  --ink: var(--sand-700);
+  --ink-2: var(--sand-600);
+  --ink-3: var(--sand-500);
+  --ink-4: var(--sand-400);
+  --ink-disabled: var(--sand-400);
+
+  --icon-default: var(--icon-light-default);
+  --icon-muted: var(--icon-light-muted);
+
+  --urgent: var(--urgent-light);
+  --urgent-soft: var(--urgent-soft-light);
+  --upcoming: var(--upcoming-light);
+  --upcoming-soft: var(--upcoming-soft-light);
+  --calendar: var(--calendar-light);
+  --remember: var(--remember-light);
+  --accent: var(--accent-light);
+
+  --shadow-card: 0 1px 1px rgba(40, 28, 12, 0.04), 0 4px 16px rgba(40, 28, 12, 0.06);
+  --shadow-win: 0 0 0 0.5px rgba(0, 0, 0, 0.18), 0 30px 80px rgba(20, 12, 4, 0.22),
+    0 8px 24px rgba(20, 12, 4, 0.1);
+
+  --titlebar-bg: rgba(246, 241, 235, 0.85);
+  --titlebar-stroke: rgba(34, 24, 12, 0.07);
+}
+
+/* ── Dark theme (Deep Dark) ────────────────────────────────────────── */
+[data-theme='dark'] {
+  --bg: var(--ink-900);
+  --bg-elev: var(--ink-800);
+  --surface: var(--ink-700);
+  --surface-sub: var(--ink-600);
+  --surface-active: #34343b;
+  --surface-disabled: var(--ink-700);
+
+  --surface-raised: var(--surface);
+  --surface-hover: var(--surface-sub);
+
+  --hairline: rgba(255, 255, 255, 0.07);
+  --hairline-2: rgba(255, 255, 255, 0.12);
+  --border-strong: rgba(255, 255, 255, 0.28);
+
+  --border-subtle: var(--hairline);
+  --border-default: var(--hairline-2);
+
+  --ink: var(--ink-50);
+  --ink-2: var(--ink-200);
+  --ink-3: var(--ink-300);
+  --ink-4: var(--ink-500);
+  --ink-disabled: var(--ink-500);
+
+  --icon-default: var(--icon-dark-default);
+  --icon-muted: var(--icon-dark-muted);
+
+  --urgent: var(--urgent-dark);
+  --urgent-soft: var(--urgent-soft-dark);
+  --upcoming: var(--upcoming-dark);
+  --upcoming-soft: var(--upcoming-soft-dark);
+  --calendar: var(--calendar-dark);
+  --remember: var(--remember-dark);
+  --accent: var(--accent-dark);
+
+  --shadow-card: 0 1px 0 rgba(0, 0, 0, 0.4), 0 6px 24px rgba(0, 0, 0, 0.35);
+  --shadow-win: 0 0 0 0.5px rgba(255, 255, 255, 0.06), 0 30px 80px rgba(0, 0, 0, 0.55),
+    0 8px 24px rgba(0, 0, 0, 0.3);
+
+  --titlebar-bg: rgba(22, 22, 26, 0.85);
+  --titlebar-stroke: rgba(255, 255, 255, 0.06);
+}

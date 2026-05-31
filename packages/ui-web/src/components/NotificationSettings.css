@@ -1,0 +1,216 @@
+.ns {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: var(--surface);
+  border: 0.5px solid var(--hairline-2);
+  border-radius: var(--radius-4);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+/* ── Section ─────────────────────────────────────────────────────────── */
+
+.ns__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+}
+
+.ns__section--row {
+  gap: var(--space-4);
+}
+
+.ns__divider {
+  height: 0.5px;
+  background: var(--hairline-2);
+  flex-shrink: 0;
+}
+
+/* ── Eyebrow + caption ───────────────────────────────────────────────── */
+
+.ns__eyebrow {
+  font-size: var(--text-11);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.ns__caption {
+  margin: 0;
+  font-size: var(--text-12);
+  color: var(--ink-3);
+  font-style: italic;
+  font-family: var(--serif);
+  line-height: 1.4;
+}
+
+/* ── Lead-time chips ─────────────────────────────────────────────────── */
+
+.ns__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.ns__chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--hairline-2);
+  background: transparent;
+  color: var(--ink-2);
+  font-size: var(--text-13);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ns__chip {
+    transition: none;
+  }
+}
+
+.ns__chip:hover {
+  border-color: var(--upcoming);
+  color: var(--upcoming);
+}
+
+.ns__chip:focus-visible {
+  outline: 2px solid var(--upcoming);
+  outline-offset: 2px;
+}
+
+.ns__chip--on {
+  background: var(--upcoming);
+  border-color: var(--upcoming);
+  color: var(--surface);
+  font-weight: 600;
+}
+
+.ns__chip--on:hover {
+  background: var(--upcoming);
+  border-color: var(--upcoming);
+  color: var(--surface);
+  opacity: 0.85;
+}
+
+.ns__chip-unit {
+  font-size: var(--text-11);
+  opacity: 0.75;
+}
+
+/* ── Quiet hours ─────────────────────────────────────────────────────── */
+
+.ns__time-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.ns__time-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+}
+
+.ns__time-text {
+  font-size: var(--text-12);
+  color: var(--ink-3);
+  min-width: 2rem;
+}
+
+.ns__time-input {
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-4);
+  border: 1px solid var(--hairline-2);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: var(--text-13);
+  font-family: inherit;
+  line-height: 1.4;
+  transition: border-color 120ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ns__time-input {
+    transition: none;
+  }
+}
+
+.ns__time-input:focus-visible {
+  outline: 2px solid var(--upcoming);
+  outline-offset: 1px;
+  border-color: var(--upcoming);
+}
+
+/* ── Alert rotation list ─────────────────────────────────────────────── */
+
+.ns__style-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.ns__style-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-4);
+  background: transparent;
+  transition: background 100ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ns__style-row {
+    transition: none;
+  }
+}
+
+.ns__style-row:hover {
+  background: var(--hairline);
+}
+
+.ns__swatch {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-pill);
+}
+
+.ns__style-id {
+  flex: 1;
+  font-size: var(--text-13);
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.ns__style-intensity {
+  font-size: var(--text-11);
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+
+/* ── Sound + Brain-dump checkboxes ───────────────────────────────────── */
+
+.ns__check-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.ns__check-label {
+  font-size: var(--text-14);
+  color: var(--ink-2);
+  cursor: pointer;
+}

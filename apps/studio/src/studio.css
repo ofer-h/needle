@@ -1,0 +1,219 @@
+/* Studio shell — chrome around the @needle/ui-web demo. App/feature styling
+ * lives in the ui-web package; this is only the demo harness layout. */
+
+#root {
+  height: 100vh;
+}
+
+.studio {
+  display: grid;
+  grid-template-columns: 232px 1fr;
+  height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+/* ── Left rail ─────────────────────────────────────────────── */
+.studio-rail {
+  border-right: 0.5px solid var(--hairline);
+  background: var(--bg-elev);
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4) var(--space-3);
+  gap: var(--space-1);
+  overflow-y: auto;
+}
+
+.studio-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3) var(--space-4);
+}
+
+.studio-brand__mark {
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-2);
+  background: var(--ink);
+  color: var(--bg);
+  display: grid;
+  place-items: center;
+  font-family: var(--serif);
+  font-size: var(--text-14);
+}
+
+.studio-brand__name {
+  font-family: var(--serif);
+  font-size: var(--text-16);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.studio-nav-group {
+  margin-top: var(--space-3);
+}
+
+.studio-nav-group__title {
+  font-size: var(--text-10);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+  padding: var(--space-2) var(--space-3) var(--space-1);
+}
+
+.studio-nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  text-align: left;
+  padding: 7px var(--space-3);
+  border-radius: var(--radius-3);
+  font-size: var(--text-13);
+  font-weight: 450;
+  color: var(--ink-2);
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.studio-nav-item:hover {
+  background: var(--surface-sub);
+}
+
+.studio-nav-item--active {
+  background: var(--surface-active);
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.studio-nav-item__icon {
+  display: inline-flex;
+  color: var(--icon-default);
+}
+
+/* ── Top bar ───────────────────────────────────────────────── */
+.studio-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.studio-topbar {
+  height: 52px;
+  flex: 0 0 52px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 0 var(--space-6);
+  border-bottom: 0.5px solid var(--hairline);
+  background: var(--bg);
+}
+
+.studio-topbar__title {
+  font-size: var(--text-14);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.studio-topbar__spacer {
+  flex: 1;
+}
+
+/* ── Scenario clock ────────────────────────────────────────── */
+.studio-clock {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--radius-3);
+  background: var(--surface-sub);
+}
+
+.studio-clock__time {
+  font-size: var(--text-12);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-2);
+  padding: 0 var(--space-2);
+  min-width: 62px;
+  text-align: center;
+}
+
+.studio-clock__btn {
+  height: 24px;
+  padding: 0 7px;
+  border-radius: var(--radius-2);
+  font-size: var(--text-11);
+  color: var(--ink-3);
+  display: inline-flex;
+  align-items: center;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.studio-clock__btn:hover {
+  background: var(--surface-active);
+  color: var(--ink);
+}
+
+.studio-iconbtn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-3);
+  display: inline-grid;
+  place-items: center;
+  color: var(--icon-default);
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.studio-iconbtn:hover {
+  background: var(--surface-sub);
+}
+
+/* ── Content ───────────────────────────────────────────────── */
+.studio-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-8) var(--space-6) var(--space-14);
+}
+
+.studio-canvas {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+/* ── Placeholder (scaffold / unbuilt screens) ──────────────── */
+.studio-placeholder {
+  max-width: 560px;
+  margin: 8vh auto 0;
+  text-align: center;
+}
+
+.studio-placeholder h1 {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: var(--text-32);
+  letter-spacing: -0.02em;
+  margin-bottom: var(--space-3);
+}
+
+.studio-placeholder p {
+  color: var(--ink-3);
+  font-size: var(--text-15);
+  line-height: 1.6;
+}
+
+.studio-swatches {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: center;
+  margin-top: var(--space-6);
+}
+
+.studio-swatch {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-3);
+  box-shadow: var(--shadow-card);
+}

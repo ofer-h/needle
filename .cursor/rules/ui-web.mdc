@@ -1,0 +1,66 @@
+---
+description: Conventions for the reusable web design system (packages/ui-web) and its studio demo (apps/studio)
+globs: packages/ui-web/**/*.ts,packages/ui-web/**/*.tsx,packages/ui-web/**/*.css,apps/studio/**/*.ts,apps/studio/**/*.tsx
+alwaysApply: false
+---
+
+# `@needle/ui-web` + `apps/studio`
+
+The browser-viewable, reusable design system and its demo. Background and the
+locked decisions: `docs/v2/studio-redesign.md` and
+`docs/decisions/2026-05-31-ui-web-studio-redesign.md`. **Read those first.**
+
+## Non-negotiables
+
+- **One canonical model; templates are pure presentation config.** A template is a
+  config object (`Template` in `src/model/template.ts`). Switching or building a
+  template MUST NOT mutate item data — layout renderers receive `TodayItemView[]` +
+  a `Template` and only read. This is the open/closed core; do not break it.
+- **Reuse `@needle/domain`.** Entities (`Item`, `ItemPlan`, `ItemOccurrence`,
+  `ItemRelation`, `Suggestion`, `Intervention`, `TodayItemView`, …) come from
+  `@needle/domain/domain-v2`, re-exported via `src/model/domain.ts`. Do NOT invent a
+  parallel entity that already exists there. New UI-driven types go in `src/model/*`
+  with a "promote into @needle/domain once validated" comment.
+- **`src/model/index.ts` is the one allowed barrel** — the curated public surface and
+  "one place to see every moving part." This is a deliberate exception to
+  `typescript.mdc` (no barrels), which targets the Electron renderer. Do not add other
+  barrels casually.
+- **Pure logic stays pure.** Everything in `src/model/*` (except component files) is
+  framework-free, no React, no I/O — so it's unit-testable. Keep it that way; put a
+  `*.test.ts` beside new logic (Vitest, per `testing.mdc`).
+
+## Styling
+
+- Follow `design-tokens.mdc`, `design-primitives.mdc`, `design-components.mdc`,
+  `design-dark-mode.mdc`. **Semantic tokens only** (`var(--ink)`, `var(--surface)`,
+  `var(--urgent)`…) — never raw hex, never `--sand-*`/`--ink-*` primitives in
+  components. Spacing on the ×4 scale; radii 4/6/8/12/16/999.
+- The package is **self-contained**: tokens in `src/styles/{primitives,tokens,base}.css`,
+  fonts via `@fontsource` in `src/styles/index.ts`. Consumers do
+  `import '@needle/ui-web/styles'` once at app root. Every component ships its CSS
+  beside it (`Foo.tsx` + `Foo.css`).
+- Both themes must work; verify light AND dark. Honor `prefers-reduced-motion`.
+
+## React / TS
+
+- Function components, `type Props` above the component, named exports, no `React.FC`
+  (`react.mdc`). Strict TS with `exactOptionalPropertyTypes` — build optional props
+  with conditional spreads (`...(x ? { x } : {})`), never assign `undefined`.
+- Variant unions, not boolean-flag soup; all interactive states
+  (default/hover/focus/active/disabled); `aria-label` + `:focus-visible`.
+
+## Studio (`apps/studio`)
+
+- Demo harness only. App/feature styling lives in `ui-web`; `studio.css` is just the
+  rail/topbar/content chrome. New scenarios mount real `ui-web` components — don't
+  reimplement features in studio.
+
+## Verify
+
+```bash
+pnpm --filter @needle/ui-web typecheck && pnpm --filter @needle/ui-web test
+pnpm --filter @needle/studio dev   # click through, toggle light/dark
+```
+
+Relevant skills: `needle-build-component`, `needle-design-system`, `needle-add-token`,
+`needle-dark-mode-fix`, `needle-ui-audit`.

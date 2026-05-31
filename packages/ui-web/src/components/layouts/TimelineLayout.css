@@ -1,0 +1,99 @@
+.timeline {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Row ────────────────────────────────────────────────────────── */
+
+.timeline__row {
+  display: grid;
+  /* time col | rail col | item col */
+  grid-template-columns: 56px 20px 1fr;
+  align-items: flex-start;
+  position: relative;
+  min-height: 40px;
+}
+
+/* Vertical spine: a continuous hairline running through all rows */
+.timeline__row::before {
+  content: '';
+  position: absolute;
+  left: calc(56px + 9px); /* centre of the 20 px rail column */
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--hairline-2);
+}
+
+/* Hide the top segment of the spine on the first row so it doesn't bleed
+   above the first dot */
+.timeline__row:first-child::before {
+  top: 20px; /* vertically centre with the dot */
+}
+
+/* Hide the bottom segment of the spine on the last row so it doesn't bleed
+   below the last dot */
+.timeline__row:last-child::before {
+  bottom: calc(100% - 20px);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .timeline__row {
+    transition: opacity var(--duration-base) var(--ease-out);
+  }
+}
+
+/* ── Time label ─────────────────────────────────────────────────── */
+
+.timeline__time {
+  font-size: var(--text-12);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-3);
+  text-align: right;
+  padding-right: var(--space-2);
+  padding-top: 10px; /* align baseline with first line of item */
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.timeline__time--muted {
+  color: var(--ink-4);
+}
+
+/* ── Rail + dot ─────────────────────────────────────────────────── */
+
+.timeline__rail {
+  display: flex;
+  justify-content: center;
+  padding-top: 13px; /* vertically centre dot with time label */
+  position: relative;
+  z-index: 1; /* sit above the ::before spine line */
+}
+
+.timeline__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-pill);
+  background: var(--upcoming);
+  flex-shrink: 0;
+}
+
+.timeline__dot--overdue {
+  background: var(--urgent);
+}
+
+/* ── Item content ───────────────────────────────────────────────── */
+
+.timeline__item {
+  padding: var(--space-1) 0 var(--space-1) var(--space-2);
+  min-width: 0;
+}
+
+/* ── Empty state ────────────────────────────────────────────────── */
+
+.timeline__empty {
+  font-size: var(--text-13);
+  color: var(--ink-4);
+  padding: var(--space-2);
+  font-style: italic;
+}

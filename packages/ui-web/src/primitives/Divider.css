@@ -1,0 +1,27 @@
+.ds-divider {
+  border: none;
+  border-top: 0.5px solid var(--hairline);
+  margin: 0;
+}
+
+.ds-divider--labeled {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  border-top: none;
+}
+
+.ds-divider--labeled::before,
+.ds-divider--labeled::after {
+  content: '';
+  flex: 1;
+  border-top: 0.5px solid var(--hairline);
+}
+
+.ds-divider__label {
+  font-size: var(--text-11);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}

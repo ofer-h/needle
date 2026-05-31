@@ -1,0 +1,38 @@
+.kudos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-4);
+  background: var(--surface);
+  border: 0.5px solid var(--hairline-2);
+  box-shadow: var(--shadow-card);
+}
+
+.kudos__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.kudos__count {
+  font-size: var(--text-14);
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.kudos__count strong {
+  font-family: var(--serif);
+  font-size: var(--text-18);
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.kudos__copy {
+  font-size: var(--text-12);
+  color: var(--ink-3);
+  font-style: italic;
+  font-family: var(--serif);
+  text-align: right;
+}

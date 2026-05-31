@@ -45,3 +45,4 @@ build/entitlements.mac.plist
 # Debug artifacts
 debug_screenshot.png
 scripts/debug_*.js
+.gstack/
