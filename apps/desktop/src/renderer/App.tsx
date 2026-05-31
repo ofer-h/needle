@@ -1,11 +1,58 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useAppStore } from './state/store';
 import TodayBoardScreen from './components/Today/TodayBoardScreen';
 import CaptureScreen from './components/Capture/CaptureScreen';
+import SettingsScreen from './components/Settings/SettingsScreen';
 import BuildDiagnostics from './components/DevTools/BuildDiagnostics';
 import DevClockControl from './components/DevTools/DevClockControl';
-import InterventionLayer from './components/Intervention/InterventionLayer';
+// InterventionLayer superseded by TransitionLayer (single in-window overlay).
+import TransitionLayer from './components/Intervention/TransitionLayer';
+import { createDesktopFeedbackSink } from './feedback';
+import { nowIsoFromState, useDevClock } from './utils/dev-clock';
+import {
+  createFeedbackBus,
+  defaultFeedbackConfig,
+  defaultNotificationConfig,
+  defaultTransitionSettings,
+  type FeedbackBus,
+  type FeedbackConfig,
+  type NotificationConfig,
+  type TodayData,
+  type TransitionSettings,
+} from '@needle/ui-web';
 import type { Screen } from '@needle/domain/types';
+
+const EMPTY_DATA: TodayData = {
+  items: [],
+  plans: [],
+  occurrences: [],
+  relations: [],
+  tags: [],
+  itemTags: [],
+};
+
+const LS_TRANSITION = 'needle.transition';
+const LS_NOTIFICATIONS = 'needle.notifications';
+const LS_FEEDBACK = 'needle.feedback';
+
+/** Load a JSON value from localStorage, falling back to a default on any error. */
+function loadPersisted<T>(key: string, fallback: T): T {
+  try {
+    const raw = window.localStorage.getItem(key);
+    if (raw === null) return fallback;
+    return JSON.parse(raw) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+function savePersisted(key: string, value: unknown): void {
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // Storage unavailable / quota — non-fatal, skip.
+  }
+}
 
 export default function App() {
   const screen = useAppStore((s) => s.screen);
@@ -15,6 +62,100 @@ export default function App() {
   const expandedItemId = useAppStore((s) => s.expandedItemId);
   const expandItem = useAppStore((s) => s.expandItem);
   const hydrateFromDb = useAppStore((s) => s.hydrateFromDb);
+
+  // Settings is layered locally rather than widening the domain-owned Screen
+  // union ('today' | 'capture') used by the store, menu, and IPC navigation.
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
+  // ── Lifted shared state ─────────────────────────────────────────────────────
+  const [todayData, setTodayData] = useState<TodayData>(EMPTY_DATA);
+  const [transitionSettings, setTransitionSettings] = useState<TransitionSettings>(() =>
+    loadPersisted<TransitionSettings>(LS_TRANSITION, defaultTransitionSettings()),
+  );
+  const [notifications, setNotifications] = useState<NotificationConfig>(() =>
+    loadPersisted<NotificationConfig>(LS_NOTIFICATIONS, defaultNotificationConfig),
+  );
+  // Feedback config is loaded once from localStorage. There is no feedback UI
+  // yet (ui-web's SettingsPanel covers transition + notifications), so it stays
+  // a stable read-only value rather than mutable state.
+  const feedbackConfig = useMemo<FeedbackConfig>(
+    () => loadPersisted<FeedbackConfig>(LS_FEEDBACK, defaultFeedbackConfig()),
+    [],
+  );
+
+  const frozenIso = useDevClock((s) => s.frozenIso);
+  const [now, setNow] = useState<Date>(() => new Date(nowIsoFromState(frozenIso)));
+
+  // Feedback bus: read config live on each emit. Built once for the app lifetime.
+  const feedbackBus = useMemo<FeedbackBus>(
+    () =>
+      createFeedbackBus(() => feedbackConfig, createDesktopFeedbackSink(), {
+        prefersReducedMotion: () =>
+          typeof window !== 'undefined' &&
+          window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+      }),
+    [feedbackConfig],
+  );
+
+  // Load the canonical Today model once on mount (single source of truth).
+  useEffect(() => {
+    if (!window.api?.db) return;
+    let active = true;
+    window.api.db
+      .getTodayData()
+      .then((loaded) => {
+        if (active) setTodayData(loaded);
+      })
+      .catch((error: unknown) => {
+        console.error('Failed to load today data', error);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Persist lifted settings to localStorage when they change.
+  useEffect(() => savePersisted(LS_TRANSITION, transitionSettings), [transitionSettings]);
+  useEffect(() => savePersisted(LS_NOTIFICATIONS, notifications), [notifications]);
+  useEffect(() => savePersisted(LS_FEEDBACK, feedbackConfig), [feedbackConfig]);
+
+  // Drive `now` from the dev clock: update immediately when frozenIso changes,
+  // and tick every second so a live (unfrozen) clock advances.
+  useEffect(() => {
+    setNow(new Date(nowIsoFromState(frozenIso)));
+    const interval = setInterval(() => {
+      setNow(new Date(nowIsoFromState(frozenIso)));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [frozenIso]);
+
+  // Single onChange: update state, persist to SQLite, and fire feedback cues.
+  const handleTodayChange = (next: TodayData): void => {
+    const prevCount = todayData.items.length;
+    const prevDone = todayData.items.filter((i) => i.status === 'done').length;
+    const nextCount = next.items.length;
+    const nextDone = next.items.filter((i) => i.status === 'done').length;
+
+    setTodayData(next);
+    if (window.api?.db) {
+      window.api.db.saveTodayData(next).catch((error: unknown) => {
+        console.error('Failed to save today data', error);
+      });
+    }
+
+    if (nextCount > prevCount) feedbackBus.emit('item.added', now);
+    if (nextDone > prevDone) {
+      feedbackBus.emit('item.completed', now);
+      if (prevDone === 0) feedbackBus.emit('item.firstCompleted', now);
+    }
+  };
+
+  const handleTransitionCapture = (text: string): void => {
+    if (!window.api?.db) return;
+    void window.api.db.addCapture(text).catch((error: unknown) => {
+      console.error('Failed to save capture', error);
+    });
+  };
 
   useEffect(() => {
     if (!window.api?.db) return;
@@ -39,13 +180,20 @@ export default function App() {
   // Listen for navigation events from main process (⌘K, menu)
   useEffect(() => {
     if (!window.api) return;
-    const unsub = window.api.app.onNavigate((s: Screen) => setScreen(s));
+    const unsub = window.api.app.onNavigate((s: Screen) => {
+      setSettingsOpen(false);
+      setScreen(s);
+    });
     return unsub;
   }, [setScreen]);
 
   // Keyboard: Escape returns to today / collapses details; Cmd-E expands focused item.
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && settingsOpen) {
+        setSettingsOpen(false);
+        return;
+      }
       if (e.key === 'Escape' && screen === 'capture') {
         setScreen('today');
         return;
@@ -66,17 +214,68 @@ export default function App() {
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [expandedItemId, expandItem, screen, setScreen]);
+  }, [expandedItemId, expandItem, screen, setScreen, settingsOpen]);
 
   return (
     <>
-      {screen === 'today' && (
-        <TodayBoardScreen onNavigateCapture={() => setScreen('capture')} />
+      {settingsOpen ? (
+        <SettingsScreen
+          transition={transitionSettings}
+          onTransitionChange={setTransitionSettings}
+          notifications={notifications}
+          onNotificationsChange={setNotifications}
+          onBack={() => setSettingsOpen(false)}
+        />
+      ) : (
+        <>
+          {screen === 'today' && (
+            <TodayBoardScreen
+              data={todayData}
+              now={now}
+              onChange={handleTodayChange}
+              onNavigateCapture={() => setScreen('capture')}
+            />
+          )}
+          {screen === 'capture' && <CaptureScreen onBack={() => setScreen('today')} />}
+        </>
       )}
-      {screen === 'capture' && (
-        <CaptureScreen onBack={() => setScreen('today')} />
+
+      {/* Single in-window transition overlay (replaces the racing InterventionLayer). */}
+      <TransitionLayer
+        data={todayData}
+        settings={transitionSettings}
+        now={now}
+        onCapture={handleTransitionCapture}
+      />
+
+      {!settingsOpen && (
+        <button
+          type="button"
+          onClick={() => setSettingsOpen(true)}
+          aria-label="Open settings"
+          style={{
+            // Sit below the 28px native titlebar drag region so clicks land.
+            position: 'fixed',
+            top: '36px',
+            right: '12px',
+            zIndex: 900,
+            width: '32px',
+            height: '32px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '8px',
+            border: '1px solid var(--border)',
+            background: 'var(--surface)',
+            color: 'var(--ink)',
+            fontSize: '15px',
+            cursor: 'pointer',
+          }}
+        >
+          ⚙
+        </button>
       )}
-      <InterventionLayer />
+
       <DevClockControl />
       <BuildDiagnostics />
     </>

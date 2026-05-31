@@ -1,0 +1,44 @@
+/* Desktop Settings screen chrome. Feature styling lives in ui-web's
+ * SettingsPanel; this is just the page frame. Semantic tokens only. */
+
+.settings-screen {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 20px 64px;
+}
+
+.settings-screen__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.settings-screen__back {
+  appearance: none;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.settings-screen__back:hover {
+  background: var(--surface-hover, var(--surface));
+}
+
+.settings-screen__title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.settings-screen__lede {
+  margin: 0 0 20px;
+  color: var(--ink-muted, var(--muted));
+  font-size: 14px;
+  line-height: 1.5;
+}
