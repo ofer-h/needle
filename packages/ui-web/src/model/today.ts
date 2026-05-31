@@ -12,6 +12,7 @@ import type {
   TodayItemView,
 } from './domain';
 import { atTimeOnDay, formatClock, toDate } from './time';
+import type { ItemTag, Tag } from './tags';
 
 /** The raw canonical data a board renders from. */
 export type TodayData = {
@@ -21,7 +22,12 @@ export type TodayData = {
   relations: ItemRelation[];
   assignments?: ItemAssignment[];
   interventions?: Intervention[];
+  /** User tags + their item assignments (see model/tags.ts). */
+  tags?: Tag[];
+  itemTags?: ItemTag[];
 };
+
+export type { ItemId } from './domain';
 
 const byId = <T extends { itemId: ItemId }>(rows: T[], itemId: ItemId): T | undefined =>
   rows.find((r) => r.itemId === itemId);
