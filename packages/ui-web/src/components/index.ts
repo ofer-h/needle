@@ -27,3 +27,5 @@ export { useBoard, BoardProvider } from './BoardContext';
 export type { BoardHandlers, BoardContextValue } from './BoardContext';
 export { LAYOUT_REGISTRY, EditorialLayout, CompactLayout, TimelineLayout, KanbanLayout } from './layouts';
 export type { LayoutProps } from './layouts';
+export { DraftBlocks } from './DraftBlocks';
+export type { DraftBlock, DraftBlocksProps } from './DraftBlocks';

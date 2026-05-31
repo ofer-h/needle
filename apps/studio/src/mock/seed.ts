@@ -8,6 +8,7 @@ import {
   brand,
   isoDate,
   localTime,
+  makeTag,
   mkItem,
   mkOccurrence,
   mkPlan,
@@ -15,6 +16,8 @@ import {
   resetIds,
   type ISODateTime,
   type ItemId,
+  type ItemTag,
+  type Tag,
   type TodayData,
 } from '@needle/ui-web';
 
@@ -27,7 +30,15 @@ function at(h: number, m: number, dayOffset = 0): ISODateTime {
 
 export function makeSeed(): TodayData {
   resetIds();
-  const data: TodayData = { items: [], plans: [], occurrences: [], relations: [] };
+  const tags: Tag[] = [
+    makeTag('design', 'violet'),
+    makeTag('urgent', 'rose'),
+    makeTag('async', 'blue'),
+  ];
+  const [designTag, urgentTag, asyncTag] = tags;
+  const itemTags: ItemTag[] = [];
+
+  const data: TodayData = { items: [], plans: [], occurrences: [], relations: [], tags, itemTags };
 
   const add = (...items: ReturnType<typeof mkItem>[]) => data.items.push(...items);
 
@@ -37,20 +48,28 @@ export function makeSeed(): TodayData {
   data.plans.push(mkPlan(standup.id, { mode: 'anchor', startTime: localTime('10:30') }));
   data.occurrences.push(mkOccurrence(standup.id, at(10, 30), at(10, 45)));
 
-  // 2. Subtasked task with a ticket ref + progress.
+  // 2. Subtasked task with a ticket ref + progress (3-level recursion: parent → child → grandchild).
   const onboarding = mkItem({ title: 'Ship the onboarding flow task-123', kind: 'task' });
   add(onboarding);
   data.plans.push(mkPlan(onboarding.id, { mode: 'float' }));
-  const children: { title: string; done: boolean }[] = [
+  const childDefs: { title: string; done: boolean }[] = [
     { title: 'Write the welcome copy', done: true },
     { title: 'Wire the /signup API', done: false },
     { title: 'QA on a fresh account', done: false },
   ];
-  children.forEach((c, i) => {
+  const childItems = childDefs.map((c, i) => {
     const child = mkItem({ title: c.title, kind: 'task', status: c.done ? 'done' : 'open' });
     add(child);
     data.relations.push(mkRelation(onboarding.id, child.id, 'contains', i));
+    return child;
   });
+  // Grandchild: nested under the second child ('Wire the /signup API') — 3-level nesting.
+  const apiChild = childItems[1];
+  if (apiChild !== undefined) {
+    const grandchild = mkItem({ title: 'Add the /signup endpoint to the contract', kind: 'task' });
+    add(grandchild);
+    data.relations.push(mkRelation(apiChild.id, grandchild.id, 'contains', 0));
+  }
 
   // 3. A couple of flexible tasks.
   const review = mkItem({ title: 'Review the Q3 roadmap doc', kind: 'task' });
@@ -80,6 +99,17 @@ export function makeSeed(): TodayData {
   });
   add(note);
   data.plans.push(mkPlan(note.id, { mode: 'stash' }));
+
+  // Tag assignments: link tags to a couple of items.
+  if (designTag !== undefined) {
+    itemTags.push({ itemId: onboarding.id, tagId: designTag.id });
+  }
+  if (urgentTag !== undefined) {
+    itemTags.push({ itemId: pickup.id, tagId: urgentTag.id });
+  }
+  if (asyncTag !== undefined) {
+    itemTags.push({ itemId: email.id, tagId: asyncTag.id });
+  }
 
   return data;
 }

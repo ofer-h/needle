@@ -194,6 +194,71 @@
   background: color-mix(in srgb, var(--urgent) 10%, var(--surface));
 }
 
+/* ── Transition screen chrome ─────────────────────────────── */
+.screen--transition {
+  max-width: 560px;
+}
+
+.transition-upcoming__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.transition-upcoming__row {
+  display: grid;
+  grid-template-columns: 72px 1fr auto;
+  gap: var(--space-3);
+  align-items: baseline;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-3);
+  background: var(--surface-sub);
+  font-size: var(--text-13);
+}
+
+.transition-upcoming__time {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-3);
+  font-size: var(--text-12);
+}
+
+.transition-upcoming__label {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.transition-upcoming__anchor {
+  color: var(--ink-4);
+  font-size: var(--text-12);
+  text-align: right;
+}
+
+.transition-jump {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.transition-jump__btn {
+  height: 36px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-3);
+  border: 1px solid var(--border-default);
+  background: var(--surface);
+  color: var(--ink-2);
+  font-family: var(--sans);
+  font-size: var(--text-13);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.transition-jump__btn:hover {
+  background: var(--surface-sub);
+  color: var(--ink);
+}
+
 /* ── Components gallery (Phase 4) ─────────────────────────── */
 .gallery-section {
   display: flex;

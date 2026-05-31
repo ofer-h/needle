@@ -25,6 +25,8 @@ Read in order:
 11. `studio-redesign.md` - the in-progress UI redesign as `@needle/ui-web` + `apps/studio` (one canonical model; templates are pure config). Living record; see also `../decisions/2026-05-31-ui-web-studio-redesign.md`.
 12. `studio-handoff.md` - **continuation guide for the Studio redesign**: exact current state (Phases 0–4; typecheck green, pending final verify + commit), remaining steps, how to run, file map, gotchas. Read this first if picking the work up.
 13. **`needle-next-master-plan.md`** - **the authoritative go-forward master plan**: Desktop next-level + the **Transition System**, reconciling Ofer's direction + the Cursor and Codex plans into one implement-ready, subagent-parallelizable spec. Read this before starting feature work. Raw requirements appendix: `needle-next-master-plan-DRAFT.md`.
+14. `brain-dump-and-time-machine.md` - **DOC-A2**: brain-dump UX spec (Part A, buildable now) + macOS "time machine" rolling-buffer capture via ScreenCaptureKit/AVAssetWriter (Part B, future flagged track WP-B8, off by default). Covers privacy stance, Swift sidecar architecture, permissions/entitlements, and extra ideas.
+15. `meeting-awareness.md` - **DOC-A5**: spec for meeting-join detection (future flagged track WP-B9, off by default). Four-signal confidence model (CoreAudio mic/cam in-use, NSWorkspace frontmost app, browser URL heuristics, Accessibility tree buttons); uses for accountability and transition-interrupt softening.
 
 Related artifacts:
 

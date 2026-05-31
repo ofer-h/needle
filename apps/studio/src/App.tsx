@@ -3,17 +3,23 @@ import {
   applyChat,
   buildTodayView,
   Countdown,
+  createFeedbackBus,
+  defaultFeedbackConfig,
   defaultNotificationConfig,
+  defaultTransitionSettings,
   Icon,
   RevisionLog,
   type AccountabilityMode,
+  type FeedbackBus,
   type IconName,
   type NotificationConfig,
   type Revision,
   type TodayData,
+  type TransitionSettings,
 } from '@needle/ui-web';
 import { useTheme } from './theme';
 import { useScenarioClock } from './clock';
+import { createBrowserFeedbackSink } from './feedback';
 import { makeSeed } from './mock/seed';
 import { TodayScreen } from './screens/TodayScreen';
 import { AddScreen } from './screens/AddScreen';
@@ -25,16 +31,26 @@ import { ChatScreen } from './screens/ChatScreen';
 import { RevisionsScreen } from './screens/RevisionsScreen';
 import { TemplatesScreen } from './screens/TemplatesScreen';
 import { GalleryScreen } from './screens/GalleryScreen';
+import { SettingsScreen } from './screens/SettingsScreen';
+import { TransitionScreen } from './screens/TransitionScreen';
 import { useTemplates, type TemplatesApi } from './templates';
+
+/** Build a single feedback bus for the lifetime of the app. */
+const feedbackBus: FeedbackBus = createFeedbackBus(
+  () => defaultFeedbackConfig(),
+  createBrowserFeedbackSink(),
+);
 
 type ScenarioKey =
   | 'today'
   | 'add'
   | 'events'
   | 'braindump'
+  | 'transition'
   | 'coach'
   | 'chat'
   | 'notifications'
+  | 'settings'
   | 'revisions'
   | 'templates'
   | 'gallery';
@@ -46,9 +62,11 @@ const SCENARIOS: Scenario[] = [
   { key: 'add', label: 'Add', icon: 'plus', group: 'Plan' },
   { key: 'events', label: 'Events', icon: 'calendar', group: 'Plan' },
   { key: 'braindump', label: 'Brain dump', icon: 'spark', group: 'Plan' },
+  { key: 'transition', label: 'Transition', icon: 'clock', group: 'Plan' },
   { key: 'coach', label: 'Coach', icon: 'coach', group: 'Coach' },
   { key: 'chat', label: 'Chat', icon: 'chat', group: 'Coach' },
   { key: 'notifications', label: 'Notifications', icon: 'bell', group: 'Setup' },
+  { key: 'settings', label: 'Settings', icon: 'layout', group: 'Setup' },
   { key: 'revisions', label: 'Revisions', icon: 'undo', group: 'Setup' },
   { key: 'templates', label: 'Templates', icon: 'layout', group: 'System' },
   { key: 'gallery', label: 'Components', icon: 'dots', group: 'System' },
@@ -61,6 +79,9 @@ export function App() {
   const [active, setActive] = useState<ScenarioKey>('today');
   const [data, setData] = useState<TodayData>(() => makeSeed());
   const [config, setConfig] = useState<NotificationConfig>(defaultNotificationConfig);
+  const [transitionSettings, setTransitionSettings] = useState<TransitionSettings>(
+    () => defaultTransitionSettings(),
+  );
   const [coachMode, setCoachMode] = useState<AccountabilityMode>('coached');
   const [revisions, setRevisions] = useState<Revision[]>([]);
   const revLog = useRef(new RevisionLog());
@@ -69,9 +90,23 @@ export function App() {
   const current = SCENARIOS.find((s) => s.key === active)!;
   const views = buildTodayView(data, clock.now);
 
+  /** Wrapped setter that fires feedback events for adds and completions. */
+  const setDataWithFeedback = (next: TodayData) => {
+    const prevCount = data.items.length;
+    const prevDone = data.items.filter((i) => i.status === 'done').length;
+    const nextCount = next.items.length;
+    const nextDone = next.items.filter((i) => i.status === 'done').length;
+    setData(next);
+    if (nextCount > prevCount) feedbackBus.emit('item.added');
+    if (nextDone > prevDone) {
+      feedbackBus.emit('item.completed');
+      if (prevDone === 0) feedbackBus.emit('item.firstCompleted');
+    }
+  };
+
   const chatSend = (text: string): { reply: string; revisionId?: string } => {
     const result = applyChat(data, text);
-    setData(result.data);
+    setDataWithFeedback(result.data);
     if (result.revision) {
       const rev = revLog.current.push(result.revision);
       setRevisions(revLog.current.all());
@@ -137,16 +172,19 @@ export function App() {
           <Screen
             scenario={active}
             data={data}
-            setData={setData}
+            setData={setDataWithFeedback}
             now={clock.now}
             config={config}
             setConfig={setConfig}
+            transitionSettings={transitionSettings}
+            onTransitionSettingsChange={setTransitionSettings}
             coachMode={coachMode}
             setCoachMode={setCoachMode}
             revisions={revisions}
             templates={templates}
             onChatSend={chatSend}
             onUndoRevision={undoRevision}
+            onJumpClock={clock.jump}
           />
         </div>
       </main>
@@ -191,12 +229,15 @@ function Screen({
   now,
   config,
   setConfig,
+  transitionSettings,
+  onTransitionSettingsChange,
   coachMode,
   setCoachMode,
   revisions,
   templates,
   onChatSend,
   onUndoRevision,
+  onJumpClock,
 }: {
   scenario: ScenarioKey;
   data: TodayData;
@@ -204,19 +245,40 @@ function Screen({
   now: Date;
   config: NotificationConfig;
   setConfig: (next: NotificationConfig) => void;
+  transitionSettings: TransitionSettings;
+  onTransitionSettingsChange: (next: TransitionSettings) => void;
   coachMode: AccountabilityMode;
   setCoachMode: (mode: AccountabilityMode) => void;
   revisions: Revision[];
   templates: TemplatesApi;
   onChatSend: (text: string) => { reply: string; revisionId?: string };
   onUndoRevision: (id: string) => void;
+  onJumpClock: (minutes: number) => void;
 }) {
   if (scenario === 'today')
     return <TodayScreen data={data} setData={setData} now={now} templates={templates} />;
   if (scenario === 'add') return <AddScreen data={data} setData={setData} />;
   if (scenario === 'events') return <EventsScreen data={data} setData={setData} now={now} />;
   if (scenario === 'notifications') return <NotificationsScreen config={config} setConfig={setConfig} />;
+  if (scenario === 'settings')
+    return (
+      <SettingsScreen
+        transition={transitionSettings}
+        onTransitionChange={onTransitionSettingsChange}
+        notifications={config}
+        onNotificationsChange={setConfig}
+      />
+    );
   if (scenario === 'braindump') return <BrainDumpScreen />;
+  if (scenario === 'transition')
+    return (
+      <TransitionScreen
+        data={data}
+        now={now}
+        transitionSettings={transitionSettings}
+        onJumpClock={onJumpClock}
+      />
+    );
   if (scenario === 'coach')
     return <CoachScreen data={data} now={now} mode={coachMode} setMode={setCoachMode} />;
   if (scenario === 'chat') return <ChatScreen onSend={onChatSend} onUndo={onUndoRevision} />;

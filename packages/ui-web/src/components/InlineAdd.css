@@ -20,6 +20,11 @@
   border-color: var(--upcoming);
 }
 
+.inline-add--nest .inline-add__main {
+  border-color: var(--upcoming);
+  border-left-width: 3px;
+}
+
 .inline-add__spark {
   width: 30px;
   height: 30px;
@@ -78,6 +83,10 @@
   background: var(--upcoming-soft);
 }
 
+.inline-add__nest-toggle {
+  padding: 0 8px;
+}
+
 .inline-add__time {
   height: 28px;
   border: 1px solid var(--border-default);
@@ -104,6 +113,45 @@
   cursor: not-allowed;
 }
 
+/* Nest-mode hint strip */
+.inline-add__nest-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  align-self: flex-start;
+  padding: 3px var(--space-3);
+  font-size: var(--text-12);
+  color: var(--ink-3);
+  background: var(--upcoming-soft);
+  border-radius: var(--radius-2);
+}
+
+.inline-add__nest-label {
+  color: var(--upcoming);
+  font-weight: 500;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inline-add__nest-cancel {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-2);
+  flex-shrink: 0;
+  margin-left: 2px;
+  opacity: 0.7;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.inline-add__nest-cancel:hover {
+  opacity: 1;
+  background: color-mix(in srgb, var(--upcoming) 15%, transparent);
+}
+
 .inline-add__yesterday {
   display: inline-flex;
   align-items: center;
@@ -123,7 +171,8 @@
 @media (prefers-reduced-motion: reduce) {
   .inline-add__main,
   .inline-add__spark,
-  .inline-add__submit {
+  .inline-add__submit,
+  .inline-add__nest-cancel {
     transition: none;
   }
 }

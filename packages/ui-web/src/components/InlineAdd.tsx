@@ -4,56 +4,74 @@ import { Icon } from '../primitives';
 import './InlineAdd.css';
 
 type InlineAddProps = {
-  /** Create a top-level item; returns its id so a following `**` subtask can
-   * nest under it. */
+  /** Create a top-level item; returns its id so the nest-mode affordance can
+   * nest a following item as a child of the just-added item. */
   onAdd: (input: NewItemInput) => ItemId;
   onAddChild: (parentId: ItemId, title: string) => void;
   onPullYesterday?: () => void;
   hasYesterday?: boolean;
 };
 
-/** One inline composer — no separate full-screen flow. Manual create by
- * default; the ✨ toggle runs the (mocked) AI parse for time/duration/kind.
- * Leading `*` / `**` (or the time chip) work in both modes. */
+/** One inline composer — plain text first. Enter = top-level item by default.
+ * The ↳ nest-mode toggle (or Tab key) makes the NEXT add a child of the last
+ * added item. The ✨ AI toggle runs the mocked parser for time/duration/kind. */
 export function InlineAdd({ onAdd, onAddChild, onPullYesterday, hasYesterday }: InlineAddProps) {
   const [text, setText] = useState('');
   const [ai, setAi] = useState(false);
+  const [nestMode, setNestMode] = useState(false);
   const [timeOpen, setTimeOpen] = useState(false);
   const [time, setTime] = useState('');
   const lastId = useRef<ItemId | null>(null);
+  const lastTitle = useRef<string>('');
 
   const submit = () => {
     const raw = text.trim();
     if (!raw) return;
 
+    if (nestMode && lastId.current) {
+      onAddChild(lastId.current, raw);
+      setText('');
+      return;
+    }
+
     let input: NewItemInput;
-    let level: 'item' | 'subtask';
     if (ai) {
       const parsed = parseQuickAdd(raw);
       input = parsed.input;
-      level = parsed.level;
     } else {
-      // Manual: still honor the `*` / `**` shorthand, nothing else.
-      level = /^\*\*/.test(raw) ? 'subtask' : 'item';
-      const title = raw.replace(/^\*+\s*/, '');
-      input = { title };
+      input = { title: raw };
     }
     if (time && !input.startTime) input.startTime = time;
 
-    if (level === 'subtask' && lastId.current) {
-      onAddChild(lastId.current, input.title);
-    } else {
-      lastId.current = onAdd(input);
-    }
+    const newId = onAdd(input);
+    lastId.current = newId;
+    lastTitle.current = input.title;
     setText('');
+    // Stay in nest mode if it was active; user can cancel explicitly.
   };
 
   const onKey = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') submit();
+    if (e.key === 'Enter') {
+      submit();
+    } else if (e.key === 'Tab') {
+      e.preventDefault();
+      if (lastId.current) setNestMode((v) => !v);
+    }
   };
 
+  const toggleNest = () => {
+    if (!lastId.current) return; // nothing to nest under yet
+    setNestMode((v) => !v);
+  };
+
+  const cancelNest = () => {
+    setNestMode(false);
+  };
+
+  const nestHint = nestMode && lastTitle.current ? lastTitle.current : '';
+
   return (
-    <div className={`inline-add${ai ? ' inline-add--ai' : ''}`}>
+    <div className={`inline-add${ai ? ' inline-add--ai' : ''}${nestMode ? ' inline-add--nest' : ''}`}>
       <div className="inline-add__main">
         <button
           type="button"
@@ -68,12 +86,30 @@ export function InlineAdd({ onAdd, onAddChild, onPullYesterday, hasYesterday }: 
         <input
           className="inline-add__input"
           value={text}
-          placeholder={ai ? 'Add anything — e.g. “standup 10am for 15m”' : 'Add a task…  (* item, ** subtask)'}
+          placeholder={
+            nestMode
+              ? 'Add a subtask…'
+              : ai
+                ? 'Add anything — e.g. "standup 10am for 15m"'
+                : 'Add a task…'
+          }
           onChange={(e) => setText(e.target.value)}
           onKeyDown={onKey}
           aria-label="Add an item"
         />
         <div className="inline-add__chips">
+          {lastId.current && (
+            <button
+              type="button"
+              className={`inline-add__chip inline-add__nest-toggle${nestMode ? ' inline-add__chip--on' : ''}`}
+              onClick={toggleNest}
+              aria-pressed={nestMode}
+              aria-label={nestMode ? 'Cancel nest mode — add to top level' : 'Nest next item under last added'}
+              title={nestMode ? 'Click to add at top level instead' : 'Nest under last added item'}
+            >
+              <Icon name="chevron-right" size={12} tone={nestMode ? 'upcoming' : 'muted'} rotate={90} />
+            </button>
+          )}
           <button
             type="button"
             className={`inline-add__chip${timeOpen || time ? ' inline-add__chip--on' : ''}`}
@@ -97,9 +133,23 @@ export function InlineAdd({ onAdd, onAddChild, onPullYesterday, hasYesterday }: 
           </button>
         </div>
       </div>
+      {nestMode && nestHint && (
+        <div className="inline-add__nest-hint">
+          <Icon name="chevron-right" size={11} tone="muted" rotate={90} />
+          adding under: <span className="inline-add__nest-label">{nestHint}</span>
+          <button
+            type="button"
+            className="inline-add__nest-cancel"
+            onClick={cancelNest}
+            aria-label="Cancel nest mode"
+          >
+            <Icon name="x" size={11} tone="muted" />
+          </button>
+        </div>
+      )}
       {hasYesterday && onPullYesterday && (
         <button type="button" className="inline-add__yesterday" onClick={onPullYesterday}>
-          <Icon name="undo" size={13} tone="muted" /> Pull yesterday’s unfinished
+          <Icon name="undo" size={13} tone="muted" /> Pull yesterday&#8217;s unfinished
         </button>
       )}
     </div>

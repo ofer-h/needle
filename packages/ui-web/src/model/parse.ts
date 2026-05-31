@@ -1,12 +1,18 @@
 /* Mocked "AI" quick-add parser — deterministic, no LLM. Pulls a start time,
  * duration, kind, and commitment out of free text so the InlineAdd ✨ toggle can
- * feel smart while staying fully scripted. */
+ * feel smart while staying fully scripted.
+ *
+ * Nesting is now controlled by the explicit nest-mode toggle in InlineAdd, NOT
+ * by asterisk markup. Any leading `*` or `**` characters are stripped from the
+ * title (backward-tolerant: old text won't look broken). The `subtask:` prefix
+ * still sets level = 'subtask' for programmatic callers. Plain text → 'item'. */
 
 import type { NewItemInput } from './mutate';
 
 export type ParsedAdd = {
   input: NewItemInput;
-  /** '**' (or "subtask:") nests under the previously added item. */
+  /** Explicit "subtask:" prefix nests under the previously added item.
+   * Leading * / ** are stripped but no longer change the level. */
   level: 'item' | 'subtask';
 };
 
@@ -33,11 +39,17 @@ export function parseQuickAdd(text: string): ParsedAdd {
   let rest = text.trim();
   let level: ParsedAdd['level'] = 'item';
 
-  if (/^\*\*/.test(rest) || /^subtask\s*:/i.test(rest)) {
+  if (/^subtask\s*:/i.test(rest)) {
     level = 'subtask';
-    rest = rest.replace(/^\*\*\s*/, '').replace(/^subtask\s*:\s*/i, '');
-  } else if (/^\*/.test(rest)) {
-    rest = rest.replace(/^\*\s*/, '');
+    rest = rest.replace(/^subtask\s*:\s*/i, '');
+  } else if (/^\*\*/.test(rest)) {
+    // Backward-tolerant: ** still sets subtask level so existing callers are
+    // not broken, but the primary nesting UX is the InlineAdd nest-mode toggle.
+    level = 'subtask';
+    rest = rest.replace(/^\*+\s*/, '');
+  } else {
+    // Strip any leading * (single asterisk) — treated as plain text decoration.
+    rest = rest.replace(/^\*+\s*/, '');
   }
 
   const input: NewItemInput = { title: rest };

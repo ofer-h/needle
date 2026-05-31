@@ -1,0 +1,197 @@
+.draft-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-4);
+  background: var(--surface);
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-card);
+}
+
+/* "You wrote:" header */
+.draft-blocks__raw {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.draft-blocks__raw-label {
+  font-size: var(--text-12);
+  color: var(--ink-3);
+  flex-shrink: 0;
+}
+
+.draft-blocks__raw-text {
+  font-size: var(--text-13);
+  color: var(--ink-2);
+  font-style: italic;
+  word-break: break-word;
+}
+
+/* Empty state */
+.draft-blocks__empty {
+  font-size: var(--text-13);
+  color: var(--ink-4);
+  text-align: center;
+  padding: var(--space-4) 0;
+}
+
+/* Card list */
+.draft-blocks__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.draft-blocks__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-3);
+  background: var(--surface-sub);
+  border: 1px solid transparent;
+  transition: border-color var(--duration-fast) var(--ease-out);
+}
+
+.draft-blocks__card--focused {
+  border-color: var(--border-default);
+  background: var(--surface);
+}
+
+.draft-blocks__card-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.draft-blocks__title {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: var(--text-14);
+  color: var(--ink);
+  letter-spacing: -0.005em;
+}
+
+.draft-blocks__title::placeholder {
+  color: var(--ink-4);
+}
+
+.draft-blocks__card-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+/* Kind toggle pill */
+.draft-blocks__kind-toggle {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-11);
+  font-weight: 500;
+  color: var(--upcoming);
+  background: var(--upcoming-soft);
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+}
+
+.draft-blocks__kind-toggle:hover {
+  opacity: 0.8;
+}
+
+/* Time input */
+.draft-blocks__time {
+  height: 24px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-2);
+  background: var(--surface);
+  color: var(--ink-3);
+  font-size: var(--text-12);
+  padding: 0 6px;
+  flex-shrink: 0;
+}
+
+.draft-blocks__time--set {
+  color: var(--upcoming);
+  border-color: var(--upcoming);
+}
+
+/* Remove button — pushed to the right */
+.draft-blocks__remove {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-2);
+  flex-shrink: 0;
+  margin-left: auto;
+  opacity: 0.6;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.draft-blocks__remove:hover {
+  opacity: 1;
+  background: var(--surface-active);
+}
+
+/* Action strip */
+.draft-blocks__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.draft-blocks__confirm {
+  height: 30px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-3);
+  background: var(--ink);
+  color: var(--bg);
+  font-size: var(--text-13);
+  font-weight: 500;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.draft-blocks__confirm:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.draft-blocks__cancel {
+  height: 30px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-3);
+  font-size: var(--text-13);
+  color: var(--ink-3);
+  background: transparent;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.draft-blocks__cancel:hover {
+  color: var(--ink);
+  background: var(--surface-sub);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .draft-blocks__card,
+  .draft-blocks__remove,
+  .draft-blocks__confirm,
+  .draft-blocks__cancel {
+    transition: none;
+  }
+}
