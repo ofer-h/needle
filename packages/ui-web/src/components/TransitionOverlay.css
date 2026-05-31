@@ -1,0 +1,335 @@
+/* TransitionOverlay — the unified single-surface transition coach.
+ * Semantic tokens only; light + dark handled by [data-theme]. */
+
+/* ── Shell ──────────────────────────────────────────────────────────────── */
+
+.to {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding: var(--space-6) var(--space-8);
+  border-radius: var(--radius-5);
+  background: var(--surface);
+  border: 0.5px solid var(--hairline-2);
+  box-shadow: var(--shadow-win);
+  min-width: 480px;
+  max-width: 640px;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+
+.to__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.to__anchor-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.to__anchor-title {
+  font-family: var(--serif);
+  font-size: var(--text-22);
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+.to__anchor-time {
+  font-size: var(--text-13);
+  color: var(--ink-3);
+  white-space: nowrap;
+  align-self: flex-end;
+  padding-bottom: 2px;
+}
+
+.to__meta {
+  margin: 0;
+  font-size: var(--text-13);
+  color: var(--ink-3);
+  line-height: 1.5;
+}
+
+/* ── Progress rail ──────────────────────────────────────────────────────── */
+
+.to__rail {
+  /* no additional padding — gap from shell handles spacing */
+}
+
+.to__rail-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  align-items: center;
+}
+
+.to__step {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-12);
+  color: var(--ink-4);
+  transition: color var(--duration-base) var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .to__step {
+    transition: none;
+  }
+}
+
+.to__step--done {
+  color: var(--upcoming);
+}
+
+.to__step--active {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.to__step--pending {
+  color: var(--ink-4);
+}
+
+.to__step--declined {
+  color: var(--ink-4);
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.to__step-icon {
+  display: flex;
+  align-items: center;
+  width: 14px;
+  flex-shrink: 0;
+}
+
+.to__step-label {
+  white-space: nowrap;
+}
+
+/* Separator dots between steps (via CSS counter, hidden for declined) */
+.to__rail-list li + li::before {
+  content: '→';
+  font-size: var(--text-11);
+  color: var(--hairline-2);
+  margin-right: var(--space-1);
+}
+
+/* ── Between-blocks state ───────────────────────────────────────────────── */
+
+.to__between {
+  padding: var(--space-4) 0;
+  text-align: center;
+}
+
+.to__next-up {
+  margin: 0;
+  font-size: var(--text-14);
+  color: var(--ink-3);
+}
+
+.to__next-up strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* ── Active block panel ─────────────────────────────────────────────────── */
+
+.to__block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border-radius: var(--radius-4);
+  background: var(--surface-raised, var(--surface));
+  border: 0.5px solid var(--hairline-2);
+}
+
+.to__block-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.to__block-meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  flex: 1 1 auto;
+}
+
+.to__block-label {
+  font-family: var(--serif);
+  font-size: var(--text-18);
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.to__block-hint {
+  margin: 0;
+  font-size: var(--text-13);
+  color: var(--ink-3);
+  line-height: 1.5;
+}
+
+/* ── Countdown ──────────────────────────────────────────────────────────── */
+
+.to__countdown {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-13);
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding-top: 2px;
+  transition: color var(--duration-base) var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .to__countdown {
+    transition: none;
+  }
+}
+
+.to__countdown-value {
+  font-size: var(--text-22);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.to__countdown--low {
+  color: var(--urgent);
+}
+
+.to__countdown--expired .to__countdown-value {
+  color: var(--urgent);
+  animation: to-pulse 1.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .to__countdown--expired .to__countdown-value {
+    animation: none;
+    color: var(--urgent);
+  }
+}
+
+@keyframes to-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
+}
+
+/* ── Block content ──────────────────────────────────────────────────────── */
+
+.to__block-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.to__textarea {
+  width: 100%;
+  min-height: 112px;
+  padding: var(--space-3);
+  border-radius: var(--radius-4);
+  border: 1px solid var(--hairline-2);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: var(--text-15);
+  line-height: 1.65;
+  resize: vertical;
+  font-family: inherit;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color var(--duration-base) var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .to__textarea {
+    transition: none;
+  }
+}
+
+.to__textarea::placeholder {
+  color: var(--ink-4, var(--ink-3));
+}
+
+.to__textarea:focus-visible {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--upcoming-soft, rgba(111, 146, 114, 0.12));
+}
+
+.to__break-note {
+  margin: 0;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: var(--text-15);
+  color: var(--ink-3);
+  line-height: 1.6;
+  padding: var(--space-3) 0;
+}
+
+/* Placeholder slot — a breathing / animation component will be injected here. */
+.transition__breath-slot {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--hairline-2);
+  align-self: center;
+  margin: var(--space-4) 0;
+}
+
+.to__leave-note {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: var(--text-18);
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.4;
+  padding: var(--space-3) 0;
+}
+
+/* ── Actions ────────────────────────────────────────────────────────────── */
+
+.to__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.to__secondary-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+/* Ensure all buttons have visible focus ring */
+.to__actions button:focus-visible,
+.to__secondary-actions button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-2);
+}
+
+/* ── Footer step counter ────────────────────────────────────────────────── */
+
+.to__footer-step {
+  margin: 0;
+  font-size: var(--text-12);
+  color: var(--ink-4);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}

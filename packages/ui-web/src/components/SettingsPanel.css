@@ -1,0 +1,425 @@
+/* SettingsPanel — configures the Transition Ritual + Notifications.
+ * Semantic tokens only; light + dark both work via data-theme on :root.
+ * BEM prefix: sp (settings panel). */
+
+/* ── Shell ───────────────────────────────────────────────────────────── */
+
+.sp {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  max-width: 640px;
+  width: 100%;
+}
+
+/* ── Section ─────────────────────────────────────────────────────────── */
+
+.sp__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-6) 0;
+}
+
+.sp__divider {
+  height: 0.5px;
+  background: var(--hairline-2);
+  flex-shrink: 0;
+}
+
+/* ── Section headings ─────────────────────────────────────────────────── */
+
+.sp__section-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.sp__heading {
+  font-size: var(--text-16);
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.sp__subhead {
+  font-size: var(--text-13);
+  color: var(--ink-3);
+  font-family: var(--serif);
+  font-style: italic;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ── Rule list ───────────────────────────────────────────────────────── */
+
+.sp__rule-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.sp__rule {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-4);
+  border: 1px solid var(--hairline-2);
+  background: var(--surface);
+  transition: border-color var(--duration-fast) var(--ease-out),
+    background var(--duration-fast) var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sp__rule {
+    transition: none;
+  }
+}
+
+.sp__rule--disabled {
+  opacity: 0.5;
+}
+
+/* ── Up / down reorder ───────────────────────────────────────────────── */
+
+.sp__rule-reorder {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.sp__reorder-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-2);
+  border: none;
+  background: transparent;
+  color: var(--ink-3);
+  cursor: pointer;
+  padding: 0;
+  transition: background var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sp__reorder-btn {
+    transition: none;
+  }
+}
+
+.sp__reorder-btn:hover:not(:disabled) {
+  background: var(--surface-sub);
+  color: var(--ink);
+}
+
+.sp__reorder-btn:focus-visible {
+  outline: 2px solid var(--upcoming);
+  outline-offset: 1px;
+}
+
+.sp__reorder-btn:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
+/* ── Toggle switch ───────────────────────────────────────────────────── */
+
+.sp__rule-toggle {
+  flex-shrink: 0;
+  width: 32px;
+  height: 18px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--hairline-2);
+  background: var(--surface-sub);
+  cursor: pointer;
+  padding: 0;
+  position: relative;
+  transition: background var(--duration-base) var(--ease-out),
+    border-color var(--duration-base) var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sp__rule-toggle {
+    transition: none;
+  }
+}
+
+.sp__rule-toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-pill);
+  background: var(--ink-4);
+  transition: transform var(--duration-base) var(--ease-out),
+    background var(--duration-base) var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sp__rule-toggle::after {
+    transition: none;
+  }
+}
+
+.sp__rule-toggle--on {
+  background: var(--upcoming);
+  border-color: var(--upcoming);
+}
+
+.sp__rule-toggle--on::after {
+  background: var(--surface);
+  transform: translateX(14px);
+}
+
+.sp__rule-toggle:focus-visible {
+  outline: 2px solid var(--upcoming);
+  outline-offset: 2px;
+}
+
+/* ── Rule label + hint ───────────────────────────────────────────────── */
+
+.sp__rule-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sp__rule-label {
+  font-size: var(--text-14);
+  font-weight: 500;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sp__rule-hint {
+  font-size: var(--text-12);
+  color: var(--ink-3);
+  font-family: var(--serif);
+  font-style: italic;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Duration stepper ────────────────────────────────────────────────── */
+
+.sp__rule-duration {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-shrink: 0;
+}
+
+.sp__step-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-2);
+  border: 1px solid var(--hairline-2);
+  background: transparent;
+  color: var(--ink-3);
+  cursor: pointer;
+  padding: 0;
+  transition: background var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sp__step-btn {
+    transition: none;
+  }
+}
+
+.sp__step-btn:hover:not(:disabled) {
+  background: var(--surface-sub);
+  border-color: var(--upcoming);
+  color: var(--upcoming);
+}
+
+.sp__step-btn:focus-visible {
+  outline: 2px solid var(--upcoming);
+  outline-offset: 1px;
+}
+
+.sp__step-btn:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
+.sp__duration-input {
+  width: 36px;
+  text-align: center;
+  font-size: var(--text-13);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--hairline-2);
+  border-radius: var(--radius-2);
+  padding: var(--space-1) 2px;
+  line-height: 1.4;
+  -moz-appearance: textfield;
+}
+
+.sp__duration-input::-webkit-outer-spin-button,
+.sp__duration-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.sp__duration-input:focus-visible {
+  outline: 2px solid var(--upcoming);
+  outline-offset: 1px;
+  border-color: var(--upcoming);
+}
+
+.sp__duration-unit {
+  font-size: var(--text-11);
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+
+/* ── Advanced disclosure ─────────────────────────────────────────────── */
+
+.sp__advanced {
+  border-radius: var(--radius-3);
+  border: 1px solid var(--hairline);
+  background: var(--surface-sub);
+  overflow: hidden;
+}
+
+.sp__advanced-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.sp__advanced-summary::-webkit-details-marker {
+  display: none;
+}
+
+.sp__advanced-summary:focus-visible {
+  outline: 2px solid var(--upcoming);
+  outline-offset: -2px;
+}
+
+.sp__advanced-label {
+  font-size: var(--text-12);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.sp__advanced-chevron {
+  color: var(--ink-3);
+  transition: transform var(--duration-base) var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sp__advanced-chevron {
+    transition: none;
+  }
+}
+
+.sp__advanced-chevron--open {
+  transform: rotate(90deg);
+}
+
+.sp__advanced-body {
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  border-top: 0.5px solid var(--hairline);
+}
+
+.sp__advanced-caption {
+  font-size: var(--text-12);
+  color: var(--ink-3);
+  font-family: var(--serif);
+  font-style: italic;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ── Commitment table ────────────────────────────────────────────────── */
+
+.sp__commit-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-13);
+}
+
+.sp__commit-th {
+  text-align: left;
+  font-size: var(--text-11);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  padding: var(--space-1) var(--space-2) var(--space-2);
+  border-bottom: 0.5px solid var(--hairline-2);
+}
+
+.sp__commit-row:hover .sp__commit-td {
+  background: var(--hairline);
+}
+
+.sp__commit-td {
+  padding: var(--space-2);
+  color: var(--ink-2);
+  vertical-align: middle;
+}
+
+.sp__commit-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--hairline-2);
+  border-radius: var(--radius-2);
+  padding: var(--space-1) var(--space-3) var(--space-1) var(--space-2);
+  font-size: var(--text-13);
+  font-family: var(--sans);
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23808080' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--space-2) center;
+  padding-right: var(--space-5);
+}
+
+.sp__commit-select:focus-visible {
+  outline: 2px solid var(--upcoming);
+  outline-offset: 1px;
+  border-color: var(--upcoming);
+}
+
+/* ── Reset row ───────────────────────────────────────────────────────── */
+
+.sp__reset-row {
+  display: flex;
+  justify-content: flex-end;
+}

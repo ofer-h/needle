@@ -25,3 +25,6 @@ export * from './ritual';
 export * from './coach';
 export * from './chat';
 export * from './revision';
+export * from './transition';
+export * from './tags';
+export * from './feedback';

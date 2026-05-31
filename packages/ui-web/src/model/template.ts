@@ -36,9 +36,24 @@ export type Template = {
   grouping: Grouping;
   showProgress: boolean;
   showCountdown: boolean;
+  /** How nested subtasks render. Optional for back-compat; default 'inline'. */
+  subtaskDisplay?: SubtaskDisplay;
   /** True for user-authored templates (persisted, deletable). */
   custom?: boolean;
 };
+
+/** inline = always expanded; collapsed = "▸ 2 of 3", expand on click;
+ * hidden = parent row only. */
+export type SubtaskDisplay = 'inline' | 'collapsed' | 'hidden';
+
+export const DEFAULT_SUBTASK_DISPLAY: SubtaskDisplay = 'inline';
+
+export function effectiveSubtaskDisplay(t: Template): SubtaskDisplay {
+  return t.subtaskDisplay ?? DEFAULT_SUBTASK_DISPLAY;
+}
+
+/** Max visible nesting depth (Ofer: 3 now; the model is generic for more). */
+export const MAX_SUBTASK_DEPTH = 3;
 
 /** Resolve which renderer a template drives (custom → its baseLayout). */
 export function effectiveLayout(t: Template): Exclude<TemplateLayout, 'custom'> {
@@ -59,6 +74,7 @@ export const BUILTIN_TEMPLATES: Record<TemplateId, Template> = {
     grouping: 'timeOfDay',
     showProgress: true,
     showCountdown: true,
+    subtaskDisplay: 'inline',
   },
   compact: {
     id: 'compact',
@@ -85,6 +101,7 @@ export const BUILTIN_TEMPLATES: Record<TemplateId, Template> = {
     grouping: 'none',
     showProgress: false,
     showCountdown: true,
+    subtaskDisplay: 'collapsed',
   },
   kanban: {
     id: 'kanban',

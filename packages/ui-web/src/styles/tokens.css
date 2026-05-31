@@ -51,6 +51,20 @@
 
   --titlebar-bg: rgba(246, 241, 235, 0.85);
   --titlebar-stroke: rgba(34, 24, 12, 0.07);
+
+  /* Tag colors — solid (text/border) + soft (chip fill). Light. */
+  --tag-rose: var(--tag-rose-1);
+  --tag-rose-soft: color-mix(in srgb, var(--tag-rose-1) 13%, var(--surface));
+  --tag-amber: var(--tag-amber-1);
+  --tag-amber-soft: color-mix(in srgb, var(--tag-amber-1) 14%, var(--surface));
+  --tag-green: var(--tag-green-1);
+  --tag-green-soft: color-mix(in srgb, var(--tag-green-1) 13%, var(--surface));
+  --tag-blue: var(--tag-blue-1);
+  --tag-blue-soft: color-mix(in srgb, var(--tag-blue-1) 13%, var(--surface));
+  --tag-violet: var(--tag-violet-1);
+  --tag-violet-soft: color-mix(in srgb, var(--tag-violet-1) 13%, var(--surface));
+  --tag-slate: var(--tag-slate-1);
+  --tag-slate-soft: color-mix(in srgb, var(--tag-slate-1) 12%, var(--surface));
 }
 
 /* ── Dark theme (Deep Dark) ────────────────────────────────────────── */
@@ -95,4 +109,18 @@
 
   --titlebar-bg: rgba(22, 22, 26, 0.85);
   --titlebar-stroke: rgba(255, 255, 255, 0.06);
+
+  /* Tag colors — solid (text/border) + soft (chip fill). Dark. */
+  --tag-rose: var(--tag-rose-2);
+  --tag-rose-soft: color-mix(in srgb, var(--tag-rose-2) 18%, transparent);
+  --tag-amber: var(--tag-amber-2);
+  --tag-amber-soft: color-mix(in srgb, var(--tag-amber-2) 18%, transparent);
+  --tag-green: var(--tag-green-2);
+  --tag-green-soft: color-mix(in srgb, var(--tag-green-2) 18%, transparent);
+  --tag-blue: var(--tag-blue-2);
+  --tag-blue-soft: color-mix(in srgb, var(--tag-blue-2) 18%, transparent);
+  --tag-violet: var(--tag-violet-2);
+  --tag-violet-soft: color-mix(in srgb, var(--tag-violet-2) 18%, transparent);
+  --tag-slate: var(--tag-slate-2);
+  --tag-slate-soft: color-mix(in srgb, var(--tag-slate-2) 20%, transparent);
 }

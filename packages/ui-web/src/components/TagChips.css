@@ -1,0 +1,138 @@
+.tagchips {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.tagchip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 1px var(--space-2);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-11);
+  font-weight: 600;
+  background: var(--chip-soft);
+  color: var(--chip);
+  border: 1px solid color-mix(in srgb, var(--chip) 28%, transparent);
+  white-space: nowrap;
+}
+
+.tagchip__x {
+  display: inline-flex;
+  align-items: center;
+  border: none;
+  background: none;
+  padding: 0;
+  margin-left: 1px;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.65;
+}
+
+.tagchip__x:hover {
+  opacity: 1;
+}
+
+.tagchips__pick {
+  position: relative;
+  display: inline-flex;
+}
+
+.tagchips__add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-pill);
+  border: 1px dashed var(--border-strong);
+  background: none;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.itemline__row:hover .tagchips__add,
+.tagchips__add[aria-expanded='true'] {
+  opacity: 1;
+}
+
+.tagpicker {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  right: 0;
+  z-index: 30;
+  min-width: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-3);
+  box-shadow: var(--shadow-card);
+}
+
+.tagpicker__existing {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.tagpicker__option {
+  cursor: pointer;
+}
+
+.tagpicker__create {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  border-top: 1px solid var(--border-default);
+  padding-top: var(--space-3);
+}
+
+.tagpicker__name {
+  font-size: var(--text-13);
+  padding: var(--space-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-2);
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.tagpicker__swatches {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.tagpicker__swatch {
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-pill);
+  background: var(--chip);
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+}
+
+.tagpicker__swatch--on {
+  border-color: var(--ink);
+}
+
+.tagpicker__make {
+  font-size: var(--text-13);
+  font-weight: 600;
+  padding: var(--space-2);
+  border: 1px solid color-mix(in srgb, var(--upcoming) 40%, transparent);
+  border-radius: var(--radius-2);
+  background: var(--upcoming-soft);
+  color: var(--upcoming);
+  cursor: pointer;
+}
+
+.tagpicker__make:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

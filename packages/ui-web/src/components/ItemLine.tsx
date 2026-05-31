@@ -1,13 +1,22 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
-import { childrenOf, type Item, type ItemId, type TodayItemView } from '../model';
+import {
+  childrenOf,
+  effectiveSubtaskDisplay,
+  MAX_SUBTASK_DEPTH,
+  tagsForItem,
+  viewForItem,
+  type DayTarget,
+  type ItemId,
+  type TodayItemView,
+} from '../model';
 import { Checkbox, Icon, Pill } from '../primitives';
 import { useBoard } from './BoardContext';
+import { TagChips } from './TagChips';
 import './ItemLine.css';
 
 const REF_RE = /\b([a-z][a-z0-9]*-\d+)\b/gi;
 
-/** Render plain text with `task-123`-style refs auto-tagged. No labels, no
- * markup syntax shown — just the words. */
+/** Render plain text with `task-123`-style refs auto-tagged. */
 function renderText(text: string): ReactNode[] {
   const out: ReactNode[] = [];
   let last = 0;
@@ -35,21 +44,60 @@ function checkboxTone(view: TodayItemView): 'neutral' | 'urgent' | 'upcoming' {
 
 type ItemLineProps = {
   view: TodayItemView;
-  /** Visual nudges a layout can pass without changing the row's behavior. */
+  /** Visual nudges a layout can pass without changing behavior. */
   hideTime?: boolean;
+  /** Nesting depth (0 = top-level). Children recurse at depth + 1. */
+  depth?: number;
 };
 
-export function ItemLine({ view, hideTime = false }: ItemLineProps) {
-  const { data, template, handlers } = useBoard();
+/** A single row. Recursive: children render as nested ItemLines down to
+ * MAX_SUBTASK_DEPTH (deeper levels collapse into an overflow affordance).
+ * Collapse, tags, day-targeting and delete all live here. */
+export function ItemLine({ view, hideTime = false, depth = 0 }: ItemLineProps) {
+  const { data, now, template, handlers } = useBoard();
   const { item } = view;
   const children = childrenOf(data, item.id);
   const isEvent = item.kind === 'event';
   const isDone = item.status === 'done';
 
+  const display = effectiveSubtaskDisplay(template);
+  const hasChildren = children.length > 0;
+  const childDepth = depth + 1;
+  const canNest = childDepth <= MAX_SUBTASK_DEPTH;
+
+  const [collapsed, setCollapsed] = useState(display === 'collapsed');
+  const [adding, setAdding] = useState(false);
+
+  const showChildren = hasChildren && display !== 'hidden' && !collapsed && canNest;
+  const overflowCount = hasChildren && !canNest ? children.length : 0;
+
+  const tags = tagsForItem(data, item.id);
+  const allTags = data.tags ?? [];
+  const assign = handlers.assignTag;
+  const unassign = handlers.unassignTag;
+  const createTag = handlers.createAndAssignTag;
+  const canTag = assign !== undefined || createTag !== undefined;
+
+  const rowStyle =
+    depth > 0 ? { paddingLeft: `calc(${depth} * var(--space-6))` } : undefined;
+
   return (
-    <div className={`itemline${isDone ? ' itemline--done' : ''}`}>
-      <div className="itemline__row">
-        <span className="itemline__control">
+    <div className={`itemline itemline--d${depth}${isDone ? ' itemline--done' : ''}`} data-depth={depth}>
+      <div className="itemline__row" style={rowStyle}>
+        <span className="itemline__lead">
+          {hasChildren && display !== 'hidden' ? (
+            <button
+              type="button"
+              className="itemline__chevron"
+              onClick={() => setCollapsed((c) => !c)}
+              aria-expanded={!collapsed}
+              aria-label={collapsed ? 'Expand subtasks' : 'Collapse subtasks'}
+            >
+              <Icon name={collapsed ? 'chevron-right' : 'chevron-down'} size={14} tone="muted" />
+            </button>
+          ) : (
+            <span className="itemline__chevron-spacer" aria-hidden />
+          )}
           {isEvent ? (
             <span className="itemline__event-dot" aria-hidden>
               <Icon name="calendar" size={14} tone="calendar" />
@@ -67,19 +115,26 @@ export function ItemLine({ view, hideTime = false }: ItemLineProps) {
         <EditableTitle
           text={item.title}
           done={isDone}
+          small={depth > 0}
           onCommit={(next) => handlers.setTitle(item.id, next)}
         />
 
         <span className="itemline__meta">
+          {template.fieldsShown.includes('tags') && (tags.length > 0 || canTag) && (
+            <TagChips
+              tags={tags}
+              allTags={allTags}
+              {...(assign ? { onAdd: (id) => assign(item.id, id) } : {})}
+              {...(unassign ? { onRemove: (id) => unassign(item.id, id) } : {})}
+              {...(createTag ? { onCreate: (n, c) => createTag(item.id, n, c) } : {})}
+            />
+          )}
           {template.fieldsShown.includes('commitment') && item.commitmentLevel !== 'soft' && (
             <Pill tone={item.commitmentLevel === 'unmissable' ? 'urgent' : 'upcoming'}>
               {item.commitmentLevel === 'unmissable' ? 'unmissable' : 'committed'}
             </Pill>
           )}
-          {template.fieldsShown.includes('source') && item.sourceId && (
-            <span className="itemline__source">{String(item.sourceId)}</span>
-          )}
-          {template.showProgress && children.length > 0 && (
+          {hasChildren && (collapsed || template.showProgress) && (
             <Pill tone="neutral" leadingIcon={<Icon name="check" size={10} tone="muted" />}>
               {view.childProgress.done}/{view.childProgress.total}
             </Pill>
@@ -89,40 +144,140 @@ export function ItemLine({ view, hideTime = false }: ItemLineProps) {
               {view.dateLabel}
             </span>
           )}
+          <RowMenu itemId={item.id} canAddChild={!isEvent} onAddSubtask={() => setAdding(true)} />
         </span>
       </div>
 
-      {(children.length > 0 || !isEvent) && (
+      {showChildren && (
         <div className="itemline__children">
           {children.map((child) => (
-            <ChildLine key={child.id} child={child} />
+            <ItemLine key={child.id} view={viewForItem(data, child, now)} depth={childDepth} hideTime={hideTime} />
           ))}
-          {!isEvent && <AddSubtask parentId={item.id} onAdd={handlers.addChild} />}
         </div>
+      )}
+
+      {overflowCount > 0 && (
+        <button
+          type="button"
+          className="itemline__overflow"
+          style={rowStyle}
+          onClick={() => setCollapsed(false)}
+        >
+          <Icon name="dots" size={12} tone="muted" /> {overflowCount} more nested
+        </button>
+      )}
+
+      {adding && (
+        <AddSubtaskInline
+          parentId={item.id}
+          depth={childDepth}
+          onAdd={(title) => {
+            handlers.addChild(item.id, title);
+            setAdding(false);
+          }}
+          onCancel={() => setAdding(false)}
+        />
       )}
     </div>
   );
 }
 
-function ChildLine({ child }: { child: Item }) {
+type RowMenuProps = {
+  itemId: ItemId;
+  canAddChild: boolean;
+  onAddSubtask: () => void;
+};
+
+function RowMenu({ itemId, canAddChild, onAddSubtask }: RowMenuProps) {
   const { handlers } = useBoard();
-  const done = child.status === 'done';
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', onDoc);
+    return () => document.removeEventListener('mousedown', onDoc);
+  }, [open]);
+
+  const moveTo = handlers.moveTo;
+  const removeItem = handlers.removeItem;
+  const move = (t: DayTarget) => {
+    moveTo?.(itemId, t);
+    setOpen(false);
+  };
+
   return (
-    <div className={`itemline__child${done ? ' itemline__child--done' : ''}`}>
-      <span className="itemline__child-arrow" aria-hidden>
-        ↳
-      </span>
-      <Checkbox
-        checked={done}
-        label={`Mark “${child.title}” ${done ? 'not done' : 'done'}`}
-        onToggle={() => handlers.toggleDone(child.id)}
-      />
-      <EditableTitle
-        text={child.title}
-        done={done}
-        small
-        onCommit={(next) => handlers.setTitle(child.id, next)}
-      />
+    <div className="rowmenu" ref={ref}>
+      <button
+        type="button"
+        className="rowmenu__btn"
+        onClick={() => setOpen((o) => !o)}
+        aria-label="Item actions"
+        aria-expanded={open}
+      >
+        <Icon name="dots" size={16} tone="muted" />
+      </button>
+      {open && (
+        <div className="rowmenu__pop" role="menu">
+          {canAddChild && (
+            <button
+              type="button"
+              role="menuitem"
+              className="rowmenu__item"
+              onClick={() => {
+                onAddSubtask();
+                setOpen(false);
+              }}
+            >
+              <Icon name="plus" size={13} tone="muted" /> Add subtask
+            </button>
+          )}
+          {moveTo && (
+            <>
+              <div className="rowmenu__sep" />
+              <div className="rowmenu__label">Move to</div>
+              <button type="button" role="menuitem" className="rowmenu__item" onClick={() => move('today')}>
+                Today
+              </button>
+              <button type="button" role="menuitem" className="rowmenu__item" onClick={() => move('tomorrow')}>
+                Tomorrow
+              </button>
+              <button type="button" role="menuitem" className="rowmenu__item" onClick={() => move('someday')}>
+                Someday
+              </button>
+              <label className="rowmenu__date">
+                Pick date
+                <input
+                  type="date"
+                  onChange={(e) => {
+                    if (e.target.value) move({ date: e.target.value });
+                  }}
+                  aria-label="Pick a date"
+                />
+              </label>
+            </>
+          )}
+          {removeItem && (
+            <>
+              <div className="rowmenu__sep" />
+              <button
+                type="button"
+                role="menuitem"
+                className="rowmenu__item rowmenu__item--danger"
+                onClick={() => {
+                  removeItem(itemId);
+                  setOpen(false);
+                }}
+              >
+                <Icon name="trash" size={13} /> Delete
+              </button>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -193,37 +348,36 @@ function EditableTitle({
   );
 }
 
-function AddSubtask({
+function AddSubtaskInline({
   parentId,
+  depth,
   onAdd,
+  onCancel,
 }: {
   parentId: ItemId;
-  onAdd: (parentId: ItemId, title: string) => void;
+  depth: number;
+  onAdd: (title: string) => void;
+  onCancel: () => void;
 }) {
-  const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  // parentId is implicit in the onAdd closure; kept for clarity at call sites.
+  void parentId;
 
   useEffect(() => {
-    if (open) inputRef.current?.focus();
-  }, [open]);
+    inputRef.current?.focus();
+  }, []);
 
   const commit = () => {
-    if (draft.trim()) onAdd(parentId, draft);
-    setDraft('');
-    setOpen(false);
+    if (draft.trim()) onAdd(draft);
+    else onCancel();
   };
 
-  if (!open) {
-    return (
-      <button type="button" className="itemline__add-subtask" onClick={() => setOpen(true)}>
-        <Icon name="plus" size={12} tone="muted" /> add subtask
-      </button>
-    );
-  }
-
   return (
-    <div className="itemline__child itemline__child--adding">
+    <div
+      className="itemline__add-row"
+      style={depth > 0 ? { paddingLeft: `calc(${depth} * var(--space-6))` } : undefined}
+    >
       <span className="itemline__child-arrow" aria-hidden>
         ↳
       </span>
@@ -236,10 +390,7 @@ function AddSubtask({
         onBlur={commit}
         onKeyDown={(e) => {
           if (e.key === 'Enter') commit();
-          if (e.key === 'Escape') {
-            setDraft('');
-            setOpen(false);
-          }
+          if (e.key === 'Escape') onCancel();
         }}
         aria-label="New subtask"
       />

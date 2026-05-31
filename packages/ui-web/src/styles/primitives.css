@@ -89,4 +89,18 @@
   --duration-base: 150ms;
   --duration-slow: 250ms;
   --ease-out: cubic-bezier(0.25, 1, 0.5, 1);
+
+  /* ── Tag palette — curated hues for user tags (-1 darker / -2 lighter) ── */
+  --tag-rose-1: #b0335f;
+  --tag-rose-2: #f0a0bd;
+  --tag-amber-1: #8a5a12;
+  --tag-amber-2: #e6bd76;
+  --tag-green-1: #2f6b3f;
+  --tag-green-2: #7fc99a;
+  --tag-blue-1: #2a5f8f;
+  --tag-blue-2: #84b6e0;
+  --tag-violet-1: #6a4a9a;
+  --tag-violet-2: #b79ae0;
+  --tag-slate-1: #45506a;
+  --tag-slate-2: #9aa6bf;
 }

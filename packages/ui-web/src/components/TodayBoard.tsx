@@ -1,12 +1,20 @@
 import { useMemo } from 'react';
 import {
   addChild as addChildMut,
+  assignTag as assignTagMut,
   buildTodayView,
+  createTag as createTagMut,
+  deleteItem as deleteItemMut,
   effectiveLayout,
   groupViews,
+  moveToTarget,
   setItemTitle,
   toggleItemDone,
+  unassignTag as unassignTagMut,
+  type DayTarget,
   type ItemId,
+  type TagColor,
+  type TagId,
   type Template,
   type TodayData,
 } from '../model';
@@ -31,8 +39,17 @@ export function TodayBoard({ data, template, now = new Date(), onChange }: Today
       toggleDone: (id: ItemId) => onChange(toggleItemDone(data, id)),
       setTitle: (id: ItemId, title: string) => onChange(setItemTitle(data, id, title)),
       addChild: (parentId: ItemId, title: string) => onChange(addChildMut(data, parentId, title)),
+      removeItem: (id: ItemId) => onChange(deleteItemMut(data, id)),
+      moveTo: (id: ItemId, target: DayTarget) => onChange(moveToTarget(data, id, target, now)),
+      assignTag: (id: ItemId, tagId: string) => onChange(assignTagMut(data, id, tagId as TagId)),
+      unassignTag: (id: ItemId, tagId: string) =>
+        onChange(unassignTagMut(data, id, tagId as TagId)),
+      createAndAssignTag: (id: ItemId, name: string, color: TagColor) => {
+        const { data: withTag, tag } = createTagMut(data, name, color);
+        onChange(assignTagMut(withTag, id, tag.id));
+      },
     }),
-    [data, onChange],
+    [data, now, onChange],
   );
 
   const groups = useMemo(

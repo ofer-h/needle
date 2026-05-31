@@ -1,0 +1,97 @@
+/* BreathHearth — pulsing breathing circle. */
+
+/* Keyframes — outer ring breathes from 1 → 1.28, inner from 1 → 1.22.
+   The asymmetry between the two layers gives organic depth. */
+@keyframes breath-outer {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  40% {
+    /* Inhale peak */
+    transform: scale(1.28);
+  }
+  60% {
+    /* Hold — slight plateau before exhale */
+    transform: scale(1.28);
+  }
+}
+
+@keyframes breath-inner {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  40% {
+    transform: scale(1.22);
+    opacity: 0.85;
+  }
+  60% {
+    transform: scale(1.22);
+    opacity: 0.85;
+  }
+}
+
+@keyframes breath-cue-fade {
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+  40%,
+  60% {
+    opacity: 1;
+  }
+}
+
+.bh {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+/* Outer ring — translucent accent tinted */
+.bh__outer {
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--upcoming) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--upcoming) 22%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  will-change: transform;
+  animation: breath-outer var(--bh-cycle, 5s) cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+/* Inner sphere — denser fill */
+.bh__inner {
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--upcoming) 32%, transparent);
+  will-change: transform, opacity;
+  animation: breath-inner var(--bh-cycle, 5s) cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+/* Cue label — "Inhale…" / "Exhale…" */
+.bh__cue {
+  font-family: var(--serif);
+  font-size: var(--text-14);
+  color: var(--upcoming);
+  letter-spacing: 0.01em;
+  animation: breath-cue-fade var(--bh-cycle, 5s) cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  /* Prevent layout shift when label changes */
+  min-height: 1.4em;
+  text-align: center;
+}
+
+/* Reduced-motion: freeze all animation; show a static circle */
+@media (prefers-reduced-motion: reduce) {
+  .bh__outer,
+  .bh__inner,
+  .bh__cue {
+    animation: none;
+  }
+
+  .bh__cue {
+    opacity: 0.7;
+  }
+}

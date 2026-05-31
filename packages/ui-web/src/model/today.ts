@@ -110,6 +110,11 @@ function buildOne(data: TodayData, item: Item, now: Date): TodayItemView {
   };
 }
 
+/** Build a single item's view — used to render nested children recursively. */
+export function viewForItem(data: TodayData, item: Item, now: Date = new Date()): TodayItemView {
+  return buildOne(data, item, now);
+}
+
 /** Assemble every top-level item into a TodayItemView, sorted by start time
  * (scheduled first, ascending), then unscheduled by creation order. Templates
  * may re-sort/group afterward via their `sortBy` / `grouping` config. */

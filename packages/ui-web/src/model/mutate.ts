@@ -3,7 +3,7 @@
 
 import { mkItem, mkOccurrence, mkPlan, mkRelation, isoDate, localTime } from './factory';
 import { brand } from './ids';
-import type { CommitmentLevel, ISODateTime, Item, ItemId, ItemKind } from './domain';
+import type { CommitmentLevel, ISODate, ISODateTime, Item, ItemId, ItemKind } from './domain';
 import type { TodayData } from './today';
 import { toDate } from './time';
 
@@ -149,6 +149,80 @@ export function addTravelPrep(
   const order = next.relations.filter((r) => r.relationType === 'prep_for').length;
   next.relations.push(mkRelation(prep.id, eventId, 'prep_for', order));
   return { data: next, itemId: prep.id };
+}
+
+/** Where a row can be re-targeted. A string variant carries an explicit ISO date. */
+export type DayTarget = 'today' | 'tomorrow' | 'someday' | { date: string };
+
+/** Local YYYY-MM-DD for a Date (avoids UTC off-by-one from toISOString). */
+function localISODay(d: Date): string {
+  const y = d.getFullYear();
+  const m = (d.getMonth() + 1).toString().padStart(2, '0');
+  const day = d.getDate().toString().padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+/** Re-target an item to today / tomorrow / a specific date / someday (stash).
+ * Floats the item (drops a fixed start) so the user can place it. Pure. */
+export function moveToTarget(
+  data: TodayData,
+  itemId: ItemId,
+  target: DayTarget,
+  now: Date = new Date(),
+): TodayData {
+  const next = clone(data);
+  const plan = next.plans.find((p) => p.itemId === itemId);
+  if (!plan) return data;
+
+  if (target === 'someday') {
+    plan.mode = 'stash';
+    delete plan.planDate;
+    delete plan.startTime;
+    return next;
+  }
+
+  let dateStr: string;
+  if (target === 'today') {
+    dateStr = localISODay(now);
+  } else if (target === 'tomorrow') {
+    const t = new Date(now);
+    t.setDate(t.getDate() + 1);
+    dateStr = localISODay(t);
+  } else {
+    dateStr = target.date;
+  }
+  plan.planDate = brand<ISODate>(dateStr);
+  plan.mode = 'float';
+  delete plan.startTime;
+  return next;
+}
+
+/** Delete an item and everything that belongs to it: its plans, occurrences,
+ * relations, tag links, and (recursively) every `contains` descendant. Pure. */
+export function deleteItem(data: TodayData, itemId: ItemId): TodayData {
+  const next = clone(data);
+
+  // Collect the item + all descendants via `contains` relations (transitive).
+  const toRemove = new Set<ItemId>([itemId]);
+  let grew = true;
+  while (grew) {
+    grew = false;
+    for (const r of next.relations) {
+      if (r.relationType === 'contains' && toRemove.has(r.fromItemId) && !toRemove.has(r.toItemId)) {
+        toRemove.add(r.toItemId);
+        grew = true;
+      }
+    }
+  }
+
+  next.items = next.items.filter((i) => !toRemove.has(i.id));
+  next.plans = next.plans.filter((p) => !toRemove.has(p.itemId));
+  next.occurrences = next.occurrences.filter((o) => !toRemove.has(o.itemId));
+  next.relations = next.relations.filter(
+    (r) => !toRemove.has(r.fromItemId) && !toRemove.has(r.toItemId),
+  );
+  if (next.itemTags) next.itemTags = next.itemTags.filter((t) => !toRemove.has(t.itemId));
+  return next;
 }
 
 /** Pull yesterday's unfinished work onto today: any overdue/open top-level item

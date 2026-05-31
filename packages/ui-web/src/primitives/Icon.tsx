@@ -7,7 +7,12 @@ import type { CSSProperties } from 'react';
 export type IconName =
   | 'check'
   | 'chevron'
+  | 'chevron-right'
+  | 'chevron-down'
   | 'plus'
+  | 'trash'
+  | 'leaf'
+  | 'edit'
   | 'spark'
   | 'calendar'
   | 'clock'
@@ -42,6 +47,28 @@ const TONE_COLOR: Record<IconTone, string> = {
 const PATHS: Record<IconName, JSX.Element> = {
   check: <polyline points="20 6 9 17 4 12" />,
   chevron: <polyline points="9 18 15 12 9 6" />,
+  'chevron-right': <polyline points="9 18 15 12 9 6" />,
+  'chevron-down': <polyline points="6 9 12 15 18 9" />,
+  trash: (
+    <>
+      <polyline points="3 6 5 6 21 6" />
+      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+      <line x1="10" y1="11" x2="10" y2="17" />
+      <line x1="14" y1="11" x2="14" y2="17" />
+    </>
+  ),
+  leaf: (
+    <>
+      <path d="M11 20A7 7 0 0 1 4 13c0-5 4-9 16-9 0 12-4 16-9 16z" />
+      <line x1="8" y1="16" x2="16" y2="8" />
+    </>
+  ),
+  edit: (
+    <>
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z" />
+    </>
+  ),
   plus: (
     <>
       <line x1="12" y1="5" x2="12" y2="19" />
