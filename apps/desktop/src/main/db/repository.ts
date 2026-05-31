@@ -7,10 +7,59 @@ import type {
   ParsedPlanningItem,
   Task,
 } from '@needle/domain/types';
+import type {
+  ActorId,
+  Bucket,
+  CommitmentLevel,
+  ISODate,
+  ISODateTime,
+  Item,
+  ItemId,
+  ItemKind,
+  ItemOccurrence,
+  ItemOccurrenceId,
+  ItemPlan,
+  ItemPlanId,
+  ItemRelation,
+  ItemRelationId,
+  ItemRelationType,
+  ItemStatus,
+  ItemVisibility,
+  LocalTime,
+  OccurrenceStatus,
+  PlanMode,
+  SourceId,
+  TimeZone,
+  WorkspaceId,
+} from '@needle/domain/domain-v2';
 import { getDb } from './index';
 
+/**
+ * Tag / item-tag shapes. These live in @needle/ui-web's model (not yet in
+ * @needle/domain), so we re-declare them structurally here to keep the main
+ * process free of any dependency on the UI package. See structure.mdc.
+ */
+type TagAutomation = { onAssign?: 'create_followup'; followupTitleTemplate?: string };
+type Tag = { id: string; name: string; color: string; automation?: TagAutomation };
+type ItemTag = { itemId: ItemId; tagId: string };
+
+/**
+ * Canonical Today-screen payload, defined structurally from @needle/domain
+ * entities (plus the local Tag/ItemTag shapes). This is structurally identical
+ * to @needle/ui-web's `TodayData`; we define it here (not imported from ui-web)
+ * so the main process never depends on the UI package. See structure.mdc.
+ */
+export type TodayData = {
+  items: Item[];
+  plans: ItemPlan[];
+  occurrences: ItemOccurrence[];
+  relations: ItemRelation[];
+  tags: Tag[];
+  itemTags: ItemTag[];
+};
+
 const DEFAULT_WORKSPACE_ID = 'ws_personal';
-const DEFAULT_ACTOR_ID = 'actor_user_ofer';
+const DEFAULT_ACTOR_ID: ActorId = 'actor_user_ofer' as ActorId;
 const DEFAULT_MANUAL_SOURCE_ID = 'src_manual';
 const DEFAULT_TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
 
@@ -1067,4 +1116,342 @@ export function countTasks(conn?: Database.Database): number {
 export function countV2Items(conn?: Database.Database): number {
   const row = dbOr(conn).prepare('SELECT COUNT(*) AS count FROM v2_items').get() as { count: number };
   return row.count;
+}
+
+// ---------------------------------------------------------------------------
+// Today-screen canonical model (ui-web TodayData)
+// ---------------------------------------------------------------------------
+
+type ItemRow = {
+  id: string;
+  workspace_id: string;
+  kind: string;
+  bucket: string;
+  title: string;
+  status: string;
+  visibility: string;
+  commitment_level: string;
+  source_id: string | null;
+  created_by_actor_id: string;
+  updated_by_actor_id: string;
+  created_at: string;
+  updated_at: string;
+};
+
+type PlanRow = {
+  id: string;
+  workspace_id: string;
+  item_id: string;
+  actor_id: string;
+  plan_date: string | null;
+  mode: string;
+  start_time: string | null;
+  end_time: string | null;
+  timezone: string;
+  slot_index: number | null;
+  slot_order: number | null;
+  relative_to_occurrence_id: string | null;
+  relative_offset_minutes: number | null;
+  created_at: string;
+  updated_at: string;
+};
+
+type OccurrenceRow = {
+  id: string;
+  workspace_id: string;
+  item_id: string;
+  starts_at: string;
+  ends_at: string;
+  timezone: string;
+  status: string;
+  source_id: string | null;
+  external_id: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+type RelationRow = {
+  id: string;
+  workspace_id: string;
+  from_item_id: string;
+  to_item_id: string;
+  relation_type: string;
+  sort_order: number;
+  created_by_actor_id: string;
+  created_at: string;
+};
+
+type TagRow = {
+  id: string;
+  name: string;
+  color: string;
+  automation: string | null;
+};
+
+type ItemTagRow = {
+  item_id: string;
+  tag_id: string;
+};
+
+function rowToItem(row: ItemRow): Item {
+  return {
+    id: row.id as ItemId,
+    workspaceId: row.workspace_id as WorkspaceId,
+    kind: row.kind as ItemKind,
+    bucket: row.bucket as Bucket,
+    title: row.title,
+    status: row.status as ItemStatus,
+    visibility: row.visibility as ItemVisibility,
+    commitmentLevel: row.commitment_level as CommitmentLevel,
+    createdByActorId: row.created_by_actor_id as ActorId,
+    updatedByActorId: row.updated_by_actor_id as ActorId,
+    createdAt: row.created_at as ISODateTime,
+    updatedAt: row.updated_at as ISODateTime,
+    ...(row.source_id !== null ? { sourceId: row.source_id as SourceId } : {}),
+  };
+}
+
+function rowToPlan(row: PlanRow): ItemPlan {
+  return {
+    id: row.id as ItemPlanId,
+    workspaceId: row.workspace_id as WorkspaceId,
+    itemId: row.item_id as ItemId,
+    actorId: row.actor_id as ActorId,
+    mode: row.mode as PlanMode,
+    timezone: row.timezone as TimeZone,
+    createdAt: row.created_at as ISODateTime,
+    updatedAt: row.updated_at as ISODateTime,
+    ...(row.plan_date !== null ? { planDate: row.plan_date as ISODate } : {}),
+    ...(row.start_time !== null ? { startTime: row.start_time as LocalTime } : {}),
+    ...(row.end_time !== null ? { endTime: row.end_time as LocalTime } : {}),
+    ...(row.slot_index !== null ? { slotIndex: row.slot_index } : {}),
+    ...(row.slot_order !== null ? { slotOrder: row.slot_order } : {}),
+    ...(row.relative_to_occurrence_id !== null && row.relative_offset_minutes !== null
+      ? {
+          relativeTo: {
+            occurrenceId: row.relative_to_occurrence_id as ItemOccurrenceId,
+            offsetMinutes: row.relative_offset_minutes,
+          },
+        }
+      : {}),
+  };
+}
+
+function rowToOccurrence(row: OccurrenceRow): ItemOccurrence {
+  return {
+    id: row.id as ItemOccurrenceId,
+    workspaceId: row.workspace_id as WorkspaceId,
+    itemId: row.item_id as ItemId,
+    startsAt: row.starts_at as ISODateTime,
+    endsAt: row.ends_at as ISODateTime,
+    timezone: row.timezone as TimeZone,
+    status: row.status as OccurrenceStatus,
+    createdAt: row.created_at as ISODateTime,
+    updatedAt: row.updated_at as ISODateTime,
+    ...(row.source_id !== null ? { sourceId: row.source_id as SourceId } : {}),
+    ...(row.external_id !== null ? { externalId: row.external_id } : {}),
+  };
+}
+
+function rowToRelation(row: RelationRow): ItemRelation {
+  return {
+    id: row.id as ItemRelationId,
+    workspaceId: row.workspace_id as WorkspaceId,
+    fromItemId: row.from_item_id as ItemId,
+    toItemId: row.to_item_id as ItemId,
+    relationType: row.relation_type as ItemRelationType,
+    sortOrder: row.sort_order,
+    createdByActorId: row.created_by_actor_id as ActorId,
+    createdAt: row.created_at as ISODateTime,
+  };
+}
+
+function rowToTag(row: TagRow): Tag {
+  const automation = parseJson<TagAutomation>(row.automation);
+  return {
+    id: row.id,
+    name: row.name,
+    color: row.color,
+    ...(automation !== undefined ? { automation } : {}),
+  };
+}
+
+function rowToItemTag(row: ItemTagRow): ItemTag {
+  return {
+    itemId: row.item_id as ItemId,
+    tagId: row.tag_id,
+  };
+}
+
+export function getTodayData(conn?: Database.Database): TodayData {
+  const database = dbOr(conn);
+
+  const itemRows = database
+    .prepare('SELECT * FROM v2_items WHERE workspace_id = ? ORDER BY created_at')
+    .all(DEFAULT_WORKSPACE_ID) as ItemRow[];
+  const planRows = database
+    .prepare('SELECT * FROM v2_item_plans WHERE workspace_id = ? ORDER BY created_at')
+    .all(DEFAULT_WORKSPACE_ID) as PlanRow[];
+  const occurrenceRows = database
+    .prepare('SELECT * FROM v2_item_occurrences WHERE workspace_id = ? ORDER BY starts_at')
+    .all(DEFAULT_WORKSPACE_ID) as OccurrenceRow[];
+  const relationRows = database
+    .prepare(
+      `SELECT id, workspace_id, from_item_id, to_item_id, relation_type, sort_order,
+              created_by_actor_id, created_at
+       FROM v2_item_relations
+       WHERE workspace_id = ? AND archived_at IS NULL
+       ORDER BY sort_order, created_at`,
+    )
+    .all(DEFAULT_WORKSPACE_ID) as RelationRow[];
+  const tagRows = database.prepare('SELECT * FROM v2_tags ORDER BY name').all() as TagRow[];
+  const itemTagRows = database.prepare('SELECT * FROM v2_item_tags').all() as ItemTagRow[];
+
+  return {
+    items: itemRows.map(rowToItem),
+    plans: planRows.map(rowToPlan),
+    occurrences: occurrenceRows.map(rowToOccurrence),
+    relations: relationRows.map(rowToRelation),
+    tags: tagRows.map(rowToTag),
+    itemTags: itemTagRows.map(rowToItemTag),
+  };
+}
+
+export function saveTodayData(data: TodayData, conn?: Database.Database): void {
+  const database = dbOr(conn);
+
+  const insertItem = database.prepare(
+    `INSERT INTO v2_items
+     (id, workspace_id, kind, bucket, title, body, status, visibility, commitment_level,
+      source_id, created_by_actor_id, updated_by_actor_id, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+  );
+  const insertPlan = database.prepare(
+    `INSERT INTO v2_item_plans
+     (id, workspace_id, item_id, actor_id, plan_date, mode, start_time, end_time,
+      timezone, slot_index, slot_order, relative_to_occurrence_id, relative_offset_minutes,
+      created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+  );
+
+  // Branded IDs (ItemId, ActorId, …) are plain strings at runtime but appear as
+  // objects to the type system, so coerce to string when binding to SQLite.
+  const s = (value: string): string => value as string;
+  const insertOccurrence = database.prepare(
+    `INSERT INTO v2_item_occurrences
+     (id, workspace_id, item_id, starts_at, ends_at, timezone, status, source_id,
+      external_id, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+  );
+  const insertRelation = database.prepare(
+    `INSERT INTO v2_item_relations
+     (id, workspace_id, from_item_id, to_item_id, relation_type, sort_order,
+      created_by_actor_id, created_at, archived_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL)`,
+  );
+  const insertTag = database.prepare(
+    'INSERT INTO v2_tags (id, name, color, automation) VALUES (?, ?, ?, ?)',
+  );
+  const insertItemTag = database.prepare(
+    'INSERT INTO v2_item_tags (item_id, tag_id) VALUES (?, ?)',
+  );
+
+  const replaceAll = database.transaction(() => {
+    const now = new Date().toISOString();
+    ensureV2Defaults(database, now);
+
+    database.prepare('DELETE FROM v2_item_tags').run();
+    database.prepare('DELETE FROM v2_tags').run();
+    database
+      .prepare('DELETE FROM v2_item_relations WHERE workspace_id = ?')
+      .run(DEFAULT_WORKSPACE_ID);
+    database
+      .prepare('DELETE FROM v2_item_occurrences WHERE workspace_id = ?')
+      .run(DEFAULT_WORKSPACE_ID);
+    database.prepare('DELETE FROM v2_item_plans WHERE workspace_id = ?').run(DEFAULT_WORKSPACE_ID);
+    database.prepare('DELETE FROM v2_items WHERE workspace_id = ?').run(DEFAULT_WORKSPACE_ID);
+
+    for (const item of data.items) {
+      insertItem.run(
+        s(item.id),
+        DEFAULT_WORKSPACE_ID,
+        item.kind,
+        item.bucket,
+        item.title,
+        item.body ?? null,
+        item.status,
+        item.visibility,
+        item.commitmentLevel,
+        item.sourceId !== undefined ? s(item.sourceId) : null,
+        s(item.createdByActorId),
+        s(item.updatedByActorId),
+        s(item.createdAt),
+        s(item.updatedAt),
+      );
+    }
+
+    for (const plan of data.plans) {
+      insertPlan.run(
+        s(plan.id),
+        DEFAULT_WORKSPACE_ID,
+        s(plan.itemId),
+        s(plan.actorId),
+        plan.planDate !== undefined ? s(plan.planDate) : null,
+        plan.mode,
+        plan.startTime !== undefined ? s(plan.startTime) : null,
+        plan.endTime !== undefined ? s(plan.endTime) : null,
+        s(plan.timezone),
+        plan.slotIndex ?? null,
+        plan.slotOrder ?? null,
+        plan.relativeTo !== undefined ? s(plan.relativeTo.occurrenceId) : null,
+        plan.relativeTo !== undefined ? plan.relativeTo.offsetMinutes : null,
+        s(plan.createdAt),
+        s(plan.updatedAt),
+      );
+    }
+
+    for (const occ of data.occurrences) {
+      insertOccurrence.run(
+        s(occ.id),
+        DEFAULT_WORKSPACE_ID,
+        s(occ.itemId),
+        s(occ.startsAt),
+        s(occ.endsAt),
+        s(occ.timezone),
+        occ.status,
+        occ.sourceId !== undefined ? s(occ.sourceId) : null,
+        occ.externalId ?? null,
+        s(occ.createdAt),
+        s(occ.updatedAt),
+      );
+    }
+
+    for (const relation of data.relations) {
+      insertRelation.run(
+        s(relation.id),
+        DEFAULT_WORKSPACE_ID,
+        s(relation.fromItemId),
+        s(relation.toItemId),
+        relation.relationType,
+        relation.sortOrder,
+        s(relation.createdByActorId),
+        s(relation.createdAt),
+      );
+    }
+
+    for (const tag of data.tags) {
+      insertTag.run(
+        tag.id,
+        tag.name,
+        tag.color,
+        tag.automation !== undefined ? JSON.stringify(tag.automation) : null,
+      );
+    }
+
+    for (const itemTag of data.itemTags) {
+      insertItemTag.run(s(itemTag.itemId), itemTag.tagId);
+    }
+  });
+
+  replaceAll();
 }

@@ -1,4 +1,5 @@
 import type { CalendarEvent, CaptureEntry, ClassifyResponse, Screen, Task, Theme } from '@needle/domain/types';
+import type { TodayData } from '@needle/ui-web';
 import type { AppDiagnostics } from '@needle/contract';
 import type { FlowHealthSnapshot } from '@needle/domain/flow-health';
 import type {
@@ -45,6 +46,8 @@ declare global {
       };
       db: {
         getTasks(): Promise<Task[]>;
+        getTodayData(): Promise<TodayData>;
+        saveTodayData(data: TodayData): Promise<void>;
         updateTask(id: string, patch: Partial<Task>): Promise<Task>;
         deleteTask(id: string): Promise<void>;
         addSubtask(taskId: string, title: string): Promise<Task>;

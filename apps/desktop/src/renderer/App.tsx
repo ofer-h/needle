@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useAppStore } from './state/store';
-import TodayScreen from './components/Today/TodayScreen';
+import TodayBoardScreen from './components/Today/TodayBoardScreen';
 import CaptureScreen from './components/Capture/CaptureScreen';
 import BuildDiagnostics from './components/DevTools/BuildDiagnostics';
 import DevClockControl from './components/DevTools/DevClockControl';
@@ -71,7 +71,7 @@ export default function App() {
   return (
     <>
       {screen === 'today' && (
-        <TodayScreen onNavigateCapture={() => setScreen('capture')} />
+        <TodayBoardScreen onNavigateCapture={() => setScreen('capture')} />
       )}
       {screen === 'capture' && (
         <CaptureScreen onBack={() => setScreen('today')} />

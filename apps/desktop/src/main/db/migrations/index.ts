@@ -2,6 +2,7 @@ import type Database from 'better-sqlite3';
 import { migrationId as initialSchemaId, up as upInitialSchema } from './001_initial_schema';
 import { migrationId as v2PlanningSchemaId, up as upV2PlanningSchema } from './002_v2_planning_schema';
 import { migrationId as dropLegacyTablesId, up as upDropLegacyTables } from './003_drop_legacy_tables';
+import { migrationId as tagsId, up as upTags } from './004_tags';
 
 type Migration = {
   id: string;
@@ -12,6 +13,7 @@ const MIGRATIONS: Migration[] = [
   { id: initialSchemaId, up: upInitialSchema },
   { id: v2PlanningSchemaId, up: upV2PlanningSchema },
   { id: dropLegacyTablesId, up: upDropLegacyTables },
+  { id: tagsId, up: upTags },
 ];
 
 export function migrate(db: Database.Database): void {

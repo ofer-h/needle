@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import type { CalendarEvent, CaptureEntry, ClassifyResponse, Screen, Task, Theme } from '@needle/domain/types';
+import type { TodayData } from '@needle/ui-web/model';
 import type {
   CaptureClosePayload,
   CaptureEntryPayload,
@@ -102,6 +103,9 @@ const api = {
   },
   db: {
     getTasks: (): Promise<Task[]> => ipcRenderer.invoke('db:get-tasks'),
+    getTodayData: (): Promise<TodayData> => ipcRenderer.invoke('db:get-today-data'),
+    saveTodayData: (data: TodayData): Promise<void> =>
+      ipcRenderer.invoke('db:save-today-data', data),
     updateTask: (id: string, patch: Partial<Task>): Promise<Task> =>
       ipcRenderer.invoke('db:update-task', { id, patch } satisfies DbUpdateTaskPayload),
     deleteTask: (id: string): Promise<void> =>

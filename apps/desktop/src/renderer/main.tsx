@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import './styles/primitives.css';
 import './styles/tokens.css';
 import './styles/global.css';
+import '@needle/ui-web/styles';
 import App from './App';
 import TorchWindow from './components/Intervention/TorchWindow';
 import CaptureWindow from './components/Intervention/CaptureWindow';

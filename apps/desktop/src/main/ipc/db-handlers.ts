@@ -16,9 +16,27 @@ import type {
   DbUpdateSubtaskPayload,
 } from '@needle/contract';
 import * as repo from '../db/repository';
+import type { TodayData } from '../db/repository';
 
 export function registerDbHandlers(): void {
   ipcMain.handle('db:get-tasks', () => repo.getAllTasks());
+
+  ipcMain.handle('db:get-today-data', () => repo.getTodayData());
+
+  ipcMain.handle('db:save-today-data', (_event, payload: TodayData) => {
+    if (
+      !payload ||
+      !Array.isArray(payload.items) ||
+      !Array.isArray(payload.plans) ||
+      !Array.isArray(payload.occurrences) ||
+      !Array.isArray(payload.relations) ||
+      !Array.isArray(payload.tags) ||
+      !Array.isArray(payload.itemTags)
+    ) {
+      throw new Error('db:save-today-data requires a full TodayData payload');
+    }
+    repo.saveTodayData(payload);
+  });
 
   ipcMain.handle('db:update-task', (_event, payload: DbUpdateTaskPayload) => {
     if (!payload?.id || typeof payload.id !== 'string') {
