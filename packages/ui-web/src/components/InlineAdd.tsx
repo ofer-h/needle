@@ -1,31 +1,79 @@
 import { useRef, useState, type KeyboardEvent } from 'react';
-import { parseQuickAdd, type ItemId, type NewItemInput } from '../model';
+import { parseQuickAdd, type ItemId, type NewEventInput, type NewItemInput } from '../model';
 import { Icon } from '../primitives';
 import './InlineAdd.css';
 
 type InlineAddProps = {
-  /** Create a top-level item; returns its id so the nest-mode affordance can
-   * nest a following item as a child of the just-added item. */
   onAdd: (input: NewItemInput) => ItemId;
+  onAddEvent: (input: NewEventInput) => void;
   onAddChild: (parentId: ItemId, title: string) => void;
   onPullYesterday?: () => void;
   hasYesterday?: boolean;
 };
 
+/** Parse "30m", "1h", "1h30m", "90m" → minutes. Returns 0 if unparseable. */
+function parseDurationMinutes(raw: string): number {
+  const s = raw.trim().toLowerCase();
+  const hoursOnly = /^(\d+)h$/.exec(s);
+  if (hoursOnly) return parseInt(hoursOnly[1] ?? '0', 10) * 60;
+  const minsOnly = /^(\d+)m$/.exec(s);
+  if (minsOnly) return parseInt(minsOnly[1] ?? '0', 10);
+  const combined = /^(\d+)h(\d+)m$/.exec(s);
+  if (combined) return parseInt(combined[1] ?? '0', 10) * 60 + parseInt(combined[2] ?? '0', 10);
+  return 0;
+}
+
+/** Add minutes to a "HH:MM" string, returns "HH:MM". */
+function addMinutesToTime(timeStr: string, minutes: number): string {
+  const [hStr, mStr] = timeStr.split(':');
+  const totalMinutes = parseInt(hStr ?? '0', 10) * 60 + parseInt(mStr ?? '0', 10) + minutes;
+  const h = Math.floor(totalMinutes / 60) % 24;
+  const m = totalMinutes % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
 /** One inline composer — plain text first. Enter = top-level item by default.
  * The ↳ nest-mode toggle (or Tab key) makes the NEXT add a child of the last
- * added item. The ✨ AI toggle runs the mocked parser for time/duration/kind. */
-export function InlineAdd({ onAdd, onAddChild, onPullYesterday, hasYesterday }: InlineAddProps) {
+ * added item. The ✨ AI toggle runs the mocked parser for time/duration/kind.
+ * Typing "/" switches to event mode. */
+export function InlineAdd({ onAdd, onAddEvent, onAddChild, onPullYesterday, hasYesterday }: InlineAddProps) {
   const [text, setText] = useState('');
+  const [mode, setMode] = useState<'task' | 'event'>('task');
   const [ai, setAi] = useState(false);
   const [nestMode, setNestMode] = useState(false);
   const [timeOpen, setTimeOpen] = useState(false);
   const [time, setTime] = useState('');
+  const [duration, setDuration] = useState('');
+  const [durationOpen, setDurationOpen] = useState(false);
   const lastId = useRef<ItemId | null>(null);
   const lastTitle = useRef<string>('');
 
+  const switchMode = (next: 'task' | 'event') => {
+    setMode(next);
+    setText('');
+    setTime('');
+    setDuration('');
+    setTimeOpen(false);
+    setDurationOpen(false);
+    setNestMode(false);
+  };
+
   const submit = () => {
     const raw = text.trim();
+
+    if (mode === 'event') {
+      if (!raw || !time) return;
+      const durationMinutes = parseDurationMinutes(duration);
+      const endTime = durationMinutes > 0 ? addMinutesToTime(time, durationMinutes) : undefined;
+      onAddEvent({ title: raw, startTime: time, ...(endTime !== undefined && { endTime }) });
+      setText('');
+      setTime('');
+      setDuration('');
+      setTimeOpen(false);
+      setDurationOpen(false);
+      return;
+    }
+
     if (!raw) return;
 
     if (nestMode && lastId.current) {
@@ -47,16 +95,24 @@ export function InlineAdd({ onAdd, onAddChild, onPullYesterday, hasYesterday }: 
     lastId.current = newId;
     lastTitle.current = input.title;
     setText('');
-    // Stay in nest mode if it was active; user can cancel explicitly.
   };
 
   const onKey = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       submit();
-    } else if (e.key === 'Tab') {
+    } else if (e.key === 'Tab' && mode === 'task') {
       e.preventDefault();
       if (lastId.current) setNestMode((v) => !v);
     }
+  };
+
+  const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    if (val === '/' && mode === 'task') {
+      switchMode('event');
+      return;
+    }
+    setText(val);
   };
 
   const toggleNest = () => {
@@ -93,7 +149,7 @@ export function InlineAdd({ onAdd, onAddChild, onPullYesterday, hasYesterday }: 
                 ? 'Add anything — e.g. "standup 10am for 15m"'
                 : 'Add a task…'
           }
-          onChange={(e) => setText(e.target.value)}
+          onChange={handleTextChange}
           onKeyDown={onKey}
           aria-label="Add an item"
         />
