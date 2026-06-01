@@ -805,6 +805,1921 @@
         transition-duration: 0.01ms !important;
       }
     }
+
+    /* ═══ GENERATED DEMO STYLES (30 new demos) ═══ */
+
+/* 6. Spotlight Sweep */
+.sweep-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 1010;
+  pointer-events: none;
+}
+.sweep-message {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1020;
+  text-align: center;
+  pointer-events: none;
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  transition: opacity 1.2s ease;
+  line-height: 1.35;
+}
+.sweep-message.visible { opacity: 1; }
+.sweep-sub {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.55);
+  font-family: var(--sans);
+  margin-top: 10px;
+  font-weight: 400;
+}
+
+/* 7. Screen Curtain */
+.curtain-overlay {
+  background: transparent;
+}
+.curtain-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 0;
+  overflow: hidden;
+  z-index: 1010;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgba(0,0,0,0.12) 0px,
+      rgba(0,0,0,0.12) 2px,
+      transparent 2px,
+      transparent 18px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255,255,255,0.04) 0px,
+      rgba(255,255,255,0.04) 1px,
+      transparent 1px,
+      transparent 9px
+    ),
+    linear-gradient(
+      180deg,
+      #3a0a0a 0%,
+      #6b1010 12%,
+      #8b1a1a 28%,
+      #7a1212 44%,
+      #5c0e0e 60%,
+      #6b1010 76%,
+      #4a0c0c 88%,
+      #3a0808 100%
+    );
+  animation: curtainDrop 2.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+@keyframes curtainDrop {
+  0%   { height: 0; }
+  100% { height: 100vh; }
+}
+.curtain-fringe {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 28px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0;
+  pointer-events: none;
+}
+.curtain-tassel {
+  width: 14px;
+  height: 28px;
+  background: linear-gradient(to bottom, #c8941a, #a07010 60%, #d4a847);
+  border-radius: 0 0 7px 7px;
+  flex-shrink: 0;
+  position: relative;
+}
+.curtain-tassel::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 10px;
+  background: #d4a847;
+  border-radius: 50%;
+}
+.curtain-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  animation: curtainTextIn 0.8s ease 2.0s forwards;
+}
+@keyframes curtainTextIn {
+  from { opacity: 0; transform: translate(-50%, calc(-50% + 16px)); }
+  to   { opacity: 1; transform: translate(-50%, -50%); }
+}
+.curtain-title {
+  font-family: var(--serif);
+  font-size: 52px;
+  font-weight: 300;
+  color: #e8c87a;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-shadow: 0 0 40px rgba(212, 168, 71, 0.5), 0 2px 8px rgba(0,0,0,0.6);
+  line-height: 1;
+}
+.curtain-divider {
+  width: 120px;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #d4a847, transparent);
+  margin: 14px auto;
+}
+.curtain-sub {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(232, 200, 122, 0.65);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+}
+
+/* 8. Pixel Dissolve */
+.dissolve-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 1010;
+  pointer-events: none;
+}
+.dissolve-message {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1020;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+.dissolve-message.visible { opacity: 1; }
+.dissolve-msg-inner {
+  font-family: var(--serif);
+  font-size: 30px;
+  font-weight: 300;
+  color: var(--ink);
+  background: rgba(246, 241, 235, 0.92);
+  backdrop-filter: blur(6px);
+  padding: 28px 44px;
+  border-radius: 16px;
+  box-shadow: 0 8px 40px rgba(31, 26, 20, 0.15);
+  line-height: 1.35;
+}
+.dissolve-msg-sub {
+  font-family: var(--sans);
+  font-size: 14px;
+  color: var(--ink-2);
+  margin-top: 8px;
+}
+
+
+/* ── #12 The Puppy ── */
+.puppy-overlay {
+  background: transparent;
+  pointer-events: none;
+}
+.puppy-overlay .demo-dismiss { pointer-events: all; }
+.puppy-char {
+  position: fixed;
+  bottom: 90px;
+  font-size: 44px;
+  z-index: 1050;
+  pointer-events: none;
+  will-change: transform, left;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+}
+.puppy-speech {
+  position: fixed;
+  bottom: 148px;
+  background: var(--surface);
+  padding: 10px 18px;
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  z-index: 1051;
+  white-space: nowrap;
+  opacity: 0;
+  transform: scale(0.8) translateY(6px);
+  transition: opacity 0.35s var(--ease), transform 0.35s var(--ease-bounce);
+  pointer-events: none;
+}
+.puppy-speech.show { opacity: 1; transform: scale(1) translateY(0); }
+.puppy-speech::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 22px;
+  width: 12px; height: 12px;
+  background: var(--surface);
+  transform: rotate(45deg);
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.05);
+}
+@keyframes puppyBounce {
+  0%, 100% { transform: scaleX(1) translateY(0) rotate(0deg); }
+  25% { transform: scaleX(1) translateY(-8px) rotate(-4deg); }
+  75% { transform: scaleX(1) translateY(-4px) rotate(3deg); }
+}
+@keyframes puppyWiggle {
+  0%, 100% { transform: scaleX(1) rotate(-2deg); }
+  50% { transform: scaleX(1) rotate(2deg); }
+}
+
+/* ── #13 The Robot Butler ── */
+.robot-overlay {
+  background: transparent;
+  pointer-events: none;
+}
+.robot-overlay .demo-dismiss { pointer-events: all; }
+.robot-container {
+  position: fixed;
+  bottom: -200px;
+  right: 60px;
+  z-index: 1050;
+  pointer-events: all;
+  transition: bottom 0.8s var(--ease-bounce);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.robot-container.show { bottom: 90px; }
+.robot-emoji {
+  font-size: 52px;
+  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.2));
+  animation: robotFloat 3s ease-in-out infinite;
+}
+@keyframes robotFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.robot-card {
+  background: var(--surface);
+  border: 1.5px solid var(--hairline-2, rgba(31,26,20,0.14));
+  border-radius: 14px;
+  padding: 14px 18px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.06);
+  max-width: 240px;
+  text-align: center;
+  position: relative;
+}
+.robot-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: 14px 14px 0 0;
+  background: linear-gradient(90deg, var(--ink-3), var(--ink));
+}
+.robot-card-title {
+  font-family: var(--serif);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--ink-3);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.robot-card-meeting {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.robot-card-time {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--accent);
+  letter-spacing: 0.04em;
+}
+.robot-tray {
+  font-size: 28px;
+  margin-top: 4px;
+}
+
+/* ── #15 The Ghost ── */
+.ghost-overlay {
+  background: transparent;
+  pointer-events: none;
+}
+.ghost-overlay .demo-dismiss { pointer-events: all; }
+.ghost-char {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1045;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 3s ease;
+  text-align: center;
+}
+.ghost-char.show { opacity: 1; }
+.ghost-emoji {
+  font-size: 96px;
+  display: block;
+  filter: drop-shadow(0 0 24px rgba(212, 168, 71, 0.3));
+  animation: ghostDrift 4s ease-in-out infinite;
+}
+@keyframes ghostDrift {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50% { transform: translateY(-18px) rotate(3deg); }
+}
+.ghost-message {
+  margin-top: 16px;
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 300;
+  color: var(--ink);
+  background: rgba(246, 241, 235, 0.88);
+  backdrop-filter: blur(12px);
+  padding: 14px 28px;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 1.5s ease 2s, transform 1.5s var(--ease) 2s;
+  white-space: nowrap;
+}
+.ghost-char.show .ghost-message {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── #16 Penguin Parade ── */
+.penguin-overlay {
+  background: transparent;
+  pointer-events: none;
+}
+.penguin-overlay .demo-dismiss { pointer-events: all; }
+.penguin-row {
+  position: fixed;
+  bottom: 90px;
+  left: 0;
+  z-index: 1050;
+  pointer-events: none;
+  display: flex;
+  align-items: flex-end;
+  gap: 0;
+}
+.penguin-char {
+  font-size: 36px;
+  will-change: transform, left;
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,0.15));
+  display: inline-block;
+}
+.penguin-banner {
+  position: fixed;
+  bottom: 128px;
+  left: 0;
+  z-index: 1051;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.penguin-banner.show { opacity: 1; }
+.penguin-banner-pole {
+  width: 3px;
+  height: 48px;
+  background: var(--ink);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.penguin-banner-flag {
+  background: var(--accent);
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 0 8px 8px 0;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow: 0 3px 12px rgba(212,168,71,0.4);
+}
+@keyframes penguinWaddle {
+  0%, 100% { transform: rotate(-8deg) translateY(0); }
+  50% { transform: rotate(8deg) translateY(-4px); }
+}
+
+/* ── #18 The Plant ── */
+.plant-overlay {
+  background: transparent;
+  pointer-events: none;
+}
+.plant-overlay .demo-dismiss { pointer-events: all; }
+.plant-container {
+  position: fixed;
+  bottom: 0;
+  left: 48px;
+  z-index: 1050;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 80px;
+}
+.plant-pot {
+  font-size: 40px;
+  line-height: 1;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+  z-index: 2;
+}
+.plant-stem {
+  width: 4px;
+  background: linear-gradient(to top, #5a8a3f, #6fb54a);
+  border-radius: 4px;
+  margin-bottom: -2px;
+  transition: height 0.8s var(--ease);
+  height: 0;
+  z-index: 1;
+}
+.plant-leaves {
+  position: absolute;
+  pointer-events: none;
+  transition: opacity 0.6s ease, transform 0.6s var(--ease-bounce);
+  opacity: 0;
+  transform: scale(0.3);
+}
+.plant-leaves.show { opacity: 1; transform: scale(1); }
+.plant-bloom {
+  font-size: 36px;
+  line-height: 1;
+  transition: opacity 0.6s ease 0.2s, transform 0.6s var(--ease-bounce) 0.2s;
+  opacity: 0;
+  transform: scale(0) rotate(-20deg);
+  cursor: default;
+  filter: drop-shadow(0 4px 12px rgba(212,168,71,0.5));
+}
+.plant-bloom.show { opacity: 1; transform: scale(1) rotate(0deg); }
+.plant-bloom-label {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface);
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  opacity: 0;
+  transition: opacity 0.5s ease 0.8s;
+}
+.plant-bloom.show .plant-bloom-label { opacity: 1; }
+.plant-bloom-label::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--surface);
+}
+@keyframes plantSway {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+
+/* ── #19 The Duckling Line ── */
+.duck-overlay {
+  background: transparent;
+  pointer-events: none;
+}
+.duck-overlay .demo-dismiss { pointer-events: all; }
+.duck-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  pointer-events: none;
+}
+.duck-mama-sign {
+  position: fixed;
+  z-index: 1051;
+  background: var(--accent-soft);
+  border: 2px solid var(--accent);
+  border-radius: 10px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translate(-50%, -120%);
+  box-shadow: 0 3px 12px rgba(212,168,71,0.3);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.duck-mama-sign::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--accent);
+}
+
+/* ── #20 The Sloth ── */
+.sloth-overlay {
+  background: transparent;
+  pointer-events: none;
+}
+.sloth-overlay .demo-dismiss { pointer-events: all; }
+.sloth-container {
+  position: fixed;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1050;
+  pointer-events: none;
+  text-align: center;
+  transition: top 8s cubic-bezier(0.1, 0, 0.2, 1);
+}
+.sloth-container.show { top: 80px; }
+.sloth-rope {
+  width: 3px;
+  background: linear-gradient(to bottom, var(--ink-4), var(--ink-3));
+  border-radius: 2px;
+  margin: 0 auto;
+  height: 0;
+  transition: height 8s cubic-bezier(0.1, 0, 0.2, 1);
+}
+.sloth-rope.show { height: 80px; }
+.sloth-emoji {
+  font-size: 56px;
+  display: block;
+  filter: drop-shadow(0 6px 14px rgba(0,0,0,0.2));
+  animation: slothSway 4s ease-in-out infinite;
+}
+@keyframes slothSway {
+  0%, 100% { transform: rotate(-4deg); }
+  50% { transform: rotate(4deg); }
+}
+.sloth-speech {
+  margin-top: 14px;
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 14px 20px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.1);
+  font-family: var(--serif);
+  font-size: 16px;
+  font-weight: 300;
+  color: var(--ink);
+  max-width: 280px;
+  line-height: 1.4;
+  min-height: 1.4em;
+  position: relative;
+}
+.sloth-speech::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 8px solid transparent;
+  border-bottom-color: var(--surface);
+  border-top: none;
+}
+.sloth-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  background: var(--accent);
+  vertical-align: text-bottom;
+  animation: slothBlink 0.8s step-end infinite;
+}
+@keyframes slothBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+
+/* ══════════════════════════════════════
+   #22: CURSOR MAGNET
+   ══════════════════════════════════════ */
+.magnet-overlay {
+  background: rgba(10, 8, 20, 0.85);
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+}
+.magnet-overlay .demo-dismiss { pointer-events: all; }
+
+/* ══════════════════════════════════════
+   #23: BUBBLE POP
+   ══════════════════════════════════════ */
+.bubblepop-overlay {
+  background: linear-gradient(180deg, rgba(15,20,40,0.92) 0%, rgba(30,40,80,0.88) 100%);
+}
+.bp-bubble {
+  position: fixed;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1060;
+  background: radial-gradient(circle at 32% 28%, rgba(255,255,255,0.55) 0%, rgba(180,220,255,0.18) 40%, rgba(120,180,255,0.06) 70%, transparent 100%);
+  border: 1.5px solid rgba(180,220,255,0.45);
+  box-shadow:
+    inset 0 -4px 12px rgba(100,160,255,0.18),
+    inset 0 2px 8px rgba(255,255,255,0.35),
+    0 4px 24px rgba(80,140,255,0.18);
+  transition: transform 0.15s var(--ease-bounce);
+  user-select: none;
+  will-change: transform;
+}
+.bp-bubble:hover {
+  transform: scale(1.08);
+  box-shadow:
+    inset 0 -4px 12px rgba(100,160,255,0.28),
+    inset 0 2px 8px rgba(255,255,255,0.5),
+    0 8px 40px rgba(80,140,255,0.35);
+}
+.bp-bubble span {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.92);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  pointer-events: none;
+  letter-spacing: 0.01em;
+}
+.bp-bubble.popped {
+  pointer-events: none;
+  animation: bubblePopAnim 0.35s var(--ease-bounce) forwards;
+}
+@keyframes bubblePopAnim {
+  0%   { transform: scale(1); opacity: 1; }
+  40%  { transform: scale(1.45); opacity: 0.7; }
+  100% { transform: scale(0); opacity: 0; }
+}
+.bp-success {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.7);
+  z-index: 1070;
+  text-align: center;
+  opacity: 0;
+  transition: all 0.5s var(--ease-bounce);
+  pointer-events: none;
+}
+.bp-success.show {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+}
+.bp-success-text {
+  font-family: var(--serif);
+  font-size: 32px;
+  color: white;
+  font-weight: 300;
+  margin-top: 12px;
+}
+.bp-success-sub {
+  font-size: 15px;
+  color: rgba(255,255,255,0.6);
+  margin-top: 8px;
+}
+
+/* ══════════════════════════════════════
+   #26: ELASTIC BAND
+   ══════════════════════════════════════ */
+.elastic-overlay {
+  background: rgba(8, 12, 28, 0.88);
+  backdrop-filter: blur(2px);
+  pointer-events: none;
+}
+.elastic-overlay .demo-dismiss { pointer-events: all; }
+.elastic-pin {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1060;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #ffe082, #d4a847 60%, #a07830);
+  box-shadow:
+    0 0 0 3px rgba(212,168,71,0.3),
+    0 0 24px rgba(212,168,71,0.5),
+    0 4px 16px rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  transition: box-shadow 0.1s ease;
+}
+.elastic-pin-icon { font-size: 22px; pointer-events: none; }
+.elastic-pin-label {
+  position: fixed;
+  top: calc(50% + 40px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1060;
+  font-family: var(--serif);
+  font-size: 14px;
+  color: rgba(212,168,71,0.85);
+  white-space: nowrap;
+  pointer-events: none;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.6);
+}
+
+/* ══════════════════════════════════════
+   #27: SNOW GLOBE
+   ══════════════════════════════════════ */
+.globe-overlay {
+  background: radial-gradient(ellipse at 50% 60%, #1a2a4a 0%, #0d1526 60%, #060c18 100%);
+}
+
+/* ══════════════════════════════════════
+   #28: RIPPLE TOUCH
+   ══════════════════════════════════════ */
+.ripple-overlay {
+  background: rgba(10, 15, 30, 0.92);
+  cursor: crosshair;
+}
+.ripple-hint {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1060;
+  text-align: center;
+  pointer-events: none;
+}
+.ripple-hint-text {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 300;
+  color: rgba(255,255,255,0.35);
+  animation: rippleHintPulse 2.5s ease-in-out infinite;
+}
+@keyframes rippleHintPulse {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.65; }
+}
+
+/* ══════════════════════════════════════
+   #29: MAGNETIC LETTERS
+   ══════════════════════════════════════ */
+.letters-overlay {
+  background: #f0ebe4;
+  overflow: hidden;
+}
+.fridge-letter {
+  position: fixed;
+  z-index: 1060;
+  width: 48px;
+  height: 56px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--serif);
+  font-size: 26px;
+  font-weight: 700;
+  color: white;
+  cursor: grab;
+  user-select: none;
+  will-change: transform;
+  transition: box-shadow 0.15s ease;
+  box-shadow:
+    0 2px 0 rgba(0,0,0,0.25),
+    0 4px 12px rgba(0,0,0,0.12);
+}
+.fridge-letter:active { cursor: grabbing; }
+.fridge-letter.dragging {
+  box-shadow:
+    0 8px 0 rgba(0,0,0,0.2),
+    0 16px 32px rgba(0,0,0,0.2);
+  z-index: 1070;
+  transform: scale(1.1) rotate(2deg);
+}
+.letters-drop-zone {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1055;
+  width: 420px;
+  height: 72px;
+  border-radius: 12px;
+  border: 2.5px dashed rgba(31,26,20,0.2);
+  background: rgba(255,255,255,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: rgba(31,26,20,0.35);
+  font-weight: 500;
+  pointer-events: none;
+  backdrop-filter: blur(4px);
+}
+.letters-instruction {
+  position: fixed;
+  top: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1060;
+  font-family: var(--serif);
+  font-size: 20px;
+  color: var(--ink-2);
+  text-align: center;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* ══════════════════════════════════════
+   #30: BLACK HOLE
+   ══════════════════════════════════════ */
+.blackhole-overlay {
+  background: transparent;
+  pointer-events: none;
+}
+.blackhole-overlay .demo-dismiss { pointer-events: all; }
+
+
+/* ══════════════════════════════════════
+   #31 SUNSET GRADIENT
+   ══════════════════════════════════════ */
+.sunset-overlay {
+  background: linear-gradient(to bottom, #FFB347 0%, #FF7043 40%, #8B4F8B 80%, #2E1760 100%);
+  animation: sunsetCycle 6s ease-in-out infinite;
+}
+@keyframes sunsetCycle {
+  0%   { background: linear-gradient(to bottom, #FFD580 0%, #FFB347 30%, #FF7043 65%, #C2185B 90%, #4A148C 100%); }
+  25%  { background: linear-gradient(to bottom, #FF8A65 0%, #FF5722 35%, #AD1457 65%, #4A148C 90%, #1A0030 100%); }
+  50%  { background: linear-gradient(to bottom, #FF6F61 0%, #D84315 30%, #880E4F 60%, #1A0030 85%, #050510 100%); }
+  75%  { background: linear-gradient(to bottom, #7B1FA2 0%, #4A148C 30%, #1A0030 60%, #050510 85%, #000008 100%); }
+  100% { background: linear-gradient(to bottom, #FFD580 0%, #FFB347 30%, #FF7043 65%, #C2185B 90%, #4A148C 100%); }
+}
+.sunset-stars {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+.sunset-star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: white;
+  animation: starTwinkle ease-in-out infinite;
+}
+@keyframes starTwinkle {
+  0%, 100% { opacity: 0; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.4); }
+}
+.sunset-horizon {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  z-index: 2;
+  pointer-events: none;
+}
+.sunset-message {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  text-align: center;
+  animation: sunsetMsgFade 3s ease forwards;
+}
+@keyframes sunsetMsgFade {
+  from { opacity: 0; transform: translate(-50%, -48%); }
+  to   { opacity: 1; transform: translate(-50%, -50%); }
+}
+.sunset-msg-title {
+  font-family: var(--serif);
+  font-size: 36px;
+  font-weight: 300;
+  color: rgba(255,255,255,0.95);
+  text-shadow: 0 2px 20px rgba(0,0,0,0.4);
+  margin-bottom: 12px;
+  letter-spacing: -0.01em;
+}
+.sunset-msg-sub {
+  font-size: 15px;
+  color: rgba(255,255,255,0.75);
+  text-shadow: 0 1px 8px rgba(0,0,0,0.4);
+}
+
+/* ══════════════════════════════════════
+   #34 FOG ROLL
+   ══════════════════════════════════════ */
+.fog-overlay {
+  background: rgba(240, 235, 228, 0.15);
+  pointer-events: none;
+}
+.fog-overlay .demo-dismiss { pointer-events: all; }
+.fog-layer {
+  position: fixed;
+  left: -20%;
+  right: -20%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center bottom, rgba(255,255,255,0.82) 0%, rgba(255,255,255,0.45) 50%, transparent 75%);
+  pointer-events: none;
+  animation: fogRise linear forwards;
+}
+@keyframes fogRise {
+  from { transform: translateY(0); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  to   { transform: translateY(-60vh); opacity: 0.6; }
+}
+.fog-message {
+  position: fixed;
+  top: 28%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1060;
+  text-align: center;
+  pointer-events: all;
+  animation: fogMsgRise 1.5s 1.2s var(--ease) both;
+}
+@keyframes fogMsgRise {
+  from { opacity: 0; transform: translateX(-50%) translateY(16px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+.fog-msg-inner {
+  font-family: var(--serif);
+  font-size: 26px;
+  font-weight: 300;
+  color: var(--ink);
+  text-shadow: 0 0 30px rgba(255,255,255,0.9);
+  line-height: 1.4;
+  padding: 20px 36px;
+}
+.fog-msg-sub {
+  font-size: 14px;
+  color: var(--ink-2);
+  margin-top: 8px;
+  font-style: italic;
+}
+
+/* ══════════════════════════════════════
+   #36 NORTHERN LIGHTS
+   ══════════════════════════════════════ */
+.aurora-overlay {
+  background: #03080F;
+}
+.aurora-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+}
+.aurora-message {
+  position: fixed;
+  bottom: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  text-align: center;
+  pointer-events: all;
+  animation: auroraFadeIn 2s 0.5s ease both;
+}
+@keyframes auroraFadeIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(12px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+.aurora-msg-title {
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 300;
+  color: rgba(255,255,255,0.9);
+  text-shadow: 0 0 20px rgba(100,255,200,0.5);
+  margin-bottom: 8px;
+}
+.aurora-msg-sub {
+  font-size: 14px;
+  color: rgba(255,255,255,0.5);
+}
+
+/* ══════════════════════════════════════
+   #37 TIDE RISING
+   ══════════════════════════════════════ */
+.tide-overlay {
+  background: linear-gradient(to bottom, #87CEEB 0%, #B0E0FF 60%, #E8F4FF 100%);
+}
+.tide-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+}
+.tide-buoy {
+  position: fixed;
+  font-size: 36px;
+  z-index: 10;
+  pointer-events: none;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+  transition: bottom 0.3s ease;
+}
+.tide-message {
+  position: fixed;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  text-align: center;
+  pointer-events: all;
+  animation: tideMsgIn 1s 0.8s var(--ease) both;
+}
+@keyframes tideMsgIn {
+  from { opacity: 0; transform: translateX(-50%) scale(0.95); }
+  to   { opacity: 1; transform: translateX(-50%) scale(1); }
+}
+.tide-msg-card {
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(12px);
+  padding: 24px 40px;
+  border-radius: 20px;
+  box-shadow: 0 8px 40px rgba(0,80,160,0.15);
+}
+.tide-msg-title {
+  font-family: var(--serif);
+  font-size: 26px;
+  font-weight: 300;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.tide-msg-sub {
+  font-size: 14px;
+  color: var(--ink-2);
+}
+
+/* ══════════════════════════════════════
+   #38 DAY/NIGHT CYCLE
+   ══════════════════════════════════════ */
+.daynight-overlay {
+  animation: dayNightCycle 14s linear infinite;
+}
+@keyframes dayNightCycle {
+  0%   { background: linear-gradient(to bottom, #87CEEB 0%, #B0D8F0 60%, #D4EAF7 100%); }
+  20%  { background: linear-gradient(to bottom, #6BB8D9 0%, #8ECFEC 60%, #B8E2F5 100%); }
+  35%  { background: linear-gradient(to bottom, #FF8C42 0%, #FFB366 40%, #FFD580 70%, #8B4F8B 100%); }
+  50%  { background: linear-gradient(to bottom, #1a1a2e 0%, #16213e 40%, #0f3460 70%, #533483 100%); }
+  65%  { background: linear-gradient(to bottom, #0d0d1a 0%, #1a1a35 40%, #2d2b6b 70%, #4a3f8a 100%); }
+  80%  { background: linear-gradient(to bottom, #FF6B6B 0%, #FFA94D 40%, #FFD580 70%, #B8D9F5 100%); }
+  100% { background: linear-gradient(to bottom, #87CEEB 0%, #B0D8F0 60%, #D4EAF7 100%); }
+}
+.daynight-sky {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.daynight-sun {
+  position: absolute;
+  font-size: 52px;
+  filter: drop-shadow(0 0 20px rgba(255,200,0,0.6));
+  transition: none;
+}
+.daynight-moon {
+  position: absolute;
+  font-size: 44px;
+  filter: drop-shadow(0 0 15px rgba(200,220,255,0.5));
+  transition: none;
+}
+.daynight-stars-layer {
+  position: absolute;
+  inset: 0;
+}
+.daynight-star {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: white;
+  animation: dnTwinkle ease-in-out infinite;
+}
+@keyframes dnTwinkle {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 1; }
+}
+.daynight-ground {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  z-index: 2;
+  pointer-events: none;
+}
+.daynight-message {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  text-align: center;
+  pointer-events: all;
+}
+.daynight-msg-card {
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.3);
+  padding: 28px 48px;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+.daynight-msg-title {
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 300;
+  color: white;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.4);
+  margin-bottom: 8px;
+}
+.daynight-msg-sub {
+  font-size: 14px;
+  color: rgba(255,255,255,0.75);
+  text-shadow: 0 1px 6px rgba(0,0,0,0.3);
+}
+.daynight-phase-label {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  font-size: 12px;
+  font-family: var(--mono);
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ══════════════════════════════════════
+   #40 SEASONAL SHIFT
+   ══════════════════════════════════════ */
+.seasonal-overlay {
+  pointer-events: none;
+  transition: background 3s ease;
+}
+.seasonal-overlay .demo-dismiss { pointer-events: all; }
+.seasonal-particles-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+.seasonal-leaf {
+  position: absolute;
+  font-size: 20px;
+  animation: leafFall linear forwards;
+  pointer-events: none;
+}
+@keyframes leafFall {
+  0%   { transform: translateY(-40px) rotate(0deg) translateX(0); opacity: 1; }
+  25%  { transform: translateY(25vh) rotate(90deg) translateX(30px); }
+  50%  { transform: translateY(50vh) rotate(180deg) translateX(-20px); opacity: 1; }
+  75%  { transform: translateY(75vh) rotate(270deg) translateX(25px); }
+  100% { transform: translateY(110vh) rotate(360deg) translateX(0); opacity: 0; }
+}
+.seasonal-snowflake {
+  position: absolute;
+  color: white;
+  animation: snowDrift linear forwards;
+  pointer-events: none;
+  text-shadow: 0 0 4px rgba(180,220,255,0.8);
+}
+@keyframes snowDrift {
+  0%   { transform: translateY(-20px) rotate(0deg) translateX(0); opacity: 0; }
+  10%  { opacity: 1; }
+  80%  { opacity: 0.9; }
+  100% { transform: translateY(110vh) rotate(180deg) translateX(40px); opacity: 0; }
+}
+.seasonal-message {
+  position: fixed;
+  top: 38%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  text-align: center;
+  pointer-events: all;
+  width: max-content;
+  max-width: min(90vw, 400px);
+}
+.seasonal-msg-card {
+  background: rgba(255,255,255,0.82);
+  backdrop-filter: blur(16px);
+  padding: 24px 40px;
+  border-radius: 20px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+  transition: background 1.5s ease;
+}
+.seasonal-msg-title {
+  font-family: var(--serif);
+  font-size: 26px;
+  font-weight: 300;
+  color: var(--ink);
+  margin-bottom: 8px;
+  transition: color 1.5s ease;
+}
+.seasonal-msg-sub {
+  font-size: 14px;
+  color: var(--ink-2);
+}
+.seasonal-season-badge {
+  display: inline-block;
+  margin-bottom: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: rgba(212,168,71,0.15);
+  color: var(--ink-3);
+  transition: all 1.5s ease;
+}
+
+
+/* ══════════════════════════════════════
+   #41 WIND CHIMES
+   ══════════════════════════════════════ */
+.chimes-overlay {
+  background: radial-gradient(ellipse at 50% 0%, rgba(180,210,240,0.25) 0%, rgba(10,20,40,0.92) 60%);
+}
+.chimes-bar {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform-origin: top center;
+  border-radius: 3px 3px 6px 6px;
+  background: linear-gradient(180deg, #d8e8f5 0%, #a0bcd4 40%, #7fa8c8 70%, #c8dce8 100%);
+  box-shadow: inset -2px 0 4px rgba(255,255,255,0.3), inset 2px 0 3px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.3);
+  cursor: default;
+}
+.chimes-string {
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 1px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.6), rgba(255,255,255,0.15));
+}
+.chimes-ripple {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid rgba(160,200,240,0.7);
+  transform: translate(-50%, -50%) scale(0);
+  pointer-events: none;
+  animation: chimeRipple 1.4s var(--ease) forwards;
+}
+@keyframes chimeRipple {
+  0%   { transform: translate(-50%,-50%) scale(0); opacity: 0.9; }
+  100% { transform: translate(-50%,-50%) scale(1); opacity: 0; }
+}
+@keyframes chimeSway {
+  0%   { transform: rotate(0deg); }
+  25%  { transform: rotate(8deg); }
+  75%  { transform: rotate(-6deg); }
+  100% { transform: rotate(0deg); }
+}
+.chimes-label {
+  position: absolute;
+  top: 80px; left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 300;
+  color: rgba(200,225,255,0.85);
+  text-align: center;
+  letter-spacing: 0.03em;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+  white-space: nowrap;
+}
+.chimes-sub {
+  position: absolute;
+  top: 116px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 13px;
+  color: rgba(160,200,240,0.65);
+  white-space: nowrap;
+}
+
+/* ══════════════════════════════════════
+   #42 HEARTBEAT / EKG
+   ══════════════════════════════════════ */
+.ekg-overlay {
+  background: #0a1a0f;
+}
+.ekg-bpm {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, calc(-50% - 80px));
+  z-index: 1060;
+  text-align: center;
+  pointer-events: none;
+}
+.ekg-bpm-num {
+  font-family: var(--mono);
+  font-size: 64px;
+  font-weight: 500;
+  color: #00e87a;
+  line-height: 1;
+  transition: color 3s ease;
+  text-shadow: 0 0 30px rgba(0,232,122,0.5);
+}
+.ekg-bpm-label {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  color: rgba(0,232,122,0.5);
+  margin-top: 4px;
+}
+.ekg-message {
+  position: fixed;
+  bottom: 140px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1060;
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 300;
+  color: rgba(0,232,122,0.7);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* ══════════════════════════════════════
+   #43 SPATIAL WHISPER
+   ══════════════════════════════════════ */
+.whisper-overlay {
+  background: #0f0d12;
+}
+.whisper-phrase {
+  position: fixed;
+  top: 50%;
+  font-family: var(--serif);
+  font-weight: 300;
+  color: white;
+  pointer-events: none;
+  transition: opacity 0.8s ease, filter 0.8s ease, transform 0.8s var(--ease);
+}
+.whisper-phrase.left {
+  left: 8%;
+  transform: translateY(-50%);
+  font-size: 42px;
+  opacity: 0;
+  filter: blur(12px);
+}
+.whisper-phrase.right {
+  right: 8%;
+  transform: translateY(-50%);
+  font-size: 38px;
+  opacity: 0;
+  filter: blur(12px);
+  text-align: right;
+}
+.whisper-phrase.center {
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 34px;
+  opacity: 0;
+  filter: blur(4px);
+  text-align: center;
+  color: rgba(255,255,255,0.95);
+  white-space: nowrap;
+}
+.whisper-phrase.visible {
+  opacity: 0.55;
+  filter: blur(6px);
+}
+.whisper-phrase.sharp {
+  opacity: 1;
+  filter: blur(0px);
+}
+.whisper-particles {
+  position: fixed;
+  inset: 0;
+  z-index: 1049;
+  pointer-events: none;
+}
+
+/* ══════════════════════════════════════
+   #44 NATURE TRANSITION
+   ══════════════════════════════════════ */
+.nature-overlay {
+  display: flex;
+  overflow: hidden;
+}
+.nature-half {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+  overflow: hidden;
+  transition: flex 5s cubic-bezier(0.4,0,0.2,1);
+}
+.nature-forest {
+  background: linear-gradient(160deg, #1a3a1a 0%, #2d5a2d 30%, #3d7a3d 60%, #2a6a2a 100%);
+}
+.nature-urban {
+  background: linear-gradient(160deg, #2a2a3a 0%, #3a3a4a 30%, #4a4a5a 60%, #35354a 100%);
+}
+.nature-emoji-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  font-size: 36px;
+  z-index: 1;
+}
+.nature-label {
+  font-family: var(--serif);
+  font-size: 16px;
+  font-weight: 300;
+  color: rgba(255,255,255,0.75);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  z-index: 1;
+}
+.nature-divider {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 4px;
+  background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.7) 20%, rgba(255,255,255,0.9) 50%, rgba(255,255,255,0.7) 80%, transparent);
+  z-index: 1060;
+  pointer-events: none;
+  box-shadow: 0 0 16px 4px rgba(255,255,255,0.25);
+  transition: left 5s cubic-bezier(0.4,0,0.2,1);
+}
+.nature-caption {
+  position: fixed;
+  bottom: 140px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1065;
+  font-family: var(--serif);
+  font-size: 18px;
+  color: rgba(255,255,255,0.8);
+  text-align: center;
+  pointer-events: none;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.6);
+  white-space: nowrap;
+}
+@keyframes leafFloat {
+  0%   { transform: translateY(0) rotate(0deg); opacity:0.8; }
+  50%  { transform: translateY(-18px) rotate(25deg); opacity:1; }
+  100% { transform: translateY(0) rotate(0deg); opacity:0.8; }
+}
+.nature-forest-particle {
+  position: absolute;
+  font-size: 18px;
+  animation: leafFloat linear infinite;
+  pointer-events: none;
+}
+
+/* ══════════════════════════════════════
+   #45 MUSICAL COUNTDOWN
+   ══════════════════════════════════════ */
+.music-overlay {
+  background: linear-gradient(135deg, #1a0a2e 0%, #16213e 50%, #0f3460 100%);
+}
+.music-stage {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1050;
+  width: 500px;
+}
+.music-staff {
+  position: relative;
+  height: 100px;
+  margin-bottom: 32px;
+}
+.music-staff-line {
+  position: absolute;
+  left: 20px; right: 20px;
+  height: 1px;
+  background: rgba(255,255,255,0.2);
+}
+.music-note {
+  position: absolute;
+  font-size: 32px;
+  cursor: default;
+  z-index: 1;
+  transition: transform 0.15s var(--ease-bounce), opacity 0.4s ease;
+  filter: drop-shadow(0 0 8px rgba(212,168,71,0.6));
+}
+@keyframes noteBounce {
+  0%   { transform: translateY(0) scale(1); }
+  30%  { transform: translateY(-28px) scale(1.15); }
+  60%  { transform: translateY(-8px) scale(1.05); }
+  100% { transform: translateY(0) scale(1); }
+}
+@keyframes noteFade {
+  0%   { opacity: 1; transform: translateY(0) scale(1); }
+  50%  { opacity: 0.5; transform: translateY(-40px) scale(0.7); }
+  100% { opacity: 0; transform: translateY(-80px) scale(0.3); }
+}
+@keyframes confettiBurst {
+  0%   { transform: translate(0,0) rotate(0deg); opacity: 1; }
+  100% { transform: translate(var(--tx),var(--ty)) rotate(var(--tr)); opacity: 0; }
+}
+.music-confetti {
+  position: fixed;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  z-index: 1070;
+  pointer-events: none;
+  animation: confettiBurst 1.2s var(--ease) forwards;
+}
+.music-tempo {
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 0.15em;
+  margin-bottom: 8px;
+}
+.music-message {
+  text-align: center;
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 300;
+  color: rgba(255,255,255,0.85);
+  min-height: 32px;
+}
+
+/* ══════════════════════════════════════
+   #48 BOSS BATTLE
+   ══════════════════════════════════════ */
+.boss-overlay {
+  background: linear-gradient(180deg, #0d0010 0%, #1a0020 40%, #0a0015 100%);
+  overflow: hidden;
+}
+.boss-bg-stars {
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 1001;
+}
+.boss-arena {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  z-index: 1050;
+  padding: 40px 32px 140px;
+}
+.boss-bars-row {
+  display: flex;
+  gap: 32px;
+  width: 100%;
+  max-width: 560px;
+  margin-bottom: 20px;
+}
+.boss-bar-block {
+  flex: 1;
+}
+.boss-bar-name {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+  display: flex;
+  justify-content: space-between;
+}
+.boss-bar-name.player { color: #4fc3f7; }
+.boss-bar-name.enemy  { color: #ef5350; }
+.boss-bar-track {
+  height: 14px;
+  border-radius: 7px;
+  background: rgba(255,255,255,0.08);
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.boss-bar-fill {
+  height: 100%;
+  border-radius: 7px;
+  transition: width 0.6s var(--ease);
+}
+.boss-bar-fill.player { background: linear-gradient(90deg, #1565c0, #4fc3f7); box-shadow: 0 0 10px rgba(79,195,247,0.4); }
+.boss-bar-fill.enemy  { background: linear-gradient(90deg, #b71c1c, #ef5350); box-shadow: 0 0 10px rgba(239,83,80,0.4); }
+.boss-combatants {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 560px;
+  margin-bottom: 20px;
+}
+.boss-entity {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.boss-emoji {
+  font-size: 72px;
+  filter: drop-shadow(0 8px 20px rgba(0,0,0,0.6));
+  cursor: default;
+  user-select: none;
+}
+.boss-emoji.float {
+  animation: bossFloat 2.4s ease-in-out infinite;
+}
+@keyframes bossFloat {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%       { transform: translateY(-14px) scale(1.04); }
+}
+@keyframes bossShake {
+  0%,100% { transform: translateY(0) rotate(0deg); }
+  20%     { transform: translateY(-8px) rotate(-4deg); }
+  40%     { transform: translateY(4px) rotate(3deg); }
+  60%     { transform: translateY(-6px) rotate(-3deg); }
+  80%     { transform: translateY(2px) rotate(2deg); }
+}
+.boss-emoji.rage {
+  animation: bossShake 0.4s ease-in-out infinite;
+}
+.boss-name-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+}
+.vs-badge {
+  font-family: var(--serif);
+  font-size: 28px;
+  font-style: italic;
+  color: rgba(255,255,255,0.15);
+  align-self: center;
+}
+.boss-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+  max-width: 420px;
+  margin-top: 4px;
+}
+.boss-action-btn {
+  padding: 12px 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  color: white;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  backdrop-filter: blur(8px);
+}
+.boss-action-btn:hover {
+  background: rgba(255,255,255,0.14);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+.boss-action-icon { font-size: 20px; }
+.boss-action-label { font-size: 10px; opacity: 0.6; }
+.boss-dialog-box {
+  width: 100%;
+  max-width: 420px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 14px 18px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: rgba(255,255,255,0.75);
+  line-height: 1.6;
+  backdrop-filter: blur(8px);
+  margin-top: 8px;
+  min-height: 56px;
+}
+@keyframes dmgFloat {
+  0%   { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-60px); opacity: 0; }
+}
+.boss-damage {
+  position: fixed;
+  font-family: var(--mono);
+  font-size: 28px;
+  font-weight: 700;
+  color: #ffeb3b;
+  pointer-events: none;
+  z-index: 1090;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.7);
+  animation: dmgFloat 0.9s var(--ease) forwards;
+}
+
+/* ══════════════════════════════════════
+   #49 DAILY CHALLENGE
+   ══════════════════════════════════════ */
+.challenge-overlay {
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(16px);
+}
+.challenge-card {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(100%);
+  z-index: 1060;
+  width: 420px;
+  background: var(--surface);
+  border-radius: 24px 24px 0 0;
+  padding: 32px 32px 44px;
+  box-shadow: 0 -8px 60px rgba(0,0,0,0.25);
+  transition: transform 0.55s var(--ease-bounce);
+}
+.challenge-card.visible {
+  transform: translateX(-50%) translateY(0);
+}
+.challenge-badge-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+.challenge-badge {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f9d423 0%, #f5a623 50%, #e8850a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34px;
+  box-shadow: 0 4px 24px rgba(245,166,35,0.45), 0 0 0 6px rgba(245,166,35,0.12);
+  animation: badgeShimmer 2.5s ease-in-out infinite;
+  position: relative;
+}
+@keyframes badgeShimmer {
+  0%, 100% { box-shadow: 0 4px 24px rgba(245,166,35,0.45), 0 0 0 6px rgba(245,166,35,0.12); }
+  50%       { box-shadow: 0 4px 32px rgba(245,166,35,0.7), 0 0 0 10px rgba(245,166,35,0.18); }
+}
+.challenge-badge-rays {
+  position: absolute;
+  inset: -12px;
+  border-radius: 50%;
+  border: 2px solid rgba(245,166,35,0.25);
+  animation: badgeRays 2.5s ease-in-out infinite;
+}
+@keyframes badgeRays {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50%       { transform: scale(1.18); opacity: 0; }
+}
+.challenge-eyebrow {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-align: center;
+  margin-bottom: 8px;
+}
+.challenge-title {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--ink);
+  text-align: center;
+  line-height: 1.3;
+  margin-bottom: 6px;
+}
+.challenge-desc {
+  font-size: 14px;
+  color: var(--ink-2);
+  text-align: center;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+.challenge-reward {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  margin-bottom: 24px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.challenge-streak {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-2);
+  margin-bottom: 24px;
+}
+.challenge-streak-num {
+  font-family: var(--mono);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--urgent);
+}
+.challenge-btns {
+  display: flex;
+  gap: 10px;
+}
+.challenge-accept {
+  flex: 2;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  background: var(--ink);
+  color: white;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.challenge-accept:hover {
+  background: #2a2520;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+.challenge-skip {
+  flex: 1;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid var(--hairline-2);
+  background: none;
+  color: var(--ink-2);
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.challenge-skip:hover {
+  background: var(--bg);
+  color: var(--ink);
+}
+.challenge-timer-bar {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--accent);
+  border-radius: 0 0 0 0;
+  transform-origin: left;
+  animation: challengeTimer 12s linear forwards;
+}
+@keyframes challengeTimer {
+  from { transform: scaleX(1); }
+  to   { transform: scaleX(0); }
+}
+
   </style>
 </head>
 <body>
@@ -955,31 +2870,61 @@
       content.appendChild(label);
 
       activeDemo = id;
-
       switch(id) {
         case 1: demoTorch(content, overlay); break;
         case 2: demoFrost(content, overlay); break;
         case 3: demoVignette(content, overlay); break;
         case 4: demoDrain(content, overlay); break;
         case 5: demoSplit(content, overlay); break;
+        case 6: demoSpotlightSweep(content, overlay); break;
+        case 7: demoScreenCurtain(content, overlay); break;
+        case 8: demoPixelDissolve(content, overlay); break;
         case 9: demoIsland(content, overlay); break;
         case 10: demoTimerBar(content, overlay); break;
         case 11: demoKitty(content, overlay); break;
+        case 12: demoPuppy(content, overlay); break;
+        case 13: demoRobotButler(content, overlay); break;
         case 14: demoOwl(content, overlay); break;
+        case 15: demoGhost(content, overlay); break;
+        case 16: demoPenguinParade(content, overlay); break;
         case 17: demoClippy(content, overlay); break;
+        case 18: demoPlant(content, overlay); break;
+        case 19: demoDuckling(content, overlay); break;
+        case 20: demoSloth(content, overlay); break;
         case 21: demoGravity(content, overlay); break;
+        case 22: demoCursorMagnet(content, overlay); break;
+        case 23: demoBubblePop(content, overlay); break;
         case 24: demoShake(content, overlay); break;
         case 25: demoParticles(content, overlay); break;
+        case 26: demoElasticBand(content, overlay); break;
+        case 27: demoSnowGlobe(content, overlay); break;
+        case 28: demoRippleTouch(content, overlay); break;
+        case 29: demoMagneticLetters(content, overlay); break;
+        case 30: demoBlackHole(content, overlay); break;
+        case 31: demoSunset(content, overlay); break;
         case 32: demoBreathe(content, overlay); break;
         case 33: demoRain(content, overlay); break;
+        case 34: demoFog(content, overlay); break;
         case 35: demoHeartbeat(content, overlay); break;
+        case 36: demoAurora(content, overlay); break;
+        case 37: demoTide(content, overlay); break;
+        case 38: demoDayNight(content, overlay); break;
         case 39: demoCandle(content, overlay); break;
+        case 40: demoSeasonal(content, overlay); break;
+        case 41: demoWindChimes(content, overlay); break;
+        case 42: demoEKG(content, overlay); break;
+        case 43: demoWhisper(content, overlay); break;
+        case 44: demoNature(content, overlay); break;
+        case 45: demoMusicCountdown(content, overlay); break;
         case 46: demoXP(content, overlay); break;
         case 47: demoStreak(content, overlay); break;
+        case 48: demoBossBattle(content, overlay); break;
+        case 49: demoDailyChallenge(content, overlay); break;
         case 50: demoSpotlight(content, overlay); break;
         default: demoGeneric(content, overlay, id); break;
       }
-    }
+    }  // end tryMechanism
+
 
     function dismissDemo() {
       const overlay = document.getElementById('demo-overlay');
@@ -1457,6 +3402,3034 @@
       `;
       content.appendChild(card);
       demoCleanup = () => { overlay.style.backdropFilter = ''; };
+    }
+
+
+    // ══════════════════════════════════════════════════
+    // NEW IMPLEMENTATIONS — 30 additional demos
+    // ══════════════════════════════════════════════════
+
+function demoSpotlightSweep(content, overlay) {
+  overlay.style.background = 'rgba(0,0,0,0.88)';
+
+  const canvas = document.createElement('canvas');
+  canvas.className = 'sweep-canvas';
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  content.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+
+  const msg = document.createElement('div');
+  msg.className = 'sweep-message';
+  msg.innerHTML = 'Time to switch.<br><span class="sweep-sub">Manager 1:1 starts in 5 minutes</span>';
+  content.appendChild(msg);
+
+  // Spotlight parameters
+  const W = canvas.width;
+  const H = canvas.height;
+  const R = Math.min(W, H) * 0.22;   // spotlight radius
+  let t = 0;
+  let animId;
+  let revealed = false;
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    // Sweep position: horizontal travel with a sine-wave vertical path
+    const progress = (t % 1);
+    const cx = progress * (W + R * 2) - R;
+    const cy = H * 0.5 + Math.sin(t * Math.PI * 2) * H * 0.22;
+
+    // Dark mask with spotlight cutout
+    ctx.save();
+
+    // Fill dark background
+    ctx.fillStyle = 'rgba(0,0,0,0.0)';   // base is overlay bg already
+    ctx.fillRect(0, 0, W, H);
+
+    // Spotlight glow — outer halo
+    const halo = ctx.createRadialGradient(cx, cy, R * 0.5, cx, cy, R * 1.8);
+    halo.addColorStop(0, 'rgba(255,245,200,0.18)');
+    halo.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = halo;
+    ctx.fillRect(0, 0, W, H);
+
+    // Spotlight bright core (blend mode: screen on dark overlay reveals content)
+    const spot = ctx.createRadialGradient(cx, cy, 0, cx, cy, R);
+    spot.addColorStop(0,   'rgba(255,252,230,0.92)');
+    spot.addColorStop(0.35,'rgba(255,245,200,0.72)');
+    spot.addColorStop(0.70,'rgba(255,235,150,0.30)');
+    spot.addColorStop(1,   'rgba(0,0,0,0)');
+    ctx.fillStyle = spot;
+    ctx.globalCompositeOperation = 'screen';
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.restore();
+
+    // Advance time — one sweep every ~4 seconds
+    t += 0.004;
+
+    // Show the message card once the spotlight has swept past center once
+    if (!revealed && t > 0.32) {
+      revealed = true;
+      msg.classList.add('visible');
+    }
+
+    animId = requestAnimationFrame(draw);
+  }
+
+  draw();
+
+  demoCleanup = () => {
+    cancelAnimationFrame(animId);
+    overlay.style.background = '';
+  };
+}
+
+function demoScreenCurtain(content, overlay) {
+  overlay.classList.add('curtain-overlay');
+
+  // Build the curtain panel
+  const panel = document.createElement('div');
+  panel.className = 'curtain-panel';
+
+  // Tassel fringe
+  const fringe = document.createElement('div');
+  fringe.className = 'curtain-fringe';
+  const tasselCount = Math.ceil(window.innerWidth / 14) + 1;
+  for (let i = 0; i < tasselCount; i++) {
+    const t = document.createElement('div');
+    t.className = 'curtain-tassel';
+    // Stagger tassel heights slightly for organic feel
+    const h = 20 + Math.sin(i * 1.3) * 8;
+    t.style.height = h + 'px';
+    fringe.appendChild(t);
+  }
+  panel.appendChild(fringe);
+
+  // Intermission text
+  const curtainContent = document.createElement('div');
+  curtainContent.className = 'curtain-content';
+  curtainContent.innerHTML = `
+    <div class="curtain-title">Intermission</div>
+    <div class="curtain-divider"></div>
+    <div class="curtain-sub">Manager 1:1 &mdash; 5 minutes</div>
+  `;
+  panel.appendChild(curtainContent);
+
+  content.appendChild(panel);
+
+  demoCleanup = () => {
+    overlay.classList.remove('curtain-overlay');
+  };
+}
+
+function demoPixelDissolve(content, overlay) {
+  overlay.style.background = 'transparent';
+  overlay.style.pointerEvents = 'none';
+  document.querySelector('.demo-dismiss').style.pointerEvents = 'all';
+
+  const canvas = document.createElement('canvas');
+  canvas.className = 'dissolve-canvas';
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+  canvas.width = W;
+  canvas.height = H;
+  content.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+
+  const msg = document.createElement('div');
+  msg.className = 'dissolve-message';
+  msg.innerHTML = `<div class="dissolve-msg-inner">Time to move on.<br><span class="dissolve-msg-sub">Manager 1:1 in 5 minutes</span></div>`;
+  content.appendChild(msg);
+
+  // Pixel grid config
+  const PIXEL = 14;          // pixel square size
+  const cols = Math.ceil(W / PIXEL);
+  const rows = Math.ceil(H / PIXEL);
+  const total = cols * rows;
+
+  // Warm palette: accent/urgent/upcoming tones
+  const palette = [
+    '#D4A847', '#C4622D', '#6F9272',
+    '#E8C87A', '#F0A060', '#A8C4AA',
+    '#D48030', '#8B5E3C', '#7A9E7E',
+    '#EAD4A0', '#C8845C', '#B0CC90',
+  ];
+
+  // Build pixel list sorted by distance from edges (edges first, center last)
+  const cx = cols / 2, cy = rows / 2;
+  const pixels = [];
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      // Distance from nearest edge (0 = at edge)
+      const edgeDist = Math.min(c, cols - 1 - c, r, rows - 1 - r);
+      pixels.push({ c, r, edgeDist, color: palette[Math.floor(Math.random() * palette.length)], alpha: 0 });
+    }
+  }
+  // Sort: smallest edgeDist first (edges come in first)
+  pixels.sort((a, b) => a.edgeDist - b.edgeDist);
+
+  // The maximum edge distance determines how we map progress → reveal wave
+  const maxEdgeDist = Math.min(Math.floor(cols / 2), Math.floor(rows / 2));
+
+  let startTime = null;
+  const DURATION = 3200;  // ms for full coverage
+  let revealed = false;
+  let animId;
+
+  function draw(ts) {
+    if (!startTime) startTime = ts;
+    const elapsed = ts - startTime;
+    const progress = Math.min(1, elapsed / DURATION);
+
+    ctx.clearRect(0, 0, W, H);
+
+    // The wave front: pixels with edgeDist <= currentEdgeFront are drawn
+    // We map progress linearly across edgeDist range
+    const currentEdgeFront = progress * maxEdgeDist;
+
+    pixels.forEach(p => {
+      if (p.edgeDist <= currentEdgeFront) {
+        // Fade in each pixel based on how far past its threshold we are
+        const localProgress = Math.min(1, (currentEdgeFront - p.edgeDist) * 2.5);
+        p.alpha = localProgress;
+
+        ctx.globalAlpha = p.alpha * 0.85;
+        ctx.fillStyle = p.color;
+        const gap = 2;
+        ctx.fillRect(p.c * PIXEL + gap, p.r * PIXEL + gap, PIXEL - gap * 2, PIXEL - gap * 2);
+      }
+    });
+
+    ctx.globalAlpha = 1;
+
+    // Show message when ~50% covered (pixels halfway in from edges)
+    if (!revealed && progress >= 0.48) {
+      revealed = true;
+      msg.classList.add('visible');
+    }
+
+    if (progress < 1) {
+      animId = requestAnimationFrame(draw);
+    } else {
+      animId = requestAnimationFrame(draw);  // keep animating to hold state
+    }
+  }
+
+  animId = requestAnimationFrame(draw);
+
+  demoCleanup = () => {
+    cancelAnimationFrame(animId);
+    overlay.style.background = '';
+    overlay.style.pointerEvents = '';
+  };
+}
+
+
+    function demoPuppy(content, overlay) {
+      overlay.classList.add('puppy-overlay');
+
+      const puppy = document.createElement('div');
+      puppy.className = 'puppy-char';
+      puppy.textContent = '🐶';
+      puppy.style.left = '-60px';
+      content.appendChild(puppy);
+
+      const leash = document.createElement('div');
+      leash.className = 'puppy-char';
+      leash.style.fontSize = '28px';
+      leash.style.bottom = '100px';
+      leash.textContent = '🦮';
+      leash.style.left = '-100px';
+      content.appendChild(leash);
+
+      const speech = document.createElement('div');
+      speech.className = 'puppy-speech';
+      speech.textContent = 'Walk time! (I mean, meeting time!) 🐾';
+      content.appendChild(speech);
+
+      let pos = -60;
+      let settled = false;
+      const targetX = Math.min(window.innerWidth * 0.12, 120);
+
+      const walk = setInterval(() => {
+        pos += 4;
+        const bounce = Math.abs(Math.sin(pos * 0.18)) * 10;
+        const tilt = Math.sin(pos * 0.15) * 8;
+        puppy.style.left = pos + 'px';
+        puppy.style.transform = `translateY(-${bounce}px) rotate(${tilt}deg)`;
+        leash.style.left = (pos - 44) + 'px';
+        leash.style.transform = `translateY(-${bounce * 0.5}px)`;
+
+        if (pos > targetX && !settled) {
+          settled = true;
+          clearInterval(walk);
+          speech.style.left = (pos - 20) + 'px';
+          speech.classList.add('show');
+          // Sit and wag
+          let wagDir = 1;
+          const wag = setInterval(() => {
+            wagDir *= -1;
+            puppy.style.transform = `scaleX(1) rotate(${wagDir * 6}deg)`;
+          }, 300);
+          demoCleanup = () => {
+            clearInterval(wag);
+            overlay.classList.remove('puppy-overlay');
+          };
+        }
+      }, 25);
+
+      demoCleanup = () => {
+        clearInterval(walk);
+        overlay.classList.remove('puppy-overlay');
+      };
+    }
+
+    function demoRobotButler(content, overlay) {
+      overlay.classList.add('robot-overlay');
+
+      const container = document.createElement('div');
+      container.className = 'robot-container';
+
+      const emoji = document.createElement('div');
+      emoji.className = 'robot-emoji';
+      emoji.textContent = '🤖';
+
+      const tray = document.createElement('div');
+      tray.className = 'robot-tray';
+      tray.textContent = '🍽️';
+
+      const card = document.createElement('div');
+      card.className = 'robot-card';
+      card.innerHTML = `
+        <div class="robot-card-title">Your Appointment</div>
+        <div class="robot-card-meeting">Manager 1:1</div>
+        <div class="robot-card-time">In 5 minutes · Room 4B</div>
+      `;
+
+      container.appendChild(emoji);
+      container.appendChild(tray);
+      container.appendChild(card);
+      content.appendChild(container);
+
+      // Slide in after a tick
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        container.classList.add('show');
+      }));
+
+      // Robot "speaks" after slide completes
+      setTimeout(() => {
+        const quip = document.createElement('div');
+        quip.style.cssText = `
+          position:fixed;bottom:320px;right:60px;z-index:1052;
+          background:var(--ink);color:white;
+          font-size:12px;font-weight:500;
+          padding:8px 14px;border-radius:999px;
+          box-shadow:0 4px 16px rgba(0,0,0,0.2);
+          opacity:0;transition:opacity 0.3s ease;pointer-events:none;
+          white-space:nowrap;
+        `;
+        quip.textContent = 'Your next appointment is served, sir.';
+        content.appendChild(quip);
+        requestAnimationFrame(() => quip.style.opacity = '1');
+      }, 900);
+
+      demoCleanup = () => overlay.classList.remove('robot-overlay');
+    }
+
+    function demoGhost(content, overlay) {
+      overlay.classList.add('ghost-overlay');
+
+      const char = document.createElement('div');
+      char.className = 'ghost-char';
+
+      const emoji = document.createElement('span');
+      emoji.className = 'ghost-emoji';
+      emoji.textContent = '👻';
+
+      const msg = document.createElement('div');
+      msg.className = 'ghost-message';
+      msg.textContent = "Don't ghost your meeting! 👻 In 5 min.";
+
+      char.appendChild(emoji);
+      char.appendChild(msg);
+      content.appendChild(char);
+
+      // Fade in gradually
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        char.classList.add('show');
+      }));
+
+      demoCleanup = () => overlay.classList.remove('ghost-overlay');
+    }
+
+    function demoPenguinParade(content, overlay) {
+      overlay.classList.add('penguin-overlay');
+
+      const PENGUINS = 5;
+      const SPACING = 52;
+      const emojis = ['🐧', '🐧', '🐧', '🐧', '🐧'];
+      const chars = [];
+      const banner = document.createElement('div');
+      banner.className = 'penguin-banner';
+      banner.innerHTML = '<div class="penguin-banner-pole"></div><div class="penguin-banner-flag">MANAGER 1:1 IN 5 MIN</div>';
+      content.appendChild(banner);
+
+      // Create penguin elements
+      emojis.forEach((e, i) => {
+        const c = document.createElement('div');
+        c.className = 'penguin-char';
+        c.textContent = e;
+        c.style.position = 'fixed';
+        c.style.bottom = '90px';
+        c.style.left = (-60 - i * SPACING) + 'px';
+        c.style.zIndex = '1050';
+        c.style.filter = 'drop-shadow(0 3px 6px rgba(0,0,0,0.15))';
+        content.appendChild(c);
+        chars.push(c);
+      });
+
+      // Banner follows the lead penguin
+      let leaderX = -60;
+      let wadglePhase = 0;
+      let animId;
+
+      function march() {
+        leaderX += 2.2;
+        wadglePhase += 0.12;
+
+        chars.forEach((c, i) => {
+          const x = leaderX - i * SPACING;
+          const waddle = Math.sin(wadglePhase - i * 0.8) * 10;
+          const bobY = Math.abs(Math.sin(wadglePhase - i * 0.8)) * 4;
+          c.style.left = x + 'px';
+          c.style.transform = `rotate(${waddle}deg) translateY(-${bobY}px)`;
+        });
+
+        // Banner follows lead penguin
+        banner.style.left = (leaderX - 18) + 'px';
+        if (leaderX > 20 && !banner.classList.contains('show')) {
+          banner.classList.add('show');
+        }
+
+        if (leaderX < window.innerWidth + 120) {
+          animId = requestAnimationFrame(march);
+        }
+      }
+      animId = requestAnimationFrame(march);
+
+      demoCleanup = () => {
+        cancelAnimationFrame(animId);
+        overlay.classList.remove('penguin-overlay');
+      };
+    }
+
+    function demoPlant(content, overlay) {
+      overlay.classList.add('plant-overlay');
+
+      const container = document.createElement('div');
+      container.className = 'plant-container';
+      container.style.cssText = 'position:fixed;bottom:0;left:56px;z-index:1050;pointer-events:none;display:flex;flex-direction:column;align-items:center;width:80px;';
+
+      const bloom = document.createElement('div');
+      bloom.className = 'plant-bloom';
+      bloom.innerHTML = `
+        🌸
+        <div class="plant-bloom-label">Manager 1:1 in 5 min</div>
+      `;
+      bloom.style.cssText = 'font-size:36px;line-height:1;opacity:0;transform:scale(0) rotate(-20deg);transition:opacity 0.6s ease 0.2s,transform 0.6s var(--ease-bounce) 0.2s;position:relative;';
+
+      const leaves = document.createElement('div');
+      leaves.style.cssText = 'font-size:40px;line-height:1;opacity:0;transform:scale(0.3);transition:opacity 0.6s ease,transform 0.6s var(--ease-bounce);';
+      leaves.textContent = '🌿';
+
+      const stem = document.createElement('div');
+      stem.className = 'plant-stem';
+      stem.style.cssText = 'width:4px;background:linear-gradient(to top,#5a8a3f,#6fb54a);border-radius:4px;margin-bottom:-2px;height:0;transition:height 0.8s var(--ease);';
+
+      const sprout = document.createElement('div');
+      sprout.style.cssText = 'font-size:28px;line-height:1;opacity:0;transform:scale(0.4);transition:opacity 0.5s ease,transform 0.5s var(--ease-bounce);';
+      sprout.textContent = '🌱';
+
+      const pot = document.createElement('div');
+      pot.className = 'plant-pot';
+      pot.textContent = '🪴';
+      pot.style.cssText = 'font-size:40px;line-height:1;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.15));z-index:2;';
+
+      container.appendChild(bloom);
+      container.appendChild(leaves);
+      container.appendChild(sprout);
+      container.appendChild(stem);
+      container.appendChild(pot);
+      content.appendChild(container);
+
+      // Stage 1: sprout
+      setTimeout(() => {
+        sprout.style.opacity = '1';
+        sprout.style.transform = 'scale(1)';
+        stem.style.height = '24px';
+      }, 200);
+
+      // Stage 2: stem grows + leaves
+      setTimeout(() => {
+        stem.style.height = '60px';
+        leaves.style.opacity = '1';
+        leaves.style.transform = 'scale(1)';
+        sprout.style.opacity = '0';
+      }, 1400);
+
+      // Stage 3: bloom with label
+      setTimeout(() => {
+        stem.style.height = '90px';
+        bloom.style.opacity = '1';
+        bloom.style.transform = 'scale(1) rotate(0deg)';
+        // Label inside bloom
+        const lbl = bloom.querySelector('.plant-bloom-label');
+        if (lbl) {
+          lbl.style.cssText = `
+            position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);
+            background:var(--surface);border-radius:10px;padding:8px 14px;
+            font-size:12px;font-weight:600;color:var(--ink);white-space:nowrap;
+            box-shadow:0 4px 16px rgba(0,0,0,0.1);
+            opacity:0;transition:opacity 0.5s ease 0.3s;
+          `;
+          requestAnimationFrame(() => requestAnimationFrame(() => lbl.style.opacity = '1'));
+          const tip = document.createElement('div');
+          tip.style.cssText = 'position:absolute;top:100%;left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:var(--surface);';
+          lbl.appendChild(tip);
+        }
+        // Gentle sway
+        bloom.style.animation = 'plantSway 3s ease-in-out infinite';
+        leaves.style.animation = 'plantSway 3.5s ease-in-out infinite reverse';
+      }, 2600);
+
+      demoCleanup = () => overlay.classList.remove('plant-overlay');
+    }
+
+    function demoDuckling(content, overlay) {
+      overlay.classList.add('duck-overlay');
+
+      const canvas = document.createElement('canvas');
+      canvas.className = 'duck-canvas';
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      content.appendChild(canvas);
+      const ctx = canvas.getContext('2d');
+
+      const TRAIL_LEN = 320;
+      const DUCK_SPACING = 38;
+      const NUM_DUCKS = 6;
+      const trail = [];
+      for (let i = 0; i < TRAIL_LEN; i++) {
+        trail.push({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+      }
+
+      let mouseX = window.innerWidth / 2;
+      let mouseY = window.innerHeight / 2;
+      let headX = mouseX, headY = mouseY;
+      let trailHead = 0;
+
+      const mamaSign = document.createElement('div');
+      mamaSign.className = 'duck-mama-sign';
+      mamaSign.textContent = '🗓 Meeting in 5 min!';
+      content.appendChild(mamaSign);
+
+      const onMove = (e) => { mouseX = e.clientX; mouseY = e.clientY; };
+      document.addEventListener('mousemove', onMove);
+
+      let animId;
+      let showSign = false;
+
+      function tick() {
+        // Smoothly interpolate head toward mouse
+        headX += (mouseX - headX) * 0.15;
+        headY += (mouseY - headY) * 0.15;
+
+        // Push head into ring buffer
+        trail[trailHead] = { x: headX, y: headY };
+        trailHead = (trailHead + 1) % TRAIL_LEN;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw mama duck at head position
+        ctx.font = '32px serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.save();
+        // Angle toward movement direction
+        const prev = trail[(trailHead - 2 + TRAIL_LEN) % TRAIL_LEN];
+        const angle = Math.atan2(headY - prev.y, headX - prev.x);
+        ctx.translate(headX, headY);
+        ctx.rotate(angle);
+        ctx.scale(headX < prev.x ? -1 : 1, 1);
+        ctx.fillText('🦆', 0, 0);
+        ctx.restore();
+
+        // Update mama sign position
+        mamaSign.style.left = headX + 'px';
+        mamaSign.style.top = headY + 'px';
+        if (!showSign) {
+          showSign = true;
+          mamaSign.style.opacity = '1';
+        }
+
+        // Draw ducklings trailing behind
+        for (let d = 0; d < NUM_DUCKS; d++) {
+          const bufIdx = (trailHead - 1 - (d + 1) * DUCK_SPACING + TRAIL_LEN * 2) % TRAIL_LEN;
+          const pos = trail[bufIdx];
+          const prevPos = trail[(bufIdx - 2 + TRAIL_LEN) % TRAIL_LEN];
+          const dAngle = Math.atan2(pos.y - prevPos.y, pos.x - prevPos.x);
+
+          ctx.save();
+          ctx.translate(pos.x, pos.y);
+          ctx.rotate(dAngle);
+          const flip = pos.x < prevPos.x ? -1 : 1;
+          ctx.scale(flip, 1);
+          const bobOffset = Math.sin(Date.now() * 0.005 + d) * 3;
+          ctx.translate(0, bobOffset);
+          ctx.font = '22px serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('🐣', 0, 0);
+          ctx.restore();
+        }
+
+        animId = requestAnimationFrame(tick);
+      }
+      tick();
+
+      demoCleanup = () => {
+        cancelAnimationFrame(animId);
+        document.removeEventListener('mousemove', onMove);
+        overlay.classList.remove('duck-overlay');
+      };
+    }
+
+    function demoSloth(content, overlay) {
+      overlay.classList.add('sloth-overlay');
+
+      // Rope visual at top
+      const ropeDiv = document.createElement('div');
+      ropeDiv.style.cssText = 'position:fixed;top:0;left:50%;transform:translateX(-50%);width:4px;background:linear-gradient(to bottom,var(--ink-4),var(--ink-3));border-radius:2px;height:0;transition:height 8s cubic-bezier(0.1,0,0.2,1);z-index:1049;';
+      content.appendChild(ropeDiv);
+
+      const container = document.createElement('div');
+      container.className = 'sloth-container';
+
+      const emoji = document.createElement('span');
+      emoji.className = 'sloth-emoji';
+      emoji.textContent = '🦥';
+
+      const speech = document.createElement('div');
+      speech.className = 'sloth-speech';
+      const cursor = document.createElement('span');
+      cursor.className = 'sloth-cursor';
+      speech.appendChild(cursor);
+
+      container.appendChild(emoji);
+      container.appendChild(speech);
+      content.appendChild(container);
+
+      // Start descent after a tick
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        container.classList.add('show');
+        ropeDiv.style.height = '200px';
+      }));
+
+      // Typewriter effect that starts ~4s into descent
+      const fullMsg = "Even I know it's time to move... 🦥";
+      let charIdx = 0;
+      let typeInterval = null;
+      let typeTimeout = null;
+
+      typeTimeout = setTimeout(() => {
+        typeInterval = setInterval(() => {
+          if (charIdx < fullMsg.length) {
+            const txt = document.createTextNode(fullMsg[charIdx]);
+            speech.insertBefore(txt, cursor);
+            charIdx++;
+          } else {
+            clearInterval(typeInterval);
+            cursor.style.animation = 'none';
+            cursor.style.opacity = '0';
+          }
+        }, 80);
+      }, 4000);
+
+      demoCleanup = () => {
+        clearTimeout(typeTimeout);
+        if (typeInterval) clearInterval(typeInterval);
+        overlay.classList.remove('sloth-overlay');
+      };
+    }
+
+
+// ══════════════════════════════════════════════════════════════
+// #22: CURSOR MAGNET
+// A glowing orb at the right edge draws a bezier line to the cursor.
+// ══════════════════════════════════════════════════════════════
+function demoCursorMagnet(content, overlay) {
+  overlay.classList.add('magnet-overlay');
+
+  const canvas = document.createElement('canvas');
+  canvas.style.cssText = 'position:fixed;inset:0;z-index:1050;pointer-events:none;';
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  content.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+
+  // Orb element
+  const orbWrap = document.createElement('div');
+  orbWrap.style.cssText = `
+    position:fixed;right:32px;top:50%;transform:translateY(-50%);
+    z-index:1062;pointer-events:none;display:flex;flex-direction:column;
+    align-items:center;gap:10px;
+  `;
+
+  const orbEl = document.createElement('div');
+  orbEl.style.cssText = `
+    width:80px;height:80px;border-radius:50%;
+    background:radial-gradient(circle at 38% 32%, #fff8e1 0%, #d4a847 40%, #a07820 80%);
+    box-shadow:0 0 0 8px rgba(212,168,71,0.15),0 0 40px rgba(212,168,71,0.6),0 0 80px rgba(212,168,71,0.3);
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--serif);font-size:11px;font-weight:600;color:rgba(0,0,0,0.7);
+    text-align:center;padding:8px;line-height:1.3;
+    animation:orbPulse 2.4s ease-in-out infinite;
+  `;
+  orbEl.textContent = 'Manager 1:1';
+
+  const orbLabel = document.createElement('div');
+  orbLabel.style.cssText = 'font-size:11px;color:rgba(212,168,71,0.7);font-weight:600;letter-spacing:0.06em;text-transform:uppercase;white-space:nowrap;font-family:var(--sans);';
+  orbLabel.textContent = '5 min';
+
+  const styleTag = document.createElement('style');
+  styleTag.textContent = `
+    @keyframes orbPulse {
+      0%,100%{box-shadow:0 0 0 8px rgba(212,168,71,0.15),0 0 40px rgba(212,168,71,0.6),0 0 80px rgba(212,168,71,0.3);}
+      50%{box-shadow:0 0 0 16px rgba(212,168,71,0.08),0 0 60px rgba(212,168,71,0.9),0 0 120px rgba(212,168,71,0.5);}
+    }
+  `;
+  document.head.appendChild(styleTag);
+
+  orbWrap.appendChild(orbEl);
+  orbWrap.appendChild(orbLabel);
+  content.appendChild(orbWrap);
+
+  let mouseX = window.innerWidth / 2;
+  let mouseY = window.innerHeight / 2;
+  const orbX = window.innerWidth - 72;
+  const orbY = window.innerHeight / 2;
+
+  const onMove = (e) => { mouseX = e.clientX; mouseY = e.clientY; };
+  document.addEventListener('mousemove', onMove);
+
+  let animId;
+  function draw() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const dx = orbX - mouseX;
+    const dy = orbY - mouseY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const t = Math.min(1, dist / 600);
+
+    // Bezier control points
+    const cp1x = mouseX + dx * 0.25 + (mouseY - orbY) * 0.15;
+    const cp1y = mouseY + dy * 0.25;
+    const cp2x = orbX - dx * 0.25;
+    const cp2y = orbY - dy * 0.25;
+
+    // Gradient along the line
+    const grad = ctx.createLinearGradient(mouseX, mouseY, orbX, orbY);
+    const alpha = 0.25 + t * 0.55;
+    grad.addColorStop(0, `rgba(212,168,71,${alpha * 0.5})`);
+    grad.addColorStop(0.5, `rgba(255,220,100,${alpha})`);
+    grad.addColorStop(1, `rgba(212,168,71,${alpha * 0.8})`);
+
+    // Line thickness by distance
+    const thickness = 1.5 + t * 3.5;
+
+    ctx.beginPath();
+    ctx.moveTo(mouseX, mouseY);
+    ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, orbX, orbY);
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = thickness;
+    ctx.lineCap = 'round';
+    ctx.shadowColor = 'rgba(212,168,71,0.6)';
+    ctx.shadowBlur = 12 + t * 20;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Cursor glow dot
+    ctx.beginPath();
+    ctx.arc(mouseX, mouseY, 5 + t * 4, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(212,168,71,${0.4 + t * 0.5})`;
+    ctx.shadowColor = 'rgba(212,168,71,0.8)';
+    ctx.shadowBlur = 16;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    animId = requestAnimationFrame(draw);
+  }
+  draw();
+
+  demoCleanup = () => {
+    cancelAnimationFrame(animId);
+    document.removeEventListener('mousemove', onMove);
+    overlay.classList.remove('magnet-overlay');
+    styleTag.remove();
+  };
+}
+
+// ══════════════════════════════════════════════════════════════
+// #23: BUBBLE POP
+// 8 glass bubbles rise with task words; click to pop them.
+// ══════════════════════════════════════════════════════════════
+function demoBubblePop(content, overlay) {
+  overlay.classList.add('bubblepop-overlay');
+
+  const words = ['MANAGER', '1:1', 'IN', '5', 'MIN', '—', 'TIME', 'TO', 'MOVE!'];
+  const bubbleData = [];
+  let poppedCount = 0;
+  const total = words.length;
+
+  const success = document.createElement('div');
+  success.className = 'bp-success';
+  success.innerHTML = '<div style="font-size:56px">✨</div><div class="bp-success-text">All clear — let\'s go!</div><div class="bp-success-sub">Manager 1:1 awaits</div>';
+  content.appendChild(success);
+
+  words.forEach((word, i) => {
+    const size = 72 + word.length * 10;
+    const startX = 60 + Math.random() * (window.innerWidth - size - 120);
+    const startY = window.innerHeight + 40;
+    const targetY = 80 + Math.random() * (window.innerHeight - 260);
+    const duration = 3000 + Math.random() * 2000;
+    const delay = i * 280 + Math.random() * 200;
+    const wobble = (Math.random() - 0.5) * 80;
+
+    const bub = document.createElement('div');
+    bub.className = 'bp-bubble';
+    bub.style.cssText = `
+      width:${size}px;height:${size}px;
+      left:${startX}px;top:${startY}px;
+    `;
+    bub.innerHTML = `<span>${word}</span>`;
+    content.appendChild(bub);
+
+    // Rise animation via JS
+    let start = null;
+    let popped = false;
+
+    const rise = (ts) => {
+      if (popped) return;
+      if (!start) start = ts + delay;
+      const elapsed = ts - start;
+      if (elapsed < 0) { requestAnimationFrame(rise); return; }
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 2);
+      const curY = startY + (targetY - startY) * eased;
+      const curX = startX + Math.sin(elapsed / 600) * wobble;
+      bub.style.left = curX + 'px';
+      bub.style.top = curY + 'px';
+      if (progress < 1) requestAnimationFrame(rise);
+    };
+    requestAnimationFrame(rise);
+
+    bub.addEventListener('click', () => {
+      if (popped) return;
+      popped = true;
+      bub.classList.add('popped');
+
+      // Pop particles
+      for (let p = 0; p < 10; p++) {
+        const dot = document.createElement('div');
+        const angle = (p / 10) * Math.PI * 2;
+        const r = 30 + Math.random() * 40;
+        dot.style.cssText = `
+          position:fixed;width:6px;height:6px;border-radius:50%;
+          background:rgba(180,220,255,0.8);z-index:1070;pointer-events:none;
+          left:${parseFloat(bub.style.left) + size/2}px;
+          top:${parseFloat(bub.style.top) + size/2}px;
+          transition:all 0.4s ease-out;opacity:1;
+        `;
+        content.appendChild(dot);
+        requestAnimationFrame(() => {
+          dot.style.transform = `translate(${Math.cos(angle)*r}px,${Math.sin(angle)*r}px)`;
+          dot.style.opacity = '0';
+        });
+        setTimeout(() => dot.remove(), 500);
+      }
+
+      setTimeout(() => bub.remove(), 400);
+      poppedCount++;
+      if (poppedCount === total) {
+        setTimeout(() => success.classList.add('show'), 200);
+      }
+    });
+
+    bubbleData.push({ bub, popped: () => popped });
+  });
+
+  demoCleanup = () => {
+    overlay.classList.remove('bubblepop-overlay');
+  };
+}
+
+// ══════════════════════════════════════════════════════════════
+// #26: ELASTIC BAND
+// Canvas bezier from center pin to cursor; color/thickness by distance.
+// ══════════════════════════════════════════════════════════════
+function demoElasticBand(content, overlay) {
+  overlay.classList.add('elastic-overlay');
+
+  const canvas = document.createElement('canvas');
+  canvas.style.cssText = 'position:fixed;inset:0;z-index:1050;pointer-events:none;';
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  content.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+
+  const pin = document.createElement('div');
+  pin.className = 'elastic-pin';
+  pin.innerHTML = '<span class="elastic-pin-icon">📌</span>';
+  content.appendChild(pin);
+
+  const pinLabel = document.createElement('div');
+  pinLabel.className = 'elastic-pin-label';
+  pinLabel.textContent = 'Manager 1:1';
+  content.appendChild(pinLabel);
+
+  const pinX = window.innerWidth / 2;
+  const pinY = window.innerHeight / 2;
+
+  let mouseX = pinX + 120;
+  let mouseY = pinY - 60;
+  const onMove = (e) => { mouseX = e.clientX; mouseY = e.clientY; };
+  document.addEventListener('mousemove', onMove);
+
+  // snap-back spring physics
+  let snapX = mouseX, snapY = mouseY;
+  let vx = 0, vy = 0;
+  let released = false;
+  const releaseTimeout = setTimeout(() => { released = true; }, 6000);
+
+  let animId;
+  function draw() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    let drawX, drawY;
+    if (!released) {
+      drawX = mouseX;
+      drawY = mouseY;
+    } else {
+      // spring toward pin
+      const dx = pinX - snapX;
+      const dy = pinY - snapY;
+      vx += dx * 0.08;
+      vy += dy * 0.08;
+      vx *= 0.72;
+      vy *= 0.72;
+      snapX += vx;
+      snapY += vy;
+      drawX = snapX;
+      drawY = snapY;
+    }
+
+    const dx = drawX - pinX;
+    const dy = drawY - pinY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const maxDist = 400;
+    const t = Math.min(dist / maxDist, 1);
+
+    // Color from green (close) → amber (mid) → urgent red (far)
+    const r = Math.round(111 + t * (196 - 111));
+    const g = Math.round(146 + t * (98 - 146));
+    const b = Math.round(114 + t * (45 - 114));
+    const bandColor = `rgba(${r},${g},${b},${0.7 + t * 0.3})`;
+
+    const thickness = 2 + t * 7;
+
+    // Bezier — control point perpendicular to midpoint
+    const midX = (pinX + drawX) / 2;
+    const midY = (pinY + drawY) / 2;
+    const perpX = -(dy) * 0.2 * t;
+    const perpY = dx * 0.2 * t;
+    const cpX = midX + perpX;
+    const cpY = midY + perpY;
+
+    // Draw band shadow
+    ctx.beginPath();
+    ctx.moveTo(pinX, pinY);
+    ctx.quadraticCurveTo(cpX, cpY, drawX, drawY);
+    ctx.strokeStyle = `rgba(0,0,0,0.3)`;
+    ctx.lineWidth = thickness + 2;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+
+    // Draw band
+    ctx.beginPath();
+    ctx.moveTo(pinX, pinY);
+    ctx.quadraticCurveTo(cpX, cpY, drawX, drawY);
+    ctx.strokeStyle = bandColor;
+    ctx.lineWidth = thickness;
+    ctx.lineCap = 'round';
+    ctx.shadowColor = bandColor;
+    ctx.shadowBlur = 8 + t * 16;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Cursor endpoint dot
+    ctx.beginPath();
+    ctx.arc(drawX, drawY, 6 + t * 4, 0, Math.PI * 2);
+    ctx.fillStyle = bandColor;
+    ctx.shadowColor = bandColor;
+    ctx.shadowBlur = 12;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    animId = requestAnimationFrame(draw);
+  }
+  draw();
+
+  demoCleanup = () => {
+    cancelAnimationFrame(animId);
+    clearTimeout(releaseTimeout);
+    document.removeEventListener('mousemove', onMove);
+    overlay.classList.remove('elastic-overlay');
+  };
+}
+
+// ══════════════════════════════════════════════════════════════
+// #27: SNOW GLOBE
+// Canvas circle with falling snow; frosted glass border; scroll to shake.
+// ══════════════════════════════════════════════════════════════
+function demoSnowGlobe(content, overlay) {
+  overlay.classList.add('globe-overlay');
+
+  const W = window.innerWidth, H = window.innerHeight;
+  const cx = W / 2, cy = H / 2;
+  const GR = Math.min(W, H) * 0.36;
+
+  const canvas = document.createElement('canvas');
+  canvas.style.cssText = 'position:fixed;inset:0;z-index:1050;pointer-events:none;';
+  canvas.width = W; canvas.height = H;
+  content.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+
+  // Stars behind globe
+  const stars = Array.from({length: 80}, () => ({
+    x: Math.random() * W, y: Math.random() * H,
+    r: 0.5 + Math.random() * 1.5,
+    a: Math.random(),
+    s: 0.004 + Math.random() * 0.008
+  }));
+
+  // Snowflakes inside globe
+  const flakes = Array.from({length: 120}, () => ({
+    x: cx + (Math.random() - 0.5) * GR * 1.8,
+    y: cy + (Math.random() - 0.5) * GR * 1.8,
+    r: 0.8 + Math.random() * 2.5,
+    vy: 0.3 + Math.random() * 0.7,
+    vx: (Math.random() - 0.5) * 0.4,
+    alpha: 0.5 + Math.random() * 0.5,
+    wobble: Math.random() * Math.PI * 2
+  }));
+
+  let shakeX = 0, shakeY = 0;
+  let shakeVx = 0, shakeVy = 0;
+
+  const onScroll = (e) => {
+    shakeVx += (Math.random() - 0.5) * 6;
+    shakeVy += Math.random() * 4;
+    flakes.forEach(f => {
+      f.vx += (Math.random() - 0.5) * 3;
+      f.vy += (Math.random() - 0.5) * 3;
+    });
+  };
+  document.addEventListener('wheel', onScroll);
+
+  let t = 0;
+  let animId;
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    t += 0.016;
+
+    // Background stars
+    stars.forEach(s => {
+      s.a += s.s;
+      const alpha = 0.2 + 0.5 * Math.abs(Math.sin(s.a));
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+      ctx.fill();
+    });
+
+    // Spring settle shake
+    shakeVx *= 0.88; shakeVy *= 0.88;
+    shakeX += shakeVx * 0.04; shakeY += shakeVy * 0.04;
+    shakeX *= 0.9; shakeY *= 0.9;
+
+    // Clip to circle
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, GR, 0, Math.PI * 2);
+    ctx.clip();
+
+    // Globe interior gradient
+    const grd = ctx.createRadialGradient(cx - GR*0.3, cy - GR*0.3, 0, cx, cy, GR);
+    grd.addColorStop(0, 'rgba(180,210,255,0.12)');
+    grd.addColorStop(0.6, 'rgba(100,150,220,0.08)');
+    grd.addColorStop(1, 'rgba(30,60,120,0.25)');
+    ctx.fillStyle = grd;
+    ctx.fillRect(cx - GR, cy - GR, GR * 2, GR * 2);
+
+    // Message text
+    ctx.font = `300 ${Math.round(GR * 0.115)}px 'Fraunces', Georgia, serif`;
+    ctx.textAlign = 'center';
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    ctx.shadowColor = 'rgba(200,230,255,0.6)';
+    ctx.shadowBlur = 12;
+    ctx.fillText('Manager 1:1', cx + shakeX * 0.5, cy - GR * 0.08 + shakeY * 0.5);
+    ctx.font = `400 ${Math.round(GR * 0.085)}px 'Inter', sans-serif`;
+    ctx.fillStyle = 'rgba(200,220,255,0.7)';
+    ctx.fillText('in 5 minutes', cx + shakeX * 0.5, cy + GR * 0.12 + shakeY * 0.5);
+    ctx.shadowBlur = 0;
+
+    // Snow flakes
+    flakes.forEach(f => {
+      f.wobble += 0.03;
+      f.vx += Math.sin(f.wobble) * 0.02 + shakeVx * 0.008;
+      f.vy += 0.015 + shakeVy * 0.008;
+      f.vx *= 0.98; f.vy *= 0.98;
+      f.x += f.vx; f.y += f.vy;
+
+      // Bounce off globe walls
+      const dfx = f.x - cx, dfy = f.y - cy;
+      const df = Math.sqrt(dfx*dfx + dfy*dfy);
+      if (df > GR - f.r * 2) {
+        const nx = dfx / df, ny = dfy / df;
+        const dot = f.vx * nx + f.vy * ny;
+        f.vx -= 2 * dot * nx * 0.5;
+        f.vy -= 2 * dot * ny * 0.5;
+        f.x = cx + nx * (GR - f.r * 2 - 1);
+        f.y = cy + ny * (GR - f.r * 2 - 1);
+      }
+
+      ctx.beginPath();
+      ctx.arc(f.x + shakeX * 0.3, f.y + shakeY * 0.3, f.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(220,235,255,${f.alpha})`;
+      ctx.fill();
+    });
+
+    ctx.restore();
+
+    // Globe border — frosted glass ring
+    ctx.beginPath();
+    ctx.arc(cx, cy, GR, 0, Math.PI * 2);
+    const borderGrd = ctx.createLinearGradient(cx - GR, cy - GR, cx + GR, cy + GR);
+    borderGrd.addColorStop(0, 'rgba(255,255,255,0.55)');
+    borderGrd.addColorStop(0.4, 'rgba(200,220,255,0.25)');
+    borderGrd.addColorStop(1, 'rgba(100,140,200,0.4)');
+    ctx.strokeStyle = borderGrd;
+    ctx.lineWidth = 6;
+    ctx.shadowColor = 'rgba(180,210,255,0.4)';
+    ctx.shadowBlur = 20;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Highlight glint
+    ctx.beginPath();
+    ctx.arc(cx - GR * 0.38, cy - GR * 0.38, GR * 0.18, 0, Math.PI * 2);
+    const glint = ctx.createRadialGradient(cx - GR*0.38, cy - GR*0.38, 0, cx - GR*0.38, cy - GR*0.38, GR*0.18);
+    glint.addColorStop(0, 'rgba(255,255,255,0.4)');
+    glint.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = glint;
+    ctx.fill();
+
+    // Base / pedestal
+    const baseGrd = ctx.createLinearGradient(cx - GR*0.5, cy + GR, cx + GR*0.5, cy + GR + 30);
+    baseGrd.addColorStop(0, 'rgba(60,80,120,0.8)');
+    baseGrd.addColorStop(1, 'rgba(30,50,90,0.9)');
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + GR + 4, GR * 0.55, 18, 0, 0, Math.PI * 2);
+    ctx.fillStyle = baseGrd;
+    ctx.fill();
+    ctx.beginPath();
+    ctx.rect(cx - GR * 0.18, cy + GR - 2, GR * 0.36, 22);
+    ctx.fillStyle = 'rgba(40,60,100,0.9)';
+    ctx.fill();
+
+    // Hint label
+    ctx.font = '500 13px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = 'rgba(180,200,255,0.55)';
+    ctx.fillText('Scroll to shake', cx, cy + GR + 52);
+
+    animId = requestAnimationFrame(draw);
+  }
+  draw();
+
+  demoCleanup = () => {
+    cancelAnimationFrame(animId);
+    document.removeEventListener('wheel', onScroll);
+    overlay.classList.remove('globe-overlay');
+  };
+}
+
+// ══════════════════════════════════════════════════════════════
+// #28: RIPPLE TOUCH
+// Click creates iridescent expanding ring ripples on canvas.
+// ══════════════════════════════════════════════════════════════
+function demoRippleTouch(content, overlay) {
+  overlay.classList.add('ripple-overlay');
+
+  const canvas = document.createElement('canvas');
+  canvas.style.cssText = 'position:fixed;inset:0;z-index:1050;';
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  content.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+
+  const hint = document.createElement('div');
+  hint.className = 'ripple-hint';
+  hint.innerHTML = '<div class="ripple-hint-text">Click anywhere to ripple</div>';
+  content.appendChild(hint);
+
+  const ripples = [];
+  const taskWords = ['Manager', '1:1', '→', 'Now'];
+  let wordIdx = 0;
+
+  const onClick = (e) => {
+    if (e.target.closest('.demo-dismiss')) return;
+    hint.style.opacity = '0';
+    const word = taskWords[wordIdx % taskWords.length];
+    wordIdx++;
+    ripples.push({
+      x: e.clientX,
+      y: e.clientY,
+      r: 0,
+      maxR: Math.max(window.innerWidth, window.innerHeight) * 0.7,
+      alpha: 1,
+      hue: 180 + Math.random() * 160,
+      word,
+      wordAlpha: 1,
+      born: performance.now()
+    });
+  };
+  overlay.addEventListener('click', onClick);
+
+  let animId;
+  function draw(ts) {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (let i = ripples.length - 1; i >= 0; i--) {
+      const rp = ripples[i];
+      const age = (ts - rp.born) / 1000;
+      rp.r = age * 380;
+      rp.alpha = Math.max(0, 1 - age * 0.7);
+      rp.wordAlpha = Math.max(0, 1 - Math.max(0, age - 0.5) * 1.5);
+
+      if (rp.alpha <= 0) { ripples.splice(i, 1); continue; }
+
+      // Iridescent gradient stroke
+      const grad = ctx.createLinearGradient(
+        rp.x - rp.r, rp.y - rp.r,
+        rp.x + rp.r, rp.y + rp.r
+      );
+      grad.addColorStop(0,   `hsla(${rp.hue},     80%, 70%, ${rp.alpha})`);
+      grad.addColorStop(0.25,`hsla(${rp.hue+60},  85%, 75%, ${rp.alpha})`);
+      grad.addColorStop(0.5, `hsla(${rp.hue+120}, 80%, 80%, ${rp.alpha})`);
+      grad.addColorStop(0.75,`hsla(${rp.hue+180}, 85%, 75%, ${rp.alpha})`);
+      grad.addColorStop(1,   `hsla(${rp.hue+240}, 80%, 70%, ${rp.alpha})`);
+
+      // Outer ring
+      ctx.beginPath();
+      ctx.arc(rp.x, rp.y, rp.r, 0, Math.PI * 2);
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = 2.5;
+      ctx.shadowColor = `hsla(${rp.hue+60},80%,70%,0.6)`;
+      ctx.shadowBlur = 12;
+      ctx.stroke();
+
+      // Inner ring (offset)
+      if (rp.r > 24) {
+        ctx.beginPath();
+        ctx.arc(rp.x, rp.y, rp.r * 0.7, 0, Math.PI * 2);
+        ctx.strokeStyle = `hsla(${rp.hue+90},75%,72%,${rp.alpha * 0.4})`;
+        ctx.lineWidth = 1;
+        ctx.shadowBlur = 0;
+        ctx.stroke();
+      }
+      ctx.shadowBlur = 0;
+
+      // Word label near origin, fades
+      if (rp.wordAlpha > 0) {
+        ctx.font = `600 16px 'Inter', sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.fillStyle = `hsla(${rp.hue},80%,85%,${rp.wordAlpha})`;
+        ctx.shadowColor = `hsla(${rp.hue},80%,70%,${rp.wordAlpha * 0.8})`;
+        ctx.shadowBlur = 10;
+        ctx.fillText(rp.word, rp.x, rp.y - 16);
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    animId = requestAnimationFrame(draw);
+  }
+  animId = requestAnimationFrame(draw);
+
+  demoCleanup = () => {
+    cancelAnimationFrame(animId);
+    overlay.removeEventListener('click', onClick);
+    overlay.classList.remove('ripple-overlay');
+  };
+}
+
+// ══════════════════════════════════════════════════════════════
+// #29: MAGNETIC LETTERS
+// Colorful draggable fridge-magnet tiles; drift slowly; drop zone.
+// ══════════════════════════════════════════════════════════════
+function demoMagneticLetters(content, overlay) {
+  overlay.classList.add('letters-overlay');
+
+  const word = 'MANAGER';
+  const palette = ['#C4622D','#D4A847','#6F9272','#2C2C3A','#6B5E8A','#3A7CA5','#C4622D'];
+  const W = window.innerWidth, H = window.innerHeight;
+
+  const instruction = document.createElement('div');
+  instruction.className = 'letters-instruction';
+  instruction.textContent = 'Drag the letters to the tray below';
+  content.appendChild(instruction);
+
+  const dropZone = document.createElement('div');
+  dropZone.className = 'letters-drop-zone';
+  dropZone.textContent = 'Drop here to acknowledge';
+  content.appendChild(dropZone);
+
+  const letters = [];
+  let droppedCount = 0;
+
+  word.split('').forEach((ch, i) => {
+    const tile = document.createElement('div');
+    tile.className = 'fridge-letter';
+    tile.textContent = ch;
+    tile.style.background = palette[i % palette.length];
+
+    // Random initial position (upper area)
+    let px = 80 + Math.random() * (W - 200);
+    let py = 100 + Math.random() * (H * 0.5 - 120);
+    // Slight tilt
+    const initRot = (Math.random() - 0.5) * 14;
+    tile.style.left = px + 'px';
+    tile.style.top = py + 'px';
+    tile.style.transform = `rotate(${initRot}deg)`;
+
+    let isDragging = false, startMX = 0, startMY = 0, startPX = 0, startPY = 0;
+    let driftVX = (Math.random() - 0.5) * 0.35;
+    let driftVY = (Math.random() - 0.5) * 0.35;
+    let dropped = false;
+
+    // Drift animation
+    let driftId;
+    function drift() {
+      if (isDragging || dropped) return;
+      px += driftVX;
+      py += driftVY;
+      if (px < 20) { px = 20; driftVX *= -1; }
+      if (px > W - 68) { px = W - 68; driftVX *= -1; }
+      if (py < 80) { py = 80; driftVY *= -1; }
+      if (py > H * 0.55) { py = H * 0.55; driftVY *= -1; }
+      tile.style.left = px + 'px';
+      tile.style.top = py + 'px';
+      driftId = requestAnimationFrame(drift);
+    }
+    driftId = requestAnimationFrame(drift);
+
+    const onDown = (e) => {
+      if (dropped) return;
+      e.preventDefault();
+      isDragging = true;
+      tile.classList.add('dragging');
+      cancelAnimationFrame(driftId);
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      startMX = clientX; startMY = clientY;
+      startPX = px; startPY = py;
+    };
+    const onMove = (e) => {
+      if (!isDragging) return;
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      px = startPX + (clientX - startMX);
+      py = startPY + (clientY - startMY);
+      tile.style.left = px + 'px';
+      tile.style.top = py + 'px';
+    };
+    const onUp = (e) => {
+      if (!isDragging) return;
+      isDragging = false;
+      tile.classList.remove('dragging');
+      tile.style.transform = `rotate(${(Math.random()-0.5)*6}deg)`;
+
+      // Check if over drop zone
+      const dz = dropZone.getBoundingClientRect();
+      const tx = px + 24, ty = py + 28;
+      if (tx > dz.left && tx < dz.right && ty > dz.top && ty < dz.bottom) {
+        dropped = true;
+        droppedCount++;
+        tile.style.transition = 'all 0.3s var(--ease-bounce)';
+        tile.style.transform = 'scale(0.85) rotate(0deg)';
+        tile.style.opacity = '0.6';
+        tile.style.pointerEvents = 'none';
+        // Place in drop zone
+        const slot = dz.left + 16 + (droppedCount - 1) * 52;
+        tile.style.left = slot + 'px';
+        tile.style.top = (dz.top + 12) + 'px';
+        tile.style.width = '44px';
+        tile.style.height = '48px';
+        tile.style.fontSize = '22px';
+        setTimeout(() => tile.style.transition = '', 350);
+
+        if (droppedCount === word.length) {
+          dropZone.style.borderColor = 'var(--upcoming)';
+          dropZone.style.background = 'rgba(111,146,114,0.12)';
+          dropZone.textContent = '';
+          const msg = document.createElement('div');
+          msg.style.cssText = 'font-size:13px;font-weight:600;color:var(--upcoming);font-family:var(--sans);';
+          msg.textContent = '✓ Acknowledged — heading to Manager 1:1';
+          dropZone.appendChild(msg);
+          instruction.textContent = 'Time to transition!';
+        }
+      } else {
+        // bounce back to drift
+        driftVX = (Math.random() - 0.5) * 0.4;
+        driftVY = (Math.random() - 0.5) * 0.4;
+        driftId = requestAnimationFrame(drift);
+      }
+    };
+
+    tile.addEventListener('mousedown', onDown);
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    tile.addEventListener('touchstart', onDown, {passive:false});
+    document.addEventListener('touchmove', onMove, {passive:false});
+    document.addEventListener('touchend', onUp);
+
+    content.appendChild(tile);
+    letters.push({ tile, driftId, onMove, onUp });
+  });
+
+  demoCleanup = () => {
+    letters.forEach(l => {
+      cancelAnimationFrame(l.driftId);
+      document.removeEventListener('mousemove', l.onMove);
+      document.removeEventListener('mouseup', l.onUp);
+      document.removeEventListener('touchmove', l.onMove);
+      document.removeEventListener('touchend', l.onUp);
+    });
+    overlay.classList.remove('letters-overlay');
+  };
+}
+
+// ══════════════════════════════════════════════════════════════
+// #30: BLACK HOLE
+// Canvas vortex at bottom-right; dark spiral; accretion disk;
+// particles spiral inward.
+// ══════════════════════════════════════════════════════════════
+function demoBlackHole(content, overlay) {
+  overlay.classList.add('blackhole-overlay');
+
+  const canvas = document.createElement('canvas');
+  canvas.style.cssText = 'position:fixed;inset:0;z-index:1050;pointer-events:none;';
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  content.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+
+  const W = window.innerWidth, H = window.innerHeight;
+  const bx = W - 80, by = H - 80;
+  let bRadius = 28;
+  const maxRadius = 140;
+
+  // Particles
+  const particles = Array.from({length: 180}, (_, i) => {
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 80 + Math.random() * Math.min(W, H) * 0.5;
+    return {
+      x: bx + Math.cos(angle) * dist,
+      y: by + Math.sin(angle) * dist,
+      angle,
+      dist,
+      speed: 0.008 + Math.random() * 0.018,
+      size: 1 + Math.random() * 2.5,
+      alpha: 0.3 + Math.random() * 0.6,
+      hue: 220 + Math.random() * 60
+    };
+  });
+
+  // Label
+  const label = document.createElement('div');
+  label.style.cssText = `
+    position:fixed;bottom:${H - by + 30}px;right:${W - bx + 20}px;
+    z-index:1060;font-family:var(--serif);font-size:13px;
+    color:rgba(180,160,255,0.7);pointer-events:none;white-space:nowrap;
+    text-shadow:0 0 8px rgba(120,80,200,0.6);
+  `;
+  label.textContent = 'Everything flows here…';
+  content.appendChild(label);
+
+  let t = 0;
+  let animId;
+  function draw() {
+    t += 0.012;
+    bRadius = Math.min(maxRadius, 28 + t * 4);
+
+    ctx.clearRect(0, 0, W, H);
+
+    // Accretion disk rings
+    for (let ring = 0; ring < 5; ring++) {
+      const ringR = bRadius + 14 + ring * 18;
+      const ringAlpha = Math.max(0, 0.18 - ring * 0.025);
+      const ringGrd = ctx.createConicalGradient
+        ? null
+        : (() => {
+          const rg = ctx.createLinearGradient(bx - ringR, by, bx + ringR, by);
+          rg.addColorStop(0,   `hsla(${270+ring*15},80%,60%,0)`);
+          rg.addColorStop(0.3, `hsla(${270+ring*15},80%,65%,${ringAlpha})`);
+          rg.addColorStop(0.6, `hsla(${220+ring*20},75%,70%,${ringAlpha*0.7})`);
+          rg.addColorStop(1,   `hsla(${270+ring*15},80%,60%,0)`);
+          return rg;
+        })();
+
+      ctx.beginPath();
+      ctx.ellipse(bx, by, ringR, ringR * 0.28, t * 0.2 + ring * 0.3, 0, Math.PI * 2);
+      ctx.strokeStyle = ringGrd || `rgba(160,100,255,${ringAlpha})`;
+      ctx.lineWidth = 3 - ring * 0.4;
+      ctx.shadowColor = `rgba(160,80,255,${ringAlpha * 2})`;
+      ctx.shadowBlur = 12;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+    }
+
+    // Spiral arms of the vortex
+    for (let arm = 0; arm < 3; arm++) {
+      const armOffset = (arm / 3) * Math.PI * 2;
+      ctx.beginPath();
+      let first = true;
+      for (let i = 0; i < 120; i++) {
+        const ang = (i / 120) * Math.PI * 6 + t * 1.2 + armOffset;
+        const r = (i / 120) * bRadius * 3.5;
+        const px = bx + Math.cos(ang) * r;
+        const py = by + Math.sin(ang) * r * 0.55;
+        const alpha = (1 - i / 120) * 0.12;
+        if (first) { ctx.moveTo(px, py); first = false; }
+        else ctx.lineTo(px, py);
+      }
+      ctx.strokeStyle = `rgba(180,120,255,0.15)`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    // Particles spiraling inward
+    particles.forEach(p => {
+      const pull = bRadius / Math.max(1, p.dist);
+      p.angle += p.speed + pull * 0.08;
+      p.dist -= pull * 0.6 + 0.18;
+
+      if (p.dist < bRadius * 0.5) {
+        // Reset particle at outer edge
+        p.angle = Math.random() * Math.PI * 2;
+        p.dist = 100 + Math.random() * Math.min(W, H) * 0.45;
+        p.size = 1 + Math.random() * 2.5;
+        p.alpha = 0.3 + Math.random() * 0.6;
+      }
+
+      p.x = bx + Math.cos(p.angle) * p.dist;
+      p.y = by + Math.sin(p.angle) * p.dist * 0.75;
+
+      const proximityT = Math.max(0, 1 - p.dist / 200);
+      const stretchX = 1 + proximityT * 3;
+
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.angle);
+      ctx.beginPath();
+      ctx.ellipse(0, 0, p.size * stretchX, p.size * 0.7, 0, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${p.hue},70%,75%,${p.alpha * (1 - proximityT * 0.5)})`;
+      ctx.shadowColor = `hsla(${p.hue},80%,70%,0.4)`;
+      ctx.shadowBlur = 4;
+      ctx.fill();
+      ctx.restore();
+    });
+    ctx.shadowBlur = 0;
+
+    // Event horizon — deep black circle
+    const eventGrd = ctx.createRadialGradient(bx, by, 0, bx, by, bRadius);
+    eventGrd.addColorStop(0,   'rgba(0,0,0,1)');
+    eventGrd.addColorStop(0.7, 'rgba(0,0,0,1)');
+    eventGrd.addColorStop(0.88,'rgba(20,5,40,0.9)');
+    eventGrd.addColorStop(1,   'rgba(0,0,0,0)');
+    ctx.beginPath();
+    ctx.arc(bx, by, bRadius * 1.1, 0, Math.PI * 2);
+    ctx.fillStyle = eventGrd;
+    ctx.fill();
+
+    // Photon ring glow
+    ctx.beginPath();
+    ctx.arc(bx, by, bRadius, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(200,150,255,${0.12 + Math.sin(t * 2) * 0.06})`;
+    ctx.lineWidth = 3;
+    ctx.shadowColor = 'rgba(180,100,255,0.7)';
+    ctx.shadowBlur = 20;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Gravitational lensing shimmer lines
+    for (let l = 0; l < 4; l++) {
+      const lAngle = t * 0.5 + (l / 4) * Math.PI * 2;
+      const lLen = bRadius * 1.8;
+      ctx.beginPath();
+      ctx.moveTo(bx + Math.cos(lAngle) * bRadius * 1.05, by + Math.sin(lAngle) * bRadius * 1.05);
+      ctx.lineTo(bx + Math.cos(lAngle) * (bRadius + lLen), by + Math.sin(lAngle) * (bRadius + lLen));
+      ctx.strokeStyle = `rgba(255,200,255,${0.04 + Math.sin(t*3+l)*0.02})`;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+
+    animId = requestAnimationFrame(draw);
+  }
+  draw();
+
+  demoCleanup = () => {
+    cancelAnimationFrame(animId);
+    overlay.classList.remove('blackhole-overlay');
+  };
+}
+
+
+function demoSunset(content, overlay) {
+  overlay.classList.add('sunset-overlay');
+
+  // Stars layer
+  const starsDiv = document.createElement('div');
+  starsDiv.className = 'sunset-stars';
+  for (let i = 0; i < 90; i++) {
+    const s = document.createElement('div');
+    s.className = 'sunset-star';
+    s.style.left = (Math.random() * 100) + '%';
+    s.style.top = (Math.random() * 60) + '%';
+    const dur = 2 + Math.random() * 4;
+    const delay = Math.random() * 6;
+    s.style.animationDuration = dur + 's';
+    s.style.animationDelay = delay + 's';
+    s.style.width = s.style.height = (1 + Math.random() * 2) + 'px';
+    starsDiv.appendChild(s);
+  }
+  content.appendChild(starsDiv);
+
+  // Horizon silhouette via SVG
+  const horizonDiv = document.createElement('div');
+  horizonDiv.className = 'sunset-horizon';
+  horizonDiv.innerHTML = `<svg viewBox="0 0 1440 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="width:100%;height:100%;">
+    <path d="M0,120 L0,85 Q40,70 80,78 Q120,86 160,72 Q200,58 240,70 Q280,82 320,65 Q360,48 400,62 L400,70 Q430,50 460,68 Q490,86 520,72 Q555,55 600,75 Q640,90 680,76 Q720,62 760,55 Q800,48 840,65 Q880,82 920,70 Q960,58 1000,72 Q1040,86 1080,74 Q1120,62 1160,78 Q1200,90 1240,80 Q1280,70 1320,82 Q1360,94 1400,84 L1440,80 L1440,120 Z" fill="rgba(0,0,0,0.45)"/>
+    <!-- trees -->
+    <rect x="60" y="52" width="10" height="34" fill="rgba(0,0,0,0.5)"/>
+    <polygon points="65,22 48,60 82,60" fill="rgba(0,0,0,0.5)"/>
+    <polygon points="65,10 52,42 78,42" fill="rgba(0,0,0,0.5)"/>
+    <rect x="200" y="42" width="8" height="44" fill="rgba(0,0,0,0.5)"/>
+    <polygon points="204,12 190,50 218,50" fill="rgba(0,0,0,0.5)"/>
+    <polygon points="204,0 194,28 214,28" fill="rgba(0,0,0,0.5)"/>
+    <rect x="1340" y="48" width="9" height="38" fill="rgba(0,0,0,0.5)"/>
+    <polygon points="1345,18 1330,56 1360,56" fill="rgba(0,0,0,0.5)"/>
+    <polygon points="1345,6 1334,32 1356,32" fill="rgba(0,0,0,0.5)"/>
+    <!-- buildings -->
+    <rect x="900" y="40" width="40" height="66" fill="rgba(0,0,0,0.45)"/>
+    <rect x="912" y="48" width="6" height="8" fill="rgba(255,200,100,0.3)"/>
+    <rect x="922" y="48" width="6" height="8" fill="rgba(255,200,100,0.2)"/>
+    <rect x="912" y="62" width="6" height="8" fill="rgba(255,200,100,0.3)"/>
+    <rect x="950" y="58" width="28" height="48" fill="rgba(0,0,0,0.4)"/>
+    <rect x="958" y="66" width="5" height="6" fill="rgba(255,200,100,0.2)"/>
+    <rect x="967" y="66" width="5" height="6" fill="rgba(255,200,100,0.3)"/>
+  </svg>`;
+  content.appendChild(horizonDiv);
+
+  // Message
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'sunset-message';
+  msgDiv.innerHTML = `
+    <div class="sunset-msg-title">The day is ending.</div>
+    <div class="sunset-msg-sub">Manager 1:1 in 5 minutes — time to let go.</div>
+  `;
+  content.appendChild(msgDiv);
+
+  demoCleanup = () => { overlay.classList.remove('sunset-overlay'); };
+}
+
+function demoFog(content, overlay) {
+  overlay.classList.add('fog-overlay');
+
+  // Create staggered fog layers rising from bottom
+  const layerCount = 8;
+  for (let i = 0; i < layerCount; i++) {
+    const layer = document.createElement('div');
+    layer.className = 'fog-layer';
+    const heightPct = 55 + (i / layerCount) * 60;
+    layer.style.height = heightPct + 'vh';
+    layer.style.bottom = (-heightPct * 0.6) + 'vh';
+    const dur = 8 + i * 1.5;
+    const delay = i * 0.7;
+    layer.style.animationDuration = dur + 's';
+    layer.style.animationDelay = delay + 's';
+    layer.style.opacity = String(0.55 + i * 0.04);
+    // Slight horizontal drift per layer
+    const hue = 0;
+    layer.style.background = `radial-gradient(ellipse at ${40 + i*5}% bottom, rgba(255,255,255,${0.75 + i*0.02}) 0%, rgba(255,255,255,0.35) 50%, transparent 72%)`;
+    content.appendChild(layer);
+  }
+
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'fog-message';
+  msgDiv.innerHTML = `
+    <div class="fog-msg-inner">
+      A gentle mist rolls in.<br>Time drifts forward.
+      <div class="fog-msg-sub">Manager 1:1 in 5 minutes — the fog knows.</div>
+    </div>
+  `;
+  content.appendChild(msgDiv);
+
+  demoCleanup = () => { overlay.classList.remove('fog-overlay'); };
+}
+
+function demoAurora(content, overlay) {
+  overlay.classList.add('aurora-overlay');
+
+  const canvas = document.createElement('canvas');
+  canvas.className = 'aurora-canvas';
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  content.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+
+  // Stars
+  const stars = Array.from({ length: 200 }, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    r: 0.5 + Math.random() * 1.5,
+    twinkle: Math.random() * Math.PI * 2
+  }));
+
+  // Aurora bands — each with a base y position (in upper portion), wave params, and color
+  const bands = [
+    { baseY: 0.08, amp: 0.04, freq: 0.0008, speed: 0.00035, phase: 0,      colorStops: ['rgba(0,230,180,0)', 'rgba(0,230,180,0.55)', 'rgba(0,200,160,0.7)', 'rgba(0,230,180,0.55)', 'rgba(0,230,180,0)'], width: 0.12 },
+    { baseY: 0.14, amp: 0.05, freq: 0.0006, speed: 0.00028, phase: 1.2,    colorStops: ['rgba(80,255,200,0)', 'rgba(80,255,200,0.45)', 'rgba(60,220,180,0.65)', 'rgba(80,255,200,0.45)', 'rgba(80,255,200,0)'], width: 0.10 },
+    { baseY: 0.20, amp: 0.06, freq: 0.0009, speed: 0.00042, phase: 2.5,    colorStops: ['rgba(60,200,255,0)', 'rgba(60,200,255,0.35)', 'rgba(40,180,240,0.55)', 'rgba(60,200,255,0.35)', 'rgba(60,200,255,0)'], width: 0.09 },
+    { baseY: 0.06, amp: 0.035, freq: 0.0007, speed: 0.00022, phase: 0.8,   colorStops: ['rgba(140,80,255,0)', 'rgba(140,80,255,0.3)', 'rgba(120,60,240,0.5)', 'rgba(140,80,255,0.3)', 'rgba(140,80,255,0)'], width: 0.08 },
+    { baseY: 0.17, amp: 0.04, freq: 0.0011, speed: 0.00050, phase: 3.7,    colorStops: ['rgba(0,255,140,0)', 'rgba(0,255,140,0.25)', 'rgba(0,240,120,0.45)', 'rgba(0,255,140,0.25)', 'rgba(0,255,140,0)'], width: 0.07 },
+  ];
+
+  let t = 0;
+  let animId;
+
+  function drawAurora() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw stars (vary brightness with time)
+    stars.forEach(s => {
+      s.twinkle += 0.015;
+      const alpha = 0.3 + 0.5 * (0.5 + 0.5 * Math.sin(s.twinkle));
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+      ctx.fill();
+    });
+
+    // Draw aurora bands — render as a ribbon following a sine wave
+    bands.forEach(band => {
+      const W = canvas.width;
+      const H = canvas.height;
+      const halfW = band.width * H / 2;
+      const steps = 120;
+
+      ctx.save();
+      const path = new Path2D();
+      // top edge of band
+      path.moveTo(0, (band.baseY + Math.sin(band.phase + t * band.speed * 1000) * band.amp) * H - halfW);
+      for (let i = 1; i <= steps; i++) {
+        const x = (i / steps) * W;
+        const y = (band.baseY + Math.sin(band.phase + x * band.freq + t * band.speed * 1000) * band.amp) * H - halfW;
+        path.lineTo(x, y);
+      }
+      // bottom edge (reverse)
+      for (let i = steps; i >= 0; i--) {
+        const x = (i / steps) * W;
+        const y = (band.baseY + Math.sin(band.phase + x * band.freq + t * band.speed * 1000) * band.amp) * H + halfW;
+        path.lineTo(x, y);
+      }
+      path.closePath();
+
+      // Gradient along Y axis (top-to-bottom of band center)
+      const centerY = band.baseY * H;
+      const grad = ctx.createLinearGradient(0, centerY - halfW, 0, centerY + halfW);
+      band.colorStops.forEach((stop, i) => grad.addColorStop(i / (band.colorStops.length - 1), stop));
+      ctx.fillStyle = grad;
+      ctx.fill(path);
+      ctx.restore();
+    });
+
+    t++;
+    animId = requestAnimationFrame(drawAurora);
+  }
+
+  drawAurora();
+
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'aurora-message';
+  msgDiv.innerHTML = `
+    <div class="aurora-msg-title">Look up. Time moves like this.</div>
+    <div class="aurora-msg-sub">Manager 1:1 in 5 minutes</div>
+  `;
+  content.appendChild(msgDiv);
+
+  demoCleanup = () => {
+    cancelAnimationFrame(animId);
+    overlay.classList.remove('aurora-overlay');
+  };
+}
+
+function demoTide(content, overlay) {
+  overlay.classList.add('tide-overlay');
+
+  const canvas = document.createElement('canvas');
+  canvas.className = 'tide-canvas';
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  content.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+
+  const W = canvas.width;
+  const H = canvas.height;
+
+  // Tide parameters
+  const TOTAL_DURATION = 8000; // ms for tide to rise to 40% height
+  const TARGET_FILL = 0.40;   // 40% of screen height
+  let startTime = null;
+  let currentFill = 0;  // fraction of screen filled (0 = none, 1 = full)
+
+  // Wave params
+  const waves = [
+    { amp: 12, freq: 0.012, speed: 0.04, phase: 0, alpha: 0.9 },
+    { amp: 8,  freq: 0.018, speed: 0.06, phase: 1.5, alpha: 0.6 },
+    { amp: 5,  freq: 0.025, speed: 0.03, phase: 3.0, alpha: 0.4 },
+  ];
+
+  let waveT = 0;
+  let buoyX = W * 0.72;
+  let animId;
+
+  // Buoy element
+  const buoy = document.createElement('div');
+  buoy.className = 'tide-buoy';
+  buoy.textContent = '🛟';
+  content.appendChild(buoy);
+
+  function getWaterSurfaceY(x, fillFraction) {
+    const baseY = H * (1 - fillFraction);
+    let offset = 0;
+    waves.forEach(w => {
+      offset += Math.sin(x * w.freq + waveT * w.speed + w.phase) * w.amp * w.alpha;
+    });
+    return baseY + offset;
+  }
+
+  function draw(timestamp) {
+    if (!startTime) startTime = timestamp;
+    const elapsed = timestamp - startTime;
+    currentFill = Math.min(TARGET_FILL, (elapsed / TOTAL_DURATION) * TARGET_FILL);
+
+    ctx.clearRect(0, 0, W, H);
+
+    // Draw layered water
+    waves.forEach((w, wi) => {
+      ctx.beginPath();
+      const baseY = H * (1 - currentFill);
+      ctx.moveTo(0, baseY);
+      for (let x = 0; x <= W; x += 4) {
+        let y = baseY;
+        waves.slice(0, wi + 1).forEach(ww => {
+          y += Math.sin(x * ww.freq + waveT * ww.speed + ww.phase) * ww.amp * ww.alpha;
+        });
+        ctx.lineTo(x, y);
+      }
+      ctx.lineTo(W, H);
+      ctx.lineTo(0, H);
+      ctx.closePath();
+
+      const alpha = 0.12 + wi * 0.08;
+      const grad = ctx.createLinearGradient(0, H * (1 - currentFill) - 20, 0, H);
+      grad.addColorStop(0, `rgba(30,140,220,${alpha + 0.15})`);
+      grad.addColorStop(0.3, `rgba(20,110,190,${alpha + 0.25})`);
+      grad.addColorStop(1, `rgba(10,80,160,${alpha + 0.4})`);
+      ctx.fillStyle = grad;
+      ctx.fill();
+    });
+
+    // Main water body — top wave crest
+    ctx.beginPath();
+    const baseY = H * (1 - currentFill);
+    ctx.moveTo(0, baseY);
+    for (let x = 0; x <= W; x += 3) {
+      let y = baseY;
+      waves.forEach(w => {
+        y += Math.sin(x * w.freq + waveT * w.speed + w.phase) * w.amp;
+      });
+      ctx.lineTo(x, y);
+    }
+    ctx.lineTo(W, H);
+    ctx.lineTo(0, H);
+    ctx.closePath();
+    const mainGrad = ctx.createLinearGradient(0, baseY, 0, H);
+    mainGrad.addColorStop(0, 'rgba(50,160,230,0.85)');
+    mainGrad.addColorStop(0.4, 'rgba(30,120,200,0.9)');
+    mainGrad.addColorStop(1, 'rgba(10,70,150,0.95)');
+    ctx.fillStyle = mainGrad;
+    ctx.fill();
+
+    // Foam/crest highlight
+    ctx.beginPath();
+    ctx.moveTo(0, baseY);
+    for (let x = 0; x <= W; x += 3) {
+      let y = baseY;
+      waves.forEach(w => {
+        y += Math.sin(x * w.freq + waveT * w.speed + w.phase) * w.amp;
+      });
+      ctx.lineTo(x, y - 3);
+    }
+    ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    // Position buoy at waterline
+    const buoyY = getWaterSurfaceY(buoyX, currentFill);
+    const buoyScreenY = buoyY - 40;
+    buoy.style.left = buoyX + 'px';
+    buoy.style.bottom = (H - buoyScreenY - 36) + 'px';
+
+    waveT += 1;
+    animId = requestAnimationFrame(draw);
+  }
+
+  animId = requestAnimationFrame(draw);
+
+  // Message card at top
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'tide-message';
+  msgDiv.innerHTML = `
+    <div class="tide-msg-card">
+      <div class="tide-msg-title">The tide doesn't wait.</div>
+      <div class="tide-msg-sub">Manager 1:1 rising in 5 minutes</div>
+    </div>
+  `;
+  content.appendChild(msgDiv);
+
+  demoCleanup = () => {
+    cancelAnimationFrame(animId);
+    overlay.classList.remove('tide-overlay');
+  };
+}
+
+function demoDayNight(content, overlay) {
+  overlay.classList.add('daynight-overlay');
+
+  const sky = document.createElement('div');
+  sky.className = 'daynight-sky';
+  content.appendChild(sky);
+
+  // Stars
+  const starsLayer = document.createElement('div');
+  starsLayer.className = 'daynight-stars-layer';
+  starsLayer.id = 'dn-stars-layer';
+  starsLayer.style.opacity = '0';
+  starsLayer.style.transition = 'opacity 2s ease';
+  for (let i = 0; i < 80; i++) {
+    const s = document.createElement('div');
+    s.className = 'daynight-star';
+    s.style.left = (Math.random() * 100) + '%';
+    s.style.top = (Math.random() * 70) + '%';
+    s.style.width = s.style.height = (1 + Math.random() * 2) + 'px';
+    s.style.animationDuration = (1.5 + Math.random() * 3) + 's';
+    s.style.animationDelay = (Math.random() * 4) + 's';
+    starsLayer.appendChild(s);
+  }
+  sky.appendChild(starsLayer);
+
+  // Sun element
+  const sun = document.createElement('div');
+  sun.className = 'daynight-sun';
+  sun.textContent = '☀️';
+  sky.appendChild(sun);
+
+  // Moon element
+  const moon = document.createElement('div');
+  moon.className = 'daynight-moon';
+  moon.textContent = '🌙';
+  moon.style.opacity = '0';
+  sky.appendChild(moon);
+
+  // Ground silhouette
+  const ground = document.createElement('div');
+  ground.className = 'daynight-ground';
+  ground.innerHTML = `<svg viewBox="0 0 1440 80" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="width:100%;height:100%;">
+    <path d="M0,80 L0,50 Q80,35 160,48 Q240,60 320,42 Q400,24 480,40 Q560,56 640,44 Q720,32 800,50 Q880,68 960,52 Q1040,36 1120,48 Q1200,60 1280,46 Q1360,32 1440,50 L1440,80 Z" fill="rgba(0,0,0,0.35)"/>
+  </svg>`;
+  content.appendChild(ground);
+
+  // Phase label
+  const phaseLabel = document.createElement('div');
+  phaseLabel.className = 'daynight-phase-label';
+  phaseLabel.textContent = 'morning';
+  content.appendChild(phaseLabel);
+
+  // Center message
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'daynight-message';
+  msgDiv.innerHTML = `
+    <div class="daynight-msg-card">
+      <div class="daynight-msg-title">A new task dawns.</div>
+      <div class="daynight-msg-sub">Your day on this task is ending — Manager 1:1 in 5 minutes.</div>
+    </div>
+  `;
+  content.appendChild(msgDiv);
+
+  // Animate sun/moon across the sky
+  const H = window.innerHeight;
+  const W = window.innerWidth;
+  const cycleDuration = 14000; // ms — matches CSS animation
+  let startTime = performance.now();
+  let animId;
+
+  const phases = [
+    { t: 0,    label: 'morning',  stars: 0 },
+    { t: 0.2,  label: 'midday',   stars: 0 },
+    { t: 0.35, label: 'sunset',   stars: 0.3 },
+    { t: 0.5,  label: 'midnight', stars: 1 },
+    { t: 0.65, label: 'deep night', stars: 1 },
+    { t: 0.8,  label: 'dawn',     stars: 0.2 },
+    { t: 1.0,  label: 'morning',  stars: 0 },
+  ];
+
+  function getPhase(frac) {
+    for (let i = phases.length - 2; i >= 0; i--) {
+      if (frac >= phases[i].t) return phases[i];
+    }
+    return phases[0];
+  }
+
+  function tick(now) {
+    const elapsed = (now - startTime) % cycleDuration;
+    const frac = elapsed / cycleDuration;
+
+    // Sun arc: rises from left bottom → peaks at center top → sets right bottom
+    const sunAngle = Math.PI * frac; // 0 = left horizon, PI = right horizon
+    const sunX = W * frac;
+    const sunY = H * 0.65 - Math.sin(sunAngle) * H * 0.52;
+    const sunOpacity = Math.max(0, Math.min(1, Math.sin(sunAngle) * 3));
+    sun.style.left = (sunX - 26) + 'px';
+    sun.style.top = sunY + 'px';
+    sun.style.opacity = String(sunOpacity);
+
+    // Moon arc: offset by half cycle
+    const moonFrac = (frac + 0.5) % 1;
+    const moonAngle = Math.PI * moonFrac;
+    const moonX = W * moonFrac;
+    const moonY = H * 0.65 - Math.sin(moonAngle) * H * 0.52;
+    const moonOpacity = Math.max(0, Math.min(1, Math.sin(moonAngle) * 3));
+    moon.style.left = (moonX - 22) + 'px';
+    moon.style.top = moonY + 'px';
+    moon.style.opacity = String(moonOpacity);
+
+    // Stars
+    const p = getPhase(frac);
+    starsLayer.style.opacity = String(p.stars);
+    phaseLabel.textContent = p.label;
+
+    animId = requestAnimationFrame(tick);
+  }
+
+  animId = requestAnimationFrame(tick);
+
+  demoCleanup = () => {
+    cancelAnimationFrame(animId);
+    overlay.classList.remove('daynight-overlay');
+  };
+}
+
+function demoSeasonal(content, overlay) {
+  overlay.classList.add('seasonal-overlay');
+  overlay.style.background = 'rgba(210,180,120,0.18)'; // autumn tint
+
+  const particleLayer = document.createElement('div');
+  particleLayer.className = 'seasonal-particles-layer';
+  content.appendChild(particleLayer);
+
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'seasonal-message';
+  msgDiv.innerHTML = `
+    <div class="seasonal-msg-card" id="seasonal-card">
+      <div class="seasonal-season-badge" id="seasonal-badge">Autumn</div>
+      <div class="seasonal-msg-title" id="seasonal-title">Time is turning.</div>
+      <div class="seasonal-msg-sub" id="seasonal-sub">Like the seasons, this task must pass.</div>
+    </div>
+  `;
+  content.appendChild(msgDiv);
+
+  const LEAVES = ['🍂', '🍁', '🍃', '🍂', '🍁'];
+  const SNOWFLAKES = ['❄', '❅', '❆', '✦', '·'];
+
+  let phase = 0; // 0 = autumn, 1 = winter
+  let particleTimers = [];
+
+  function spawnLeaf() {
+    const el = document.createElement('div');
+    el.className = 'seasonal-leaf';
+    el.textContent = LEAVES[Math.floor(Math.random() * LEAVES.length)];
+    el.style.left = (Math.random() * 100) + '%';
+    el.style.top = '-30px';
+    el.style.fontSize = (14 + Math.random() * 12) + 'px';
+    const dur = 4 + Math.random() * 4;
+    el.style.animationDuration = dur + 's';
+    el.style.animationDelay = '0s';
+    particleLayer.appendChild(el);
+    const t = setTimeout(() => el.remove(), (dur + 0.2) * 1000);
+    particleTimers.push(t);
+  }
+
+  function spawnSnow() {
+    const el = document.createElement('div');
+    el.className = 'seasonal-snowflake';
+    el.textContent = SNOWFLAKES[Math.floor(Math.random() * SNOWFLAKES.length)];
+    el.style.left = (Math.random() * 100) + '%';
+    el.style.top = '-20px';
+    const sz = 10 + Math.random() * 16;
+    el.style.fontSize = sz + 'px';
+    const dur = 5 + Math.random() * 5;
+    el.style.animationDuration = dur + 's';
+    el.style.animationDelay = '0s';
+    particleLayer.appendChild(el);
+    const t = setTimeout(() => el.remove(), (dur + 0.2) * 1000);
+    particleTimers.push(t);
+  }
+
+  // Phase 1: autumn leaves for 5 seconds
+  const leafInterval = setInterval(spawnLeaf, 250);
+
+  const phaseSwitch = setTimeout(() => {
+    // Switch to winter
+    clearInterval(leafInterval);
+    phase = 1;
+    overlay.style.background = 'rgba(200,220,240,0.22)';
+    const card = document.getElementById('seasonal-card');
+    const badge = document.getElementById('seasonal-badge');
+    const title = document.getElementById('seasonal-title');
+    const sub = document.getElementById('seasonal-sub');
+    if (badge) badge.textContent = 'Winter';
+    if (badge) badge.style.background = 'rgba(100,160,220,0.15)';
+    if (badge) badge.style.color = '#5580AA';
+    if (title) title.textContent = 'Time drifts quietly.';
+    if (sub) sub.textContent = 'Your next task awaits — Manager 1:1 in 5 minutes.';
+
+    const snowInterval = setInterval(spawnSnow, 180);
+    particleTimers.push(snowInterval);
+    demoCleanup = () => {
+      clearInterval(snowInterval);
+      particleTimers.forEach(t => clearTimeout(t));
+      overlay.classList.remove('seasonal-overlay');
+      overlay.style.background = '';
+    };
+  }, 6000);
+
+  demoCleanup = () => {
+    clearInterval(leafInterval);
+    clearTimeout(phaseSwitch);
+    particleTimers.forEach(t => { clearTimeout(t); clearInterval(t); });
+    overlay.classList.remove('seasonal-overlay');
+    overlay.style.background = '';
+  };
+}
+
+
+    function demoWindChimes(content, overlay) {
+      overlay.classList.add('chimes-overlay');
+      overlay.style.pointerEvents = 'none';
+      document.querySelector('.demo-dismiss').style.pointerEvents = 'all';
+
+      const label = document.createElement('div');
+      label.className = 'chimes-label';
+      label.textContent = 'Your next meeting calls…';
+      content.appendChild(label);
+
+      const sub = document.createElement('div');
+      sub.className = 'chimes-sub';
+      sub.textContent = 'Manager 1:1 in 5 minutes';
+      content.appendChild(sub);
+
+      const W = window.innerWidth;
+      const H = window.innerHeight;
+
+      // 6 chimes hung from a horizontal rod near top center
+      const rodY = H * 0.22;
+      const rodX = W * 0.5;
+      const chimeWidths  = [14, 11, 9, 12, 10, 13];
+      const chimeLengths = [200, 160, 220, 180, 240, 170];
+      const spacing = 56;
+      const totalW = spacing * 5;
+      const chimeEls = [];
+
+      chimeWidths.forEach((w, i) => {
+        const x = rodX - totalW / 2 + i * spacing;
+        const len = chimeLengths[i];
+
+        // String
+        const str = document.createElement('div');
+        str.className = 'chimes-string';
+        str.style.cssText = `left:${x}px; top:${rodY}px; height:${len * 0.18}px; position:fixed; z-index:1052;`;
+        content.appendChild(str);
+
+        // Bar
+        const bar = document.createElement('div');
+        bar.className = 'chimes-bar';
+        bar.style.cssText = `
+          position:fixed;
+          left:${x - w/2}px;
+          top:${rodY + len * 0.18}px;
+          width:${w}px;
+          height:${len}px;
+          transform-origin: top center;
+          z-index:1052;
+        `;
+        content.appendChild(bar);
+        chimeEls.push({ bar, x, y: rodY + len * 0.18 + len / 2, len, active: false });
+      });
+
+      // Horizontal rod
+      const rod = document.createElement('div');
+      rod.style.cssText = `
+        position:fixed;
+        left:${rodX - totalW/2 - 28}px;
+        top:${rodY - 5}px;
+        width:${totalW + 56}px;
+        height:10px;
+        border-radius:5px;
+        background:linear-gradient(180deg,#c8d8e8 0%,#8aaac4 60%,#c0d4e4 100%);
+        box-shadow:0 3px 10px rgba(0,0,0,0.4);
+        z-index:1053;
+      `;
+      content.appendChild(rod);
+
+      function triggerChime(idx) {
+        const c = chimeEls[idx];
+        c.bar.style.animation = 'none';
+        void c.bar.offsetWidth;
+        c.bar.style.animation = `chimeSway ${0.7 + Math.random()*0.4}s ease-in-out`;
+
+        // Ripple at mid-point of bar
+        const rX = c.x;
+        const rY = c.y;
+        const rSize = 60 + Math.random() * 40;
+        const ripple = document.createElement('div');
+        ripple.className = 'chimes-ripple';
+        ripple.style.cssText = `
+          position:fixed;
+          left:${rX}px; top:${rY}px;
+          width:${rSize}px; height:${rSize}px;
+          z-index:1055;
+        `;
+        content.appendChild(ripple);
+        setTimeout(() => ripple.remove(), 1500);
+      }
+
+      // Periodic random strikes, accelerating
+      let baseInterval = 1400;
+      let elapsed = 0;
+      const timers = [];
+
+      function scheduleNext() {
+        const jitter = (Math.random() - 0.5) * baseInterval * 0.4;
+        const delay = Math.max(300, baseInterval + jitter);
+        const t = setTimeout(() => {
+          const idx = Math.floor(Math.random() * chimeEls.length);
+          triggerChime(idx);
+          // occasionally strike adjacent
+          if (Math.random() > 0.6) {
+            const idx2 = (idx + 1) % chimeEls.length;
+            setTimeout(() => triggerChime(idx2), 140);
+          }
+          elapsed += delay;
+          if (elapsed > 14000) baseInterval = 400;
+          else if (elapsed > 7000) baseInterval = 800;
+          scheduleNext();
+        }, delay);
+        timers.push(t);
+      }
+
+      // Initial cascade
+      chimeEls.forEach((_, i) => {
+        const t = setTimeout(() => triggerChime(i), i * 200);
+        timers.push(t);
+      });
+      setTimeout(scheduleNext, 1400);
+
+      demoCleanup = () => {
+        timers.forEach(clearTimeout);
+        overlay.classList.remove('chimes-overlay');
+        overlay.style.pointerEvents = '';
+      };
+    }
+
+    function demoEKG(content, overlay) {
+      overlay.classList.add('ekg-overlay');
+
+      // Canvas for waveform
+      const canvas = document.createElement('canvas');
+      canvas.style.cssText = 'position:fixed;inset:0;z-index:1051;pointer-events:none;';
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      content.appendChild(canvas);
+      const ctx = canvas.getContext('2d');
+
+      // BPM display
+      const bpmWrap = document.createElement('div');
+      bpmWrap.className = 'ekg-bpm';
+      const bpmNum = document.createElement('div');
+      bpmNum.className = 'ekg-bpm-num';
+      bpmNum.textContent = '65';
+      const bpmLbl = document.createElement('div');
+      bpmLbl.className = 'ekg-bpm-label';
+      bpmLbl.textContent = 'BPM';
+      bpmWrap.appendChild(bpmNum);
+      bpmWrap.appendChild(bpmLbl);
+      content.appendChild(bpmWrap);
+
+      const msg = document.createElement('div');
+      msg.className = 'ekg-message';
+      msg.textContent = 'Your pulse says: time to move.';
+      content.appendChild(msg);
+
+      const W = canvas.width, H = canvas.height;
+      const midY = H * 0.62;
+      const lineY = midY;
+      const speed = 3.2;
+      let x = 0;
+      let bpm = 65;
+      let startTime = performance.now();
+
+      // PQRST waveform generator (one beat cycle in pixels)
+      function pqrst(t) {
+        // t in [0,1] = one beat
+        if (t < 0.12)  return 4 * Math.sin(t / 0.12 * Math.PI);          // P wave
+        if (t < 0.22)  return 0;
+        if (t < 0.28)  return -8 * Math.sin((t - 0.22) / 0.06 * Math.PI);// Q dip
+        if (t < 0.38)  return 80 * Math.sin((t - 0.28) / 0.10 * Math.PI);// R spike
+        if (t < 0.45)  return -20 * Math.sin((t - 0.38) / 0.07 * Math.PI);// S dip
+        if (t < 0.62)  return 12 * Math.sin((t - 0.45) / 0.17 * Math.PI);// T wave
+        return 0;
+      }
+
+      // Store the waveform history
+      const history = new Float32Array(W);
+      let writePos = 0;
+      let pixPerBeat = (60 / bpm) * (speed * 60); // rough pixels per beat
+
+      let lastFrameTime = performance.now();
+      let beatPhase = 0;
+      let animId;
+
+      // Color lerp green -> urgent
+      function getColor(t) {
+        // t 0..1
+        const r = Math.round(0 + t * 196);
+        const g = Math.round(232 - t * 110);
+        const b = Math.round(122 - t * 91);
+        return `rgb(${r},${g},${b})`;
+      }
+
+      function animate(now) {
+        const dt = (now - lastFrameTime) / 1000;
+        lastFrameTime = now;
+
+        // Update BPM (65 -> 85 over 6s)
+        const elapsed = (now - startTime) / 1000;
+        const progress = Math.min(1, elapsed / 6);
+        bpm = 65 + progress * 20;
+        bpmNum.textContent = Math.round(bpm);
+        pixPerBeat = (60 / bpm) * speed * 60;
+
+        const color = getColor(progress);
+        bpmNum.style.color = color;
+        bpmNum.style.textShadow = `0 0 30px ${color}80`;
+        msg.style.color = color;
+
+        // Advance beat phase
+        const pxPerFrame = speed;
+        beatPhase += pxPerFrame / pixPerBeat;
+        if (beatPhase >= 1) beatPhase -= 1;
+
+        // Write new samples
+        const newPxCount = Math.round(pxPerFrame);
+        for (let i = 0; i < newPxCount; i++) {
+          const phase = ((beatPhase * pixPerBeat + i) % pixPerBeat) / pixPerBeat;
+          history[writePos % W] = pqrst(phase);
+          writePos++;
+        }
+
+        // Draw
+        ctx.clearRect(0, 0, W, H);
+
+        // Grid lines
+        ctx.strokeStyle = 'rgba(0,80,30,0.25)';
+        ctx.lineWidth = 1;
+        for (let gx = 0; gx < W; gx += 60) {
+          ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, H); ctx.stroke();
+        }
+        for (let gy = lineY - 200; gy < lineY + 200; gy += 40) {
+          ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(W, gy); ctx.stroke();
+        }
+
+        // Waveform
+        ctx.beginPath();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2.5;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 12;
+
+        let drawStart = writePos - W;
+        for (let i = 0; i < W; i++) {
+          const idx = ((drawStart + i) % W + W) % W;
+          const py = lineY - history[idx];
+          if (i === 0) ctx.moveTo(i, py);
+          else ctx.lineTo(i, py);
+        }
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // Scan line glow at write head
+        const headX = (writePos) % W;
+        const grad = ctx.createLinearGradient(headX - 40, 0, headX + 10, 0);
+        grad.addColorStop(0, 'transparent');
+        grad.addColorStop(1, `${color}40`);
+        ctx.fillStyle = grad;
+        ctx.fillRect(headX - 40, 0, 50, H);
+
+        animId = requestAnimationFrame(animate);
+      }
+
+      animate(performance.now());
+
+      demoCleanup = () => {
+        cancelAnimationFrame(animId);
+        overlay.classList.remove('ekg-overlay');
+      };
+    }
+
+    function demoWhisper(content, overlay) {
+      overlay.classList.add('whisper-overlay');
+
+      // Particle canvas background
+      const pCanvas = document.createElement('canvas');
+      pCanvas.style.cssText = 'position:fixed;inset:0;z-index:1049;pointer-events:none;';
+      pCanvas.width = window.innerWidth;
+      pCanvas.height = window.innerHeight;
+      content.appendChild(pCanvas);
+      const pCtx = pCanvas.getContext('2d');
+
+      // Floating particles
+      const particles = Array.from({length: 40}, () => ({
+        x: Math.random() * pCanvas.width,
+        y: Math.random() * pCanvas.height,
+        r: 1 + Math.random() * 2,
+        vy: -0.2 - Math.random() * 0.4,
+        vx: (Math.random() - 0.5) * 0.3,
+        opacity: 0.1 + Math.random() * 0.25,
+      }));
+
+      let animId;
+      function animPart() {
+        pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+        particles.forEach(p => {
+          p.x += p.vx; p.y += p.vy;
+          if (p.y < -10) p.y = pCanvas.height + 10;
+          pCtx.beginPath();
+          pCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          pCtx.fillStyle = `rgba(160,140,200,${p.opacity})`;
+          pCtx.fill();
+        });
+        animId = requestAnimationFrame(animPart);
+      }
+      animPart();
+
+      // Three phrases
+      const left = document.createElement('div');
+      left.className = 'whisper-phrase left';
+      left.innerHTML = '<em>hey…</em>';
+      content.appendChild(left);
+
+      const right = document.createElement('div');
+      right.className = 'whisper-phrase right';
+      right.innerHTML = '<em>your meeting…</em>';
+      content.appendChild(right);
+
+      const center = document.createElement('div');
+      center.className = 'whisper-phrase center';
+      center.innerHTML = 'starts in <strong style="color:rgba(212,168,71,0.95);font-style:normal;">5 minutes</strong>';
+      content.appendChild(center);
+
+      // Phase 1: left appears blurred (0.5s)
+      const t1 = setTimeout(() => {
+        left.classList.add('visible');
+      }, 400);
+
+      // Phase 2: right appears blurred (1.8s)
+      const t2 = setTimeout(() => {
+        right.classList.add('visible');
+      }, 1800);
+
+      // Phase 3: center appears sharp + left/right fade out (3.2s)
+      const t3 = setTimeout(() => {
+        left.style.opacity = '0';
+        right.style.opacity = '0';
+        center.classList.add('sharp');
+      }, 3200);
+
+      // Re-loop after 5.5s
+      const t4 = setTimeout(() => {
+        left.classList.remove('visible');
+        right.classList.remove('visible');
+        center.classList.remove('sharp');
+        center.style.opacity = '0';
+        setTimeout(() => {
+          left.style.opacity = '';
+          right.style.opacity = '';
+          center.style.opacity = '';
+          const t5 = setTimeout(() => left.classList.add('visible'), 400);
+          const t6 = setTimeout(() => right.classList.add('visible'), 1800);
+          const t7 = setTimeout(() => {
+            left.style.opacity = '0';
+            right.style.opacity = '0';
+            center.classList.add('sharp');
+          }, 3200);
+          allTimers.push(t5, t6, t7);
+        }, 600);
+      }, 5500);
+
+      const allTimers = [t1, t2, t3, t4];
+
+      demoCleanup = () => {
+        allTimers.forEach(clearTimeout);
+        cancelAnimationFrame(animId);
+        overlay.classList.remove('whisper-overlay');
+      };
+    }
+
+    function demoNature(content, overlay) {
+      overlay.classList.add('nature-overlay');
+
+      const forest = document.createElement('div');
+      forest.className = 'nature-half nature-forest';
+
+      const forestEmojis = document.createElement('div');
+      forestEmojis.className = 'nature-emoji-row';
+      forestEmojis.textContent = '🌲🌳🍃🦋🌿🐦';
+      forest.appendChild(forestEmojis);
+
+      const forestLabel = document.createElement('div');
+      forestLabel.className = 'nature-label';
+      forestLabel.textContent = 'Deep work';
+      forest.appendChild(forestLabel);
+
+      // Floating leaves
+      ['🍂','🍃','🌿'].forEach((emoji, i) => {
+        const leaf = document.createElement('div');
+        leaf.className = 'nature-forest-particle';
+        leaf.textContent = emoji;
+        leaf.style.cssText = `left:${15 + i*22}%;top:${20+i*15}%;animation-duration:${3+i*0.8}s;animation-delay:${i*0.5}s;`;
+        forest.appendChild(leaf);
+      });
+
+      const urban = document.createElement('div');
+      urban.className = 'nature-half nature-urban';
+
+      const urbanEmojis = document.createElement('div');
+      urbanEmojis.className = 'nature-emoji-row';
+      urbanEmojis.textContent = '🏢🚗💼👔☕📋';
+      urban.appendChild(urbanEmojis);
+
+      const urbanLabel = document.createElement('div');
+      urbanLabel.className = 'nature-label';
+      urbanLabel.textContent = 'Manager 1:1';
+      urban.appendChild(urbanLabel);
+
+      overlay.insertBefore(forest, overlay.firstChild);
+      overlay.insertBefore(urban, overlay.firstChild);
+
+      // Divider
+      const divider = document.createElement('div');
+      divider.className = 'nature-divider';
+      divider.style.left = '50%';
+      overlay.appendChild(divider);
+
+      // Caption
+      const caption = document.createElement('div');
+      caption.className = 'nature-caption';
+      caption.textContent = 'Leaving the forest — stepping into the meeting';
+      overlay.appendChild(caption);
+
+      // Re-add dismiss
+      const dismiss = document.createElement('div');
+      dismiss.className = 'demo-dismiss';
+      dismiss.style.zIndex = '1110';
+      dismiss.innerHTML = '<button class="demo-btn primary" onclick="dismissDemo()">Got it — I\'ll transition ✓</button><button class="demo-btn secondary" onclick="dismissDemo()">5 more minutes</button>';
+      overlay.appendChild(dismiss);
+
+      // Wipe: divider moves right, forest shrinks
+      const t = setTimeout(() => {
+        forest.style.transition = 'flex 5s cubic-bezier(0.4,0,0.2,1)';
+        urban.style.transition = 'flex 5s cubic-bezier(0.4,0,0.2,1)';
+        forest.style.flex = '0.15';
+        urban.style.flex = '2';
+        divider.style.left = '13%';
+      }, 800);
+
+      demoCleanup = () => {
+        clearTimeout(t);
+        overlay.classList.remove('nature-overlay');
+      };
+    }
+
+    function demoMusicCountdown(content, overlay) {
+      overlay.classList.add('music-overlay');
+
+      const stage = document.createElement('div');
+      stage.className = 'music-stage';
+      content.appendChild(stage);
+
+      // Staff lines
+      const staff = document.createElement('div');
+      staff.className = 'music-staff';
+      stage.appendChild(staff);
+      [20, 36, 52, 68, 84].forEach(top => {
+        const line = document.createElement('div');
+        line.className = 'music-staff-line';
+        line.style.top = top + 'px';
+        staff.appendChild(line);
+      });
+
+      // 5 notes
+      const noteEmoji = ['♩','♪','♫','♬','𝅗𝅥'];
+      const notePositions = [
+        { left: '8%',  top: 14 },
+        { left: '24%', top: 30 },
+        { left: 'calc(50% - 16px)', top: 10 },
+        { left: '64%', top: 36 },
+        { left: '80%', top: 18 },
+      ];
+      const noteEls = [];
+      notePositions.forEach((pos, i) => {
+        const note = document.createElement('div');
+        note.className = 'music-note';
+        note.textContent = ['♩','♪','♫','♬','🎵'][i];
+        note.style.left = pos.left;
+        note.style.top = pos.top + 'px';
+        note.style.color = `hsl(${40 + i*8}, 85%, ${65 + i*4}%)`;
+        note.style.opacity = '0';
+        note.style.transform = 'translateY(20px)';
+        staff.appendChild(note);
+        noteEls.push(note);
+      });
+
+      const tempoEl = document.createElement('div');
+      tempoEl.className = 'music-tempo';
+      tempoEl.textContent = '♩ = 72 bpm';
+      stage.appendChild(tempoEl);
+
+      const msgEl = document.createElement('div');
+      msgEl.className = 'music-message';
+      stage.appendChild(msgEl);
+
+      const messages = [
+        'The countdown begins…',
+        'Four beats left…',
+        'Three…',
+        'Two…',
+        'One…',
+        '🎶 Time to go! 🎶',
+      ];
+      const tempos = ['♩ = 72 bpm','♩ = 80 bpm','♩ = 96 bpm','♩ = 112 bpm','♩ = 132 bpm',''];
+
+      let currentNote = 0;
+      let beatInterval = 1200;
+      const timers = [];
+
+      function revealNote(i) {
+        if (i >= noteEls.length) return;
+        noteEls[i].style.transition = 'opacity 0.3s ease, transform 0.3s var(--ease-bounce)';
+        noteEls[i].style.opacity = '1';
+        noteEls[i].style.transform = 'translateY(0)';
+        msgEl.textContent = messages[i];
+        tempoEl.textContent = tempos[i];
+      }
+
+      function bounceNote(i) {
+        if (i >= noteEls.length) return;
+        noteEls[i].style.animation = 'none';
+        void noteEls[i].offsetWidth;
+        noteEls[i].style.animation = 'noteBounce 0.5s var(--ease-bounce)';
+      }
+
+      function dismissNote(i) {
+        if (i >= noteEls.length) return;
+        noteEls[i].style.animation = 'noteFade 0.6s var(--ease) forwards';
+      }
+
+      // Phase 1: reveal all notes one by one
+      for (let i = 0; i < 5; i++) {
+        timers.push(setTimeout(() => revealNote(i), 300 + i * 500));
+      }
+
+      // Phase 2: bounce sequence with increasing tempo
+      function runBounce(noteIdx, delay) {
+        if (noteIdx >= 5) {
+          // Final resolution: confetti!
+          msgEl.textContent = messages[5];
+          tempoEl.textContent = tempos[5];
+          noteEls.forEach((_, i) => {
+            timers.push(setTimeout(() => dismissNote(i), i * 80));
+          });
+          // Confetti burst
+          const colors = ['#D4A847','#C4622D','#6F9272','#9B8EC4','#fff'];
+          for (let c = 0; c < 48; c++) {
+            const conf = document.createElement('div');
+            conf.className = 'music-confetti';
+            const cx = window.innerWidth / 2 + (Math.random() - 0.5) * 200;
+            const cy = window.innerHeight / 2;
+            const tx = (Math.random() - 0.5) * 400 + 'px';
+            const ty = (Math.random() * -300 - 50) + 'px';
+            const tr = (Math.random() * 720 - 360) + 'deg';
+            conf.style.cssText = `
+              left:${cx}px; top:${cy}px;
+              background:${colors[c % colors.length]};
+              --tx:${tx}; --ty:${ty}; --tr:${tr};
+              animation-delay:${Math.random() * 0.3}s;
+            `;
+            content.appendChild(conf);
+            timers.push(setTimeout(() => conf.remove(), 1600));
+          }
+          return;
+        }
+        timers.push(setTimeout(() => {
+          bounceNote(noteIdx);
+          runBounce(noteIdx + 1, beatInterval * 0.85);
+          beatInterval *= 0.85;
+        }, delay));
+      }
+
+      timers.push(setTimeout(() => runBounce(0, 100), 3000));
+
+      demoCleanup = () => {
+        timers.forEach(clearTimeout);
+        overlay.classList.remove('music-overlay');
+      };
+    }
+
+    function demoBossBattle(content, overlay) {
+      overlay.classList.add('boss-overlay');
+
+      // Starfield
+      const starCanvas = document.createElement('canvas');
+      starCanvas.className = 'boss-bg-stars';
+      starCanvas.width = window.innerWidth;
+      starCanvas.height = window.innerHeight;
+      content.appendChild(starCanvas);
+      const sCtx = starCanvas.getContext('2d');
+      const stars = Array.from({length: 80}, () => ({
+        x: Math.random() * starCanvas.width,
+        y: Math.random() * starCanvas.height,
+        r: 0.5 + Math.random() * 1.5,
+        o: 0.3 + Math.random() * 0.5,
+        twinkle: Math.random() * Math.PI * 2,
+      }));
+      let starAnimId;
+      function drawStars() {
+        sCtx.clearRect(0, 0, starCanvas.width, starCanvas.height);
+        stars.forEach(s => {
+          s.twinkle += 0.03;
+          const op = s.o + 0.2 * Math.sin(s.twinkle);
+          sCtx.beginPath();
+          sCtx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          sCtx.fillStyle = `rgba(255,255,255,${op})`;
+          sCtx.fill();
+        });
+        starAnimId = requestAnimationFrame(drawStars);
+      }
+      drawStars();
+
+      const arena = document.createElement('div');
+      arena.className = 'boss-arena';
+      content.appendChild(arena);
+
+      // Health bars row
+      const barsRow = document.createElement('div');
+      barsRow.className = 'boss-bars-row';
+
+      const playerHPBlock = document.createElement('div');
+      playerHPBlock.className = 'boss-bar-block';
+      playerHPBlock.innerHTML = `
+        <div class="boss-bar-name player"><span>YOU</span><span id="boss-player-hp">100</span></div>
+        <div class="boss-bar-track"><div class="boss-bar-fill player" id="boss-player-bar" style="width:100%"></div></div>
+      `;
+
+      const enemyHPBlock = document.createElement('div');
+      enemyHPBlock.className = 'boss-bar-block';
+      enemyHPBlock.innerHTML = `
+        <div class="boss-bar-name enemy"><span>THE MEETING</span><span id="boss-enemy-hp">100</span></div>
+        <div class="boss-bar-track"><div class="boss-bar-fill enemy" id="boss-enemy-bar" style="width:100%"></div></div>
+      `;
+      barsRow.appendChild(playerHPBlock);
+      barsRow.appendChild(enemyHPBlock);
+      arena.appendChild(barsRow);
+
+      // Combatants
+      const combatants = document.createElement('div');
+      combatants.className = 'boss-combatants';
+
+      const playerEntity = document.createElement('div');
+      playerEntity.className = 'boss-entity';
+      playerEntity.innerHTML = '<div class="boss-emoji float" id="boss-player-emoji">🧑‍💻</div><div class="boss-name-tag">YOU</div>';
+
+      const vsBadge = document.createElement('div');
+      vsBadge.className = 'vs-badge';
+      vsBadge.textContent = 'vs';
+
+      const bossEntity = document.createElement('div');
+      bossEntity.className = 'boss-entity';
+      bossEntity.innerHTML = '<div class="boss-emoji float" id="boss-enemy-emoji">🐉</div><div class="boss-name-tag">THE MEETING</div>';
+
+      combatants.appendChild(playerEntity);
+      combatants.appendChild(vsBadge);
+      combatants.appendChild(bossEntity);
+      arena.appendChild(combatants);
+
+      // Dialog box
+      const dialog = document.createElement('div');
+      dialog.className = 'boss-dialog-box';
+      dialog.id = 'boss-dialog';
+      dialog.textContent = '⚔️  A wild MEETING approaches! Prepare your talking points!';
+      arena.appendChild(dialog);
+
+      // Action buttons
+      const actions = document.createElement('div');
+      actions.className = 'boss-actions';
+      const actionDefs = [
+        { icon: '📝', label: 'BRAIN DUMP', effect: 'prepare' },
+        { icon: '⚔️',  label: 'TRANSITION', effect: 'attack' },
+        { icon: '🛡️', label: 'STALL',       effect: 'defend' },
+        { icon: '🏃', label: 'FLEE',        effect: 'flee' },
+      ];
+
+      let playerHP = 100, enemyHP = 100;
+      const dialogLines = {
+        prepare: ['You jot down your key points!', 'You feel focused and ready!', 'Notes captured! +15 confidence!'],
+        attack:  ['You transition boldly!', 'Direct hit! Meeting flinches!', 'Decisive action! The Meeting reels!'],
+        defend:  ['You buy 5 more minutes…', 'The Meeting glowers impatiently.', 'Stalling… but time is running out!'],
+        flee:    ['You can\'t flee from your calendar!', 'The Meeting blocks your escape!', 'No retreat! The meeting is inescapable!'],
+      };
+
+      const timers = [];
+
+      function flashDamage(amount, x, y, color) {
+        const dmg = document.createElement('div');
+        dmg.className = 'boss-damage';
+        dmg.textContent = (amount > 0 ? '-' : '+') + Math.abs(amount);
+        dmg.style.color = color || '#ffeb3b';
+        dmg.style.left = (x - 20) + 'px';
+        dmg.style.top = (y - 20) + 'px';
+        content.appendChild(dmg);
+        timers.push(setTimeout(() => dmg.remove(), 1000));
+      }
+
+      function updateBars() {
+        const pb = document.getElementById('boss-player-bar');
+        const eb = document.getElementById('boss-enemy-bar');
+        const pn = document.getElementById('boss-player-hp');
+        const en = document.getElementById('boss-enemy-hp');
+        if (pb) pb.style.width = Math.max(0, playerHP) + '%';
+        if (eb) eb.style.width = Math.max(0, enemyHP) + '%';
+        if (pn) pn.textContent = Math.max(0, playerHP);
+        if (en) en.textContent = Math.max(0, enemyHP);
+      }
+
+      function doAction(effect, btn) {
+        const lines = dialogLines[effect];
+        const line = lines[Math.floor(Math.random() * lines.length)];
+        dialog.textContent = line;
+
+        const bossEmoji = document.getElementById('boss-enemy-emoji');
+        const playerEmoji = document.getElementById('boss-player-emoji');
+        const bossRect = bossEmoji ? bossEmoji.getBoundingClientRect() : {left:600,top:300};
+        const playerRect = playerEmoji ? playerEmoji.getBoundingClientRect() : {left:200,top:300};
+
+        if (effect === 'attack' || effect === 'prepare') {
+          const dmg = 12 + Math.floor(Math.random() * 18);
+          enemyHP -= dmg;
+          flashDamage(dmg, bossRect.left + 36, bossRect.top, '#ffeb3b');
+          if (bossEmoji) {
+            bossEmoji.classList.remove('float');
+            bossEmoji.classList.add('rage');
+            timers.push(setTimeout(() => {
+              bossEmoji.classList.remove('rage');
+              bossEmoji.classList.add('float');
+            }, 800));
+          }
+          if (enemyHP <= 0) {
+            dialog.textContent = '🎉 You won! The Meeting has been… attended!';
+            timers.push(setTimeout(dismissDemo, 2000));
+          }
+        } else if (effect === 'defend') {
+          const dmg = 8 + Math.floor(Math.random() * 8);
+          playerHP -= dmg;
+          flashDamage(dmg, playerRect.left + 36, playerRect.top, '#ef5350');
+        } else if (effect === 'flee') {
+          const dmg = 15 + Math.floor(Math.random() * 10);
+          playerHP -= dmg;
+          flashDamage(dmg, playerRect.left + 36, playerRect.top, '#ef5350');
+          dialog.textContent = '😱 The Meeting punishes your cowardice! -' + dmg + ' HP!';
+        }
+
+        // Boss counter-attack (slower on attack/prepare)
+        if (effect !== 'attack' && effect !== 'prepare') {
+          // nothing extra
+        } else {
+          // small counter
+          timers.push(setTimeout(() => {
+            const cdmg = 5 + Math.floor(Math.random() * 8);
+            playerHP -= cdmg;
+            flashDamage(cdmg, playerRect.left + 36, playerRect.top + 20, '#ef5350');
+            updateBars();
+            if (playerHP <= 0) {
+              dialog.textContent = '😵 You\'ve been Late-Joined to death! Transition NOW!';
+            }
+          }, 700));
+        }
+
+        updateBars();
+      }
+
+      actionDefs.forEach(def => {
+        const btn = document.createElement('button');
+        btn.className = 'boss-action-btn';
+        btn.innerHTML = `<span class="boss-action-icon">${def.icon}</span>${def.label}<span class="boss-action-label">ACTION</span>`;
+        btn.onclick = () => doAction(def.effect, btn);
+        actions.appendChild(btn);
+      });
+      arena.appendChild(actions);
+
+      // Periodic boss taunts
+      const taunts = [
+        '🐉  "Your agenda is weak, human."',
+        '🐉  "5 minutes… tick tock…"',
+        '🐉  "I\'ve been rescheduled 3 times. Face me."',
+        '🐉  "Your camera will be ON."',
+      ];
+      let tIdx = 0;
+      const tauntT = setInterval(() => {
+        tIdx = (tIdx + 1) % taunts.length;
+        dialog.textContent = taunts[tIdx];
+      }, 4000);
+      timers.push(tauntT);
+
+      demoCleanup = () => {
+        timers.forEach(t => typeof t === 'number' ? (t > 1000 ? clearInterval(t) : clearTimeout(t)) : null);
+        clearInterval(tauntT);
+        cancelAnimationFrame(starAnimId);
+        overlay.classList.remove('boss-overlay');
+      };
+    }
+
+    function demoDailyChallenge(content, overlay) {
+      overlay.classList.add('challenge-overlay');
+
+      const card = document.createElement('div');
+      card.className = 'challenge-card';
+      content.appendChild(card);
+
+      card.innerHTML = `
+        <div class="challenge-badge-wrap">
+          <div class="challenge-badge">
+            <div class="challenge-badge-rays"></div>
+            ✨
+          </div>
+        </div>
+        <div class="challenge-eyebrow">Daily Challenge</div>
+        <div class="challenge-title">Transition 2 minutes early</div>
+        <div class="challenge-desc">
+          Join your Manager 1:1 <strong>before 3:00 PM</strong> and earn today's badge.
+          Early arrivals set the tone for great meetings.
+        </div>
+        <div class="challenge-reward">
+          <span>🏅</span>
+          <span>Reward: Golden Brain Badge + 75 XP</span>
+        </div>
+        <div class="challenge-streak">
+          <span>🔥</span>
+          <span class="challenge-streak-num" id="challenge-streak-num">5</span>
+          <span>day streak — don't break it!</span>
+        </div>
+        <div class="challenge-btns">
+          <button class="challenge-accept" onclick="dismissDemo()">Accept Challenge →</button>
+          <button class="challenge-skip" onclick="dismissDemo()">Skip</button>
+        </div>
+        <div class="challenge-timer-bar"></div>
+      `;
+
+      // Slide up
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => card.classList.add('visible'));
+      });
+
+      // Animate streak counter
+      let streakNum = 5;
+      const streakEl = card.querySelector('#challenge-streak-num');
+      let pulse = false;
+      const streakT = setInterval(() => {
+        pulse = !pulse;
+        if (streakEl) {
+          streakEl.style.transform = pulse ? 'scale(1.2)' : 'scale(1)';
+          streakEl.style.transition = 'transform 0.2s var(--ease-bounce)';
+        }
+      }, 1500);
+
+      // Warning at 8s
+      const warnT = setTimeout(() => {
+        const titleEl = card.querySelector('.challenge-title');
+        if (titleEl) {
+          titleEl.textContent = '⚠️ Challenge almost failed…';
+          titleEl.style.color = 'var(--urgent)';
+        }
+      }, 8000);
+
+      // Auto-dismiss at 12s
+      const autoT = setTimeout(() => dismissDemo(), 12000);
+
+      demoCleanup = () => {
+        clearInterval(streakT);
+        clearTimeout(warnT);
+        clearTimeout(autoT);
+        overlay.classList.remove('challenge-overlay');
+      };
     }
 
     // ── Keyboard shortcut ──
