@@ -182,18 +182,20 @@
 .inline-add__type-btn--task {
   background: var(--surface);
   color: var(--upcoming);
+  /* intentional: no shadow token fits this micro-pill context */
   box-shadow: 0 1px 3px color-mix(in srgb, var(--ink) 10%, transparent);
 }
 
 .inline-add__type-btn--event {
   background: var(--surface);
   color: var(--urgent);
+  /* intentional: no shadow token fits this micro-pill context */
   box-shadow: 0 1px 3px color-mix(in srgb, var(--ink) 10%, transparent);
 }
 
 /* ── Event mode border accent ────────────────────────────────────────── */
 .inline-add--event .inline-add__main {
-  border-color: var(--urgent-soft);
+  border-color: color-mix(in srgb, var(--urgent) 40%, transparent);
 }
 
 /* Override task-mode border (nest) when in task mode */
