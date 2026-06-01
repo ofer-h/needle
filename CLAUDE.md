@@ -74,3 +74,9 @@ pnpm start                              # boot the desktop app (@needle/desktop)
 pnpm --filter @needle/studio dev        # the design-system demo in a browser
 pnpm typecheck && pnpm lint             # all workspaces (turbo)
 ```
+
+**Editing a `@needle/*` package and not seeing it in the desktop app — or a blank
+window after adding an export?** Workspace packages are excluded from the renderer's
+Vite pre-bundling (`apps/desktop/vite.renderer.config.ts`) so they serve as live
+source; if the dep cache goes stale, `rm -rf apps/desktop/node_modules/.vite` and
+restart. Details + why it blanks the renderer: `.cursor/rules/build-and-tooling.mdc`.

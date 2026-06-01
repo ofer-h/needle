@@ -24,6 +24,22 @@ Intelligent second brain: capture anything, AI classifies it, surfaces the right
 
 ## Current state (as of 2026-05-27)
 
+**Update 2026-06-01 (`needle-next-master`):** Desktop Today UI shell repaired + the
+controls Ofer asked for landed. Re-wrapped `App.tsx` in the `.win > Titlebar > .body`
+shell (fixes content under the macOS traffic lights, restores scrolling, a centered
+**720px** column, and a titlebar-only drag region); added a ☀/◐/☾ **light/system/dark**
+titlebar control (store `appearance` pref; resolved `theme` stays binary; system
+preference no longer clobbers a manual pick); pinned the Capture FAB (`position:fixed`);
+ui-web `ItemLine` gained an inline **"+ subtask"** button, **⇧⏎** subtask/sibling
+chaining, and an AI-parse toggle. Fixed two latent bugs: (1) a real **runtime id
+collision** — `uid()`'s counter resets on reload, so post-load `addItem/addChild`
+duplicated persisted ids → added `reserveIdsFromData(loaded)` (called in desktop load;
++2 tests, ui-web now **77**); (2) **Vite pre-bundled `@needle/ui-web`** and served a
+frozen copy, so ui-web edits silently didn't run and a fresh export blanked the renderer
+→ `optimizeDeps.exclude` for `@needle/*` in `apps/desktop/vite.renderer.config.ts`
+(documented in `build-and-tooling.mdc`, `ui-web.mdc`, `needle-debug-app-state`, CLAUDE.md).
+Full record in `decisions.md`.
+
 **Update 2026-05-29 (`v2-monorepo`):** Monorepo Foundation pass is runtime-verified.
 Desktop app builds and boots via `pnpm start` from `apps/desktop`; boot logs confirm
 Forge preflight, Vite main+preload, SQLite + IPC (`app:getDiagnostics`,

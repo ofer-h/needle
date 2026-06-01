@@ -55,6 +55,23 @@ locked decisions: `docs/v2/studio-redesign.md` and
   rail/topbar/content chrome. New scenarios mount real `ui-web` components — don't
   reimplement features in studio.
 
+## Runtime ids (persisted consumers)
+
+- Ids come from `uid()` (`model/ids.ts`) — a **per-process counter that resets to 0
+  on reload**. Any app that loads a persisted `TodayData` (e.g. `apps/desktop` from
+  SQLite) MUST call **`reserveIdsFromData(loaded)`** right after loading, before any
+  `addItem`/`addChild`/`addEvent`. Skip it and a freshly minted id can duplicate a
+  loaded one — `childrenOf` then resolves a new child to a *different* existing item,
+  and the persistence layer rejects the duplicate primary key.
+
+## Consuming this package (desktop)
+
+- `@needle/ui-web` is live-edited, so it is excluded from the desktop renderer's Vite
+  pre-bundling (`apps/desktop/vite.renderer.config.ts` `optimizeDeps.exclude`). If
+  ui-web edits don't appear in the desktop app, or the window goes blank after you add
+  an export, the Vite dep cache is stale — see `build-and-tooling.mdc` (clear
+  `apps/desktop/node_modules/.vite`, restart).
+
 ## Verify
 
 ```bash

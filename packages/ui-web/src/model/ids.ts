@@ -19,3 +19,18 @@ export function uid<T = string>(prefix = 'id'): T {
 export function resetIds(): void {
   counter = 0;
 }
+
+/** Advance the counter past every id already present in `ids`, so future
+ * `uid()` calls can't collide with them. The counter is per-process and resets
+ * to 0 on reload, so after loading persisted data (whose ids were minted in a
+ * previous session) this MUST be called — otherwise a freshly minted id can
+ * duplicate an existing one. Ids not matching the `prefix-<base36>` shape are
+ * ignored. */
+export function reserveIds(ids: Iterable<string>): void {
+  for (const id of ids) {
+    const match = /-([0-9a-z]+)$/.exec(id);
+    if (!match) continue;
+    const value = parseInt(match[1] as string, 36);
+    if (Number.isFinite(value) && value > counter) counter = value;
+  }
+}

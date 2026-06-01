@@ -28,6 +28,23 @@ Expected scripts — adjust names if Forge defaults differ, but keep the semanti
 - HMR is for renderer only. Changes to `main/` or `preload/` require a restart — Forge handles this.
 - When changing IPC contracts, restart the dev server; HMR will not pick up preload changes reliably.
 
+## Vite & in-repo workspace packages (IMPORTANT — bit us hard once)
+- The renderer's `optimizeDeps.exclude` **MUST list every `@needle/*` workspace
+  package the renderer imports** (`@needle/ui-web`, `@needle/domain`,
+  `@needle/contract`) — see `apps/desktop/vite.renderer.config.ts`.
+- Why: without it, Vite **pre-bundles** those packages into
+  `node_modules/.vite/deps` and then serves that *frozen* copy. Edits to the
+  package's source are then **silently ignored**, and a freshly-added export makes
+  a normal `import { foo } from '@needle/ui-web'` throw at load time — a failed
+  named import takes down the whole React mount, so the symptom is a **blank
+  desktop window**, not an error in the UI. typecheck/tests stay green (they read
+  source), which makes this very easy to misdiagnose.
+- Excluding them serves the packages as live source with working HMR.
+- Symptom → fix: ui-web/domain edits not appearing, or a blank renderer after
+  adding an export → confirm the package is in `optimizeDeps.exclude`, then bust
+  the cache: `rm -rf apps/desktop/node_modules/.vite` and restart `pnpm start`.
+- Add any **new** renderer-consumed workspace package to that `exclude` list.
+
 ## Linting & formatting
 - ESLint with `@typescript-eslint`, `eslint-plugin-react`, `eslint-plugin-react-hooks`, and an Electron-security plugin (`eslint-plugin-electron-security` or equivalent).
 - Prettier with project defaults. Don't argue style in code review — let the formatter decide.

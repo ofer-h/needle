@@ -17,6 +17,7 @@ import {
   defaultNotificationConfig,
   defaultTransitionSettings,
   DEFAULT_TEMPLATE_ID,
+  reserveIdsFromData,
   type FeedbackBus,
   type FeedbackConfig,
   type NotificationConfig,
@@ -115,6 +116,9 @@ export default function App() {
     window.api.db
       .getTodayData()
       .then((loaded) => {
+        // Reserve the id counter past persisted ids so new items/subtasks
+        // created this session can't collide with ids from a previous one.
+        reserveIdsFromData(loaded);
         if (active) setTodayData(loaded);
       })
       .catch((error: unknown) => {

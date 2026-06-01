@@ -14,6 +14,8 @@ Systematic triage when the product looks wrong but the cause is unclear.
 
 - "Classifying forever", "Saving… stuck", empty Today after restart
 - Capture works once then fails; API key confusion (.env vs UI)
+- **Blank / white desktop window**, or edits to a `@needle/*` workspace package
+  (esp. `@needle/ui-web`) not showing up in the desktop app
 - Any report that contradicts expected async UX (`docs/async-ux.md`)
 
 ## Read first
@@ -83,6 +85,7 @@ Filter `[needle-ui]`:
 | Saving API key forever | Missing `finally` / no timeout | `ApiKeySettings` + `usePendingOperation` (10s) |
 | Works in dev, not packaged | `.env` not loaded | Use UI key or OS env; packaged skips dotenv |
 | UI vs terminal mismatch | Stale IPC generation | Cancel and retry; check `flowId` |
+| **Blank/white renderer**, or `@needle/ui-web` edits don't appear | Vite served a **stale pre-bundle** of a workspace package (a fresh import of a not-yet-bundled export crashes the mount) | Ensure `@needle/*` are in `apps/desktop/vite.renderer.config.ts` `optimizeDeps.exclude`; `rm -rf apps/desktop/node_modules/.vite`; restart `pnpm start`. See `build-and-tooling.mdc`. Confirm via `curl -s http://localhost:5173/src/renderer/App.tsx \| grep ui-web` — the import should resolve to `…/src/index.ts` (source), not `…/.vite/deps/…` (pre-bundled). |
 
 ### 7. Escalate
 

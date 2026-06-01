@@ -2,12 +2,27 @@
  * intact, which is what makes RevisionLog snapshots cheap + revert trivial). */
 
 import { mkItem, mkOccurrence, mkPlan, mkRelation, isoDate, localTime } from './factory';
-import { brand } from './ids';
+import { brand, reserveIds } from './ids';
 import type { CommitmentLevel, ISODate, ISODateTime, Item, ItemId, ItemKind } from './domain';
 import type { TodayData } from './today';
 import { toDate } from './time';
 
 const clone = (data: TodayData): TodayData => structuredClone(data);
+
+/** Advance the id counter past every id in `data`. Call once right after
+ * loading persisted data so runtime-minted ids (addItem/addChild/addEvent)
+ * can't collide with ids minted in a previous session. Without this, a new
+ * child can reuse an existing item's id, and `childrenOf` then resolves the new
+ * relation to the wrong (pre-existing) item. */
+export function reserveIdsFromData(data: TodayData): void {
+  reserveIds([
+    ...data.items.map((i) => i.id),
+    ...data.plans.map((p) => p.id),
+    ...data.occurrences.map((o) => o.id),
+    ...data.relations.map((r) => r.id),
+    ...(data.tags ?? []).map((t) => t.id),
+  ]);
+}
 
 function atOn(day: Date, hhmm: string): ISODateTime {
   const [h = 0, m = 0] = hhmm.split(':').map(Number);
