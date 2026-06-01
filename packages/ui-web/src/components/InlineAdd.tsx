@@ -32,10 +32,10 @@ export function addMinutesToTime(timeStr: string, minutes: number): string {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
 }
 
-/** One inline composer — plain text first. Enter = top-level item by default.
+/** One inline composer. Enter = top-level task by default.
+ * Task/Event toggle (or type "/" to switch to event) selects item kind.
  * The ↳ nest-mode toggle (or Tab key) makes the NEXT add a child of the last
- * added item. The ✨ AI toggle runs the mocked parser for time/duration/kind.
- * Typing "/" switches to event mode. */
+ * added item. Pass `onAddEvent` to enable the Event tab. */
 export function InlineAdd({ onAdd, onAddEvent, onAddChild, onPullYesterday, hasYesterday }: InlineAddProps) {
   const [text, setText] = useState('');
   const [mode, setMode] = useState<'task' | 'event'>('task');
@@ -139,14 +139,16 @@ export function InlineAdd({ onAdd, onAddEvent, onAddChild, onPullYesterday, hasY
           >
             Task
           </button>
-          <button
-            type="button"
-            className={`inline-add__type-btn${mode === 'event' ? ' inline-add__type-btn--event' : ''}`}
-            onClick={() => switchMode('event')}
-            aria-pressed={mode === 'event'}
-          >
-            Event
-          </button>
+          {onAddEvent !== undefined && (
+            <button
+              type="button"
+              className={`inline-add__type-btn${mode === 'event' ? ' inline-add__type-btn--event' : ''}`}
+              onClick={() => switchMode('event')}
+              aria-pressed={mode === 'event'}
+            >
+              Event
+            </button>
+          )}
         </div>
         <input
           className="inline-add__input"
