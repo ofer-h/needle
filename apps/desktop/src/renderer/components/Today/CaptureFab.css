@@ -1,5 +1,7 @@
 .capture-fab {
-  position: absolute;
+  /* Fixed to the window, not the scroll content — the body is now the scroll
+     container, so position:absolute would scroll the FAB away with the page. */
+  position: fixed;
   bottom: 22px;
   left: 50%;
   transform: translateX(-50%);
