@@ -1,0 +1,1032 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Needle Project Handbook</title>
+  <style>
+    :root {
+      --sand-50: #fbf7f0;
+      --sand-100: #f6f1eb;
+      --sand-200: #efe9df;
+      --sand-300: #d4c5a8;
+      --sand-400: #a8997f;
+      --sand-500: #7a6e5d;
+      --sand-600: #4a3f32;
+      --sand-700: #1f1a14;
+      --ink-50: #f2efe9;
+      --ink-200: #bdb7ad;
+      --ink-300: #9a948a;
+      --ink-500: #585249;
+      --ink-600: #2a2a30;
+      --ink-700: #232328;
+      --ink-800: #1c1c21;
+      --ink-900: #16161a;
+      --accent-light: #d4a847;
+      --accent-dark: #f0b429;
+      --urgent-light: #c4622d;
+      --urgent-dark: #e8674a;
+      --upcoming-light: #6f9272;
+      --remember-light: #6b7fa3;
+      --radius-2: 6px;
+      --radius-3: 8px;
+      --radius-4: 12px;
+      --radius-5: 16px;
+      --radius-pill: 999px;
+      --sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", sans-serif;
+      --serif: "New York", Georgia, serif;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    html[data-theme="light"] {
+      --bg: var(--sand-100);
+      --bg-elev: var(--sand-50);
+      --surface: #ffffff;
+      --surface-sub: var(--sand-200);
+      --surface-active: #e6dccb;
+      --hairline: rgba(34, 24, 12, 0.08);
+      --hairline-2: rgba(34, 24, 12, 0.14);
+      --border-strong: rgba(34, 24, 12, 0.32);
+      --ink: var(--sand-700);
+      --ink-2: var(--sand-600);
+      --ink-3: var(--sand-500);
+      --ink-4: var(--sand-400);
+      --accent: var(--accent-light);
+      --urgent: var(--urgent-light);
+      --green: var(--upcoming-light);
+      --blue: var(--remember-light);
+      --shadow: 0 1px 1px rgba(40, 28, 12, 0.04), 0 18px 44px rgba(40, 28, 12, 0.08);
+      --nav-bg: rgba(251, 247, 240, 0.84);
+      --diagram-bg: rgba(255, 255, 255, 0.74);
+    }
+
+    html[data-theme="dark"] {
+      --bg: var(--ink-900);
+      --bg-elev: var(--ink-800);
+      --surface: var(--ink-700);
+      --surface-sub: var(--ink-600);
+      --surface-active: #34343b;
+      --hairline: rgba(255, 255, 255, 0.07);
+      --hairline-2: rgba(255, 255, 255, 0.12);
+      --border-strong: rgba(255, 255, 255, 0.28);
+      --ink: var(--ink-50);
+      --ink-2: var(--ink-200);
+      --ink-3: var(--ink-300);
+      --ink-4: var(--ink-500);
+      --accent: var(--accent-dark);
+      --urgent: var(--urgent-dark);
+      --green: #6fbdb4;
+      --blue: #b0a4d6;
+      --shadow: 0 1px 0 rgba(0, 0, 0, 0.4), 0 18px 44px rgba(0, 0, 0, 0.3);
+      --nav-bg: rgba(22, 22, 26, 0.82);
+      --diagram-bg: rgba(35, 35, 40, 0.72);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at top left, color-mix(in srgb, var(--accent) 17%, transparent), transparent 32rem),
+        radial-gradient(circle at 88% 8%, color-mix(in srgb, var(--green) 12%, transparent), transparent 25rem),
+        var(--bg);
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.65;
+      letter-spacing: -0.011em;
+    }
+
+    a {
+      color: inherit;
+      text-decoration-color: color-mix(in srgb, var(--accent) 78%, transparent);
+      text-decoration-thickness: 0.08em;
+      text-underline-offset: 0.18em;
+    }
+
+    a:hover {
+      color: var(--ink);
+      text-decoration-color: var(--urgent);
+    }
+
+    .shell {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 28px 22px;
+      border-right: 1px solid var(--hairline);
+      background: var(--nav-bg);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      overflow-y: auto;
+    }
+
+    .brand {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 26px;
+    }
+
+    .brand-mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: var(--ink);
+      color: var(--bg);
+      font-family: var(--serif);
+      font-size: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-family: var(--serif);
+      font-size: 28px;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+    }
+
+    .brand p {
+      margin: 0;
+      color: var(--ink-3);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .nav-list {
+      display: grid;
+      gap: 4px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .nav a {
+      display: block;
+      padding: 8px 10px;
+      border-radius: var(--radius-3);
+      color: var(--ink-2);
+      font-size: 13px;
+      text-decoration: none;
+    }
+
+    .nav a:hover,
+    .nav a:focus-visible {
+      background: var(--surface-sub);
+      color: var(--ink);
+      outline: none;
+    }
+
+    .theme-toggle {
+      width: 100%;
+      margin-top: 22px;
+      padding: 10px 12px;
+      border: 1px solid var(--hairline-2);
+      border-radius: var(--radius-pill);
+      background: var(--surface);
+      color: var(--ink);
+      font: 600 13px var(--sans);
+      cursor: pointer;
+    }
+
+    main {
+      min-width: 0;
+      padding: 54px clamp(22px, 5vw, 72px) 96px;
+    }
+
+    .hero {
+      max-width: 1050px;
+      margin: 0 auto 36px;
+      padding: clamp(28px, 5vw, 56px);
+      border: 1px solid var(--hairline);
+      border-radius: 28px;
+      background: color-mix(in srgb, var(--surface) 86%, transparent);
+      box-shadow: var(--shadow);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding: 6px 10px;
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-pill);
+      color: var(--ink-2);
+      background: var(--surface-sub);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+
+    .hero h2 {
+      margin: 0;
+      max-width: 890px;
+      font-family: var(--serif);
+      font-size: clamp(42px, 7vw, 76px);
+      line-height: 0.96;
+      letter-spacing: -0.055em;
+    }
+
+    .hero .lede {
+      max-width: 760px;
+      margin: 24px 0 0;
+      color: var(--ink-2);
+      font-size: clamp(18px, 2vw, 22px);
+      line-height: 1.55;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 30px;
+    }
+
+    .stat-card,
+    .card,
+    .section {
+      border: 1px solid var(--hairline);
+      background: color-mix(in srgb, var(--surface) 86%, transparent);
+      box-shadow: var(--shadow);
+    }
+
+    .stat-card {
+      padding: 18px;
+      border-radius: 18px;
+    }
+
+    .stat-card strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--ink-3);
+    }
+
+    .stat-card span {
+      display: block;
+      color: var(--ink);
+      font-family: var(--serif);
+      font-size: 22px;
+      line-height: 1.16;
+    }
+
+    .section {
+      max-width: 1050px;
+      margin: 18px auto;
+      padding: clamp(26px, 4vw, 44px);
+      border-radius: 24px;
+      scroll-margin-top: 28px;
+    }
+
+    .section-header {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .section-number {
+      color: var(--urgent);
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+
+    h2, h3 {
+      margin: 0;
+      color: var(--ink);
+      font-family: var(--serif);
+      letter-spacing: -0.035em;
+    }
+
+    h2 {
+      font-size: clamp(30px, 4vw, 46px);
+      line-height: 1.05;
+    }
+
+    h3 {
+      font-size: 24px;
+      line-height: 1.18;
+    }
+
+    p {
+      margin: 0 0 16px;
+      color: var(--ink-2);
+    }
+
+    .section > p:last-child,
+    .card > p:last-child {
+      margin-bottom: 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .grid.three {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .card {
+      padding: 20px;
+      border-radius: 18px;
+    }
+
+    .card h3 {
+      margin-bottom: 10px;
+      font-size: 21px;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 18px 0 0;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 5px 10px;
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-pill);
+      background: var(--surface-sub);
+      color: var(--ink-2);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .callout {
+      margin: 22px 0;
+      padding: 18px 20px;
+      border-left: 4px solid var(--accent);
+      border-radius: 0 var(--radius-4) var(--radius-4) 0;
+      background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+    }
+
+    .callout strong {
+      color: var(--ink);
+    }
+
+    .diagram {
+      margin: 24px 0;
+      padding: 24px;
+      border: 1px solid var(--hairline);
+      border-radius: 20px;
+      background: var(--diagram-bg);
+      overflow-x: auto;
+    }
+
+    .diagram svg {
+      min-width: 760px;
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .svg-box {
+      fill: var(--surface);
+      stroke: var(--hairline-2);
+      stroke-width: 1.4;
+    }
+
+    .svg-accent {
+      fill: color-mix(in srgb, var(--accent) 22%, var(--surface));
+      stroke: color-mix(in srgb, var(--accent) 75%, var(--ink));
+    }
+
+    .svg-text {
+      fill: var(--ink);
+      font: 700 15px var(--sans);
+    }
+
+    .svg-sub {
+      fill: var(--ink-3);
+      font: 12px var(--sans);
+    }
+
+    .svg-line {
+      stroke: var(--ink-4);
+      stroke-width: 1.5;
+      fill: none;
+    }
+
+    .steps {
+      display: grid;
+      gap: 12px;
+      counter-reset: step;
+      margin: 22px 0;
+    }
+
+    .step {
+      position: relative;
+      padding: 18px 18px 18px 58px;
+      border: 1px solid var(--hairline);
+      border-radius: 18px;
+      background: var(--surface);
+    }
+
+    .step::before {
+      counter-increment: step;
+      content: counter(step);
+      position: absolute;
+      left: 18px;
+      top: 18px;
+      width: 26px;
+      height: 26px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--ink);
+      color: var(--bg);
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    code,
+    .mono {
+      font-family: var(--mono);
+      font-size: 0.92em;
+    }
+
+    code {
+      padding: 0.12em 0.32em;
+      border-radius: var(--radius-2);
+      background: var(--surface-sub);
+      color: var(--ink);
+    }
+
+    .timeline {
+      display: grid;
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 116px minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+      padding: 16px 0;
+      border-top: 1px solid var(--hairline);
+    }
+
+    .timeline-date {
+      color: var(--urgent);
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+    }
+
+    .timeline-body strong {
+      display: block;
+      color: var(--ink);
+      line-height: 1.25;
+    }
+
+    .timeline-body span {
+      display: block;
+      margin-top: 4px;
+      color: var(--ink-3);
+      font-size: 13px;
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .status {
+      padding: 16px;
+      border: 1px solid var(--hairline);
+      border-radius: 16px;
+      background: var(--surface);
+    }
+
+    .status strong {
+      display: block;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+
+    .status.done strong::before {
+      content: "Done ";
+      color: var(--green);
+    }
+
+    .status.deferred strong::before {
+      content: "Deferred ";
+      color: var(--urgent);
+    }
+
+    .suggestions {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .suggestions li {
+      padding: 16px 18px;
+      border: 1px solid var(--hairline);
+      border-radius: 16px;
+      background: var(--surface);
+      color: var(--ink-2);
+    }
+
+    .suggestions strong {
+      color: var(--ink);
+    }
+
+    .footer-note {
+      max-width: 1050px;
+      margin: 26px auto 0;
+      color: var(--ink-3);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    @media (max-width: 980px) {
+      .shell {
+        display: block;
+      }
+
+      .nav {
+        position: sticky;
+        height: auto;
+        max-height: 70vh;
+        z-index: 20;
+        border-right: 0;
+        border-bottom: 1px solid var(--hairline);
+      }
+
+      .brand {
+        grid-template-columns: 40px 1fr;
+        align-items: center;
+      }
+
+      .brand p {
+        grid-column: 1 / -1;
+      }
+
+      .nav-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .hero-grid,
+      .grid,
+      .grid.three,
+      .status-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      main {
+        padding: 28px 14px 56px;
+      }
+
+      .hero,
+      .section {
+        border-radius: 18px;
+      }
+
+      .nav-list {
+        grid-template-columns: 1fr;
+      }
+
+      .timeline-item {
+        grid-template-columns: 1fr;
+        gap: 4px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="nav" aria-label="Project handbook navigation">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">N</div>
+        <div>
+          <h1>Needle</h1>
+          <p>Project handbook for the transition-coach desktop app.</p>
+        </div>
+      </div>
+      <nav>
+        <ul class="nav-list">
+          <li><a href="#overview">Overview</a></li>
+          <li><a href="#architecture">Architecture</a></li>
+          <li><a href="#today">Today Model</a></li>
+          <li><a href="#torch">Torch System</a></li>
+          <li><a href="#async">Async + Observability</a></li>
+          <li><a href="#timeline">Decision Timeline</a></li>
+          <li><a href="#migration">Migration Status</a></li>
+          <li><a href="#next">Suggestions</a></li>
+        </ul>
+      </nav>
+      <button class="theme-toggle" type="button" id="themeToggle" aria-pressed="false">Switch to dark</button>
+    </aside>
+
+    <main>
+      <header class="hero">
+        <span class="eyebrow">Needle project handbook</span>
+        <h2>A calm transition coach for the moment focus usually slips.</h2>
+        <p class="lede">Needle catches the switch between task and meeting, asks for a quick brain dump, and helps the user start the next thing clean. This page summarizes what exists, what is planned, and why the architecture is shaped the way it is.</p>
+        <div class="hero-grid" aria-label="Project summary">
+          <div class="stat-card">
+            <strong>Current app</strong>
+            <span>macOS Electron, local-first</span>
+          </div>
+          <div class="stat-card">
+            <strong>Shared spine</strong>
+            <span>pnpm, Turborepo, domain, contract</span>
+          </div>
+          <div class="stat-card">
+            <strong>Product wedge</strong>
+            <span>intentional transitions, not task storage</span>
+          </div>
+        </div>
+      </header>
+
+      <section id="overview" class="section">
+        <div class="section-header">
+          <span class="section-number">01 / Overview</span>
+          <h2>What Needle Is</h2>
+        </div>
+        <p>Needle is a <strong>transition coach</strong> for a software engineer with ADHD or anyone who loses focus when moving from one thing to the next. It works at the boundary: one meeting ends, another task starts, but the last context is still stuck in the user's head. Needle interrupts at that hard stop, makes the user dump the residue quickly, and points attention toward the next thing.</p>
+        <div class="grid three">
+          <div class="card">
+            <h3>For</h3>
+            <p>Someone who benefits from external structure, low-friction capture, and gentle focus support during context switches.</p>
+          </div>
+          <div class="card">
+            <h3>Not</h3>
+            <p>Not another to-do app, not a timer, and not a planner that only helps before the day starts.</p>
+          </div>
+          <div class="card">
+            <h3>Differentiator</h3>
+            <p>It uses a well-timed interruption on purpose, and the long-term product thesis is to rotate the intervention so it does not become wallpaper.</p>
+          </div>
+        </div>
+        <div class="callout">
+          <p><strong>Positioning line:</strong> every other app helps you plan. Needle helps you let go of one task and start the next, which is the exact moment focus is lost.</p>
+        </div>
+      </section>
+
+      <section id="architecture" class="section">
+        <div class="section-header">
+          <span class="section-number">02 / Architecture</span>
+          <h2>Two Paths, One Shared Core</h2>
+        </div>
+        <p>The repo is now a <strong>pnpm + Turborepo monorepo</strong>. The current app lives in <code>apps/desktop</code>. Shared packages live in <code>packages/domain</code>, <code>packages/contract</code>, and <code>packages/config</code>. Planned packages include <code>ui-web</code>, <code>design-tokens</code>, <code>api-client</code>, <code>db-schema</code>, and <code>ai</code>.</p>
+
+        <div class="diagram" aria-label="Architecture diagram">
+          <svg viewBox="0 0 900 470" role="img" aria-labelledby="archTitle archDesc">
+            <title id="archTitle">Needle architecture diagram</title>
+            <desc id="archDesc">Shared domain and contract packages feed the desktop path and future cloud path, with IPC as the desktop connection boundary.</desc>
+            <defs>
+              <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                <path d="M0,0 L8,4 L0,8 Z" fill="var(--ink-4)"></path>
+              </marker>
+            </defs>
+            <rect class="svg-box svg-accent" x="295" y="28" width="310" height="86" rx="18"></rect>
+            <text class="svg-text" x="450" y="65" text-anchor="middle">Shared Core</text>
+            <text class="svg-sub" x="450" y="88" text-anchor="middle">packages/domain + packages/contract</text>
+            <path class="svg-line" marker-end="url(#arrow)" d="M390 114 C340 150 255 160 205 194"></path>
+            <path class="svg-line" marker-end="url(#arrow)" d="M510 114 C560 150 645 160 695 194"></path>
+
+            <rect class="svg-box" x="70" y="190" width="270" height="126" rx="18"></rect>
+            <text class="svg-text" x="205" y="228" text-anchor="middle">Path A: Mac</text>
+            <text class="svg-sub" x="205" y="252" text-anchor="middle">apps/desktop</text>
+            <text class="svg-sub" x="205" y="274" text-anchor="middle">Electron + React + SQLite</text>
+            <text class="svg-sub" x="205" y="296" text-anchor="middle">offline, standalone, shipping first</text>
+
+            <rect class="svg-box" x="560" y="190" width="270" height="126" rx="18"></rect>
+            <text class="svg-text" x="695" y="228" text-anchor="middle">Path B: Cloud</text>
+            <text class="svg-sub" x="695" y="252" text-anchor="middle">planned apps/server + apps/web</text>
+            <text class="svg-sub" x="695" y="274" text-anchor="middle">NestJS + Postgres + auth</text>
+            <text class="svg-sub" x="695" y="296" text-anchor="middle">server-of-record later</text>
+
+            <rect class="svg-box svg-accent" x="106" y="360" width="198" height="70" rx="16"></rect>
+            <text class="svg-text" x="205" y="390" text-anchor="middle">IPC Boundary</text>
+            <text class="svg-sub" x="205" y="412" text-anchor="middle">window.api through preload</text>
+            <path class="svg-line" marker-end="url(#arrow)" d="M205 316 L205 355"></path>
+
+            <path class="svg-line" stroke-dasharray="6 8" marker-end="url(#arrow)" d="M560 360 C465 405 355 405 305 395"></path>
+            <text class="svg-sub" x="450" y="382" text-anchor="middle">future sync adapter</text>
+          </svg>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <h3>Path A: macOS local-first</h3>
+            <p>The Electron app keeps shipping on local SQLite. It remains usable offline and is never blocked by the future backend.</p>
+          </div>
+          <div class="card">
+            <h3>Path B: cloud later</h3>
+            <p>The planned cloud track adds <code>apps/server</code>, <code>apps/web</code>, auth, Postgres, and later mobile. It uses the same domain and contract packages.</p>
+          </div>
+        </div>
+        <div class="callout">
+          <p><strong>Anti-divergence guardrail:</strong> Mac SQLite and future Postgres are two storage representations of one model. The shared domain and contract packages are the spine that keep "connect later" from becoming a rewrite.</p>
+        </div>
+        <p>The desktop renderer already talks to main through the preload-exposed <code>window.api</code>. That IPC boundary is the connect seam: later, handlers can call a remote API plus local cache behind the same renderer surface.</p>
+      </section>
+
+      <section id="today" class="section">
+        <div class="section-header">
+          <span class="section-number">03 / Today Scheduling</span>
+          <h2>The Today Model</h2>
+        </div>
+        <p>Needle separates the identity of work from its placement in the day. The implemented scheduling model distinguishes fixed anchors from flexible work and renders them as one interleaved timeline.</p>
+        <div class="grid">
+          <div class="card">
+            <h3>Fixed</h3>
+            <p>Fixed items have a wall-clock start time and cannot be freely dragged. Calendar meetings are event-only and non-checkable. Fixed anchors divide the day into slots.</p>
+          </div>
+          <div class="card">
+            <h3>Flexible</h3>
+            <p>Flexible tasks carry <code>slotIndex</code> and <code>slotOrder</code>. They float between anchors and can be reordered using fractional indexing.</p>
+          </div>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <strong>Build the interleaved list.</strong>
+            <p><code>buildTimeline()</code> merges events, fixed tasks, and flexible tasks into a single Today sequence.</p>
+          </div>
+          <div class="step">
+            <strong>Drop into gaps, not onto rows.</strong>
+            <p>Drag-and-drop uses <code>useDroppable</code> gap zones between items plus a <code>DragOverlay</code> clone. This avoids the element-swap behavior that made earlier SortableContext attempts feel wrong.</p>
+          </div>
+          <div class="step">
+            <strong>Let overdue return to Today.</strong>
+            <p>Overdue and Today now share one DnD context so overdue flexible work can be moved back into the day's plan.</p>
+          </div>
+          <div class="step">
+            <strong>Move toward v2 plans.</strong>
+            <p>The v2 model replaces UI-shaped fields with <code>Item</code>, <code>ItemPlan</code>, <code>ItemOccurrence</code>, and <code>ItemRelation(type='contains')</code>. View labels like <code>dateLabel</code> and <code>isOverdue</code> are derived, not durable truth.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="torch" class="section">
+        <div class="section-header">
+          <span class="section-number">04 / Torch</span>
+          <h2>How the Torch Intervention Works</h2>
+        </div>
+        <p>Torch is the current high-intensity transition intervention: a full-screen, multi-display attention takeover for unmissable commitments. It intentionally makes the screen harder to ignore while leaving the user with two humane exits: brain dump or skip with reason.</p>
+
+        <div class="steps">
+          <div class="step">
+            <strong>Scheduling selects an active intervention.</strong>
+            <p><code>InterventionLayer</code> reads v2 store interventions for the current actor. Due scheduled interventions are activated, then the highest-intensity surfacing intervention becomes the top one. If its strategy is <code>attention_takeover_torch</code>, the renderer sends <code>torch:show</code>.</p>
+          </div>
+          <div class="step">
+            <strong>Main opens overlays on every display.</strong>
+            <p><code>showTorch()</code> creates one frameless, transparent, always-on-top <code>TorchWindow</code> per display using <code>screen.getAllDisplays()</code>. The windows load the renderer with <code>?mode=torch</code>, which forces <code>data-theme="dark"</code> for correct token resolution.</p>
+          </div>
+          <div class="step">
+            <strong>The screen dims around the cursor.</strong>
+            <p>Main polls the absolute cursor position about 30 times per second and broadcasts <code>torch:cursor</code>. Each overlay renders a spotlight only if the cursor is on its display. The backdrop ramps from a light tint to a 0.95 opacity ceiling with up to 12px blur, using an ease-out escalation curve.</p>
+          </div>
+          <div class="step">
+            <strong>Each overlay embeds the TorchBanner.</strong>
+            <p>The old separate hero banner window was replaced by an embedded 48px strip at the top of every overlay. It displays <code>title · in Xm · HH:MM</code> when a meeting start time is known, plus <strong>Brain dump</strong> and <strong>Skip...</strong>.</p>
+          </div>
+          <div class="step">
+            <strong>Click-through stays mostly enabled.</strong>
+            <p>Overlays normally call <code>setIgnoreMouseEvents(true, { forward: true })</code>. Cursor polling enables clicks only when the cursor is over the banner; full panel modes make all overlays interactive. The contract also exposes <code>torch:set-interactive</code> for the Electron forward-event pattern.</p>
+          </div>
+          <div class="step">
+            <strong>Skip requires a deliberate countdown.</strong>
+            <p><code>torch:skip-init</code> switches overlays into skip mode via <code>torch:hero { mode: 'skip' }</code>. <code>SkipPanel</code> asks for a meeting or task reason, supports optional notes for "Other", and requires a 4-second countdown. Confirm emits <code>torch:skip-confirm</code>, then main relays <code>torch:closed { reason: 'skipped' }</code> to the main app and hides Torch.</p>
+          </div>
+          <div class="step">
+            <strong>Brain dump saves transition residue.</strong>
+            <p><code>torch:brain-dump-init</code> shows <code>BrainDumpPanel</code> on all overlays. The textarea supports <code>Cmd+Enter</code> to save. Submit emits <code>torch:brain-dump-submit</code>, main relays <code>torch:closed</code> with <code>brainDumpText</code>, and <code>InterventionLayer</code> stores it as a capture entry through the v2 store and <code>db:add-capture</code>.</p>
+          </div>
+        </div>
+
+        <div class="pill-row" aria-label="Torch IPC channels">
+          <span class="pill">torch:show</span>
+          <span class="pill">torch:payload</span>
+          <span class="pill">torch:cursor</span>
+          <span class="pill">torch:hero</span>
+          <span class="pill">torch:skip-init</span>
+          <span class="pill">torch:skip-confirm</span>
+          <span class="pill">torch:brain-dump-init</span>
+          <span class="pill">torch:brain-dump-submit</span>
+          <span class="pill">torch:closed</span>
+          <span class="pill">db:add-capture</span>
+        </div>
+
+        <div class="callout">
+          <p><strong>Important honesty note:</strong> the source has a native critical notification and snooze plumbing, but the current embedded banner flow centers on Brain dump and Skip. The handbook treats the richer cross-device escalation chain as v2 architecture, not shipped behavior.</p>
+        </div>
+      </section>
+
+      <section id="async" class="section">
+        <div class="section-header">
+          <span class="section-number">05 / Async UX + Observability</span>
+          <h2>No More Infinite Dots</h2>
+        </div>
+        <p>The async and observability docs make one rule explicit: user-triggered async work must end in success, actionable error, or cancel, with a hard timeout. This was added because endless "classifying" dots are trust-breaking in a companion app.</p>
+        <div class="grid">
+          <div class="card">
+            <h3>Async primitives</h3>
+            <p><code>usePendingOperation</code> models <code>idle</code>, <code>pending</code>, <code>success</code>, and <code>error</code>. It defaults to a 30s timeout, ignores stale IPC results after cancel or a newer run, and marks flows slow after 3s.</p>
+          </div>
+          <div class="card">
+            <h3>Visible pending UI</h3>
+            <p><code>AsyncStatusPanel</code> shows elapsed seconds, a slow hint, and cancel action. Capture classify and API key save are the examples already called out in the docs.</p>
+          </div>
+          <div class="card">
+            <h3>Local logs</h3>
+            <p>Main logs use <code>[needle]</code>. Renderer logs use <code>[needle-ui]</code>. Safe metadata includes duration, outcome, key source, text length, and flow IDs, never secrets or raw brain-dump text.</p>
+          </div>
+          <div class="card">
+            <h3>Flow health</h3>
+            <p>The main process keeps a last-50 event ring buffer exposed through <code>app:getFlowHealth</code>. <code>BuildDiagnostics</code> shows version, SHA, API key source, and last classify status in dev.</p>
+          </div>
+        </div>
+        <div class="callout">
+          <p><strong>Still open from the docs:</strong> Today hydrate pending UI, silent DB persist feedback, fire-and-forget capture persistence, packaged main logs, and passing <code>flowId</code> back to renderer consistently.</p>
+        </div>
+      </section>
+
+      <section id="timeline" class="section">
+        <div class="section-header">
+          <span class="section-number">06 / Decisions</span>
+          <h2>Decision Timeline</h2>
+        </div>
+        <p>Condensed from <code>memory/decisions.md</code>. Driver attribution follows the log.</p>
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-date">2026-05-24</div>
+            <div class="timeline-body"><strong>Project scaffold - Ofer</strong><span>Electron + Forge + Vite + React + TypeScript, Zustand, two screens, mock data.</span></div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">2026-05-24</div>
+            <div class="timeline-body"><strong>Build and titlebar fixes - Ofer + AI</strong><span>Resolved Vite output collision and native titlebar drag issues.</span></div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">2026-05-26</div>
+            <div class="timeline-body"><strong>Task scheduling redesign - Omri directed, Ofer implemented</strong><span>Introduced fixed vs flexible scheduling, slots, and interleaved Today timeline.</span></div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">2026-05-26</div>
+            <div class="timeline-body"><strong>Gap-based DnD - AI recommendation, Ofer approved</strong><span>Swapped SortableContext-style row swapping for insert-between gap zones and a DragOverlay clone.</span></div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">2026-05-26</div>
+            <div class="timeline-body"><strong>Design-system foundation - Ofer + AI</strong><span>Created AI-readable rules, skills, docs, primitives, and semantic tokens; kept CSS variables.</span></div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">2026-05-26</div>
+            <div class="timeline-body"><strong>Today refactor and primitive library - Ofer + AI</strong><span>Split Today into smaller components, added reusable primitives, fixed dark-mode contrast, and kept lint/typecheck green.</span></div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">2026-05-26</div>
+            <div class="timeline-body"><strong>V2 domain architecture - Ofer + AI</strong><span>Moved toward durable Items, actor-based collaboration, first-class child items, and shared domain contracts.</span></div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">2026-05-26</div>
+            <div class="timeline-body"><strong>Daily-flow product direction - Ofer</strong><span>Reframed v2 as an AI-guided daily flow and intentional task manager, not a generic task database.</span></div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">2026-05-27</div>
+            <div class="timeline-body"><strong>Torch intervention system - Ofer directed, AI implemented</strong><span>Shipped full-screen dimming overlays, cursor spotlight, embedded TorchBanner, Skip, and Brain-dump flows.</span></div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">2026-05-27</div>
+            <div class="timeline-body"><strong>SQLite + AI orchestration - Ofer + AI</strong><span>Integrated SQLite hydration/persistence, Anthropic classify, local .env loading, and capture persistence into renderer flows.</span></div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">2026-05-27</div>
+            <div class="timeline-body"><strong>Async UX + observability baseline - user request + AI</strong><span>Added pending operation discipline, flow-health ring buffer, diagnostics, and logging conventions.</span></div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">2026-05-27</div>
+            <div class="timeline-body"><strong>AI capture review and v2-only persistence - Ofer directed</strong><span>Capture now shows editable generated planning blocks before committing; persistence uses v2 planning records.</span></div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">2026-05-28</div>
+            <div class="timeline-body"><strong>Monorepo + NestJS backend direction - Ofer</strong><span>Chose pnpm + Turborepo, NestJS modular monolith, Postgres, ts-rest, better-auth, and the two-path shared-core delivery model.</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="migration" class="section">
+        <div class="section-header">
+          <span class="section-number">07 / Migration Status</span>
+          <h2>Monorepo Migration Status</h2>
+        </div>
+        <p>As of the migration ledger, Foundation F0 through F2 are complete and committed. F3 is deferred until a real web app drives the shared UI boundary. The current repo structure is <code>apps/desktop</code> plus <code>packages/{domain,contract,config}</code>, and the root README says the app runs through <code>pnpm start</code>.</p>
+        <div class="status-grid">
+          <div class="status done">
+            <strong>F0 Tooling</strong>
+            <p>pnpm workspaces, Turborepo, <code>.npmrc</code>, and <code>packages/config</code>.</p>
+          </div>
+          <div class="status done">
+            <strong>F1 Domain + contract</strong>
+            <p><code>@needle/domain</code> and <code>@needle/contract</code> extracted from shared types and IPC contracts.</p>
+          </div>
+          <div class="status done">
+            <strong>F2 Desktop move</strong>
+            <p>Electron app moved into <code>apps/desktop</code> with Vite, Forge, and TypeScript configs adjusted.</p>
+          </div>
+          <div class="status deferred">
+            <strong>F3 UI + tokens</strong>
+            <p>Deferred to Track B because <code>ui-web</code> and <code>design-tokens</code> should be shaped by the first real second consumer.</p>
+          </div>
+        </div>
+        <div class="callout">
+          <p><strong>Runtime note:</strong> the orchestrator's context says that as of 2026-05-29 the app boots and runs from the monorepo. The migration ledger still asks a human to perform GUI and SQLite smoke tests because the original migration agent could not launch the Electron GUI headlessly.</p>
+        </div>
+      </section>
+
+      <section id="next" class="section">
+        <div class="section-header">
+          <span class="section-number">08 / Suggestions</span>
+          <h2>Grounded Next Steps</h2>
+        </div>
+        <p>These are suggestions synthesized from the docs' next-step sections and open gaps. They are not claims that the work already exists.</p>
+        <ul class="suggestions">
+          <li><strong>Close the remaining async/observability P0s.</strong> Add Today hydrate pending UI, visible DB persist feedback, safer fire-and-forget capture persistence, packaged logging strategy, and renderer flowId propagation.</li>
+          <li><strong>Run and document the final monorepo smoke test.</strong> Confirm app launch, SQLite read/write persistence, Capture classify, and root <code>pnpm run typecheck</code> plus <code>pnpm run lint</code> from the current branch.</li>
+          <li><strong>Kick off Track B deliberately.</strong> Scaffold <code>apps/server</code> first with NestJS, Postgres, better-auth, AccessModule, and ts-rest contract implementation, or run server and web agents in parallel against <code>@needle/contract</code> mocks.</li>
+          <li><strong>Extract <code>ui-web</code> only when web starts.</strong> Let <code>apps/web</code> drive the transport-agnostic boundary instead of guessing it from desktop alone.</li>
+          <li><strong>Keep strengthening the v2 Today adapter.</strong> Continue moving away from UI-shaped state toward <code>Item</code>, <code>ItemPlan</code>, <code>ItemOccurrence</code>, and child item relations.</li>
+          <li><strong>Instrument Torch outcomes.</strong> The data model has interventions, transition events, and capture entries; next useful product learning is whether brain dump, skip, timeout, or escalation actually helps transitions.</li>
+          <li><strong>Prototype current focus and reflection.</strong> The roadmap calls for a current focus affordance, lightweight completion reflection, and daily flow state before deeper AI automation.</li>
+          <li><strong>Keep accountability private-first.</strong> The scoring/coaching idea is captured but still conceptual; start with self-accountability and local adherence metrics before coach or leaderboard surfaces.</li>
+        </ul>
+      </section>
+
+      <p class="footer-note">Generated as a single self-contained file from repository docs and source. No external assets, scripts, or network calls.</p>
+    </main>
+  </div>
+
+  <script>
+    (function () {
+      var root = document.documentElement;
+      var button = document.getElementById("themeToggle");
+      var stored = window.localStorage.getItem("needle-handbook-theme");
+      if (stored === "dark" || stored === "light") {
+        root.setAttribute("data-theme", stored);
+      }
+      function syncButton() {
+        var isDark = root.getAttribute("data-theme") === "dark";
+        button.textContent = isDark ? "Switch to light" : "Switch to dark";
+        button.setAttribute("aria-pressed", String(isDark));
+      }
+      button.addEventListener("click", function () {
+        var next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+        root.setAttribute("data-theme", next);
+        window.localStorage.setItem("needle-handbook-theme", next);
+        syncButton();
+      });
+      syncButton();
+    })();
+  </script>
+</body>
+</html>
