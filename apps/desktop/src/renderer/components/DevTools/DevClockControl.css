@@ -23,6 +23,23 @@
   gap: var(--space-2);
 }
 
+.dev-clock__handle {
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+
+.dev-clock__handle:active {
+  cursor: grabbing;
+}
+
+.dev-clock__grip {
+  color: var(--ink-4);
+  font-size: var(--text-10);
+  letter-spacing: -1px;
+  line-height: 1;
+}
+
 .dev-clock__label {
   font-size: var(--text-10);
   text-transform: uppercase;

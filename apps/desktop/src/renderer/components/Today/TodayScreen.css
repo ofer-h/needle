@@ -5,23 +5,100 @@
   width: 100%;
   max-width: 720px;
   margin: 0 auto;
-  padding: var(--space-3) var(--space-6) 100px;
+  padding: var(--space-5) var(--space-6) 100px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
 }
 
-/* Header row: progress on the left, template switcher on the right. */
-.today-screen__header {
+/* ── Hero header ────────────────────────────────────────────────────────── */
+.today-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-6);
+  padding-bottom: var(--space-5);
+  border-bottom: 1px solid var(--hairline-2);
+}
+
+.today-hero__left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex: 1;
+  min-width: 0;
+}
+
+.today-hero__date {
+  font-family: var(--serif);
+  font-size: 40px;
+  font-weight: 300;
+  line-height: 1;
+  color: var(--ink);
+  letter-spacing: -0.03em;
+  margin-bottom: 4px;
+}
+
+.today-hero__weekday {
+  font-family: var(--serif);
+  font-size: 40px;
+  font-weight: 300;
+  color: var(--ink);
+  letter-spacing: -0.03em;
+}
+
+.today-hero__time {
+  font-family: var(--serif);
+  font-size: 40px;
+  font-weight: 300;
+  color: var(--ink);
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.today-hero__greeting {
+  font-family: var(--serif);
+  font-size: var(--text-18);
+  font-style: italic;
+  color: var(--ink-2);
+  margin: var(--space-3) 0 0;
+  line-height: 1.4;
+}
+
+.today-hero__progress-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
 }
 
-/* Template switcher — mirrors studio's .template-switch, semantic tokens only. */
+.today-hero__count {
+  font-size: var(--text-12);
+  color: var(--ink-3);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+.today-hero__progress-row .ds-progress {
+  flex: 1;
+}
+
+.today-hero__microcopy {
+  font-size: var(--text-12);
+  color: var(--ink-4);
+  font-style: italic;
+  font-family: var(--serif);
+  margin: 0;
+}
+
+/* Template switcher — pinned top-right of hero */
 .template-switch {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
+  align-self: flex-start;
 }
 
 .template-switch__label {
@@ -57,6 +134,10 @@
 /* "+ Event" trigger sits just under the inline add. */
 .today-screen__event-add {
   display: flex;
+  justify-content: flex-start;
+  padding-left: var(--space-2);
+  margin-top: calc(var(--space-2) * -1);
+  margin-bottom: var(--space-2);
 }
 
 .today-screen__event-btn {

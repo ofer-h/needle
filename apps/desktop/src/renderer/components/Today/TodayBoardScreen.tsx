@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   addChild,
   addItem,
@@ -6,7 +6,7 @@ import {
   BUILTIN_TEMPLATES,
   Countdown,
   InlineAdd,
-  ProgressKudos,
+  ProgressBar,
   pullYesterdayUnfinished,
   TodayBoard,
   type ItemId,
@@ -28,6 +28,36 @@ type TodayBoardScreenProps = {
   onNavigateCapture: () => void;
 };
 
+function greeting(now: Date): string {
+  const h = now.getHours();
+  if (h < 12) return 'Good morning';
+  if (h < 17) return 'Good afternoon';
+  return 'Good evening';
+}
+
+function formatTime(d: Date): string {
+  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+}
+
+function useLiveClock(): string {
+  const [time, setTime] = useState(() => formatTime(new Date()));
+  useEffect(() => {
+    const id = setInterval(() => setTime(formatTime(new Date())), 1_000);
+    return () => clearInterval(id);
+  }, []);
+  return time;
+}
+
+function microcopy(done: number, total: number): string {
+  if (total === 0) return 'Nothing due — a clear runway.';
+  if (done === 0) return 'Fresh start. Pick one thing.';
+  if (done === total) return "All clear. That's the whole list.";
+  const frac = done / total;
+  if (frac >= 0.75) return 'Almost there — strong finish in sight.';
+  if (frac >= 0.5) return "Past halfway. Momentum's real.";
+  return 'Good start — keep the thread going.';
+}
+
 export default function TodayBoardScreen({
   data,
   now,
@@ -39,9 +69,6 @@ export default function TodayBoardScreen({
   const views = useMemo(() => buildTodayView(data, now), [data, now]);
   const [eventModalOpen, setEventModalOpen] = useState(false);
 
-  // Templates are pure presentation — switching only swaps which layout renders,
-  // never the underlying item data. The editorial fallback is the documented
-  // default and always present in the built-in registry.
   const template: Template =
     BUILTIN_TEMPLATES[templateId] ?? (BUILTIN_TEMPLATES.editorial as Template);
 
@@ -62,10 +89,38 @@ export default function TodayBoardScreen({
     return result.itemId;
   };
 
+  const currentTime = useLiveClock();
+
+  const tasks = views.filter((v) => v.item.kind === 'task');
+  const total = tasks.length;
+  const done = tasks.filter((v) => v.item.status === 'done').length;
+
+  const monthDay = now.toLocaleDateString([], { month: 'long', day: 'numeric' });
+  const weekday = now.toLocaleDateString([], { weekday: 'short' });
+  const greetingText = `${greeting(now)}. You have ${total} thing${total === 1 ? '' : 's'} today.`;
+
   return (
     <div className="today-screen">
-      <div className="today-screen__header">
-        <ProgressKudos views={views} />
+      {/* Hero header */}
+      <div className="today-hero">
+        <div className="today-hero__left">
+          <div className="today-hero__date">
+            <span className="today-hero__weekday">{weekday},&nbsp;</span>
+            {monthDay}
+            <span className="today-hero__time">&ensp;·&ensp;{currentTime}</span>
+          </div>
+          <p className="today-hero__greeting">{greetingText}</p>
+          <div className="today-hero__progress-row">
+            <span className="today-hero__count">{done} of {total} done</span>
+            <ProgressBar
+              value={done}
+              max={total}
+              tone={done === total && total > 0 ? 'accent' : 'upcoming'}
+              label={`${done} of ${total} tasks done`}
+            />
+          </div>
+        </div>
+
         <label className="template-switch">
           <span className="template-switch__label">Template</span>
           <select
