@@ -128,26 +128,34 @@ export function InlineAdd({ onAdd, onAddEvent, onAddChild, onPullYesterday, hasY
   const nestHint = nestMode && lastTitle.current ? lastTitle.current : '';
 
   return (
-    <div className={`inline-add${ai ? ' inline-add--ai' : ''}${nestMode ? ' inline-add--nest' : ''}`}>
+    <div className={`inline-add inline-add--${mode}${nestMode ? ' inline-add--nest' : ''}`}>
       <div className="inline-add__main">
-        <button
-          type="button"
-          className={`inline-add__spark${ai ? ' inline-add__spark--on' : ''}`}
-          onClick={() => setAi((v) => !v)}
-          aria-pressed={ai}
-          aria-label="Toggle AI parsing"
-          title={ai ? 'AI parsing on — detects time, duration, kind' : 'Plain add'}
-        >
-          <Icon name={ai ? 'spark' : 'plus'} size={15} tone={ai ? 'upcoming' : 'muted'} />
-        </button>
+        <div className="inline-add__type-toggle" role="group" aria-label="Item type">
+          <button
+            type="button"
+            className={`inline-add__type-btn${mode === 'task' ? ' inline-add__type-btn--task' : ''}`}
+            onClick={() => switchMode('task')}
+            aria-pressed={mode === 'task'}
+          >
+            Task
+          </button>
+          <button
+            type="button"
+            className={`inline-add__type-btn${mode === 'event' ? ' inline-add__type-btn--event' : ''}`}
+            onClick={() => switchMode('event')}
+            aria-pressed={mode === 'event'}
+          >
+            Event
+          </button>
+        </div>
         <input
           className="inline-add__input"
           value={text}
           placeholder={
-            nestMode
-              ? 'Add a subtask…'
-              : ai
-                ? 'Add anything — e.g. "standup 10am for 15m"'
+            mode === 'event'
+              ? 'Event name…'
+              : nestMode
+                ? 'Add a subtask…'
                 : 'Add a task…'
           }
           onChange={handleTextChange}
@@ -155,7 +163,7 @@ export function InlineAdd({ onAdd, onAddEvent, onAddChild, onPullYesterday, hasY
           aria-label="Add an item"
         />
         <div className="inline-add__chips">
-          {lastId.current && (
+          {mode === 'task' && lastId.current && (
             <button
               type="button"
               className={`inline-add__chip inline-add__nest-toggle${nestMode ? ' inline-add__chip--on' : ''}`}
@@ -169,11 +177,11 @@ export function InlineAdd({ onAdd, onAddEvent, onAddChild, onPullYesterday, hasY
           )}
           <button
             type="button"
-            className={`inline-add__chip${timeOpen || time ? ' inline-add__chip--on' : ''}`}
+            className={`inline-add__chip${timeOpen || time ? ' inline-add__chip--on' : ''}${mode === 'event' ? ' inline-add__chip--event' : ''}`}
             onClick={() => setTimeOpen((v) => !v)}
             aria-label="Set a time"
           >
-            <Icon name="clock" size={13} tone={time ? 'upcoming' : 'muted'} />
+            <Icon name="clock" size={13} tone={time ? (mode === 'event' ? 'urgent' : 'upcoming') : 'muted'} />
             {time || 'time'}
           </button>
           {timeOpen && (
@@ -185,7 +193,36 @@ export function InlineAdd({ onAdd, onAddEvent, onAddChild, onPullYesterday, hasY
               aria-label="Time"
             />
           )}
-          <button type="button" className="inline-add__submit" onClick={submit} disabled={!text.trim()}>
+          {mode === 'event' && (
+            <>
+              <button
+                type="button"
+                className={`inline-add__chip${durationOpen || duration ? ' inline-add__chip--on' : ''} inline-add__chip--event`}
+                onClick={() => setDurationOpen((v) => !v)}
+                aria-label="Set duration"
+              >
+                <Icon name="clock" size={13} tone={duration ? 'urgent' : 'muted'} />
+                {duration || 'duration'}
+              </button>
+              {durationOpen && (
+                <input
+                  type="text"
+                  className="inline-add__duration"
+                  value={duration}
+                  placeholder="30m"
+                  onChange={(e) => setDuration(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.stopPropagation(); setDurationOpen(false); } }}
+                  aria-label="Duration (e.g. 30m, 1h, 1h30m)"
+                />
+              )}
+            </>
+          )}
+          <button
+            type="button"
+            className="inline-add__submit"
+            onClick={submit}
+            disabled={mode === 'event' ? (!text.trim() || !time) : !text.trim()}
+          >
             Add
           </button>
         </div>
