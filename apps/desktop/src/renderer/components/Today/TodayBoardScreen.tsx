@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   addChild,
+  addEvent,
   addItem,
   buildTodayView,
   BUILTIN_TEMPLATES,
@@ -10,13 +11,13 @@ import {
   pullYesterdayUnfinished,
   TodayBoard,
   type ItemId,
+  type NewEventInput,
   type NewItemInput,
   type Template,
   type TemplateId,
   type TodayData,
 } from '@needle/ui-web';
 import CaptureFab from './CaptureFab';
-import EventEditorModal from './EventEditorModal';
 import './TodayScreen.css';
 
 type TodayBoardScreenProps = {
@@ -67,8 +68,6 @@ export default function TodayBoardScreen({
   onNavigateCapture,
 }: TodayBoardScreenProps) {
   const views = useMemo(() => buildTodayView(data, now), [data, now]);
-  const [eventModalOpen, setEventModalOpen] = useState(false);
-
   const template: Template =
     BUILTIN_TEMPLATES[templateId] ?? (BUILTIN_TEMPLATES.editorial as Template);
 
@@ -87,6 +86,11 @@ export default function TodayBoardScreen({
     const result = addItem(data, input);
     onChange(result.data);
     return result.itemId;
+  };
+
+  const handleAddEvent = (input: NewEventInput): void => {
+    const result = addEvent(data, input, now);
+    onChange(result.data);
   };
 
   const currentTime = useLiveClock();
@@ -139,20 +143,11 @@ export default function TodayBoardScreen({
 
       <InlineAdd
         onAdd={handleAdd}
+        onAddEvent={handleAddEvent}
         onAddChild={(parentId, title) => onChange(addChild(data, parentId, title))}
         onPullYesterday={() => onChange(pullYesterdayUnfinished(data, now))}
         hasYesterday={hasYesterday}
       />
-
-      <div className="today-screen__event-add">
-        <button
-          type="button"
-          className="today-screen__event-btn"
-          onClick={() => setEventModalOpen(true)}
-        >
-          + Event
-        </button>
-      </div>
 
       {template.showCountdown && <Countdown views={views} now={now} variant="inline" />}
 
@@ -161,15 +156,6 @@ export default function TodayBoardScreen({
       {template.showCountdown && <Countdown views={views} now={now} variant="floating" />}
 
       <CaptureFab onClick={onNavigateCapture} />
-
-      {eventModalOpen && (
-        <EventEditorModal
-          data={data}
-          now={now}
-          onChange={onChange}
-          onClose={() => setEventModalOpen(false)}
-        />
-      )}
     </div>
   );
 }

@@ -131,37 +131,6 @@
   outline-offset: 2px;
 }
 
-/* "+ Event" trigger sits just under the inline add. */
-.today-screen__event-add {
-  display: flex;
-  justify-content: flex-start;
-  padding-left: var(--space-2);
-  margin-top: calc(var(--space-2) * -1);
-  margin-bottom: var(--space-2);
-}
-
-.today-screen__event-btn {
-  appearance: none;
-  background: var(--surface);
-  color: var(--ink-3);
-  border: 1px dashed var(--hairline-2);
-  border-radius: 8px;
-  padding: 6px 12px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.today-screen__event-btn:hover {
-  color: var(--ink);
-  border-color: var(--border-strong);
-}
-
-.today-screen__event-btn:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
 /* ── Event editor modal ──────────────────────────────────────────────────── */
 .event-modal__backdrop {
   position: fixed;
