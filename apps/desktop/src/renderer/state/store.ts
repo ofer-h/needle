@@ -1,15 +1,23 @@
 import { create } from 'zustand';
 import type { Screen, Theme, TimeSlot, Task, CalendarEvent, ParsedPlanningItem } from '@needle/domain/types';
 
+/** User's appearance preference. 'system' follows the OS; 'light'/'dark' pin it.
+ * The resolved value lives in `theme` (always 'light' | 'dark'). */
+export type Appearance = 'system' | 'light' | 'dark';
+
 type AppState = {
   screen: Screen;
+  /** Resolved theme actually applied to the DOM (derived from `appearance`). */
   theme: Theme;
+  /** User's appearance preference (system / light / dark). */
+  appearance: Appearance;
   tasks: Task[];
   events: CalendarEvent[];
   expandedItemId: string | null;
   hydrateFromDb: () => Promise<void>;
   setScreen: (screen: Screen) => void;
   setTheme: (theme: Theme) => void;
+  setAppearance: (appearance: Appearance) => void;
   expandItem: (id: string | null) => void;
   setTaskTitle: (id: string, title: string) => void;
   toggleDone: (id: string) => void;
@@ -91,6 +99,7 @@ async function refreshPlanningData(set: (partial: Partial<AppState>) => void): P
 export const useAppStore = create<AppState>((set, get) => ({
   screen: 'today',
   theme: 'light',
+  appearance: 'system',
   tasks: [],
   events: [],
   expandedItemId: null,
@@ -101,6 +110,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   setScreen: (screen) => set({ screen }),
   setTheme: (theme) => set({ theme }),
+  setAppearance: (appearance) => set({ appearance }),
   expandItem: (id) => set({ expandedItemId: id }),
 
   setTaskTitle: (id, title) => {

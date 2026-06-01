@@ -161,6 +161,59 @@
   padding: 3px var(--space-2);
 }
 
+/* Let the input flex within the add row so the trailing AI button stays put. */
+.itemline__add-row .itemline__edit {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+}
+
+/* AI parse toggle at the end of the inline subtask composer. */
+.itemline__add-ai {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border: none;
+  background: none;
+  border-radius: var(--radius-2);
+  cursor: pointer;
+}
+
+.itemline__add-ai:hover {
+  background: var(--surface-active);
+}
+
+.itemline__add-ai--on {
+  background: color-mix(in srgb, var(--upcoming) 14%, transparent);
+}
+
+/* Hover-reveal "add subtask" affordance in the row meta. */
+.itemline__add-sub {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: none;
+  border-radius: var(--radius-2);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.itemline__row:hover .itemline__add-sub,
+.itemline__add-sub:focus-visible {
+  opacity: 1;
+}
+
+.itemline__add-sub:hover {
+  background: var(--surface-active);
+}
+
 .itemline__overflow {
   display: inline-flex;
   align-items: center;
@@ -282,7 +335,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .itemline__row,
-  .rowmenu__btn {
+  .rowmenu__btn,
+  .itemline__add-sub {
     transition: none;
   }
 }

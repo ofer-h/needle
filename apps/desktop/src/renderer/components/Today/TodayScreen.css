@@ -1,8 +1,11 @@
-.today-scroll {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  padding: var(--space-3) var(--space-8) 100px;
+/* Centered reading column. The .body owns scrolling; this just bounds line
+   length (~720px) and centers content. Bottom padding clears the CaptureFab so
+   the last item is never hidden under it. */
+.today-screen {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--space-3) var(--space-6) 100px;
 }
 
 /* Header row: progress on the left, template switcher on the right. */

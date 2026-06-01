@@ -421,13 +421,60 @@ button {
   position: relative;
   display: flex;
   align-items: center;
-  padding: 0 14px;
+  /* Left inset clears the native macOS traffic lights (trafficLightPosition
+     x:14 → cluster ends ~66px); right inset is a normal gutter. */
+  padding: 0 var(--space-3) 0 80px;
   background: var(--titlebar-bg);
   backdrop-filter: blur(20px) saturate(160%);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
   border-bottom: 0.5px solid var(--titlebar-stroke);
   z-index: 2;
   -webkit-app-region: drag;
+}
+
+/* Right-aligned cluster for chrome controls (appearance, settings). */
+.titlebar__controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+
+/* Icon button in the titlebar (settings gear). */
+.titlebar__icon-btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0.5px solid transparent;
+  border-radius: var(--radius-2);
+  background: transparent;
+  color: var(--ink-3);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background var(--duration-fast, 120ms) var(--ease-out, ease),
+    color var(--duration-fast, 120ms) var(--ease-out, ease);
+}
+
+.titlebar__icon-btn:hover {
+  background: var(--surface-sub);
+  color: var(--ink);
+}
+
+.titlebar__icon-btn--on {
+  background: var(--surface-sub);
+  border-color: var(--hairline-2);
+  color: var(--ink);
+}
+
+.titlebar__icon-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
 }
 
 /* Only interactive elements inside the titlebar opt out of window dragging. */
@@ -480,7 +527,10 @@ button {
   display: flex;
   flex-direction: column;
   position: relative;
-  overflow: hidden;
+  /* The body is the scroll boundary; the titlebar above it stays pinned as a
+     flex sibling. overflow-x hidden so a wide layout never scrolls sideways. */
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* ── Expanded item panel (Capture — out of scope) ──────────── */

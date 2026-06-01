@@ -3,6 +3,8 @@ import { useAppStore } from './state/store';
 import TodayBoardScreen from './components/Today/TodayBoardScreen';
 import CaptureScreen from './components/Capture/CaptureScreen';
 import SettingsScreen from './components/Settings/SettingsScreen';
+import Titlebar from './components/Window/Titlebar';
+import AppearanceToggle from './components/Window/AppearanceToggle';
 import BuildDiagnostics from './components/DevTools/BuildDiagnostics';
 import DevClockControl from './components/DevTools/DevClockControl';
 // InterventionLayer superseded by TransitionLayer (single in-window overlay).
@@ -37,6 +39,7 @@ const LS_TRANSITION = 'needle.transition';
 const LS_NOTIFICATIONS = 'needle.notifications';
 const LS_FEEDBACK = 'needle.feedback';
 const LS_TEMPLATE = 'needle.template';
+const LS_APPEARANCE = 'needle.appearance';
 
 /** Load a JSON value from localStorage, falling back to a default on any error. */
 function loadPersisted<T>(key: string, fallback: T): T {
@@ -62,6 +65,8 @@ export default function App() {
   const setScreen = useAppStore((s) => s.setScreen);
   const theme = useAppStore((s) => s.theme);
   const setTheme = useAppStore((s) => s.setTheme);
+  const appearance = useAppStore((s) => s.appearance);
+  const setAppearance = useAppStore((s) => s.setAppearance);
   const expandedItemId = useAppStore((s) => s.expandedItemId);
   const expandItem = useAppStore((s) => s.expandItem);
   const hydrateFromDb = useAppStore((s) => s.hydrateFromDb);
@@ -169,20 +174,34 @@ export default function App() {
     void hydrateFromDb();
   }, [hydrateFromDb]);
 
-  // Apply theme to <html> for CSS custom properties
+  // Hydrate the saved appearance preference once on mount.
+  useEffect(() => {
+    setAppearance(loadPersisted(LS_APPEARANCE, 'system'));
+  }, [setAppearance]);
+
+  // Persist the appearance preference when it changes.
+  useEffect(() => savePersisted(LS_APPEARANCE, appearance), [appearance]);
+
+  // Apply the resolved theme to <html> for CSS custom properties.
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
-  // Detect system theme and listen for changes
+  // Resolve the active theme from the appearance preference. 'system' follows
+  // the OS (and live-updates on OS change); 'light'/'dark' pin it explicitly.
   useEffect(() => {
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    const apply = (dark: boolean) => setTheme(dark ? 'dark' : 'light');
-    apply(mq.matches);
-    const handler = (e: MediaQueryListEvent) => apply(e.matches);
+    const resolve = () => {
+      const dark = appearance === 'system' ? mq.matches : appearance === 'dark';
+      setTheme(dark ? 'dark' : 'light');
+    };
+    resolve();
+    const handler = () => {
+      if (appearance === 'system') resolve();
+    };
     mq.addEventListener('change', handler);
     return () => mq.removeEventListener('change', handler);
-  }, [setTheme]);
+  }, [appearance, setTheme]);
 
   // Listen for navigation events from main process (⌘K, menu)
   useEffect(() => {
@@ -224,30 +243,46 @@ export default function App() {
   }, [expandedItemId, expandItem, screen, setScreen, settingsOpen]);
 
   return (
-    <>
-      {settingsOpen ? (
-        <SettingsScreen
-          transition={transitionSettings}
-          onTransitionChange={setTransitionSettings}
-          notifications={notifications}
-          onNotificationsChange={setNotifications}
-          onBack={() => setSettingsOpen(false)}
-        />
-      ) : (
-        <>
-          {screen === 'today' && (
-            <TodayBoardScreen
-              data={todayData}
-              now={now}
-              templateId={templateId}
-              onTemplateChange={setTemplateId}
-              onChange={handleTodayChange}
-              onNavigateCapture={() => setScreen('capture')}
-            />
-          )}
-          {screen === 'capture' && <CaptureScreen onBack={() => setScreen('today')} />}
-        </>
-      )}
+    <div className="win">
+      <Titlebar>
+        <AppearanceToggle value={appearance} onChange={setAppearance} />
+        <button
+          type="button"
+          className={`titlebar__icon-btn${settingsOpen ? ' titlebar__icon-btn--on' : ''}`}
+          onClick={() => setSettingsOpen((v) => !v)}
+          aria-label="Settings"
+          aria-pressed={settingsOpen}
+          title="Settings"
+        >
+          ⚙
+        </button>
+      </Titlebar>
+
+      <div className="body">
+        {settingsOpen ? (
+          <SettingsScreen
+            transition={transitionSettings}
+            onTransitionChange={setTransitionSettings}
+            notifications={notifications}
+            onNotificationsChange={setNotifications}
+            onBack={() => setSettingsOpen(false)}
+          />
+        ) : (
+          <>
+            {screen === 'today' && (
+              <TodayBoardScreen
+                data={todayData}
+                now={now}
+                templateId={templateId}
+                onTemplateChange={setTemplateId}
+                onChange={handleTodayChange}
+                onNavigateCapture={() => setScreen('capture')}
+              />
+            )}
+            {screen === 'capture' && <CaptureScreen onBack={() => setScreen('today')} />}
+          </>
+        )}
+      </div>
 
       {/* Single in-window transition overlay (replaces the racing InterventionLayer). */}
       <TransitionLayer
@@ -257,36 +292,13 @@ export default function App() {
         onCapture={handleTransitionCapture}
       />
 
-      {!settingsOpen && (
-        <button
-          type="button"
-          onClick={() => setSettingsOpen(true)}
-          aria-label="Open settings"
-          style={{
-            // Sit below the 28px native titlebar drag region so clicks land.
-            position: 'fixed',
-            top: '36px',
-            right: '12px',
-            zIndex: 900,
-            width: '32px',
-            height: '32px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: '8px',
-            border: '1px solid var(--border)',
-            background: 'var(--surface)',
-            color: 'var(--ink)',
-            fontSize: '15px',
-            cursor: 'pointer',
-          }}
-        >
-          ⚙
-        </button>
+      {/* Dev-only overlays — never rendered in production builds. */}
+      {import.meta.env.DEV && (
+        <>
+          <DevClockControl />
+          <BuildDiagnostics />
+        </>
       )}
-
-      <DevClockControl />
-      <BuildDiagnostics />
-    </>
+    </div>
   );
 }

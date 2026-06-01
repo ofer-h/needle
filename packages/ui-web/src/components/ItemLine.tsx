@@ -3,6 +3,7 @@ import {
   childrenOf,
   effectiveSubtaskDisplay,
   MAX_SUBTASK_DEPTH,
+  parseQuickAdd,
   tagsForItem,
   viewForItem,
   type DayTarget,
@@ -68,6 +69,15 @@ export function ItemLine({ view, hideTime = false, depth = 0 }: ItemLineProps) {
   const [collapsed, setCollapsed] = useState(display === 'collapsed');
   const [adding, setAdding] = useState(false);
 
+  // Subtasks can be added to any non-event item that can still nest and whose
+  // template doesn't hide subtasks. Opening the composer also expands the group
+  // so the new child (and the continuing input) are visible.
+  const canAddSub = !isEvent && canNest && display !== 'hidden';
+  const startAdding = () => {
+    setCollapsed(false);
+    setAdding(true);
+  };
+
   const showChildren = hasChildren && display !== 'hidden' && !collapsed && canNest;
   const overflowCount = hasChildren && !canNest ? children.length : 0;
 
@@ -117,6 +127,7 @@ export function ItemLine({ view, hideTime = false, depth = 0 }: ItemLineProps) {
           done={isDone}
           small={depth > 0}
           onCommit={(next) => handlers.setTitle(item.id, next)}
+          {...(canAddSub ? { onAddChild: startAdding } : {})}
         />
 
         <span className="itemline__meta">
@@ -144,7 +155,18 @@ export function ItemLine({ view, hideTime = false, depth = 0 }: ItemLineProps) {
               {view.dateLabel}
             </span>
           )}
-          <RowMenu itemId={item.id} canAddChild={!isEvent} onAddSubtask={() => setAdding(true)} />
+          {canAddSub && (
+            <button
+              type="button"
+              className="itemline__add-sub"
+              onClick={startAdding}
+              aria-label="Add subtask"
+              title="Add subtask (⇧⏎)"
+            >
+              <Icon name="plus" size={14} tone="muted" />
+            </button>
+          )}
+          <RowMenu itemId={item.id} canAddChild={canAddSub} onAddSubtask={startAdding} />
         </span>
       </div>
 
@@ -171,9 +193,11 @@ export function ItemLine({ view, hideTime = false, depth = 0 }: ItemLineProps) {
         <AddSubtaskInline
           parentId={item.id}
           depth={childDepth}
-          onAdd={(title) => {
+          onAdd={(title, keepOpen) => {
             handlers.addChild(item.id, title);
-            setAdding(false);
+            // ⇧⏎ keeps the composer open for the next sibling subtask; plain ⏎
+            // (or blur) commits and closes.
+            if (!keepOpen) setAdding(false);
           }}
           onCancel={() => setAdding(false)}
         />
@@ -287,11 +311,14 @@ function EditableTitle({
   done,
   small = false,
   onCommit,
+  onAddChild,
 }: {
   text: string;
   done: boolean;
   small?: boolean;
   onCommit: (next: string) => void;
+  /** ⇧⏎ while editing commits the title and starts a subtask under this item. */
+  onAddChild?: () => void;
 }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(text);
@@ -311,7 +338,12 @@ function EditableTitle({
   };
 
   const onKey = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') commit();
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      commit();
+      // ⇧⏎ chains straight into adding a subtask under this item.
+      if (e.shiftKey && onAddChild) onAddChild();
+    }
     if (e.key === 'Escape') {
       setDraft(text);
       setEditing(false);
@@ -356,10 +388,12 @@ function AddSubtaskInline({
 }: {
   parentId: ItemId;
   depth: number;
-  onAdd: (title: string) => void;
+  /** keepOpen = ⇧⏎: commit this subtask but stay open for the next sibling. */
+  onAdd: (title: string, keepOpen: boolean) => void;
   onCancel: () => void;
 }) {
   const [draft, setDraft] = useState('');
+  const [ai, setAi] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   // parentId is implicit in the onAdd closure; kept for clarity at call sites.
   void parentId;
@@ -368,9 +402,19 @@ function AddSubtaskInline({
     inputRef.current?.focus();
   }, []);
 
-  const commit = () => {
-    if (draft.trim()) onAdd(draft);
-    else onCancel();
+  const commit = (keepOpen: boolean) => {
+    const raw = draft.trim();
+    if (!raw) {
+      onCancel();
+      return;
+    }
+    // With AI on, run the quick-add parser and use its cleaned title.
+    const title = ai ? parseQuickAdd(raw).input.title : raw;
+    onAdd(title, keepOpen);
+    if (keepOpen) {
+      setDraft('');
+      inputRef.current?.focus();
+    }
   };
 
   return (
@@ -385,15 +429,29 @@ function AddSubtaskInline({
         ref={inputRef}
         className="itemline__edit itemline__edit--sm"
         value={draft}
-        placeholder="Subtask…"
+        placeholder={ai ? 'Add a subtask — ⇧⏎ for another' : 'Subtask… (⇧⏎ adds another)'}
         onChange={(e) => setDraft(e.target.value)}
-        onBlur={commit}
+        onBlur={() => commit(false)}
         onKeyDown={(e) => {
-          if (e.key === 'Enter') commit();
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            commit(e.shiftKey);
+          }
           if (e.key === 'Escape') onCancel();
         }}
         aria-label="New subtask"
       />
+      <button
+        type="button"
+        className={`itemline__add-ai${ai ? ' itemline__add-ai--on' : ''}`}
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={() => setAi((v) => !v)}
+        aria-pressed={ai}
+        aria-label="Parse with AI"
+        title={ai ? 'AI parsing on — cleans up the text' : 'Parse with AI'}
+      >
+        <Icon name="spark" size={14} tone={ai ? 'upcoming' : 'muted'} />
+      </button>
     </div>
   );
 }
