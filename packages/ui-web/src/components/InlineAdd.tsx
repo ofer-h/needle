@@ -5,14 +5,14 @@ import './InlineAdd.css';
 
 type InlineAddProps = {
   onAdd: (input: NewItemInput) => ItemId;
-  onAddEvent: (input: NewEventInput) => void;
+  onAddEvent?: (input: NewEventInput) => void;
   onAddChild: (parentId: ItemId, title: string) => void;
   onPullYesterday?: () => void;
   hasYesterday?: boolean;
 };
 
-/** Parse "30m", "1h", "1h30m", "90m" → minutes. Returns 0 if unparseable. */
-function parseDurationMinutes(raw: string): number {
+/** @internal — exported for unit tests only */
+export function parseDurationMinutes(raw: string): number {
   const s = raw.trim().toLowerCase();
   const hoursOnly = /^(\d+)h$/.exec(s);
   if (hoursOnly) return parseInt(hoursOnly[1] ?? '0', 10) * 60;
@@ -23,8 +23,8 @@ function parseDurationMinutes(raw: string): number {
   return 0;
 }
 
-/** Add minutes to a "HH:MM" string, returns "HH:MM". */
-function addMinutesToTime(timeStr: string, minutes: number): string {
+/** @internal — exported for unit tests only */
+export function addMinutesToTime(timeStr: string, minutes: number): string {
   const [hStr, mStr] = timeStr.split(':');
   const totalMinutes = parseInt(hStr ?? '0', 10) * 60 + parseInt(mStr ?? '0', 10) + minutes;
   const h = Math.floor(totalMinutes / 60) % 24;
@@ -65,12 +65,13 @@ export function InlineAdd({ onAdd, onAddEvent, onAddChild, onPullYesterday, hasY
       if (!raw || !time) return;
       const durationMinutes = parseDurationMinutes(duration);
       const endTime = durationMinutes > 0 ? addMinutesToTime(time, durationMinutes) : undefined;
-      onAddEvent({ title: raw, startTime: time, ...(endTime !== undefined && { endTime }) });
+      onAddEvent?.({ title: raw, startTime: time, ...(endTime !== undefined && { endTime }) });
       setText('');
       setTime('');
       setDuration('');
       setTimeOpen(false);
       setDurationOpen(false);
+      setMode('task');
       return;
     }
 
